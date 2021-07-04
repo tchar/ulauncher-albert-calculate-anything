@@ -36,7 +36,11 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( c a l c space 1 0 space m space t o space i n comma space c m comma space k m )
+keys=( c a l c space 1 0 space m space plus space 1 5 8 space c m )
+run_xdotool
+sleep $sleep_big
+
+keys=( space t o space i n comma space c m comma space k m )
 run_xdotool
 sleep $sleep_big
 clear_all
