@@ -1,4 +1,4 @@
-# Ulauncher Calculate Anything Extension
+# <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher Calculate Anything Extension
 
 Currency and Unit converter as well as a Calculator that supports mathematical functions and Complex Numbers for [Ulauncher](https://ulauncher.io/), with the help of [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) and [fixer.io](https://fixer.io)
 
