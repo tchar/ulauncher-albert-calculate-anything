@@ -1,0 +1,48 @@
+{
+  "required_api_version": "^2.0.0",
+  "name": "Unit and Currency Converter",
+  "description": "An extension to convert units and currency which supports caching",
+  "developer_name": "Tilemachos Charalampous",
+  "icon": "images/icon.svg",
+  "options": {
+    "query_debounce": 0.05
+  },
+  "preferences": [
+    {
+      "id": "kw",
+      "type": "keyword",
+      "name": "Calculate Antything",
+      "description": "Calculate expressions, convert currency and units",
+      "default_value": "c"
+    },
+    {
+      "id": "api_key",
+      "type": "input",
+      "name": "API Key",
+      "description": "Your fixer.io API key",
+      "default_value": ""
+    },
+    {
+      "id": "cache",
+      "type": "select",
+      "name": "Currency Cache",
+      "description": "Cache currency exchange rates for a specified duration",
+      "default_value": "86400",
+      "options": [
+        {"value": "0", "text": "None"},
+        {"value": "86400", "text": "1 day"},
+        {"value": "604800", "text": "1 Week"},
+        {"value": "1209600", "text": "2 Weeks"},
+        {"value": "2629746", "text": "1 Month"},
+        {"value": "31556952", "text": "1 Year"}
+      ]
+    },
+    {
+      "id": "default_currencies",
+      "type": "input",
+      "name": "Default Currencies",
+      "desciption": "A comma separated list of currencies to display if not target currency is specified (works only when cache enabled)",
+      "default_value": "USD,EUR,CAD,GBP,AUD"
+    }
+  ]
+}

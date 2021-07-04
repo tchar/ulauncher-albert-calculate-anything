@@ -1,0 +1,105 @@
+import os
+from datetime import datetime
+
+from .interface import QueryHandler
+from .lang import Language
+from ..currency.service import CurrencyService
+from ..utils import Singleton
+from ..constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
+
+class CurrencyQueryHandler(QueryHandler):
+    def _extract_query(self, query):
+
+        matches = CURRENCY_QUERY_REGEX.findall(query)
+        matches_default = CURRENCY_DEFAULT_REGEX.findall(query)
+
+        if not matches_default and not matches:
+            return None
+
+        service = CurrencyService.get_instance()
+        if matches_default and not matches and not service.cache_enabled:
+            return None
+
+        translator = Language.get_instance().get_translator('currency')
+
+        if matches:
+            amount, currency_from, _, currencies_to = matches[0]
+            currencies_to = currencies_to.split(',')
+        else:
+            amount, currency_from, _ = matches_default[0]
+            currencies_to = service.default_currencies
+        
+        amount = 1.0 if EMPTY_AMOUNT.match(amount) else float(amount)
+        currency_from = translator(currency_from.strip()).upper()
+        currencies_to = map(str.strip, currencies_to)
+        currencies_to = map(translator, currencies_to)
+        currencies_to = map(str.upper, currencies_to)
+        currencies_to = filter(lambda c: CURRENCY_REGEX.match(c), currencies_to)
+        currencies_to = list(dict.fromkeys(currencies_to))
+
+        return amount, currency_from, currencies_to
+
+    def handle(self, query):
+        query = self._extract_query(query)
+        if not query:
+            return
+        
+        amount, currency_from, currencies_to = query
+
+        if len(currencies_to) == 0:
+            return
+
+        service = CurrencyService.get_instance()
+        rates = service.get_rates(currency_from, *currencies_to)
+        if service.provider_had_error:
+            return [{
+                'value': '',
+                'name': 'Currency Provider error. Did you set your API key?',
+                'description': 'Set your API key in the extension preferences',
+                'is_error': False,
+                'order': -1
+            }]
+        
+        if currency_from not in rates:
+            return
+
+        currency_from_rate = rates[currency_from]['rate']
+
+        results = []
+        i = 0
+        for currency_to in currencies_to:
+            if currency_to not in rates:
+                continue
+            rate_data = rates[currency_to]
+            rate = rate_data['rate'] / currency_from_rate
+            converted_amount = amount * rate
+            date = datetime.fromtimestamp(rate_data['timestamp_refresh']) if rate_data['timestamp_refresh'] else None
+
+            if currency_from == currency_to:
+                description = ''
+            elif date:
+                description = '1 {} = {:g} {} as of {}'.format(currency_from, rate, currency_to, date)
+            else:
+                description = '1 {} = {:g} {}'.format(currency_from, rate, currency_to)
+
+            if currency_to in FLAGS:
+                icon = 'images/flags/{}'.format(FLAGS[currency_to])
+            else:
+                icon = 'images/currency.svg'
+
+            results.append({
+                'icon': icon,
+                'value': converted_amount,
+                'name': '{:g} {}'.format(converted_amount, currency_to),
+                'description': description,
+                'is_error': False,
+                'order': i
+            })
+            i += 1
+        
+        return results
+
+    @classmethod
+    @Singleton
+    def get_instance(cls):
+        return cls()
