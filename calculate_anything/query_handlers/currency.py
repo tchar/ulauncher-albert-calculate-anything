@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+from .query_result import QueryResult
 from .interface import QueryHandler
 from .lang import Language
 from ..currency.service import CurrencyService
@@ -52,13 +52,13 @@ class CurrencyQueryHandler(QueryHandler):
         service = CurrencyService.get_instance()
         rates = service.get_rates(currency_from, *currencies_to)
         if service.provider_had_error:
-            return [{
-                'value': '',
-                'name': 'Currency Provider error. Did you set your API key?',
-                'description': 'Set your API key in the extension preferences',
-                'is_error': False,
-                'order': -1
-            }]
+            return [QueryResult(
+                icon='images/icon.svg',
+                name='Currency Provider error. Did you set your API key?',
+                description='Set your API key in the extension preferences',
+                is_error=True,
+                clipboard=False
+            )]
         
         if currency_from not in rates:
             return
@@ -86,15 +86,14 @@ class CurrencyQueryHandler(QueryHandler):
                 icon = 'images/flags/{}'.format(FLAGS[currency_to])
             else:
                 icon = 'images/currency.svg'
-
-            results.append({
-                'icon': icon,
-                'value': converted_amount,
-                'name': '{:g} {}'.format(converted_amount, currency_to),
-                'description': description,
-                'is_error': False,
-                'order': i
-            })
+            
+            results.append(QueryResult(
+                icon=icon,
+                value=converted_amount,
+                name='{:g} {}'.format(converted_amount, currency_to),
+                description=description,
+                order=i
+            ))
             i += 1
         
         return results

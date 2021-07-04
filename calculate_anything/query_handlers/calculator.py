@@ -4,12 +4,13 @@ try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = None
+from .query_result import QueryResult
 from ..utils import is_types
 from .interface import QueryHandler
 from ..utils import Singleton
 from ..constants import (
-    CALCULATOR_ERROR, CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX,
-    CALCULATOR_IMAG_REGEX_UNIT_REGEX, CALCULATOR_QUERY_REPLACE, CALCULATOR_REGEX_QUERY_REPLACE
+    CALCULATOR_ERROR, CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX_UNIT_REGEX,
+    CALCULATOR_QUERY_REPLACE, CALCULATOR_REGEX_QUERY_REPLACE, CALCULATOR_IMAG_REPLACE
 )
 
 class CalculatorQueryHandler(QueryHandler):
@@ -32,20 +33,20 @@ class CalculatorQueryHandler(QueryHandler):
 
     def handle(self, query):
         if self._simple_eval is None:
-            return [{
-                'value': 'pip install simpleeval',
-                'name': 'Looks like simpleeval is not installed.',
-                'description': 'Install it with "pip install simpleeval" and restart launcher.',
-                'is_error': True,
-                'order': -1
-            }]
+            return [QueryResult(
+                icon='images/icon.svg',
+                value='pip install simpleeval',
+                name='Looks like simpleeval is not installed.',
+                description='Install it with "pip install simpleeval" and restart launcher.',
+                is_error=True
+            )]
 
         query = query.lower()
         if CALCULATOR_REGEX_REJECT.match(query):
             return []
         
         query = CALCULATOR_REGEX_QUERY_REPLACE.sub(lambda m: CALCULATOR_QUERY_REPLACE[re.escape(m.group(0))], query)
-        query = CALCULATOR_IMAG_REGEX.sub(lambda m: m.group(0).replace(' ', ''), query)
+        query = CALCULATOR_IMAG_REPLACE.sub(lambda m: m.group(0).replace('i', 'j'), query)
         query = CALCULATOR_IMAG_REGEX_UNIT_REGEX.sub(lambda m: m.group(0).replace('j', '1j'), query)
 
         try:
@@ -63,29 +64,35 @@ class CalculatorQueryHandler(QueryHandler):
             description = ''
         elif real == 0:
             if imag == -1:
-                result = '-j'
+                result = '-i'
             elif imag == 1:
-                result = 'j'
+                result = 'i'
             else:
-                result = '{:g}j'.format(imag)
+                result = '{:g}i'.format(imag)
             description = 'Result is an Imaginary number'
         elif imag == 0:
             result = '{:g}'.format(real)
             description = ''
         elif imag < 0:
             if imag == -1:
-                result = '{:g} - j'.format(real)
+                result = '{:g} - i'.format(real)
             else:
-                result = '{:g} - {:g}j'.format(real, -imag)
+                result = '{:g} - {:g}i'.format(real, -imag)
             description = 'Result is a Complex number'
         else:
             if imag == 1:
-                result = '{:g} + j'.format(real)
+                result = '{:g} + i'.format(real)
             else:
-                result = '{:g} + {:g}j'.format(real, imag)
+                result = '{:g} + {:g}i'.format(real, imag)
             description = 'Result is a Complex number'
         
-        return [{'icon': 'images/calculator.svg', 'value': result, 'name': result, 'description': description, 'is_error': False, 'order': 0}]
+        return [QueryResult(
+            icon='images/calculator.svg',
+            value=result,
+            name=result,
+            description=description,
+            order=0
+        )]
 
     @classmethod
     @Singleton

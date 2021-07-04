@@ -17,43 +17,32 @@ class ConverterExtension(Extension):
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
 
 class KeywordQueryEventListener(EventListener):
-    def _no_match_item(self, name=None, description=None):
-        return RenderResultListAction([
-            ExtensionResultItem(
-                icon='images/icon.svg',
-                name=name or 'Keep typing your query ...',
-                description=description or 'Try expressions like "10 euros to dollars", "sqrt(10) + 2 ^ 2.5", "20 cm to inches"',
-                highlightable=False,
-                on_enter=HideWindowAction()
-            )
-        ])
 
     def on_event(self, event, extension):
         items = []
         error_num = 0
         results = QueryHandler.get_instance().handle(event.get_argument() or '')
         for result in results:
-            icon = result.get('icon', 'images/icon.svg')
-            value = result['value']
-            is_error = result['is_error']
-            error_num += is_error
-            name = result['name']
-            description = result['description']
+            error_num += result.is_error
+            highlightable = result.is_error
+            on_enter = CopyToClipboardAction(str(result.value)) if result.clipboard else HideWindowAction()
 
-            if is_error:
-                highlightable=False,
-            else:
-                highlightable=True,
             items.append(ExtensionResultItem(
-                icon=icon,
-                name=name,
-                description=description,
+                icon=result.icon or 'images/icon.svg',
+                name=result.name,
+                description=result.description,
                 highlightable=highlightable,
-                on_enter=CopyToClipboardAction(str(value))
+                on_enter=on_enter
             ))
         
         if len(items) == error_num:
-            return self._no_match_item()
+            return items.append(ExtensionResultItem(
+                icon='images/icon.svg',
+                name='Keep typing your query ...',
+                description='Try expressions like "10 euros to dollars", "sqrt(10) + 2 ^ 2.5", "20 cm to inches"',
+                highlightable=False,
+                on_enter=HideWindowAction()
+            ))
 
         return RenderResultListAction(items)
 

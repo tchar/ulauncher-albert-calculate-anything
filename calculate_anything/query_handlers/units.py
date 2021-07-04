@@ -3,6 +3,7 @@ try:
     import pint
 except ImportError:
     pint = None
+from .query_result import QueryResult
 from .interface import QueryHandler
 from .lang import Language
 from ..utils import is_types, Singleton
@@ -39,14 +40,14 @@ class UnitsQueryHandler(QueryHandler):
 
     def handle(self, query):
         if pint is None:
-            return [{
-                'icon': 'images/icon.svg',
-                'value': '',
-                'name': 'Looks like pint is not installed.',
-                'description': 'Install it with "pip install pint" and restart launcher.',
-                'is_error': True,
-                'order': -1
-            }]
+            return [QueryResult(
+                icon='images/icon.svg',
+                value='pip install pip',
+                name='Looks like pint is not installed.',
+                description='Install it with "pip install pint" and restart launcher.',
+                is_error=True,
+                order=-1
+            )]
 
         query = UnitsQueryHandler._extract_query(query)
         if not query:
@@ -88,13 +89,13 @@ class UnitsQueryHandler(QueryHandler):
             else:
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
 
-            results.append({
-                'value': amount_converted.magnitude,
-                'name': '{:g} {}'.format(amount_converted.magnitude, unit_to_name),
-                'description': description,
-                'is_error': False,
-                'order': i,
-            })
+            results.append(QueryResult(
+                icon='images/icon.svg',
+                value=amount_converted.magnitude,
+                name='{:g} {}'.format(amount_converted.magnitude, unit_to_name),
+                description=description,
+                order=i,
+            ))
             i += 1
         return results
 

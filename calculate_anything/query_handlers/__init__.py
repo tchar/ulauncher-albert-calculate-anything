@@ -1,3 +1,4 @@
+from .query_result import QueryResult
 from .units import UnitsQueryHandler
 from .calculator import CalculatorQueryHandler
 from .currency import CurrencyQueryHandler
@@ -18,7 +19,7 @@ class QueryHandler:
             if result:
                 results.extend(result)
 
-        return sorted(results, key=lambda result: result.get('order', 0))
+        return sorted(results, key=lambda result: result.order)
 
     @classmethod
     @Singleton
