@@ -13,7 +13,7 @@
       "type": "keyword",
       "name": "Calculate Antything",
       "description": "Calculate expressions, convert currency and units",
-      "default_value": "c"
+      "default_value": "calc"
     },
     {
       "id": "api_key",
