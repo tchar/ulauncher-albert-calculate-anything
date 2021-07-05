@@ -34,7 +34,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         signs = set(['+', '-'])
         cal = parsedatetime.Calendar()
-        now = datetime.now().replace(microsecond=0)
+        now = datetime.now()
         date = timedelta()
         prev = None
 
@@ -48,33 +48,74 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             elif subquery == 'now':
                 if prev != '+' and prev is not None:
                     return None
-                date += now
             else:
                 if prev not in signs:
                     return None
                 diff = cal.nlp(subquery, sourceTime=datetime.min)
                 if diff is None:
                     return None
+                diff = diff[0][0] - datetime.min
                 if prev == '+':
-                    date += diff[0][0] - datetime.min
+                    date += diff
                 else:
-                    date -= diff[0][0] - datetime.min
+                    date -= diff
             prev = subquery
+        
+        date = date + now
 
-        date = date.replace(microsecond=0)
-        value = '{}'.format(date)
-        if now.date() == date.date() and now != date:
-            name = '{} {}'.format(Language().translate('Today at', 'dates'), date.time())
-        elif now.date() + timedelta(days=1) == date.date():
-            name = '{} {}'.format(Language().translate('Tomorrow at', 'dates'), date.time(), date.time())
-        elif now.date() - timedelta(days=1) == date.date():
-            name = '{} {}'.format(Language().translate('Yesterday at', 'dates'), date.time(), date.time())
+        value = date.strftime('%A %-d %B %Y %H:%M:%S')
+
+        now_week = now.isocalendar()[1]
+        date_week = date.isocalendar()[1]
+
+        if now.year - 1 == date.year:
+            description = Language().translate('Last year', 'dates')
+        elif now.year + 1 == date.year:
+            description = Language().translate('Next year', 'dates')
+        elif now.year != date.year:
+            if date.year > now.year:
+                description = Language().translate('years from now', 'dates')
+            else:
+                description = Language().translate('years ago', 'dates')
+            description = '{} {}'.format(abs(now.year - date.year), description)
+        elif now.month - 1 == date.month:
+            description = Language().translate('Last month', 'dates')
+        elif now.month + 1 == date.month:
+            description = Language().translate('Next month', 'dates')
+        elif now.month != date.month:
+            if date.month > now.month:
+                description = Language().translate('months from now', 'dates')
+            else:
+                description = Language().translate('months ago', 'dates')
+            description = '{} {}'.format(abs(now.month - date.month), description)
+        elif now_week - 1 == date_week:
+            description = Language().translate('Last week', 'dates')
+        elif now_week + 1 == date_week:
+            description = Language().translate('Next week', 'dates')
+        elif now_week != date_week:
+            if date_week > now_week:
+                description = Language().translate('weeks from now', 'dates')
+            else:
+                description = Language().translate('weeks ago', 'dates')
+            description = '{} {}'.format(abs(now_week - date_week), description)
+        elif now.day - 1 == date.day:
+            description = Language().translate('Last day', 'dates')
+        elif now.day + 1 == date.day:
+            description = Language().translate('Next day', 'dates')
+        elif now.day != date.day:
+            if date.day > now.day:
+                description = Language().translate('days from now', 'dates')
+            else:
+                description = Language().translate('days ago', 'dates')
+            description = '{} {}'.format(abs(now.day - date.day), description)
         else:
-            name = '{}'.format(date)
+            description = Language().translate('Today', 'dates')
 
         return [QueryResult(
             icon='images/time.svg',
             value=value,
-            name=name,
+            name=value,
+            description=description,
             order=0
         )]
+    
