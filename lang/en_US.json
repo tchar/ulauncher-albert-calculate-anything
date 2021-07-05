@@ -21,7 +21,9 @@
         "degree_Fahrenheit": "Fahrenheit",
         "degree_Celsius": "Celsius",
         "degree_Rankine": "Rankine",
-        "horsepower": "hp"
+
+        "install-pint": "Looks like pint is not installed",
+        "install-pint-description": "Install it with \"pip install pint\" and restart launcher"
     },
     "currency": {
         "€": "EUR",
@@ -84,6 +86,37 @@
         "bitcoin": "BTC",
         "bitcoins": "BTC",
         "ether": "ETH",
-        "etherium": "ETH"
+        "etherium": "ETH",
+
+        "provider-error": "Currency Provider error. Did you set your API key?",
+        "provider-error-description": "Set your API key in the extension preferences"
+    },
+    "time": {
+        "last-year": "Last year",
+        "next-year": "Next year",
+        "years-from-now": "years from now",
+        "years-ago": "years ago",
+        
+        "last-month": "Last month",
+        "next-month": "Next month",
+        "months-from-now": "months from now",
+        "months-ago": "months ago",
+        
+        "last-week": "Last week",
+        "next-week": "Next week",
+        "weeks-from-now": "weeks from now",
+        "weeks-ago": "weeks ago",
+        
+        "yesterday": "Yesterday",
+        "tomorrow": "Tomorrow",
+        "today": "Today",
+        "days-from-now": "days from now",
+        "days-ago": "days ago",
+
+        "years-overflow": "Hey I'm not a time machine",
+        "years-overflow-description": "Are you trying to crash me?",
+
+        "install-parsedatetime": "Looks like parsedatetime is not installed.",
+        "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher."
     }
 }

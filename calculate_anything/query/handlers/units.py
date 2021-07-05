@@ -43,12 +43,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         return unit_from, units_to
 
     def handle(self, query):
+        translator = Language().get_translator('units')
+
         if pint is None:
             return [QueryResult(
                 icon='images/units.svg',
                 value='pip install pint',
-                name='Looks like pint is not installed.',
-                description='Install it with "pip install pint" and restart launcher.',
+                name=translator('install-pint'),
+                description=translator('install-pint-description'),
                 is_error=True,
                 order=-1
             )]
@@ -65,13 +67,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             if unit_from_ureg.units == self._ureg('dimensionless'):
                 return
         except Exception as e:
-            self._logger.error('Could not convert from unit: {}'.format(unit_from))
             return None
         
         if not units_to:
             units_to = [str(unit_from_ureg.units)]
 
-        translator = Language().get_translator('units')
         unit_from_name = str(unit_from_ureg.units)
         is_temperature_from = 'degree_' in unit_from_name
         unit_from_name = translator(unit_from_name).replace('**', '^').replace('_', ' ')
@@ -83,7 +83,6 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 unit_to_ureg = self._ureg.parse_expression(unit_to)
                 amount_converted = unit_from_ureg.to(unit_to_ureg)
             except Exception as e:
-                self._logger.error('Could not convert to unit: {}'.format(unit_to))
                 continue
 
             try:

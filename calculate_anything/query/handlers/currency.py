@@ -52,12 +52,13 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             return
 
         service = CurrencyService()
+        translator = Language().get_translator('currency')
         rates = service.get_rates(currency_from, *currencies_to)
         if service.provider_had_error:
             return [QueryResult(
                 icon='images/icon.svg',
-                name='Currency Provider error. Did you set your API key?',
-                description='Set your API key in the extension preferences',
+                name=translator('provider-error'),
+                description=translator('provider-error-description'),
                 is_error=True,
                 clipboard=False
             )]

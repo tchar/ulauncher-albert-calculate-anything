@@ -34,6 +34,8 @@ PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(r'^\s*(.*)\s*(as|is what|in)\s*( a)
 PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
 
 TIME_QUERY_REGEX = re.compile('now|time')
+TIME_SUBQUERY_REGEX = re.compile(r'.*[a-z].*', flags=re.IGNORECASE)
+TIME_SUBQUERY_DIGITS= re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile('(\+|-)')
 
 MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
