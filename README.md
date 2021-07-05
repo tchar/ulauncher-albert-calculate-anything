@@ -237,7 +237,7 @@ e ^ (pi * j) + 1
 
 ## Extending and More
 
-The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert do) you can extend it for other cases.
+The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert) do. You can extend it for other cases.
 
 ### Adding flags
 
@@ -245,4 +245,4 @@ If your currencie's flag is missing you can place it in the extension's flags di
 
 Make sure to name your flag image in uppercase 3 letter name of your currency. For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
 
-You can find the flags that were used for this project at `https://github.com/HatScripts/circle-flags/tree/gh-pages/flags`.
+You can find the flags that were used for this project at https://github.com/HatScripts/circle-flags/tree/gh-pages/flags.

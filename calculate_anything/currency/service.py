@@ -21,6 +21,7 @@ class CurrencyService(metaclass=Singleton):
         self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
         self._provider = ProviderFactory.get_provider('fixerio')
+        self._is_running = False
 
     def __get_currencies(self, *currencies):
         if not self._cache.enabled or self._cache.should_update():
@@ -51,7 +52,6 @@ class CurrencyService(metaclass=Singleton):
     @lock
     def set_api_key(self, api_key):
         self._provider.set_api_key(api_key)
-        self.run(once=True)
 
     @lock
     def get_rates(self, *currencies):
@@ -62,8 +62,9 @@ class CurrencyService(metaclass=Singleton):
             return {}
 
     @lock
-    def _update_thread(self, once=False):
+    def _update_thread(self):
         if not self._cache.enabled:
+            self._is_running = False
             return
         try:
             self.__get_currencies()
@@ -78,8 +79,6 @@ class CurrencyService(metaclass=Singleton):
         else:
             timer_thread = Timer(60, self._update_thread)
 
-        if once:
-            return
         timer_thread.setDaemon(True)
         timer_thread.start()
 
@@ -98,11 +97,11 @@ class CurrencyService(metaclass=Singleton):
     def set_default_currencies(self, default_currencies):
         self.default_currencies =  default_currencies
 
-    def run(self, once=False):
-        if not self._cache.enabled:
+    def run(self):
+        if not self._cache.enabled or self._is_running:
             return
-        if not once:
-            self._logger.info('Currency Service is running')
-        timer_thread = Timer(0.0, self._update_thread, kwargs={'once': once})
+        self._is_running = True
+        self._logger.info('Currency Service is running')
+        timer_thread = Timer(0.0, self._update_thread)
         timer_thread.setDaemon(True)
         timer_thread.start()

@@ -85,6 +85,7 @@ def initialize():
     default_currencies = map(str.upper, default_currencies)
     default_currencies = list(default_currencies)
     service.set_default_currencies(default_currencies)
+    service.run()
 
 def finalize():
     CurrencyService().disable_cache()

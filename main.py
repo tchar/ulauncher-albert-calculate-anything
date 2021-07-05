@@ -88,6 +88,7 @@ class PreferencesUpdateEventListener(EventListener):
             service.set_api_key(event.new_value)
             if service.provider_had_error:
                 service.get_rates()
+        service.run()
 
 if __name__ == '__main__':
     ConverterExtension().run()
