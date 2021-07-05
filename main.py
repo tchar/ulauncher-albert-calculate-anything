@@ -36,7 +36,7 @@ class KeywordQueryEventListener(EventListener):
             ))
         
         if len(items) == error_num:
-            return items.append(ExtensionResultItem(
+            items.append(ExtensionResultItem(
                 icon='images/icon.svg',
                 name='Keep typing your query ...',
                 description='Try expressions like "10 euros to dollars", "sqrt(10) + 2 ^ 2.5", "20 cm to inches"',
