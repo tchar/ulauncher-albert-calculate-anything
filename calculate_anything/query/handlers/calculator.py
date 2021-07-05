@@ -4,11 +4,10 @@ try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = None
-from .query_result import QueryResult
-from ..utils import is_types
+from ..result import QueryResult
 from .interface import QueryHandler
-from ..utils import Singleton
-from ..constants import (
+from ...utils import is_types, Singleton
+from ...constants import (
     CALCULATOR_ERROR, CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX_UNIT_REGEX,
     CALCULATOR_QUERY_REPLACE, CALCULATOR_REGEX_QUERY_REPLACE, CALCULATOR_IMAG_REPLACE
 )
@@ -24,8 +23,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
 
     @staticmethod
     def _format_number(number):
-        if isinstance(number, float) and number.is_integer():
-            return int(number)
+        # if isinstance(number, float) and number.is_integer():
+            # return int(number)
         
         if cmath.isclose(number, 0, abs_tol=CALCULATOR_ERROR):
             return 0
@@ -50,13 +49,13 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         query = CALCULATOR_IMAG_REGEX_UNIT_REGEX.sub(lambda m: m.group(0).replace('j', '1j'), query)
 
         try:
-            result = self._simple_eval.eval(query)
+            value = self._simple_eval.eval(query)
         except Exception as e:
             return None
         
-        if not is_types(result, int, float, complex):
+        if not is_types(value, int, float, complex):
             return None
-        real, imag = result.real, result.imag
+        real, imag = value.real, value.imag
         real = CalculatorQueryHandler._format_number(real)
         imag = CalculatorQueryHandler._format_number(imag)
         if real == 0 and imag == 0:
@@ -87,8 +86,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             description = 'Result is a complex number'
         
         return [QueryResult(
-            icon='images/calculator.svg',
-            value=result,
+            icon='images/icon.svg',
+            value=value,
             name=result,
             description=description,
             order=0

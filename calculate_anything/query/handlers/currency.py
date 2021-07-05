@@ -1,19 +1,22 @@
 from datetime import datetime
-from .query_result import QueryResult
 from .interface import QueryHandler
-from .lang import Language
-from ..currency.service import CurrencyService
-from ..utils import Singleton
-from ..constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
+from ..result import QueryResult
+from ..lang import Language
+from ...currency.service import CurrencyService
+from ...utils import Singleton
+from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
 
 class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
     def _extract_query(self, query):
 
         matches = CURRENCY_QUERY_REGEX.findall(query)
-        matches_default = CURRENCY_DEFAULT_REGEX.findall(query)
+        if not matches:
+            matches_default = CURRENCY_DEFAULT_REGEX.findall(query)
+        else:
+            matches_default = None
 
-        if not matches_default and not matches:
-            return None
+        if not matches and not matches_default:
+            return
 
         service = CurrencyService()
         if matches_default and not matches and not service.cache_enabled:

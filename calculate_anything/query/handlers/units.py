@@ -2,12 +2,12 @@ try:
     import pint
 except ImportError:
     pint = None
-from .query_result import QueryResult
 from .interface import QueryHandler
-from .lang import Language
-from ..utils import is_types, Singleton
-from ..logging_wrapper import LoggingWrapper as logging
-from ..constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
+from ..lang import Language
+from ..result import QueryResult
+from ...utils import is_types, Singleton
+from ...logging_wrapper import LoggingWrapper as logging
+from ...constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
 
 class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
@@ -41,7 +41,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def handle(self, query):
         if pint is None:
             return [QueryResult(
-                icon='images/icon.svg',
+                icon='images/units.svg',
                 value='pip install pip',
                 name='Looks like pint is not installed.',
                 description='Install it with "pip install pint" and restart launcher.',
@@ -94,7 +94,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
 
             results.append(QueryResult(
-                icon='images/icon.svg',
+                icon='images/units.svg',
                 value=amount_converted.magnitude,
                 name='{:g} {}'.format(amount_converted.magnitude, unit_to_name),
                 description=description,

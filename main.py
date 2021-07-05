@@ -6,7 +6,7 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from calculate_anything.currency.service import CurrencyService
-from calculate_anything.query_handlers import QueryHandler
+from calculate_anything.query import QueryHandler
 
 class ConverterExtension(Extension):
 

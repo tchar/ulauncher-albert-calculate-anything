@@ -1,7 +1,8 @@
-from .query_result import QueryResult
-from .units import UnitsQueryHandler
-from .calculator import CalculatorQueryHandler
-from .currency import CurrencyQueryHandler
+from .result import QueryResult
+from .handlers import UnitsQueryHandler
+from .handlers import CalculatorQueryHandler
+from .handlers import CurrencyQueryHandler
+from .handlers import PercentagesQueryHandler
 from ..utils  import Singleton
 
 class QueryHandler(metaclass=Singleton):
@@ -9,7 +10,8 @@ class QueryHandler(metaclass=Singleton):
         self._handlers = [
             UnitsQueryHandler(),
             CalculatorQueryHandler(),
-            CurrencyQueryHandler()
+            CurrencyQueryHandler(),
+            PercentagesQueryHandler()
         ]
 
     def handle(self, query):
