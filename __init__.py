@@ -9,7 +9,7 @@ Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi 
 # Below are the settings for this extension
 API_KEY = ''
 CACHE = '86400'
-DEFAULT_CURRENCIES='USD,EUR,CAD,GBP,AUD'
+DEFAULT_CURRENCIES='USD,EUR,GBP,CAD'
 # Uncomment below line to set a trigger keyword to your choice (put a space after your keyword)
 # __triggers__ = 'calc '
 ####################################################################################

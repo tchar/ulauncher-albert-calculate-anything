@@ -42,7 +42,7 @@
       "type": "input",
       "name": "Default Currencies",
       "desciption": "A comma separated list of currencies to display if not target currency is specified (works only when cache enabled)",
-      "default_value": "USD,EUR,CAD,GBP,AUD"
+      "default_value": "USD,EUR,GBP,CAD"
     }
   ]
 }

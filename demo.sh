@@ -14,9 +14,9 @@ clear_all () {
 
 if [ "$1" == "ulauncher" ]; then
     ulauncher
-    cmd="$cmd"
-    sleep_small=0.1
-    sleep_big=1.5
+    cmd="c a l c"
+    sleep_small=0.05
+    sleep_big=2
 elif [ "$1" == "albert" ]; then
     albert show
     cmd=""
