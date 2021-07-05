@@ -75,16 +75,20 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         for unit_to in units_to:
             try:
                 unit_to_ureg = self._ureg.parse_expression(unit_to)
-                rate = unit_from_ureg.to(unit_to_ureg).magnitude / unit_from_ureg.magnitude
                 amount_converted = unit_from_ureg.to(unit_to_ureg)
             except Exception as e:
                 self._logger.error('Could not convert to unit: {}'.format(unit_to))
                 continue
 
+            try:
+                rate = unit_from_ureg.to(unit_to_ureg).magnitude / unit_from_ureg.magnitude
+            except Exception as e:
+                rate = None
+
             unit_to_name = str(unit_to_ureg.units)
-            has_temperature = 'degree_' in unit_to_name
             unit_to_name = translator(unit_to_name).replace('**', '^').replace('_', ' ')
-            if has_temperature or unit_from_name == unit_to_name:
+
+            if rate is None:
                 description = ''
             else:
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
