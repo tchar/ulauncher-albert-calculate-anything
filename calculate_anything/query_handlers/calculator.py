@@ -69,7 +69,7 @@ class CalculatorQueryHandler(QueryHandler):
                 result = 'i'
             else:
                 result = '{:g}i'.format(imag)
-            description = 'Result is an Imaginary number'
+            description = 'Result is an imaginary number'
         elif imag == 0:
             result = '{:g}'.format(real)
             description = ''
@@ -78,13 +78,13 @@ class CalculatorQueryHandler(QueryHandler):
                 result = '{:g} - i'.format(real)
             else:
                 result = '{:g} - {:g}i'.format(real, -imag)
-            description = 'Result is a Complex number'
+            description = 'Result is a complex number'
         else:
             if imag == 1:
                 result = '{:g} + i'.format(real)
             else:
                 result = '{:g} + {:g}i'.format(real, imag)
-            description = 'Result is a Complex number'
+            description = 'Result is a complex number'
         
         return [QueryResult(
             icon='images/calculator.svg',

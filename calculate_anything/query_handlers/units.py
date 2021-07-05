@@ -1,4 +1,3 @@
-import logging
 try:
     import pint
 except ImportError:
@@ -7,6 +6,7 @@ from .query_result import QueryResult
 from .interface import QueryHandler
 from .lang import Language
 from ..utils import is_types, Singleton
+from ..logging_wrapper import LoggingWrapper as logging
 from ..constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
 
 class UnitsQueryHandler(QueryHandler):

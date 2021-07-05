@@ -1,6 +1,6 @@
 import os
 import re
-import __main__
+import calculate_anything
 
 XDG_FALLBACK = os.path.join(os.getenv('HOME'), '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
@@ -26,6 +26,6 @@ CALCULATOR_IMAG_REGEX_UNIT_REGEX = re.compile(r'([^a-zA-Z0-9]\s*|^\s*)j[^a-zA-Z]
 CALCULATOR_QUERY_REPLACE = dict((re.escape(k), v) for k, v in CALCULATOR_QUERY_REPLACE.items())
 CALCULATOR_REGEX_QUERY_REPLACE = re.compile("|".join(CALCULATOR_QUERY_REPLACE.keys()))
 
-MAIN_DIR = os.path.dirname(os.path.realpath(__main__.__file__))
+MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(os.path.join(MAIN_DIR, 'images/flags'))}
 

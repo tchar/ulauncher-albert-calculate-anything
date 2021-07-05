@@ -1,10 +1,10 @@
 from functools import wraps
 from .cache import CurrencyCache
-import logging
 from threading import RLock, Timer
 from .providers import ProviderFactory
 from ..exceptions import ProviderRequestException
 from ..utils import Singleton
+from ..logging_wrapper import LoggingWrapper as logging
 
 def lock(func):
     @wraps(func)

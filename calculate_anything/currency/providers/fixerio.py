@@ -1,8 +1,8 @@
-import logging
 import urllib.parse
 import requests
 from .interface import CurrencyProvider
 from ...exceptions import ProviderRequestException
+from ...logging_wrapper import LoggingWrapper as logging
 
 class FixerIOCurrencyProvider(CurrencyProvider):
     BASE_URL = 'http://data.fixer.io/api/'

@@ -1,11 +1,11 @@
 import os
 import shutil
-import logging
 import json
 from datetime import datetime
 from functools import wraps
 from ..utils import is_types
 from ..constants import CACHE_DIR, DATA_FILE
+from ..logging_wrapper import LoggingWrapper as logging
 
 class CacheException(Exception):
     pass

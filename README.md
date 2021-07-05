@@ -1,30 +1,64 @@
-# <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher Calculate Anything Extension
+# <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything Extension
 
 Currency and Unit converter as well as a Calculator that supports mathematical functions and Complex Numbers for [Ulauncher](https://ulauncher.io/), with the help of [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) and [fixer.io](https://fixer.io)
 
-## Demo
+## Ulauncher Demo 
 
-![](images/demo.gif)
+![](images/demo-ulauncher.gif)
+
+## Albert Demo
+
+![](images/demo-albert.gif)
 
 ## Contents
 
- - [Install](#install)
+ - [Install for Ulauncher](#install-for-ulauncher)
+ - [Install for Albert](#install-for-albert)
  - [How to use](#how-to-use)
  - [Examples](#examples)
+ - [Extending and more](#extending-and-more)
 
 
-## Install
+## Install for Ulauncher
 
 Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint) and [simpleeval](https://github.com/danthedeckie/simpleeval). Install them with:
 ```bash
 pip install requests pint simpleeval
 ```
 
+Open `Ulauncher` go to `Extensions` > `Add extension` and paste https://github.com/tchar/ulauncher-albert-calculate-anything
+
+## Install for Albert
+
+Similarly to `Ulauncher` the same dependencies are are required.
+
+To install the extension for Albert run
+```bash
+pip install requests pint simpleeval
+mkdir -p ~/.local/share/albert/org.albert.extension.python/modules/
+git clone https://github.com/tchar/ulauncher-albert-calculate-anything ~/.local/share/albert/org.albert.extension.python/modules/
+```
+
+Open albert, enable `Python` extensions and then enable the `Calculate Anything` extension.
+
+You can double click it to open module's location and edit `__init__.py` to add your preferences.
+
 ## How to Use
+
+### Albert
+
+If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES` or `__triggers` for the keyword
+
+By default the Albert extension does not use any keywords (can be changed the aforementioned file), so in the examples below just remove the `calc ` at the begining
+
+### Ulauncher
+
+If you are using Ulauncher use the extension preferences.
 
 ### Set API Key
 
 In order for the currency conversion to work you need to provide a [fixer.io](https://fixer.io/) API Key. Sign up at https://fixer.io/signup (there is free subscription available) and then go to your `fixer.io` dashboard and copy your API key to the appropriate input box in this extension's preferences.
+
 
 ### Cache
 
@@ -37,21 +71,21 @@ Defaults to `USD,EUR,CAD,GBP,AUD`
 
 ### Commands and Syntax
 
-To convert anything you need to use the keyword (default `calc`, can be changed in preferences).
+To convert anything you can use the keyword  (default `calc` for `Ulauncher`, no keyword for `Albert`)
 
-To convert currency
+To convert currency type your keyword and then
 
-`calc AMOUNT CURRENCY` to get conversion in the default currencies set in the preferences (requires cache)
+`AMOUNT CURRENCY` to get conversion in the default currencies set in the preferences (requires cache)
 
-`calc AMOUNT CURRENCY in(or to) CURRENCY1,CURRENCY2,CURRENCY3` or
+`AMOUNT CURRENCY in(or to) CURRENCY1,CURRENCY2,CURRENCY3` or
 
-`calc CURRENCY in(or to) CURRENCY1,CURRENCY2,CURRENCY3`
+`CURRENCY in(or to) CURRENCY1,CURRENCY2,CURRENCY3`
 
 To convert units use
 
-`calc AMOUNT UNIT in(or to) UNIT1,UNIT2,UNIT3` or
+`AMOUNT UNIT in(or to) UNIT1,UNIT2,UNIT3` or
 
-`calc UNIT in(or to) UNIT1,UNIT2,UNIT3`
+`UNIT in(or to) UNIT1,UNIT2,UNIT3`
 
 If you select one results it will be copied to clipboard.
 
@@ -62,18 +96,18 @@ Comma separated units and currencies can have spaces between them.
 ### Currency
 **Simple Conversion**
 ```
-calc 10 EUR TO USD
+10 EUR TO USD
 # or
-calc 10 euros to $
+10 euros to $
 # or
-calc 10 eurs to dollars
+10 eurs to dollars
 
 # Converts 10 euros to american dollars
 ```
 
 **Multiple Conversion**
 ```
-calc 10 EUR to USD,canadian,bitcoin,mexican
+10 EUR to USD,canadian,bitcoin,mexican
 
 # Converts 10 euros to american dollars, canadian dollars, bitcoin, and mexican pesos
 ```
@@ -85,23 +119,23 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
 **Simple Conversion**
 Simple conversion
 ```
-calc 100 f to c
+100 f to c
 
 # converts 100 fahrenheit to celsius, which is  37.7778 Celcius
 ```
 
 **Multiple Conversion**
 ```
-calc 20 cm in inches,m
+20 cm in inches,m
 # or
-calc 20 cm in inches,meters
+20 cm in inches,meters
 
 # produce 2 results with conversion in inches and meters
 ```
 
 **Advanced Conversion**
 ```
-calc 20 km/h to cm/min,km/minute,in/s,cm/sec
+20 km/h to cm/min,km/minute,in/s,cm/sec
 
 # Converts convert to centimeters per minute, kilometers per minute, inches per second and centimeters per second.
 ```
@@ -115,21 +149,33 @@ The following functions exist: `phase`, `polar`, `rect`, `exp`, `log`, `log10`, 
 
 Here are some examples
 ```
-calc 10 + sqrt(2)
+10 + sqrt(2)
 # Will output 11.4142
 
-calc 10 + cos(pi) + 30 * e ^ 2
+10 + cos(pi) + 30 * e ^ 2
 # Will output 230.672
 ```
 
 With complex numbers too (j is the imaginary unit)
 ```
-calc 10 + sqrt(2) + j
+10 + sqrt(2) + j
 # Will output 11.4142 + j
 
-calc cos(1 + j)
+cos(1 + j)
 # Will output 0.83373 - 0.988898j
 
-calc e ^ (pi * j) + 1
+e ^ (pi * j) + 1
 # Will output 0 (Euler's identity)
 ```
+
+## Extending and More
+
+The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert do) you can extend it for other cases.
+
+### Adding flags
+
+If your currencie's flag is missing you can place it in the extension's flags directory at `images/flags/` and restart your launcher or make a pull request to include it.
+
+Make sure to name your flag image in uppercase 3 letter name of your currency. For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
+
+You can find the flags that were used for this project at `https://github.com/HatScripts/circle-flags/tree/gh-pages/flags`.

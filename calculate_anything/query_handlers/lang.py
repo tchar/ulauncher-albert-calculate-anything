@@ -1,8 +1,8 @@
 import os
 import json
-import logging
 from ..utils import Singleton
-import __main__
+from ..constants import MAIN_DIR
+from ..logging_wrapper import LoggingWrapper as logging
 
 class Language:
     def __init__(self):
@@ -14,8 +14,7 @@ class Language:
     def set(self, lang):
         if lang == self._lang:
             return
-        main_dir = os.path.dirname(os.path.realpath(__main__.__file__))
-        lang_filepath = os.path.join(main_dir, 'lang', '{}.json'.format(lang))
+        lang_filepath = os.path.join(MAIN_DIR, 'lang', '{}.json'.format(lang))
         if not os.path.exists(lang_filepath):
             return
         try:

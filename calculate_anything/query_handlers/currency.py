@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from .query_result import QueryResult
 from .interface import QueryHandler
@@ -46,7 +45,7 @@ class CurrencyQueryHandler(QueryHandler):
         
         amount, currency_from, currencies_to = query
 
-        if len(currencies_to) == 0:
+        if len(currencies_to) == 0 or currency_from.strip() == '':
             return
 
         service = CurrencyService.get_instance()
