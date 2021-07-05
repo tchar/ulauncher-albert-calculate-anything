@@ -1,6 +1,6 @@
 # <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything Extension
 
-Currency and Unit converter as well as a Calculator that supports mathematical functions and Complex Numbers for [Ulauncher](https://ulauncher.io/), with the help of [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) and [fixer.io](https://fixer.io)
+Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers for [Ulauncher](https://ulauncher.io/), with the help of [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) and [fixer.io](https://fixer.io)
 
 ## Ulauncher Demo 
 
@@ -14,16 +14,16 @@ Currency and Unit converter as well as a Calculator that supports mathematical f
 
  - [Install for Ulauncher](#install-for-ulauncher)
  - [Install for Albert](#install-for-albert)
- - [How to use](#how-to-use)
+ - [How to setup](#how-to-setup)
  - [Examples](#examples)
  - [Extending and more](#extending-and-more)
 
 
 ## Install for Ulauncher
 
-Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint) and [simpleeval](https://github.com/danthedeckie/simpleeval). Install them with:
+Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
 ```bash
-pip install requests pint simpleeval
+pip install requests pint simpleeval parsedatetime
 ```
 
 Open `Ulauncher` go to `Extensions` > `Add extension` and paste https://github.com/tchar/ulauncher-albert-calculate-anything
@@ -34,7 +34,7 @@ Similarly to `Ulauncher` the same dependencies are are required.
 
 To install the extension for Albert run
 ```bash
-pip install requests pint simpleeval
+pip install requests pint simpleeval parsedatetime
 mkdir -p ~/.local/share/albert/org.albert.extension.python/modules/
 git clone https://github.com/tchar/ulauncher-albert-calculate-anything ~/.local/share/albert/org.albert.extension.python/modules/
 ```
@@ -43,7 +43,7 @@ Open albert, enable `Python` extensions and then enable the `Calculate Anything`
 
 You can double click it to open module's location and edit `__init__.py` to add your preferences.
 
-## How to Use
+## How to Setup
 
 ### Albert
 
@@ -138,6 +138,73 @@ Simple conversion
 20 km/h to cm/min,km/minute,in/s,cm/sec
 
 # Converts convert to centimeters per minute, kilometers per minute, inches per second and centimeters per second.
+```
+
+### Percentages
+
+***Simple Cases***
+
+To calculate what is 10% of 40 use
+```
+10% of 40
+
+# Returns 4
+```
+
+To calculate what percentage of 30 is 5 any of the following works
+```
+5 is what % of 30
+5 is what % 30
+5 as % of 30
+5 in % of 30
+5 in % 30
+
+# Returns 16.6667%
+```
+
+***Advanced Cases***
+
+You can also do more advanced things like the following
+```
+10% of cos(pi) + 5
+# Returns 0.4
+
+3 + 2 * pi % of cos(pi) + 5
+# Returns 0.371328
+
+5 as % sqrt(2) + 5
+# Returns 77.9519%
+
+1 + sin(pi) as % sqrt(2) + 5
+# Returns 15.5904%
+```
+
+### Time
+You can also add and subtract time
+For example if now is `2021-07-05 14:14:42` then you can use the following
+**NOTE: You can use the keyword now and time interchangeable**
+```
+now
+# Returns 2021-07-05 14:14:42
+
+now + 1 hour
+# Returns Today at 15:14:42
+
+now + 1 day
+# Returns Tomorrow at 14:14:42
+
+time - 1 day
+# Returns Yesterday at 14:14:42
+
+time + 2 hours 2 minutes 5 seconds
+# Returns Today at 15:16:47
+
+time + 1 year
+# Returns 2022-07-05 14:14:42
+
+time 
+now + 1 year 2 days 2 hours - 4 years 4 minutes
+# Returns 2018-07-07 16:10:42
 ```
 
 ### Calculator

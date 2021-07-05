@@ -24,14 +24,17 @@ CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-z]\s*|\s+|^)i([^a-z0-9]|$)')
 CALCULATOR_IMAG_REGEX_UNIT_REGEX = re.compile(r'([^a-zA-Z0-9]\s*|^\s*)j[^a-zA-Z]{0,1}')
 CALCULATOR_QUERY_REPLACE = {'mod ': '%', 'div ': '//', '^': '**'}
 CALCULATOR_QUERY_REPLACE = dict((re.escape(k), v) for k, v in CALCULATOR_QUERY_REPLACE.items())
-CALCULATOR_REGEX_QUERY_REPLACE = re.compile("|".join(CALCULATOR_QUERY_REPLACE.keys()))
+CALCULATOR_QUERY_REGEX_REPLACE = re.compile("|".join(CALCULATOR_QUERY_REPLACE.keys()))
 
 PERCENTAGES_QUERY_REPLACE = {'plus': '+', 'minus': '-'}
 PERCENTAGES_QUERY_REPLACE = dict((re.escape(k), v) for k, v in PERCENTAGES_QUERY_REPLACE.items())
-PERCENTAGES_REGEX_QUERY_REPLACE = re.compile("|".join(PERCENTAGES_QUERY_REPLACE.keys()))
+PERCENTAGES_QUERY_REGEX_REPLACE = re.compile("|".join(PERCENTAGES_QUERY_REPLACE.keys()))
 PERCENTAGES_REGEX_MATCH_NORMAL = re.compile(r'^\s*(.*)% of (.*)\s*$')
 PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(r'^\s*(.*)\s*(as|is what|in)\s*( a)?\s*(%|percent(age)?)\s(of )?(.*)\s*$')
 PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
+
+TIME_QUERY_REGEX = re.compile('now|time')
+TIME_SPLIT_REGEX = re.compile('(\+|-)')
 
 MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(os.path.join(MAIN_DIR, 'images/flags'))}

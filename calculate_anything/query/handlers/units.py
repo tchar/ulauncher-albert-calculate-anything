@@ -28,12 +28,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             unit_from = matches_default[0]
             units_to = []
+        
+        if '%' in unit_from:
+            return None
         # amount = 1.0 if EMPTY_AMOUNT.match(amount) else float(amount)
         unit_from = unit_from.strip().lower()
         unit_from = translator(UNIT_REGEX_SPLIT.sub(lambda m: translator(m.group(0)), unit_from))
         units_to = map(str.strip, units_to)
         units_to = map(str.lower, units_to)
         units_to = map(lambda u: UNIT_REGEX_SPLIT.sub(lambda m: translator(m.group(0)), u), units_to)
+        units_to = filter(lambda u: '%' not in u, units_to)
         units_to = list(dict.fromkeys(units_to))
 
         return unit_from, units_to
@@ -42,7 +46,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         if pint is None:
             return [QueryResult(
                 icon='images/units.svg',
-                value='pip install pip',
+                value='pip install pint',
                 name='Looks like pint is not installed.',
                 description='Install it with "pip install pint" and restart launcher.',
                 is_error=True,
@@ -61,14 +65,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             if unit_from_ureg.units == self._ureg('dimensionless'):
                 return
         except Exception as e:
-            self._logger.error('Could not convert parse from unit: {}'.format(unit_from))
+            self._logger.error('Could not convert from unit: {}'.format(unit_from))
             return None
         
         if not units_to:
             units_to = [str(unit_from_ureg.units)]
 
         translator = Language().get_translator('units')
-        unit_from_name = translator(str(unit_from_ureg.units)).replace('**', '^').replace('_', ' ')
+        unit_from_name = str(unit_from_ureg.units)
+        is_temperature_from = 'degree_' in unit_from_name
+        unit_from_name = translator(unit_from_name).replace('**', '^').replace('_', ' ')
 
         results = []
         i = 0
@@ -86,9 +92,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 rate = None
 
             unit_to_name = str(unit_to_ureg.units)
+            is_temperature_to = 'degree_' in unit_to_name
             unit_to_name = translator(unit_to_name).replace('**', '^').replace('_', ' ')
 
-            if rate is None:
+            if rate is None or unit_from_name == unit_to_name or is_temperature_from or is_temperature_to:
                 description = ''
             else:
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)

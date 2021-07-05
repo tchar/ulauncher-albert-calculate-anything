@@ -25,17 +25,29 @@ class AlbertLogger:
     def __init__(self, name):
         self._name = name
 
+    @staticmethod
+    def _escape(message):
+        return message.replace('%', '\\%')
+
+    def _log(self, func, message, *args):
+        message = str(message)
+        message = AlbertLogger._escape(message)
+        if args:
+            message = message % args
+        message = '{}: {}'.format(self._name, message)
+        func(message)
+
     def debug(self, message, *args):
-        debug('{}: {}'.format(self._name, str(message) % args))
+        self._log(debug, message, *args)
 
     def info(self, message, *args):
-        info('{}: {}'.format(self._name, str(message) % args))
+        self._log(info, message, *args)
 
     def warning(self, message, *args):
-        warning('{}: {}'.format(self._name, str(message) % args))
+        self._log(warning, message, *args)
 
     def error(self, message, *args):
-        critical('{}: {}'.format(self._name, str(message) % args))
+        self._log(critical, message, *args)
     
 class AlbertLogging:
     def getLogger(name=''):
@@ -52,7 +64,7 @@ except ImportError as e:
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
-from calculate_anything.query_handlers import QueryHandler
+from calculate_anything.query import QueryHandler
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
 try:

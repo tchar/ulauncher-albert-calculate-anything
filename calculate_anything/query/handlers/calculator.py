@@ -9,7 +9,7 @@ from .interface import QueryHandler
 from ...utils import is_types, Singleton
 from ...constants import (
     CALCULATOR_ERROR, CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX_UNIT_REGEX,
-    CALCULATOR_QUERY_REPLACE, CALCULATOR_REGEX_QUERY_REPLACE, CALCULATOR_IMAG_REPLACE
+    CALCULATOR_QUERY_REPLACE, CALCULATOR_QUERY_REGEX_REPLACE, CALCULATOR_IMAG_REPLACE
 )
 
 class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
@@ -44,7 +44,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         if CALCULATOR_REGEX_REJECT.match(query):
             return []
         
-        query = CALCULATOR_REGEX_QUERY_REPLACE.sub(lambda m: CALCULATOR_QUERY_REPLACE[re.escape(m.group(0))], query)
+        query = CALCULATOR_QUERY_REGEX_REPLACE.sub(lambda m: CALCULATOR_QUERY_REPLACE[re.escape(m.group(0))], query)
         query = CALCULATOR_IMAG_REPLACE.sub(lambda m: m.group(0).replace('i', 'j'), query)
         query = CALCULATOR_IMAG_REGEX_UNIT_REGEX.sub(lambda m: m.group(0).replace('j', '1j'), query)
 
@@ -87,7 +87,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         
         return [QueryResult(
             icon='images/icon.svg',
-            value=value,
+            value=result,
             name=result,
             description=description,
             order=0

@@ -14,8 +14,8 @@ clear_all () {
 
 if [ "$1" == "ulauncher" ]; then
     ulauncher
-    cmd="c a l c"
-    sleep_small=0.05
+    cmd="c a l c space"
+    sleep_small=0.02
     sleep_big=2
 elif [ "$1" == "albert" ]; then
     albert show
@@ -30,7 +30,8 @@ clear_all
 wmctrl -a "Ulauncher - Application Launcher"
 sleep 4.4
 
-keys=( $cmd space 1 0 space dollar )
+# Currency
+keys=( $cmd 1 0 space dollar )
 run_xdotool
 sleep $sleep_big
 
@@ -39,12 +40,13 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 3 8 space c space t o  space f )
+# Units
+keys=( $cmd 3 8 space c space t o  space f )
 run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 1 0 space m space plus space 1 5 8 space c m )
+keys=( $cmd 1 0 space m space plus space 1 5 8 space c m )
 run_xdotool
 sleep $sleep_big
 
@@ -53,17 +55,57 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 6 0 space m p h space t o space k p h comma space m i l e s space p e r space m i n u t e comma space i n c h slash h )
+keys=( $cmd 6 0 space m p h space t o space k p h comma space m i l e s space p e r space m i n u t e comma space i n c h slash h )
 run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 1 0 m asciicircum 2 space t o space i n asciicircum 2 comma space c m asterisk c m )
+keys=( $cmd 1 0 m asciicircum 2 space t o space i n asciicircum 2 comma space c m space asterisk space c m )
 run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 1 0 space plus space 2 space plus space s q r t parenleft 2 parenright )
+# Percentages
+keys=( $cmd 1 0 0 space plus space 5 0 percent )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+keys=( $cmd s q r t parenleft 2 parenright space plus space 5 0 percent )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+keys=( $cmd 1 0 0 space a s space percent space o f space 2 0 0)
+run_xdotool
+sleep $sleep_big
+clear_all
+
+keys=( $cmd 5 0 percent space o f space 4 )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+keys=( $cmd 5 0 percent space o f space 1 0 0 space plus space s q r t parenleft 2 parenright space plus space 1 period 5 )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+# Time
+keys=($cmd n o w )
+run_xdotool
+sleep $sleep_big
+keys=( space plus space 2 space h o u r s space 3 space m i n )
+run_xdotool
+sleep $sleep_big
+keys=( space minus space 2 space y e a r s space 5 space s e c o n d s )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+# Calculator
+
+keys=( $cmd 1 0 space plus space 2 space plus space s q r t parenleft 2 parenright )
 run_xdotool
 sleep $sleep_big
 
@@ -72,7 +114,7 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space 5 space plus space 3 i space minus space 8 i )
+keys=( $cmd 5 space plus space 3 i space minus space 8 i )
 run_xdotool
 sleep $sleep_big
 
@@ -81,10 +123,10 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space e asciicircum parenleft p i space asterisk space i parenright )
+keys=( $cmd e asciicircum parenleft p i space asterisk space i parenright )
 run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd space A n d space s o space m u c h space m o r e )
+keys=( $cmd A n d space s o space m u c h space m o r e )
 run_xdotool

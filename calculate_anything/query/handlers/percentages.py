@@ -6,7 +6,7 @@ from ..result import QueryResult
 from ...utils import Singleton
 from ...constants import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
-    PERCENTAGES_REGEX_CALC_MATCH, PERCENTAGES_QUERY_REPLACE, PERCENTAGES_REGEX_QUERY_REPLACE
+    PERCENTAGES_REGEX_CALC_MATCH, PERCENTAGES_QUERY_REPLACE, PERCENTAGES_QUERY_REGEX_REPLACE
 )
 
 class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
@@ -66,7 +66,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _calculate_calc(self, query):
         query = query.lower()
-        query = PERCENTAGES_REGEX_QUERY_REPLACE.sub(lambda m: PERCENTAGES_QUERY_REPLACE[re.escape(m.group(0))], query)
+        query = PERCENTAGES_QUERY_REGEX_REPLACE.sub(lambda m: PERCENTAGES_QUERY_REPLACE[re.escape(m.group(0))], query)
 
         matches = PERCENTAGES_REGEX_CALC_MATCH.findall(query)
         if not matches:
@@ -74,7 +74,10 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         
         amount, sign, percentage = matches[0]
 
+        print(amount)
+
         amount = self._use_calculator(amount)
+        print(amount)
         if amount is None:
             return None
         

@@ -3,6 +3,7 @@ from .handlers import UnitsQueryHandler
 from .handlers import CalculatorQueryHandler
 from .handlers import CurrencyQueryHandler
 from .handlers import PercentagesQueryHandler
+from .handlers import TimeQueryHandler
 from ..utils  import Singleton
 
 class QueryHandler(metaclass=Singleton):
@@ -11,7 +12,8 @@ class QueryHandler(metaclass=Singleton):
             UnitsQueryHandler(),
             CalculatorQueryHandler(),
             CurrencyQueryHandler(),
-            PercentagesQueryHandler()
+            PercentagesQueryHandler(),
+            TimeQueryHandler()
         ]
 
     def handle(self, query):

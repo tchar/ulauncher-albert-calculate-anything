@@ -1,7 +1,7 @@
 {
   "required_api_version": "^2.0.0",
   "name": "Calculate Anything",
-  "description": "An extension to calculate anything, from currency and unit conversion to simple and complex calculator",
+  "description": "An extension to calculate anything, from currency and unit conversion to percentage, time and complex calculations",
   "developer_name": "Tilemachos Charalampous",
   "icon": "images/icon.svg",
   "options": {
