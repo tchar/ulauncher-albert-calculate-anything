@@ -245,4 +245,4 @@ If your currencie's flag is missing you can place it in the extension's flags di
 
 Make sure to name your flag image in uppercase 3 letter name of your currency. For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
 
-You can find the flags that were used for this project at https://github.com/HatScripts/circle-flags/tree/gh-pages/flags.
+<div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
