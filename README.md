@@ -47,9 +47,9 @@ You can double click it to open module's location and edit `__init__.py` to add 
 
 ### Albert
 
-If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES` or `__triggers` for the keyword
+If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES` or `__triggers__` for the keyword
 
-By default the Albert extension does not use any keywords (can be changed the aforementioned file), so in the examples below just remove the `calc ` at the begining
+By default the Albert extension does not use any keywords (can be changed the aforementioned file).
 
 ### Ulauncher
 
