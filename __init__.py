@@ -7,10 +7,12 @@ Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi 
 
 ################################### SETTINGS #######################################
 # Below are the settings for this extension
+# API Key is your fixer.io API key
 API_KEY = ''
 # Cache update interval in seconds (defaults to 1 day = 86400 seconds)
 CACHE = 86400
-DEFAULT_CURRENCIES='USD,EUR,GBP,CAD'
+# Default currencies to show when no target currency is provided
+DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
 # Uncomment below line to set a trigger keyword to your choice (put a space after your keyword)
 # __triggers__ = 'calc '
 ####################################################################################
