@@ -19,8 +19,7 @@ clear_all () {
 ulauncher
 sleep 0.05
 wmctrl -a "Ulauncher - Application Launcher"
-sleep 0.05
-sleep 4.5
+sleep 4.4
 
 keys=( c a l c space 1 0 space dollar )
 run_xdotool
@@ -50,7 +49,7 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( c a l c space 1 0 m asciicircum 2 space t o space i n asciicircum 2 comma space c m asciicircum 2 )
+keys=( c a l c space 1 0 m asciicircum 2 space t o space i n asciicircum 2 comma space c m asterisk c m )
 run_xdotool
 sleep $sleep_big
 clear_all
@@ -64,16 +63,16 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( c a l c space 5 space plus space 3 j space minus space 8 j )
+keys=( c a l c space 5 space plus space 3 i space minus space 8 i )
 run_xdotool
 sleep $sleep_big
 
-keys=( space plus space c o s parenleft 2 space plus space j parenright )
+keys=( space plus space c o s parenleft 2 space plus space i parenright )
 run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( c a l c space e asciicircum parenleft p i space asterisk space j parenright )
+keys=( c a l c space e asciicircum parenleft p i space asterisk space i parenright )
 run_xdotool
 sleep $sleep_big
 clear_all
