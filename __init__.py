@@ -53,6 +53,8 @@ class AlbertLogging:
     def getLogger(name=''):
         return AlbertLogger(name)
 
+import locale
+locale.setlocale(locale.LC_ALL, '')
 import os
 import sys
 try:

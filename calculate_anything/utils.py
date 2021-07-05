@@ -1,3 +1,5 @@
+import math
+
 def is_types(value, *types):
     return any(map(lambda t: isinstance(value, t), types))
 

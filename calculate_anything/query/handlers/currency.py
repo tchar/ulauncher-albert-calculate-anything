@@ -1,17 +1,18 @@
+import locale
 from datetime import datetime
 from .interface import QueryHandler
 from ..result import QueryResult
 from ..lang import Language
 from ...currency.service import CurrencyService
 from ...utils import Singleton
-from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
+from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
 
 class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
     def _extract_query(self, query):
 
         matches = CURRENCY_QUERY_REGEX.findall(query)
         if not matches:
-            matches_default = CURRENCY_DEFAULT_REGEX.findall(query)
+            matches_default = CURRENCY_QUERY_DEFAULT_REGEX.findall(query)
         else:
             matches_default = None
 
@@ -81,19 +82,20 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             if currency_from == currency_to:
                 description = ''
             elif date:
-                description = '1 {} = {:g} {} as of {}'.format(currency_from, rate, currency_to, date)
+                description = '1 {} = {:f} {} as of {}'.format(currency_from, rate, currency_to, date)
             else:
-                description = '1 {} = {:g} {}'.format(currency_from, rate, currency_to)
+                description = '1 {} = {:f} {}'.format(currency_from, rate, currency_to)
 
             if currency_to in FLAGS:
                 icon = 'images/flags/{}'.format(FLAGS[currency_to])
             else:
                 icon = 'images/currency.svg'
             
+            converted_amount = locale.currency(converted_amount, symbol='', grouping=True)
             results.append(QueryResult(
                 icon=icon,
                 value=converted_amount,
-                name='{:g} {}'.format(converted_amount, currency_to),
+                name='{} {}'.format(converted_amount, currency_to),
                 description=description,
                 order=i
             ))

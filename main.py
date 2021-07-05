@@ -1,3 +1,5 @@
+import locale
+locale.setlocale(locale.LC_ALL, '')
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
