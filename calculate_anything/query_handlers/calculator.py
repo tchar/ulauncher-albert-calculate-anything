@@ -13,7 +13,7 @@ from ..constants import (
     CALCULATOR_QUERY_REPLACE, CALCULATOR_REGEX_QUERY_REPLACE, CALCULATOR_IMAG_REPLACE
 )
 
-class CalculatorQueryHandler(QueryHandler):
+class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         functions = {
             name: getattr(cmath, name)
@@ -93,8 +93,3 @@ class CalculatorQueryHandler(QueryHandler):
             description=description,
             order=0
         )]
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        return cls()

@@ -4,12 +4,12 @@ from .calculator import CalculatorQueryHandler
 from .currency import CurrencyQueryHandler
 from ..utils  import Singleton
 
-class QueryHandler:
+class QueryHandler(metaclass=Singleton):
     def __init__(self):
         self._handlers = [
-            UnitsQueryHandler.get_instance(),
-            CalculatorQueryHandler.get_instance(),
-            CurrencyQueryHandler.get_instance()
+            UnitsQueryHandler(),
+            CalculatorQueryHandler(),
+            CurrencyQueryHandler()
         ]
 
     def handle(self, query):
@@ -20,8 +20,3 @@ class QueryHandler:
                 results.extend(result)
 
         return sorted(results, key=lambda result: result.order)
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        return cls()

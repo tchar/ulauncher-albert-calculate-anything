@@ -6,7 +6,7 @@ from ..currency.service import CurrencyService
 from ..utils import Singleton
 from ..constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
 
-class CurrencyQueryHandler(QueryHandler):
+class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
     def _extract_query(self, query):
 
         matches = CURRENCY_QUERY_REGEX.findall(query)
@@ -15,11 +15,11 @@ class CurrencyQueryHandler(QueryHandler):
         if not matches_default and not matches:
             return None
 
-        service = CurrencyService.get_instance()
+        service = CurrencyService()
         if matches_default and not matches and not service.cache_enabled:
             return None
 
-        translator = Language.get_instance().get_translator('currency')
+        translator = Language().get_translator('currency')
 
         if matches:
             amount, currency_from, _, currencies_to = matches[0]
@@ -48,7 +48,7 @@ class CurrencyQueryHandler(QueryHandler):
         if len(currencies_to) == 0 or currency_from.strip() == '':
             return
 
-        service = CurrencyService.get_instance()
+        service = CurrencyService()
         rates = service.get_rates(currency_from, *currencies_to)
         if service.provider_had_error:
             return [QueryResult(
@@ -96,8 +96,3 @@ class CurrencyQueryHandler(QueryHandler):
             i += 1
         
         return results
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        return cls()

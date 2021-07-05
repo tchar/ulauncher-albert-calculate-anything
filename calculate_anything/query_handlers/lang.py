@@ -4,7 +4,7 @@ from ..utils import Singleton
 from ..constants import MAIN_DIR
 from ..logging_wrapper import LoggingWrapper as logging
 
-class Language:
+class Language(metaclass=Singleton):
     def __init__(self):
         self._lang = None
         self._data = {}
@@ -32,9 +32,3 @@ class Language:
         def _translator(word):
             return self.translate(word, mode)
         return _translator
-
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        return cls()

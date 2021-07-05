@@ -62,7 +62,7 @@ except (ValueError, TypeError):
     CACHE = 86400
 
 def initialize():
-    service = CurrencyService.get_instance()
+    service = CurrencyService()
     service.set_api_key(API_KEY)
     if CACHE > 0:
         service.enable_cache(CACHE)
@@ -75,7 +75,7 @@ def initialize():
     service.set_default_currencies(default_currencies)
 
 def finalize():
-    CurrencyService.get_instance().disable_cache()
+    CurrencyService().disable_cache()
 
 def handleQuery(query):
     has_trigger = '__triggers__' in globals()
@@ -83,7 +83,7 @@ def handleQuery(query):
         return
     items = []
     error_num = 0
-    results = QueryHandler.get_instance().handle(query.string.strip() or '')
+    results = QueryHandler().handle(query.string.strip() or '')
     for result in results:
         error_num += result.is_error
         icon = result.icon or 'images/icon.svg'

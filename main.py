@@ -21,7 +21,7 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         items = []
         error_num = 0
-        results = QueryHandler.get_instance().handle(event.get_argument() or '')
+        results = QueryHandler().handle(event.get_argument() or '')
         for result in results:
             error_num += result.is_error
             highlightable = result.is_error
@@ -51,7 +51,7 @@ class PreferencesEventListener(EventListener):
         super().on_event(event, extension)
         cache_update = int(event.preferences['cache'])
 
-        service = CurrencyService.get_instance()
+        service = CurrencyService()
         if not cache_update:
             service.disable_cache()
         else:
@@ -70,7 +70,7 @@ class PreferencesUpdateEventListener(EventListener):
         super().on_event(event, extension)
         
 
-        service = CurrencyService.get_instance()
+        service = CurrencyService()
         if event.id == 'cache':
             old_value = int(event.old_value)
             new_value = int(event.new_value)

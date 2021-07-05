@@ -9,7 +9,7 @@ from ..utils import is_types, Singleton
 from ..logging_wrapper import LoggingWrapper as logging
 from ..constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
 
-class UnitsQueryHandler(QueryHandler):
+class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         self._ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
         self._logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class UnitsQueryHandler(QueryHandler):
         matches_default = UNIT_QUERY_REGEX_DEFAULT.findall(query)
         if not matches and not matches_default:
             return None
-        translator = Language.get_instance().get_translator('units')
+        translator = Language().get_translator('units')
 
         if matches:
             unit_from, _, units_to = matches[0]
@@ -67,7 +67,7 @@ class UnitsQueryHandler(QueryHandler):
         if not units_to:
             units_to = [str(unit_from_ureg.units)]
 
-        translator = Language.get_instance().get_translator('units')
+        translator = Language().get_translator('units')
         unit_from_name = translator(str(unit_from_ureg.units)).replace('**', '^').replace('_', ' ')
 
         results = []
@@ -98,8 +98,3 @@ class UnitsQueryHandler(QueryHandler):
             ))
             i += 1
         return results
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        return cls()

@@ -13,7 +13,7 @@ def lock(func):
             return func(self, *args, **kwargs)
     return _wrapper
 
-class CurrencyService:
+class CurrencyService(metaclass=Singleton):
     def __init__(self):
         self.default_currencies = []
         self._lock = RLock()
@@ -97,12 +97,6 @@ class CurrencyService:
     @lock
     def set_default_currencies(self, default_currencies):
         self.default_currencies =  default_currencies
-
-    @classmethod
-    @Singleton
-    def get_instance(cls):
-        logging.getLogger('test').info('In get instance')
-        return cls()
 
     def run(self, once=False):
         if not self._cache.enabled:
