@@ -118,5 +118,9 @@
 
         "install-parsedatetime": "Looks like parsedatetime is not installed.",
         "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher."
+    },
+    "misc": {
+        "no-result": "Keep typing your query ...",
+        "no-result-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\""
     }
 }

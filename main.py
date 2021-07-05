@@ -7,6 +7,7 @@ from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import QueryHandler
+from calculate_anything.query.lang import Language
 
 class ConverterExtension(Extension):
 
@@ -38,8 +39,8 @@ class KeywordQueryEventListener(EventListener):
         if len(items) == error_num:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
-                name='Keep typing your query ...',
-                description='Try expressions like "10 euros to dollars", "sqrt(10) + 2 ^ 2.5", "20 cm to inches"',
+                name=Language().translate('no-result', 'misc'),
+                description=Language().translate('no-result-description', 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
             ))
