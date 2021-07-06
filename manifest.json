@@ -5,7 +5,7 @@
   "developer_name": "Tilemachos Charalampous",
   "icon": "images/icon.svg",
   "options": {
-    "query_debounce": 0.005
+    "query_debounce": 0.05
   },
   "preferences": [
     {
