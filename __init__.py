@@ -13,6 +13,8 @@ API_KEY = ''
 CACHE = 86400
 # Default currencies to show when no target currency is provided
 DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
+# Default cities to show when converting timezones
+DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'
 # Uncomment below line to set a trigger keyword to your choice (put a space after your keyword)
 # __triggers__ = 'calc '
 ####################################################################################
@@ -66,6 +68,7 @@ except ImportError as e:
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
+from calculate_anything.time.service import TimezoneService
 from calculate_anything.query import QueryHandler
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
@@ -88,6 +91,9 @@ def initialize():
     default_currencies = list(default_currencies)
     service.set_default_currencies(default_currencies)
     service.run()
+
+    default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
+    TimezoneService().set_default_cities(default_cities)
 
 def finalize():
     CurrencyService().disable_cache()

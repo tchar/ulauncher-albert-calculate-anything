@@ -16,9 +16,11 @@ class QueryHandler(metaclass=Singleton):
             TimeQueryHandler()
         ]
 
-    def handle(self, query):
+    def handle(self, query, *handlers):
         results = []
         for handler in self._handlers:
+            if handlers and not handler.__class__ in handlers:
+                continue
             result = handler.handle(query)
             if result:
                 results.extend(result)

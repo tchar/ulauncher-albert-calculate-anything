@@ -26,10 +26,10 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
         translator = Language().get_translator('currency')
 
         if matches:
-            amount, currency_from, _, currencies_to = matches[0]
+            amount, currency_from, currencies_to = matches[0]
             currencies_to = currencies_to.split(',')
         else:
-            amount, currency_from, _ = matches_default[0]
+            amount, currency_from = matches_default[0]
             currencies_to = service.default_currencies
         
         amount = 1.0 if EMPTY_AMOUNT.match(amount) else float(amount)

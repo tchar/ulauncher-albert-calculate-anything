@@ -48,7 +48,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         if not matches:
             return None
 
-        percentage_from, _, _, _, _, _, percentage_to = matches[0]
+        percentage_from, percentage_to = matches[0]
         percentage_from = self._use_calculator(percentage_from)
 
         if percentage_from is None:
@@ -74,10 +74,8 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         
         amount, sign, percentage = matches[0]
 
-        print(amount)
 
         amount = self._use_calculator(amount)
-        print(amount)
         if amount is None:
             return None
         

@@ -1,6 +1,6 @@
 import urllib.parse
 import requests
-from .interface import CurrencyProvider
+from .provider import CurrencyProvider
 from ...exceptions import ProviderRequestException
 from ...logging_wrapper import LoggingWrapper as logging
 
@@ -9,13 +9,11 @@ class FixerIOCurrencyProvider(CurrencyProvider):
     PATH_URL = '/latest'
     
     def __init__(self, api_key=''):
-        self._api_key = api_key
+        super().__init__(api_key)
         self._logger = logging.getLogger(__name__)
 
-    def set_api_key(self, api_key):
-        self._api_key = api_key
-
     def request_currencies(self, *currencies):
+        super().request_currencies(*currencies)
         url = urllib.parse.urljoin(FixerIOCurrencyProvider.BASE_URL, FixerIOCurrencyProvider.PATH_URL)
         params = {'access_key': self._api_key, 'base': 'EUR'}
         if currencies:

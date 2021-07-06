@@ -23,7 +23,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         translator = Language().get_translator('units')
 
         if matches:
-            unit_from, _, units_to = matches[0]
+            unit_from, units_to = matches[0]
             units_to = units_to.split(',')
         else:
             unit_from = matches_default[0]

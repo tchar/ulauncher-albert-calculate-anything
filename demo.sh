@@ -31,7 +31,7 @@ wmctrl -a "Ulauncher - Application Launcher"
 sleep 4.4
 
 # Currency
-keys=( $cmd 1 0 space dollar )
+keys=( $cmd 5 0 0 space dollar )
 run_xdotool
 sleep $sleep_big
 
@@ -40,6 +40,30 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
+# Time
+old_cmd=$cmd
+cmd=""
+
+keys=($cmd t i m e space)
+run_xdotool
+sleep $sleep_big
+
+keys=( a t space P a r i s comma space F r a n c e )
+run_xdotool
+sleep $sleep_big
+
+keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
+run_xdotool
+keys=( plus space 2 space h o u r s space 3 space m i n space a t space P r a g u e )
+run_xdotool
+sleep $sleep_big
+
+keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace minus space 2 space y e a r s space 5 space m o n t h s )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+cmd=$old_cmd
 # Units
 keys=( $cmd 3 8 space c space t o  space f )
 run_xdotool
@@ -60,7 +84,7 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd 1 0 m asciicircum 2 space t o space i n asciicircum 2 comma space c m space asterisk space c m )
+keys=( $cmd 1 0 space m asciicircum space 2 space t o space i n space asciicircum space 2 comma space c m space asterisk space c m )
 run_xdotool
 sleep $sleep_big
 clear_all
@@ -91,25 +115,9 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-# Time
-keys=($cmd n o w )
-run_xdotool
-sleep $sleep_big
-keys=( space plus space 2 space h o u r s space 3 space m i n )
-run_xdotool
-sleep $sleep_big
-keys=( space minus space 2 space y e a r s space 5 space s e c o n d s )
-run_xdotool
-sleep $sleep_big
-clear_all
-
 # Calculator
 
-keys=( $cmd 1 0 space plus space 2 space plus space s q r t parenleft 2 parenright )
-run_xdotool
-sleep $sleep_big
-
-keys=( space plus space c o s parenleft p i parenright space plus space s i n parenleft e parenright )
+keys=( $cmd 1 0 space plus space 2 space plus space s q r t parenleft 2 parenright space plus space c o s parenleft p i parenright space plus space s i n parenleft e parenright )
 run_xdotool
 sleep $sleep_big
 clear_all

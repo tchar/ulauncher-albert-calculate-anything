@@ -17,7 +17,7 @@ class CurrencyService(metaclass=Singleton):
     def __init__(self):
         self.default_currencies = []
         self._lock = RLock()
-        self._provider_error = False
+        self.provider_had_error = False
         self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
         self._provider = ProviderFactory.get_provider('fixerio')
@@ -31,7 +31,7 @@ class CurrencyService(metaclass=Singleton):
         else:
             currency_rates = self._cache.get_rates(*currencies)
         
-        self._provider_error = False
+        self.provider_had_error = False
         return currency_rates
 
     @lock
@@ -52,6 +52,7 @@ class CurrencyService(metaclass=Singleton):
     @lock
     def set_api_key(self, api_key):
         self._provider.set_api_key(api_key)
+        self.run()
 
     @lock
     def get_rates(self, *currencies):
@@ -98,7 +99,7 @@ class CurrencyService(metaclass=Singleton):
         self.default_currencies =  default_currencies
 
     def run(self):
-        if not self._cache.enabled or self._is_running:
+        if not self._cache.enabled or self._is_running or not self._provider.api_key_valid:
             return
         self._is_running = True
         self._logger.info('Currency Service is running')

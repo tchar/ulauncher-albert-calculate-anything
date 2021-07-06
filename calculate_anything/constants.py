@@ -9,12 +9,12 @@ DATA_FILE = os.path.join(CACHE_DIR, 'data.json')
 
 FILENAME_REGEX = re.compile(r'([a-z]{3})\.json', flags=re.IGNORECASE)
 
-UNIT_QUERY_REGEX = re.compile(r'^\s*(.*)\s+(to|in)\s+(.*)$', flags=re.IGNORECASE)
+UNIT_QUERY_REGEX = re.compile(r'^\s*(.*?)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
 UNIT_QUERY_REGEX_DEFAULT = re.compile(r'^\s*(.*)\s*')
 UNIT_REGEX_SPLIT = re.compile(r'[a-z]+')
 
-CURRENCY_QUERY_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*)\s+(to|in)\s+(.*)$', flags=re.IGNORECASE)
-CURRENCY_QUERY_DEFAULT_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*)\s*(to|in)?\s*$', flags=re.IGNORECASE)
+CURRENCY_QUERY_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
+CURRENCY_QUERY_DEFAULT_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*?)\s*(?:to|in)?\s*$', flags=re.IGNORECASE)
 CURRENCY_REGEX = re.compile(r'^[a-z]{3}$', flags=re.IGNORECASE)
 EMPTY_AMOUNT = re.compile(r'^\s*$')
 
@@ -28,16 +28,16 @@ CALCULATOR_QUERY_REGEX_REPLACE = re.compile("|".join(CALCULATOR_QUERY_REPLACE.ke
 
 PERCENTAGES_QUERY_REPLACE = {'plus': '+', 'minus': '-'}
 PERCENTAGES_QUERY_REPLACE = dict((re.escape(k), v) for k, v in PERCENTAGES_QUERY_REPLACE.items())
-PERCENTAGES_QUERY_REGEX_REPLACE = re.compile("|".join(PERCENTAGES_QUERY_REPLACE.keys()))
-PERCENTAGES_REGEX_MATCH_NORMAL = re.compile(r'^\s*(.*)% of (.*)\s*$')
-PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(r'^\s*(.*)\s*(as|is what|in)\s*( a)?\s*(%|percent(age)?)\s(of )?(.*)\s*$')
+PERCENTAGES_QUERY_REGEX_REPLACE = re.compile("|".join(PERCENTAGES_QUERY_REPLACE.keys()), flags=re.IGNORECASE)
+PERCENTAGES_REGEX_MATCH_NORMAL = re.compile(r'^\s*(.*)% of (.*)\s*$', flags=re.IGNORECASE)
+PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(r'^\s*(.*)\s*(?:as|is what|in)\s*(?: a)?\s*(?:%|percent(?:age)?)\s(?:of )?(.*)\s*$', flags=re.IGNORECASE)
 PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
 
-TIME_QUERY_REGEX = re.compile('now|time')
+TIME_QUERY_REGEX = re.compile(r'\s*(now|time)', flags=re.IGNORECASE)
+TIME_QUERY_REGEX_SPLIT = re.compile(r'\s(?:in|at)(?:\s|$)', flags=re.IGNORECASE)
 TIME_SUBQUERY_REGEX = re.compile(r'.*[a-z].*', flags=re.IGNORECASE)
 TIME_SUBQUERY_DIGITS= re.compile(r'\d+\.?\d*')
-TIME_SPLIT_REGEX = re.compile('(\+|-)')
+TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
 
 MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(os.path.join(MAIN_DIR, 'images/flags'))}
-

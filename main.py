@@ -1,3 +1,9 @@
+from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.currency import CurrencyQueryHandler
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.time.service import TimezoneService
 import locale
 locale.setlocale(locale.LC_ALL, '')
 from ulauncher.api.client.Extension import Extension
@@ -24,7 +30,14 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         items = []
         error_num = 0
-        results = QueryHandler().handle(event.get_argument() or '')
+        query = event.get_argument() or ''
+        if event.get_keyword() == extension.preferences['time_kw']:
+            query = 'now ' + query
+            handlers = set([TimeQueryHandler])
+        else:
+            handlers = set([CalculatorQueryHandler, PercentagesQueryHandler,UnitsQueryHandler, CurrencyQueryHandler])
+
+        results = QueryHandler().handle(query, *handlers)
         for result in results:
             error_num += result.is_error
             highlightable = result.is_error
@@ -68,11 +81,13 @@ class PreferencesEventListener(EventListener):
 
         service.set_api_key(event.preferences['api_key'])
 
+        default_cities = TimezoneService.parse_default_cities(event.preferences['default_cities'])
+        TimezoneService().set_default_cities(default_cities)
+
 class PreferencesUpdateEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
         
-
         service = CurrencyService()
         if event.id == 'cache':
             old_value = int(event.old_value)
@@ -91,6 +106,9 @@ class PreferencesUpdateEventListener(EventListener):
             service.set_api_key(event.new_value)
             if service.provider_had_error:
                 service.get_rates()
+        elif event.id == 'default_cities':
+            default_cities = TimezoneService.parse_default_cities(event.new_value)
+            TimezoneService().set_default_cities(default_cities)
         service.run()
 
 if __name__ == '__main__':

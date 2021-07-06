@@ -5,15 +5,22 @@
   "developer_name": "Tilemachos Charalampous",
   "icon": "images/icon.svg",
   "options": {
-    "query_debounce": 0.05
+    "query_debounce": 0.005
   },
   "preferences": [
     {
-      "id": "kw",
+      "id": "calc_kw",
       "type": "keyword",
-      "name": "Calculate Antything",
-      "description": "Calculate expressions, convert currency and units",
+      "name": "Calculate Anything",
+      "description": "Calculate expressions, percentages",
       "default_value": "calc"
+    },
+    {
+      "id": "time_kw",
+      "type": "keyword",
+      "name": "Convert Time",
+      "description": "Convert time to other timezones",
+      "default_value": "time"
     },
     {
       "id": "api_key",
@@ -43,6 +50,13 @@
       "name": "Default Currencies",
       "desciption": "A comma separated list of currencies to display if not target currency is specified (works only when cache enabled)",
       "default_value": "USD,EUR,GBP,CAD"
+    },
+    {
+      "id": "default_cities",
+      "type": "input",
+      "name": "Default Cities",
+      "desciption": "A comma separated list of cities to display local time",
+      "default_value": "New York City US, London GB, Madrid ES, Vancouver CA, Athens GR"
     }
   ]
 }

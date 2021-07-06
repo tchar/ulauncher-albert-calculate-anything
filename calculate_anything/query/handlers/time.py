@@ -1,25 +1,78 @@
+from re import search
+import pytz
 from datetime import datetime, timedelta
-from re import sub
 try:
     import parsedatetime
 except ImportError:
     parsedatetime = None
-from .units import UnitsQueryHandler
 from .interface import QueryHandler
 from ..lang import Language
 from ..result import QueryResult
+from ...time.service import TimezoneService
 from ...utils import Singleton
-from ...constants import TIME_QUERY_REGEX, TIME_SUBQUERY_REGEX, TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX
+from ...logging_wrapper import LoggingWrapper
+from ...constants import FLAGS, TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX, TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
+    DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
+    DATE_FORMAT = '%A %-d %B %Y'
+    TIME_FORMAT = '%H:%M:%S'
+
+    def __init__(self):
+        self._logger = LoggingWrapper.getLogger(__name__)
+
+    def _get_time_location(self, date, location, order_offset=0):
+        items = []
+        search_terms = []
+        if location:
+            location = location.split(',')
+            location, search_terms = location[0].strip(), map(str.strip, location[1:])
+        locations = TimezoneService().get(location, *search_terms, add_defaults=location == '')
+        if not locations:
+            return items
+
+        order = 0
+        for location in locations:
+            try:
+                tz = pytz.timezone(location['timezone'])
+            except pytz.UnknownTimeZoneError as e:
+                self._logger.error('Could not find time zone: {}'.format(location))
+                continue
+            location_datetime = date.astimezone(tz)
+            timezone_name = location_datetime.tzname()
+            utc = int(location_datetime.utcoffset().total_seconds() / 60 / 60)
+            utc = 'UTC{:+}'.format(utc)
+            
+            location_time = location_datetime.strftime(TimeQueryHandler.TIME_FORMAT)
+            location_date = location_datetime.strftime(TimeQueryHandler.DATE_FORMAT)
+            
+            city_name = location['name']
+            country_name = location['country']
+            country_code = location['cc'].upper()
+            if country_code == 'US':
+                state_name = location['state'].upper()
+                country_name = '{} {}'.format(state_name, country_name)
+
+            name = '{}: {}'.format(city_name, location_time)
+            description = '{} - {} - {} ({}) '.format(location_date, country_name, timezone_name, utc)
+
+            if country_code in FLAGS:
+                icon = 'images/flags/{}'.format(FLAGS[country_code])
+            else:
+                icon = 'images/country.svg'
+
+            items.append(QueryResult(
+                icon=icon,
+                value=name,
+                name=name,
+                description=description,
+                order=order + order_offset
+            ))
+            order += 1
+        return items
 
     def handle(self, query):
-        query = query.lower()
-
-        if not TIME_QUERY_REGEX.match(query):
-            return
-
-        translator = Language().get_translator("time")
+        translator = Language().get_translator('time')
 
         if parsedatetime is None:
             return [QueryResult(
@@ -31,7 +84,18 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order=-1
             )]
 
-        query = TIME_QUERY_REGEX.sub('now', query)
+        query = query.lower()
+        if len(TIME_QUERY_REGEX.findall(query)) != 1:
+            return
+
+        query = TIME_QUERY_REGEX_SPLIT.split(query)
+        if len(query) > 1:
+            query, location = map(str.strip, query) 
+        else:
+            query = query[0].strip()
+            location = ''
+
+        query = TIME_QUERY_REGEX.sub('', query)
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
 
@@ -50,9 +114,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             elif subquery == '-':
                 if prev in signs:
                     return None
-            elif subquery == 'now':
-                if prev != '+' and prev is not None:
-                    return None
+            elif subquery == '':
+                pass
             else:
                 if prev not in signs:
                     return None
@@ -95,7 +158,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order=0
             )]
 
-        value = date.strftime('%A %-d %B %Y %H:%M:%S')
+        value = date.strftime(TimeQueryHandler.DATETIME_FORMAT)
 
         now_week = now.isocalendar()[1]
         date_week = date.isocalendar()[1]
@@ -143,11 +206,13 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             description = translator('today')
 
-        return [QueryResult(
+        items = [QueryResult(
             icon='images/time.svg',
             value=value,
             name=value,
             description=description,
             order=0
         )]
-    
+
+        items.extend(self._get_time_location(date, location, order_offset=len(items)))
+        return items
