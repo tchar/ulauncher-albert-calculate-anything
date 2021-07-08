@@ -1,4 +1,4 @@
-from re import search
+import re
 import pytz
 from datetime import datetime, timedelta
 try:
@@ -6,12 +6,15 @@ try:
 except ImportError:
     parsedatetime = None
 from .interface import QueryHandler
-from ..lang import Language
+from ...lang import Language
 from ..result import QueryResult
 from ...time.service import TimezoneService
 from ...utils import Singleton
 from ...logging_wrapper import LoggingWrapper
-from ...constants import FLAGS, TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX, TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX
+from ...constants import (
+    FLAGS, TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
+    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE
+)
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
@@ -21,18 +24,20 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         self._logger = LoggingWrapper.getLogger(__name__)
 
-    def _get_time_location(self, date, location, order_offset=0):
-        items = []
+    def _get_locations(self, location):
         search_terms = []
         if location:
             location = location.split(',')
             location, search_terms = location[0].strip(), map(str.strip, location[1:])
-        locations = TimezoneService().get(location, *search_terms, add_defaults=location == '')
-        if not locations:
-            return items
+        add_defaults = location == ''
+        locations = TimezoneService().get(location, *search_terms, add_defaults=add_defaults)
+        return locations, add_defaults
 
+    def _get_time_location(self, date, locations, order_offset=0):
+        items = []
         order = 0
         for location in locations:
+            self._logger.info(location)
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:
@@ -85,6 +90,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             )]
 
         query = query.lower()
+        query = PLUS_MINUS_REGEX_REPLACE.sub(lambda m: PLUS_MINUS_REPLACE[re.escape(m.group(0))], query)
+
         if len(TIME_QUERY_REGEX.findall(query)) != 1:
             return
 
@@ -206,13 +213,17 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             description = translator('today')
 
-        items = [QueryResult(
+        items = []
+        locations, add_defaults = self._get_locations(location)
+        order_offset_locations = 1 if add_defaults else 0
+        items.extend(self._get_time_location(date, locations, order_offset=order_offset_locations))
+
+        items.append(QueryResult(
             icon='images/time.svg',
             value=value,
             name=value,
             description=description,
-            order=0
-        )]
+            order=0 if add_defaults else len(items)
+        ))
 
-        items.extend(self._get_time_location(date, location, order_offset=len(items)))
         return items

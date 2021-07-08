@@ -14,12 +14,12 @@ clear_all () {
 
 if [ "$1" == "ulauncher" ]; then
     ulauncher
-    cmd="c a l c space"
+    cmd="equal space"
     sleep_small=0.02
     sleep_big=2
 elif [ "$1" == "albert" ]; then
     albert show
-    cmd=""
+    cmd="equal space"
     sleep_small=0.02
     sleep_big=2
 else
@@ -54,7 +54,7 @@ sleep $sleep_big
 
 keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
 run_xdotool
-keys=( plus space 2 space h o u r s space 3 space m i n space a t space P r a g u e )
+keys=( p l u s space 2 space h o u r s space 3 space m i n space a t space P r a g u e )
 run_xdotool
 sleep $sleep_big
 
@@ -84,7 +84,7 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
-keys=( $cmd 1 0 space m asciicircum space 2 space t o space i n space asciicircum space 2 comma space c m space asterisk space c m )
+keys=( $cmd 1 0 space m asciicircum space 2 space t o space i n c h space asciicircum space 2 comma space c m space asterisk space c m )
 run_xdotool
 sleep $sleep_big
 clear_all

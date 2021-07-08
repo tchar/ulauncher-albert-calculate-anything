@@ -3,7 +3,7 @@ try:
 except ImportError:
     pint = None
 from .interface import QueryHandler
-from ..lang import Language
+from ...lang import Language
 from ..result import QueryResult
 from ...utils import is_types, Singleton
 from ...logging_wrapper import LoggingWrapper as logging

@@ -15,8 +15,11 @@ CACHE = 86400
 DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
 # Default cities to show when converting timezones
 DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'
-# Uncomment below line to set a trigger keyword to your choice (put a space after your keyword)
-# __triggers__ = 'calc '
+# Set the following to True if you want to enable placeholder for empty results
+SHOW_EMPTY_PLACEHOLDER = False
+# Below line is the trigger keywords to your choice (put a space after your keyword)
+# First element is the calculator trigger, second element is the time conversion trigger
+__triggers__ = ['=', 'time']
 ####################################################################################
 
 __title__ = 'Calculate Anything'
@@ -69,7 +72,12 @@ from calculate_anything.logging_wrapper import LoggingWrapper as logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.time.service import TimezoneService
+from calculate_anything.query.handlers import (
+    UnitsQueryHandler, CalculatorQueryHandler, CurrencyQueryHandler,
+    PercentagesQueryHandler, TimeQueryHandler
+)
 from calculate_anything.query import QueryHandler
+from calculate_anything.lang import Language
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
 try:
@@ -77,6 +85,10 @@ try:
     CACHE = int(CACHE)
 except (ValueError, TypeError):
     CACHE = 86400
+
+TRIGGERS = globals().get('__triggers__') or []
+if isinstance(TRIGGERS, str):
+    TRIGGERS = [TRIGGERS]
 
 def initialize():
     service = CurrencyService()
@@ -98,15 +110,35 @@ def initialize():
 def finalize():
     CurrencyService().disable_cache()
 
+def is_time_trigger(trigger):
+    try:
+        return TRIGGERS[1] == trigger
+    except IndexError:
+        return False
+
 def handleQuery(query):
-    has_trigger = '__triggers__' in globals()
-    if has_trigger and not query.isTriggered:
+    if TRIGGERS and not query.isTriggered:
         return
+    query_str = query.string.strip()
+    query.disableSort()
     items = []
-    error_num = 0
-    results = QueryHandler().handle(query.string.strip() or '')
+    errors_num = 0
+
+    if not TRIGGERS:
+        handlers = []
+    elif is_time_trigger(query.trigger):
+        query_str = 'time ' + query_str
+        handlers = [TimeQueryHandler]
+    else:
+        handlers = [
+            UnitsQueryHandler,
+            CalculatorQueryHandler,
+            CurrencyQueryHandler,
+            PercentagesQueryHandler
+        ]
+    results = QueryHandler().handle(query_str, *handlers)
     for result in results:
-        error_num += result.is_error
+        errors_num += result.is_error
         icon = result.icon or 'images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)
         value = str(result.value)
@@ -118,6 +150,23 @@ def handleQuery(query):
             subtext=result.description,
             actions=actions
         ))
+    
+    should_show_placeholder = (
+        query_str == '' or (
+            SHOW_EMPTY_PLACEHOLDER and (
+                TRIGGERS or query_str
+            ) and len(items) == errors_num
+        )
+    )
+    if should_show_placeholder:
+        items.append(
+            Item(
+                id=__title__,
+                icon='images/icon.svg',
+                text=Language().translate('no-result', 'misc'),
+                subtext=Language().translate('no-result-description', 'misc'),
+            )
+        )
     if not items:
         return None
     return items

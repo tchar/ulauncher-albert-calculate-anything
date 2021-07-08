@@ -48,9 +48,9 @@ You can double click it to open module's location and edit `__init__.py` to add 
 
 ### Albert
 
-If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES`, `DEFAULT_CITIES` or `__triggers__` for the keyword
+If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES`, `DEFAULT_CITIES`, `SHOW_EMPTY_PLACEHOLDER` or `__triggers__` for the keyword
 
-By default the Albert extension does not use any keywords (can be changed the aforementioned file).
+The extension can work in albert without keywords if you comment out the `__triggers__` option, however if another extension has the keyword you type, `Calculate Anything won't trigger` (see [relevant issue](https://github.com/albertlauncher/albert/issues/978))
 
 ### Ulauncher
 
@@ -58,25 +58,41 @@ If you are using Ulauncher use the extension preferences.
 
 ### Set API Key
 
-In order for the currency conversion to work you need to provide a [fixer.io](https://fixer.io/) API Key. Sign up at https://fixer.io/signup (there is free subscription available) and then go to your `fixer.io` dashboard and copy your API key to the appropriate input box in this extension's preferences.
+In order for the currency conversion to work you need to provide a [fixer.io](https://fixer.io/) API Key. Sign up at https://fixer.io/signup (there is free subscription available) and then go to your `fixer.io` dashboard and get your API key.
+- ULauncher: Copy your api key to the `API KEY` box in preferences
+- Albert: Modify the `API_KEY` in `__init__.py`
 
 
 ### Cache
 
 For currency conversion you can enable the cache (located by default at `~/.cache/extension_calculate_anything`) for a minimum of 1 day up to 1 year. This will store the results fetched by `fixer.io` to prevent redundant requests. This is especially helpful if you have a free plan on `fixer.io`. It will also display the results faster, since no request is made. If all requested currencies have been cached, not request is made to `fixer.io`
 
+- Ulauncher: Edit `Currency Cache` in the extension preferences
+- Albert: Edit `CACHE=86400` in `__init__.py` and set it to your interval in seconds
+
 ### Default currency
 
 In the preferences you can define a comma separated list of default currencies to show when typing conversion without target unit/currency.
 Defaults to `USD,EUR,CAD,GBP,AUD`
 
+- ULauncher: Edit in `Default Currencies` preferences
+- Albert: Edit `DEFAULT_CURRENCIES` in `__init__.py`
+
 ### Default cities
 
 In the preferences you can define a comma separated list of default cities when using the time command
 
+- ULauncher: Edit in `Default Currencies` preferences
+- Albert: Edit `DEFAULT_CITIES` in `__init__.py`
+
+### Show Empty Placeholder
+
+ - ULauncher: Default is `No`. Set to `Yes` to show an empty placeholder when extension doesn't return anything
+ - Albert: Change `SHOW_EMPTY_PLACEHOLDER=True` in `__init__.py`
+
 ### Commands and Syntax
 
-To convert anything you can use the keyword  (default `calc` and `time` as in the demo for `Ulauncher`, no keyword for `Albert`)
+To convert anything you can use the keyword  (default `=` and `time` as in the demo for `Ulauncher`)
 
 You can go directly to [examples](#examples) or use the ones from the demo
 
@@ -93,7 +109,7 @@ To convert units use
 
 Comma separated units and currencies can have spaces between them.
 
-For time you can use the time keyword (now works in Albert too) with a syntax
+For time you can use the time keyword with a syntax
 
 - `time` To get the current time plus the `default cities` you defined in the preferences
 - `time at CITY,[COUNTRY|COUNTRY CODE|STATE CODE]` to get the current time for a specified city
@@ -177,13 +193,13 @@ For example if now is `2021-07-05 14:14:42` then you can use the following
 
 **In the following examples the time returned is accompanied by the date time in the `default cities` you specified in the extension preferences**
 
-- time: Returns 2021-07-05 14:14:42 as well as the date time in the default cities specified in settings
-- time + 1 hour: Returns Today at 15:14:42 
-- time + 1 day: Returns Tomorrow at 14:14:42
-- time - 1 day: Returns Yesterday at 14:14:42
-- time + 2 hours 2 minutes 5 seconds: Returns Today at 15:16:47
-- time + 1 year: Returns 2022-07-05 14:14:42
-- time + 1 year 2 days 2 hours - 4 years 4 minutes: Returns 2018-07-07 16:10:42
+- `time`: Returns 2021-07-05 14:14:42 as well as the date time in the default cities specified in settings
+- `time plus 1 hour`: Returns Today at 15:14:42 
+- `time + 1 day`: Returns Tomorrow at 14:14:42
+- `time minus 1 day`: Returns Yesterday at 14:14:42
+- `time + 2 hours` 2 minutes 5 seconds: Returns Today at 15:16:47
+- `time + 1 year`: Returns 2022-07-05 14:14:42
+- `time + 1 year 2 days 2 hours - 4 years 4 minutes`: Returns 2018-07-07 16:10:42
 
 **Specifying a custom city**
 

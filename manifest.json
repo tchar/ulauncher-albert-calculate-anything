@@ -13,7 +13,7 @@
       "type": "keyword",
       "name": "Calculate Anything",
       "description": "Calculate expressions, percentages",
-      "default_value": "calc"
+      "default_value": "="
     },
     {
       "id": "time_kw",
@@ -57,6 +57,17 @@
       "name": "Default Cities",
       "desciption": "A comma separated list of cities to display local time",
       "default_value": "New York City US, London GB, Madrid ES, Vancouver CA, Athens GR"
+    },
+    {
+      "id": "show_empty_placeholder",
+      "type": "select",
+      "name": "Empty Placeholder",
+      "description": "Show empty placeholder when no there is no result",
+      "default_value": "n",
+      "options": [
+        {"value": "y", "text": "Yes"},
+        {"value": "n", "text": "No"}
+      ]
     }
   ]
 }

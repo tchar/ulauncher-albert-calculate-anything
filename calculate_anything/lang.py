@@ -1,8 +1,8 @@
 import os
 import json
-from ..utils import Singleton
-from ..constants import MAIN_DIR
-from ..logging_wrapper import LoggingWrapper as logging
+from .utils import Singleton
+from .constants import MAIN_DIR
+from .logging_wrapper import LoggingWrapper as logging
 
 class Language(metaclass=Singleton):
     def __init__(self):

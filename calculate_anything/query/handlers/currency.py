@@ -2,7 +2,7 @@ import locale
 from datetime import datetime
 from .interface import QueryHandler
 from ..result import QueryResult
-from ..lang import Language
+from ...lang import Language
 from ...currency.service import CurrencyService
 from ...utils import Singleton
 from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS

@@ -1,4 +1,3 @@
-from .result import QueryResult
 from .handlers import UnitsQueryHandler
 from .handlers import CalculatorQueryHandler
 from .handlers import CurrencyQueryHandler

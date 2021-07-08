@@ -15,7 +15,7 @@ from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import QueryHandler
-from calculate_anything.query.lang import Language
+from calculate_anything.lang import Language
 
 class ConverterExtension(Extension):
 
@@ -51,7 +51,12 @@ class KeywordQueryEventListener(EventListener):
                 on_enter=on_enter
             ))
         
-        if len(items) == error_num:
+        should_show_placeholder = (
+            query.strip() == '' or (
+                extension.preferences['show_empty_placeholder'] == 'y' and len(items) == error_num
+            )
+        )
+        if should_show_placeholder and len(items) == error_num:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
                 name=Language().translate('no-result', 'misc'),
