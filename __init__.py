@@ -25,6 +25,7 @@ __triggers__ = ['=', 'time']
 __title__ = 'Calculate Anything'
 __version__ = '0.0.1'
 __authors__ = 'Tilemachos Charalampous'
+__py_deps__ = ['requests', 'requests', 'pint' ,'simpleeval', 'parsedatetime']
 
 class AlbertLogger:
     def __init__(self, name):
