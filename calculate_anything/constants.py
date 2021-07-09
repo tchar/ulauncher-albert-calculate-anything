@@ -39,6 +39,7 @@ TIME_QUERY_REGEX_SPLIT = re.compile(r'\s(?:in|at)(?:\s|$)', flags=re.IGNORECASE)
 TIME_SUBQUERY_REGEX = re.compile(r'.*[a-z].*', flags=re.IGNORECASE)
 TIME_SUBQUERY_DIGITS= re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
+TIME_LOCATION_REPLACE_REGEX = re.compile(r'[^A-Z0-9\']+', flags=re.IGNORECASE)
 
 MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(os.path.join(MAIN_DIR, 'images/flags'))}

@@ -6,11 +6,11 @@ class TimezoneService(metaclass=Singleton):
     def __init__(self):
         self._default_cities = []
 
-    def get(self, name, *search_terms, add_defaults=True):
-        cities = TimezoneCache().get(name, *search_terms)
-        if add_defaults:
-            cities.extend(self._default_cities)
-        return cities
+    def get(self, name, *search_terms):
+        return TimezoneCache().get(name, *search_terms)
+
+    def get_defaults(self):
+        return self._default_cities
 
     def set_default_cities(self, default_cities):
         self._default_cities = default_cities

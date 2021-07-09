@@ -9,11 +9,12 @@ from .interface import QueryHandler
 from ...lang import Language
 from ..result import QueryResult
 from ...time.service import TimezoneService
-from ...utils import Singleton
+from ...utils import Singleton, partition
 from ...logging_wrapper import LoggingWrapper
 from ...constants import (
     FLAGS, TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
-    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE
+    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE,
+    TIME_LOCATION_REPLACE_REGEX
 )
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
@@ -24,20 +25,44 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         self._logger = LoggingWrapper.getLogger(__name__)
 
+    def _get_location_search_combinations(location):
+        location = location.strip()
+        if not location:
+            return []
+
+        locations_tmp = TIME_LOCATION_REPLACE_REGEX.sub(' ', location)
+        locations_tmp = locations_tmp.split(' ')
+        locations_tmp = map(str.strip, locations_tmp)
+        locations_tmp = filter(lambda s: s, locations_tmp)
+        locations_tmp = list(locations_tmp)
+        locations_tmp = partition(locations_tmp)
+
+        locations = []
+        for item in locations_tmp:
+            location = ' '.join(map(str, item[0]))
+            search_terms = [' '.join(map(str, sublist)) for sublist in item[1:]]
+            locations.append((location, search_terms))
+        return sorted(locations, key=lambda item: len(item[0]))
+
     def _get_locations(self, location):
         search_terms = []
-        if location:
-            location = location.split(',')
-            location, search_terms = location[0].strip(), map(str.strip, location[1:])
-        add_defaults = location == ''
-        locations = TimezoneService().get(location, *search_terms, add_defaults=add_defaults)
-        return locations, add_defaults
+        locations = TimeQueryHandler._get_location_search_combinations(location)
+        
+        if not locations:
+            return TimezoneService().get_defaults(), True
+        
+        for location, search_terms in locations:
+            location, search_terms
+            found_locations = TimezoneService().get(location, *search_terms)
+            if found_locations:
+                return found_locations, False
+
+        return [], True
 
     def _get_time_location(self, date, locations, order_offset=0):
         items = []
         order = 0
         for location in locations:
-            self._logger.info(location)
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:
