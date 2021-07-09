@@ -27,10 +27,11 @@ CALCULATOR_ERROR = 1e-10
 CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/).*')
 CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
 # Replaces imaginary j with 1 j to be computed
-CALCULATOR_IMAG_REGEX_UNIT_REGEX = re.compile(r'([^a-zA-Z0-9]\s*|^\s*)j[^a-zA-Z]{0,1}')
+CALCULATOR_IMAG_REGEX_UNIT_REGEX = re.compile(r'(\S\s*|^\s*)j[^a-zA-Z]{0,1}')
 CALCULATOR_QUERY_REPLACE = {'mod ': '%', 'div ': '//', '^': '**'}
 CALCULATOR_QUERY_REPLACE = dict((re.escape(k), v) for k, v in CALCULATOR_QUERY_REPLACE.items())
-CALCULATOR_QUERY_REGEX_REPLACE = re.compile("|".join(CALCULATOR_QUERY_REPLACE.keys()))
+CALCULATOR_QUERY_REGEX_REPLACE = re.compile(r'|'.join(CALCULATOR_QUERY_REPLACE.keys()))
+CALCULATOR_BOOLEAN_RESULT_REGEX = re.compile(r'[\d\s]is[\(\s)]|==', flags=re.IGNORECASE)
 
 PERCENTAGES_REGEX_MATCH_NORMAL = re.compile(r'^\s*(.*)% of (.*)\s*$', flags=re.IGNORECASE)
 PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(r'^\s*(.*)\s*(?:as|is what|in)\s*(?: a)?\s*(?:%|percent(?:age)?)\s(?:of )?(.*)\s*$', flags=re.IGNORECASE)

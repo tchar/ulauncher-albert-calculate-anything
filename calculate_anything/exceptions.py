@@ -1,14 +1,35 @@
-class ProviderException(Exception):
+class CurrencyException(Exception):
     pass
 
-class ProviderRequestException(ProviderException):
+class CurrencyProviderException(CurrencyException):
     pass
 
-class ConvertException(Exception):
+class CurrencyProviderRequestException(CurrencyProviderException):
     pass
 
-class CurrencyConvertException(ConvertException):
+class UnitException(Exception):
     pass
 
-class UnitConvertException(ConvertException):
+class CalculatorException(Exception):
+    pass
+
+class ZeroDivisionException(CalculatorException):
+    pass
+
+class TimeException(Exception):
+    pass
+
+class MissingModuleException(Exception):
+    pass
+
+class MissingRequestsException(CurrencyException):
+    pass
+
+class MissingSimpleevalException(CalculatorException):
+    pass
+
+class MissingPintException(Exception):
+    pass
+
+class MissingParsedatetimeException(MissingModuleException):
     pass

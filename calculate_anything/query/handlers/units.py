@@ -3,8 +3,9 @@ try:
 except ImportError:
     pint = None
 from .interface import QueryHandler
-from ...lang import Language
 from ..result import QueryResult
+from ...lang import Language
+from ...exceptions import MissingPintException
 from ...utils import is_types, Singleton
 from ...logging_wrapper import LoggingWrapper as logging
 from ...constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
@@ -48,10 +49,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         if pint is None:
             return [QueryResult(
                 icon='images/convert.svg',
-                value='pip install pint',
                 name=translator('install-pint'),
                 description=translator('install-pint-description'),
-                is_error=True,
+                clipboard='pip install pint',
+                error=MissingPintException,
                 order=-1
             )]
 
@@ -98,12 +99,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 description = ''
             else:
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
-
+            
+            name = '{:g} {}'.format(amount_converted.magnitude, unit_to_name)
             results.append(QueryResult(
                 icon='images/convert.svg',
-                value=amount_converted.magnitude,
-                name='{:g} {}'.format(amount_converted.magnitude, unit_to_name),
+                name=name,
                 description=description,
+                clipboard=name,
+                value=amount_converted.magnitude,
                 order=i,
             ))
             i += 1

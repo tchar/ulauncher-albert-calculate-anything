@@ -1,3 +1,3 @@
 from .fixerio import FixerIOCurrencyProvider
-from ...exceptions import ProviderException
+from ...exceptions import CurrencyProviderException
 from .factory import ProviderFactory

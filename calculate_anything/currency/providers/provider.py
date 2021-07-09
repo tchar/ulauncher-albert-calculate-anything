@@ -1,5 +1,5 @@
 from ...utils import is_types
-from ...exceptions import ProviderRequestException
+from ...exceptions import CurrencyProviderRequestException
 
 class CurrencyProvider:
     def __init__(self, api_key=''):
@@ -7,7 +7,7 @@ class CurrencyProvider:
 
     def request_currencies(self, *currencies):
         if not self.api_key_valid:
-            raise ProviderRequestException('API Key is not valid')
+            raise CurrencyProviderRequestException('API Key is not valid')
         return {}
 
     @property

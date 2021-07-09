@@ -1,3 +1,4 @@
+from calculate_anything.exceptions import CurrencyProviderException
 import locale
 from datetime import datetime
 from .interface import QueryHandler
@@ -60,8 +61,7 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
                 icon='images/icon.svg',
                 name=translator('provider-error'),
                 description=translator('provider-error-description'),
-                is_error=True,
-                clipboard=False
+                error=CurrencyProviderException,
             )]
         
         if currency_from not in rates:
@@ -91,12 +91,16 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             else:
                 icon = 'images/currency.svg'
             
+            value = converted_amount
             converted_amount = locale.currency(converted_amount, symbol='', grouping=True)
+            name = '{} {}'.format(converted_amount, currency_to)
+
             results.append(QueryResult(
                 icon=icon,
-                value=converted_amount,
-                name='{} {}'.format(converted_amount, currency_to),
+                name=name,
                 description=description,
+                clipboard=name,
+                value=value,
                 order=i
             ))
             i += 1

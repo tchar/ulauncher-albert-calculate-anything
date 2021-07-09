@@ -9,6 +9,7 @@ from .interface import QueryHandler
 from ...lang import Language
 from ..result import QueryResult
 from ...time.service import TimezoneService
+from ...exceptions import MissingParsedatetimeException
 from ...utils import Singleton, partition
 from ...logging_wrapper import LoggingWrapper
 from ...constants import (
@@ -93,9 +94,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
             items.append(QueryResult(
                 icon=icon,
-                value=name,
                 name=name,
                 description=description,
+                clipboard=name,
+                value=location_datetime,
                 order=order + order_offset
             ))
             order += 1
@@ -107,10 +109,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if parsedatetime is None:
             return [QueryResult(
                 icon='images/time.svg',
-                value='pip install parsedatetime',
                 name=translator('install-parsedatetime'),
                 description=translator('install-parsedatetime-description'),
-                is_error=True,
+                clipboard='pip install parsedatetime',
+                error=MissingParsedatetimeException,
                 order=-1
             )]
 
@@ -188,14 +190,14 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if date_overflows:
             return [QueryResult(
                 icon='images/time.svg',
-                value='',
                 name=translator('years-overflow'),
                 description=translator('years-overflow-description'),
+                clipboard='',
                 order=0
             )]
 
         value = date.strftime(TimeQueryHandler.DATETIME_FORMAT)
-
+        
         now_week = now.isocalendar()[1]
         date_week = date.isocalendar()[1]
 
@@ -249,9 +251,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         items.append(QueryResult(
             icon='images/time.svg',
-            value=value,
             name=value,
             description=description,
+            clipboard=value,
+            value=date,
             order=0 if add_defaults else len(items)
         ))
 

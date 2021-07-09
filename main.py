@@ -40,9 +40,12 @@ class KeywordQueryEventListener(EventListener):
 
         results = QueryHandler().handle(query, *handlers)
         for result in results:
-            error_num += result.is_error
-            highlightable = result.is_error
-            on_enter = CopyToClipboardAction(str(result.value)) if result.clipboard else HideWindowAction()
+            error_num += result.error is not None
+            highlightable = result.error is not None
+            if result.clipboard is not None:
+                on_enter = CopyToClipboardAction(result.clipboard)
+            else:
+                on_enter = HideWindowAction()
 
             items.append(ExtensionResultItem(
                 icon=result.icon or 'images/icon.svg',

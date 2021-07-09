@@ -2,7 +2,7 @@ from functools import wraps
 from .cache import CurrencyCache
 from threading import RLock, Timer
 from .providers import ProviderFactory
-from ..exceptions import ProviderRequestException
+from ..exceptions import CurrencyProviderRequestException
 from ..utils import Singleton
 from ..logging_wrapper import LoggingWrapper as logging
 
@@ -63,7 +63,7 @@ class CurrencyService(metaclass=Singleton):
     def get_rates(self, *currencies):
         try:
             return self.__get_currencies(*currencies)
-        except ProviderRequestException:
+        except CurrencyProviderRequestException:
             self.provider_had_error = True
             return {}
 
@@ -79,7 +79,7 @@ class CurrencyService(metaclass=Singleton):
         try:
             self.__get_currencies()
             provider_had_error = False
-        except ProviderRequestException as e:
+        except CurrencyProviderRequestException as e:
             self._logger.error('Error when contacting provider: {}'.format(e))
             provider_had_error = True
         
@@ -97,7 +97,7 @@ class CurrencyService(metaclass=Singleton):
         try:
             available_currencies = list(self.__get_currencies().keys())
             self.provider_had_error = False
-        except ProviderRequestException as e:
+        except CurrencyProviderRequestException as e:
             self.provider_had_error = True
             self._logger.error('Error when contacting provider: {}'.format(e))
             available_currencies = []

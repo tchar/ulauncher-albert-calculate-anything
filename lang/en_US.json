@@ -119,6 +119,21 @@
         "install-parsedatetime": "Looks like parsedatetime is not installed.",
         "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher."
     },
+    "calculator": {
+        "query-boolean": "Query has boolean representation (1 = True, 0 = False)",
+        
+        "result-complex": "Result is a complex number",
+        "result-imaginary": "Result is an imaginary number",
+        "value-complex": "Value is a complex number",
+        "value-imaginary": "Value is an imaginary number",
+
+        "infinity": "Infinity",
+        "infinite-result": "Creating a black hole aren't we?",
+        "infinite-result-description": "Looks like you divided by zero somewhere",
+
+        "install-simpleeval": "Looks like simpleeval is not installed.",
+        "install-simpleeval-description": "Install it with \"pip install simpleeval\" and restart launcher."
+    },
     "misc": {
         "no-result": "Keep typing your query ...",
         "no-result-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\""

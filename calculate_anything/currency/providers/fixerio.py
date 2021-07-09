@@ -1,7 +1,7 @@
 import urllib.parse
 import requests
 from .provider import CurrencyProvider
-from ...exceptions import ProviderRequestException
+from ...exceptions import CurrencyProviderRequestException
 from ...logging_wrapper import LoggingWrapper as logging
 
 class FixerIOCurrencyProvider(CurrencyProvider):
@@ -24,12 +24,12 @@ class FixerIOCurrencyProvider(CurrencyProvider):
             data = result.json()
         except Exception as e:
             self._logger.error('Could not connect to fixer.io: {}'.format(e))
-            raise ProviderRequestException('Could not connect to conversion service')
+            raise CurrencyProviderRequestException('Could not connect to conversion service')
         
         if not str(result.status_code).startswith('2'):
-            raise ProviderRequestException('Could not connect to conversion service')
+            raise CurrencyProviderRequestException('Could not connect to conversion service')
         elif not data['success']:
-            raise ProviderRequestException(data['error']['info'])
+            raise CurrencyProviderRequestException(data['error']['info'])
         
         currency_data = {
             currency: {'rate': data['rates'].get(currency, None), 'timestamp_refresh': data['timestamp']}

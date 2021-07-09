@@ -139,11 +139,12 @@ def handleQuery(query):
         ]
     results = QueryHandler().handle(query_str, *handlers)
     for result in results:
-        errors_num += result.is_error
+        errors_num += result.error is not None
         icon = result.icon or 'images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)
-        value = str(result.value)
-        actions = [ClipAction(text=value, clipboardText=value) if result.clipboard else None]
+
+        if result.clipboard is not None:
+            actions = [ClipAction(text=result.clipboard, clipboardText=result.clipboard)]
         items.append(Item(
             id=__title__,
             icon=icon,
