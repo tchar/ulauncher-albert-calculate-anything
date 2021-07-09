@@ -20,7 +20,10 @@ def preload(func):
 class CurrencyCache:
     def __init__(self, _update_frequency=0):
         self._update_frequency = _update_frequency
-        self._data = {}
+        self._data = {
+            'exchange_rates': {},
+            'last_update_timestamp': 0
+        }
         self._loaded = False
         self._use_only_memory = False
         self._logger = logging.getLogger(__name__)
@@ -128,7 +131,17 @@ class CurrencyCache:
     def should_update(self):
         return datetime.now().timestamp() - self.last_update_timestamp > self._update_frequency
 
-    @preload
+    def clear(self):
+        self._data = {
+            'exchange_rates': {},
+            'last_update_timestamp': 0
+        }
+        if os.path.isfile(DATA_FILE):
+            try:
+                os.remove(DATA_FILE)
+            except Exception as e:
+                self._logger.error('Could not remove data file {}: {}'.format(DATA_FILE, e))
+
     def save(self, exchange_rates):
         if not self.enabled:
             return
@@ -136,6 +149,11 @@ class CurrencyCache:
             'exchange_rates': exchange_rates,
             'last_update_timestamp': datetime.now().timestamp()
         }
+        if self._use_only_memory:
+            return
+        if not self._check_structure():
+            self._use_only_memory = True
+            return
         try:
             with open(DATA_FILE, 'w') as f:
                 f.write(json.dumps(self._data))

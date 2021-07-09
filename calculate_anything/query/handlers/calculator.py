@@ -1,19 +1,18 @@
-from calculate_anything.lang import Language
 import re
 import cmath
 try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = None
-from ..result import QueryResult
 from .interface import QueryHandler
+from ...calculation import Calculation
 from ...utils import is_types, Singleton
 from ...exceptions import MissingSimpleevalException, ZeroDivisionException
 from ...constants import (
-    CALCULATOR_ERROR, CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX_UNIT_REGEX,
-    CALCULATOR_QUERY_REPLACE, CALCULATOR_QUERY_REGEX_REPLACE, CALCULATOR_IMAG_REPLACE, CALCULATOR_BOOLEAN_RESULT_REGEX
+    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE, CALCULATOR_IMAG_REGEX_UNIT_REGEX,
+    CALCULATOR_QUERY_REPLACE, CALCULATOR_QUERY_REGEX_REPLACE, CALCULATOR_IMAG_REPLACE,
+    CALCULATOR_BOOLEAN_RESULT_REGEX
 )
-
 class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         functions = {
@@ -21,74 +20,12 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             for name in dir(cmath)
             if not name.startswith('_') and not name.endswith('_')
         }
-        self._simple_eval = SimpleEval(functions=functions)
+        self._simple_eval = SimpleEval(functions=functions) if SimpleEval else None
 
-    @staticmethod
-    def _fix_number_precision(number):
-        # if isinstance(number, float) and number.is_integer():
-            # return int(number)
-        
-        if cmath.isclose(number, 0, abs_tol=CALCULATOR_ERROR):
-            return 0
-        return number
-
-    @staticmethod
-    def _zero_division_error():
-        return [QueryResult(
-            icon='images/icon.svg',
-            name=Language().translate('infinite-result', 'calculator'),
-            description=Language().translate('infinite-result-description', 'calculator'),
-            error=ZeroDivisionException
-        )]
-
-    @staticmethod
-    def _format_result(value, has_boolean):
-        translator = Language().get_translator('calculator')
-
-        real, imag = value.real, value.imag
-        real = CalculatorQueryHandler._fix_number_precision(real)
-        imag = CalculatorQueryHandler._fix_number_precision(imag)
-        
-        if real == 0 and imag == 0:
-            name = '0'
-            description = translator('query-boolean') if has_boolean else ''
-        elif real == 0:
-            if imag == -1:
-                name = '-i'
-            elif imag == 1:
-                name = 'i'
-            else:
-                name = '{:g}i'.format(imag)
-            description = translator('result-imaginary')
-        elif imag == 0:
-            name = '{:g}'.format(real)
-            description = translator('query-boolean') if has_boolean else ''
-        elif imag < 0:
-            if imag == -1:
-                name = '{:g} - i'.format(real)
-            else:
-                name = '{:g} - {:g}i'.format(real, -imag)
-            description = translator('result-complex')
-        else:
-            if imag == 1:
-                name = '{:g} + i'.format(real)
-            else:
-                name = '{:g} + {:g}i'.format(real, imag)
-            description = translator('result-complex')
-
-        return name, description
-
-    def handle(self, query, skip_format=False):
-        translator = Language().get_translator('calculator')
-
+    def handle(self, query, return_raw=False):
         if self._simple_eval is None:
-            return [QueryResult(
-                icon='images/icon.svg',
-                clipboard='pip install simpleeval',
-                name=translator('install-simpleeval'),
-                description=translator('install-simpleeval-description'),
-                error=MissingSimpleevalException
-            )]
+            result = Calculation(error=MissingSimpleevalException)
+            return [result] if return_raw else [result.to_query_result()]
 
         query = query.lower()
         if CALCULATOR_REGEX_REJECT.match(query):
@@ -111,23 +48,16 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         try:
             value = self._simple_eval.eval(query)
         except ZeroDivisionError:
-            return CalculatorQueryHandler._zero_division_error()
+            result = Calculation(error=ZeroDivisionException)
+            return [result] if return_raw else [result.to_query_result()]
         except Exception as e:
             return None
         
         if not is_types(value, int, float, complex):
             return None
      
-        if not skip_format:
-            name, description = CalculatorQueryHandler._format_result(value, has_boolean)
-        else:
-            name, description = '', ''
+        result = Calculation(value, has_boolean=has_boolean)
+        if return_raw:
+            return [result]
 
-        return [QueryResult(
-            icon='images/icon.svg',
-            name=name,
-            description=description,
-            clipboard=name,
-            value=value,
-            order=0
-        )]
+        return [result] if return_raw else [result.to_query_result()]

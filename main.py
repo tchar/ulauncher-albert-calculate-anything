@@ -1,11 +1,12 @@
+import locale
+locale.setlocale(locale.LC_ALL, '')
 from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
 from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.currency import CurrencyQueryHandler
 from calculate_anything.query.handlers.time import TimeQueryHandler
 from calculate_anything.time.service import TimezoneService
-import locale
-locale.setlocale(locale.LC_ALL, '')
+from calculate_anything.exceptions import MissingRequestsException
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
@@ -112,8 +113,8 @@ class PreferencesUpdateEventListener(EventListener):
             service.set_default_currencies(default_currencies)
         elif event.id == 'api_key':
             service.set_api_key(event.new_value, force_run=True)
-            if service.provider_had_error:
-                service.get_rates()
+            try: service.get_rates(force=True)
+            except MissingRequestsException: pass
         elif event.id == 'default_cities':
             default_cities = TimezoneService.parse_default_cities(event.new_value)
             TimezoneService().set_default_cities(default_cities)

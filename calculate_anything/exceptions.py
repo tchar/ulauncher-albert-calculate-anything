@@ -19,6 +19,9 @@ class ZeroDivisionException(CalculatorException):
 class TimeException(Exception):
     pass
 
+class DateOverflowException(TimeException):
+    pass
+
 class MissingModuleException(Exception):
     pass
 

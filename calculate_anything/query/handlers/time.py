@@ -6,22 +6,18 @@ try:
 except ImportError:
     parsedatetime = None
 from .interface import QueryHandler
-from ...lang import Language
-from ..result import QueryResult
+from ...calculation import LocationTimeCalculation, TimeCalculation
 from ...time.service import TimezoneService
-from ...exceptions import MissingParsedatetimeException
+from ...exceptions import MissingParsedatetimeException, DateOverflowException
 from ...utils import Singleton, partition
 from ...logging_wrapper import LoggingWrapper
 from ...constants import (
-    FLAGS, TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
+    TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE,
     TIME_LOCATION_REPLACE_REGEX
 )
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
-    DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
-    DATE_FORMAT = '%A %-d %B %Y'
-    TIME_FORMAT = '%H:%M:%S'
 
     def __init__(self):
         self._logger = LoggingWrapper.getLogger(__name__)
@@ -60,7 +56,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         return [], True
 
-    def _get_time_location(self, date, locations, order_offset=0):
+    def _get_time_location(self, date, locations, order_offset=0, return_raw=False):
         items = []
         order = 0
         for location in locations:
@@ -69,61 +65,35 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             except pytz.UnknownTimeZoneError as e:
                 self._logger.error('Could not find time zone: {}'.format(location))
                 continue
+            
             location_datetime = date.astimezone(tz)
-            timezone_name = location_datetime.tzname()
-            utc = int(location_datetime.utcoffset().total_seconds() / 60 / 60)
-            utc = 'UTC{:+}'.format(utc)
-            
-            location_time = location_datetime.strftime(TimeQueryHandler.TIME_FORMAT)
-            location_date = location_datetime.strftime(TimeQueryHandler.DATE_FORMAT)
-            
-            city_name = location['name']
-            country_name = location['country']
-            country_code = location['cc'].upper()
-            if country_code == 'US':
-                state_name = location['state'].upper()
-                country_name = '{} {}'.format(state_name, country_name)
-
-            name = '{}: {}'.format(city_name, location_time)
-            description = '{} - {} - {} ({}) '.format(location_date, country_name, timezone_name, utc)
-
-            if country_code in FLAGS:
-                icon = 'images/flags/{}'.format(FLAGS[country_code])
-            else:
-                icon = 'images/country.svg'
-
-            items.append(QueryResult(
-                icon=icon,
-                name=name,
-                description=description,
-                clipboard=name,
+            item = LocationTimeCalculation(
                 value=location_datetime,
-                order=order + order_offset
-            ))
+                location=location,
+                order=order+order_offset
+            )
+            if not return_raw:
+                item = item.to_query_result()
+            items.append(item)
             order += 1
         return items
 
-    def handle(self, query, try_again=True):
-        translator = Language().get_translator('time')
-
+    def handle(self, query, try_again=True, return_raw=False):
         if parsedatetime is None:
-            return [QueryResult(
-                icon='images/time.svg',
-                name=translator('install-parsedatetime'),
-                description=translator('install-parsedatetime-description'),
-                clipboard='pip install parsedatetime',
+            result = TimeCalculation(
                 error=MissingParsedatetimeException,
-                order=-1
-            )]
-
+            )
+            return [result] if return_raw else [result.to_query_result()]
+            
         query = query.lower()
         query = PLUS_MINUS_REGEX_REPLACE.sub(lambda m: PLUS_MINUS_REPLACE[re.escape(m.group(0))], query)
 
         if len(TIME_QUERY_REGEX.findall(query)) != 1:
             return
 
-        query = TIME_QUERY_REGEX_SPLIT.split(query)
+        query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:
+            print(query)
             query, location = map(str.strip, query)
         else:
             query = query[0].strip()
@@ -136,7 +106,6 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         signs = set(['+', '-'])
         cal = parsedatetime.Calendar()
-        now = datetime.now()
         date = timedelta()
         prev = None
 
@@ -155,8 +124,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev not in signs:
                     if not try_again: return None
                     new_query = 'now at ' + ' '.join(query).replace('now', '')
-                    print(new_query)
-                    return self.handle(new_query, try_again=False)
+                    return self.handle(new_query, try_again=False, return_raw=return_raw)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return None
@@ -181,81 +149,36 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 else:
                     date -= diff
             prev = subquery
-        
+
         try:
-            date += now
+            date += datetime.now()
         except OverflowError:
             date_overflows = True
-
+            
         if date_overflows:
-            return [QueryResult(
-                icon='images/time.svg',
-                name=translator('years-overflow'),
-                description=translator('years-overflow-description'),
-                clipboard='',
-                order=0
-            )]
+            result = TimeCalculation(error=DateOverflowException)
+            return [result] if return_raw else [result.to_query_result()]
 
-        value = date.strftime(TimeQueryHandler.DATETIME_FORMAT)
-        
-        now_week = now.isocalendar()[1]
-        date_week = date.isocalendar()[1]
-
-        if now.year - 1 == date.year:
-            description = translator('last-year')
-        elif now.year + 1 == date.year:
-            description = translator('next-year')
-        elif now.year != date.year:
-            if date.year > now.year:
-                description = translator('years-from-now')
-            else:
-                description = translator('years-ago')
-            description = '{} {}'.format(abs(now.year - date.year), description)
-        elif now.month - 1 == date.month:
-            description = translator('last-month')
-        elif now.month + 1 == date.month:
-            description = translator('next-month')
-        elif now.month != date.month:
-            if date.month > now.month:
-                description = translator('months-from-now')
-            else:
-                description = translator('months ago')
-            description = '{} {}'.format(abs(now.month - date.month), description)
-        elif now_week - 1 == date_week:
-            description = translator('last-week')
-        elif now_week + 1 == date_week:
-            description = translator('next-week')
-        elif now_week != date_week:
-            if date_week > now_week:
-                description = translator('weeks-from-now')
-            else:
-                description = translator('weeks-ago')
-            description = '{} {}'.format(abs(now_week - date_week), description)
-        elif now.day - 1 == date.day:
-            description = translator('yesterday')
-        elif now.day + 1 == date.day:
-            description = translator('tomorrow')
-        elif now.day != date.day:
-            if date.day > now.day:
-                description = translator('days-from-now')
-            else:
-                description = translator('days-ago')
-            description = '{} {}'.format(abs(now.day - date.day), description)
-        else:
-            description = translator('today')
-
-        items = []
         locations, add_defaults = self._get_locations(location)
         order_offset_locations = 1 if add_defaults else 0
-        items.extend(self._get_time_location(date, locations, order_offset=order_offset_locations))
+    
 
-        items.append(QueryResult(
-            icon='images/time.svg',
-            name=value,
-            description=description,
-            clipboard=value,
+        items = []
+        items.extend(
+            self._get_time_location(
+                date,
+                locations, 
+                order_offset=order_offset_locations,
+                return_raw=return_raw
+            )
+        )
+
+        item = TimeCalculation(
             value=date,
             order=0 if add_defaults else len(items)
-        ))
+        )
+        if not return_raw:
+            item = item.to_query_result()
 
+        items.append(item)
         return items

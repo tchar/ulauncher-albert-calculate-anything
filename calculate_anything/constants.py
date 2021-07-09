@@ -43,6 +43,9 @@ TIME_SUBQUERY_REGEX = re.compile(r'.*[^\W_0-9].*', flags=re.IGNORECASE|re.UNICOD
 TIME_SUBQUERY_DIGITS= re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
 TIME_LOCATION_REPLACE_REGEX = re.compile(r'[\W_]+', flags=re.IGNORECASE|re.UNICODE)
+TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
+TIME_DATE_FORMAT = '%A %-d %B %Y'
+TIME_TIME_FORMAT = '%H:%M:%S'
 
 MAIN_DIR = os.path.dirname(os.path.dirname(os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(os.path.join(MAIN_DIR, 'images/flags'))}

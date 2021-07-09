@@ -1,10 +1,10 @@
-from calculate_anything.exceptions import CurrencyProviderException
-import locale
+from calculate_anything.calculation.currency import CurrencyData
+from calculate_anything.exceptions import CurrencyProviderException, MissingRequestsException
 from datetime import datetime
 from .interface import QueryHandler
-from ..result import QueryResult
-from ...lang import Language
 from ...currency.service import CurrencyService
+from ...calculation import CurrencyCalculation
+from ...lang import Language
 from ...utils import Singleton
 from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
 
@@ -43,7 +43,7 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
 
         return amount, currency_from, currencies_to
 
-    def handle(self, query):
+    def handle(self, query, return_raw=False):
         query = self._extract_query(query)
         if not query:
             return
@@ -54,23 +54,22 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             return
 
         service = CurrencyService()
-        translator = Language().get_translator('currency')
-        rates = service.get_rates(currency_from, *currencies_to)
+        try:
+            rates = service.get_rates(currency_from, *currencies_to)
+        except MissingRequestsException:
+            result = CurrencyCalculation(error=MissingRequestsException, order=-1)
+            return [result] if return_raw else [result.to_query_result()]
+
         if service.provider_had_error:
-            return [QueryResult(
-                icon='images/icon.svg',
-                name=translator('provider-error'),
-                description=translator('provider-error-description'),
-                error=CurrencyProviderException,
-            )]
+            result = CurrencyCalculation(error=CurrencyProviderException, order=-1)
+            return [result] if return_raw else [result.to_query_result()]
         
         if currency_from not in rates:
             return
 
         currency_from_rate = rates[currency_from]['rate']
 
-        results = []
-        i = 0
+        items = []
         for currency_to in currencies_to:
             if currency_to not in rates:
                 continue
@@ -78,31 +77,17 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             rate = rate_data['rate'] / currency_from_rate
             converted_amount = amount * rate
             date = datetime.fromtimestamp(rate_data['timestamp_refresh']) if rate_data['timestamp_refresh'] else None
-
-            if currency_from == currency_to:
-                description = ''
-            elif date:
-                description = '1 {} = {:f} {} as of {}'.format(currency_from, rate, currency_to, date)
-            else:
-                description = '1 {} = {:f} {}'.format(currency_from, rate, currency_to)
-
-            if currency_to in FLAGS:
-                icon = 'images/flags/{}'.format(FLAGS[currency_to])
-            else:
-                icon = 'images/currency.svg'
-            
-            value = converted_amount
-            converted_amount = locale.currency(converted_amount, symbol='', grouping=True)
-            name = '{} {}'.format(converted_amount, currency_to)
-
-            results.append(QueryResult(
-                icon=icon,
-                name=name,
-                description=description,
-                clipboard=name,
-                value=value,
-                order=i
-            ))
-            i += 1
-        
-        return results
+            item = CurrencyCalculation(
+                value=CurrencyData(
+                    converted_amount=converted_amount,
+                    rate=rate,
+                    date=date,
+                    currency_from=currency_from,
+                    currency_to=currency_to,
+                ),
+                order=len(items)
+            )
+            if not return_raw:
+                item = item.to_query_result()
+            items.append(item)
+        return items

@@ -89,7 +89,9 @@
         "etherium": "ETH",
 
         "provider-error": "Currency Provider error. Did you set your API key?",
-        "provider-error-description": "Set your API key in the extension preferences"
+        "provider-error-description": "Set your API key in the extension preferences",
+        "install-requests": "Looks like requests is not installed.",
+        "install-requests-description": "Install it with \"pip install requests\" and restart launcher."
     },
     "time": {
         "last-year": "Last year",

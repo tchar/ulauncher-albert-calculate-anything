@@ -2,7 +2,7 @@ from functools import wraps
 from .cache import CurrencyCache
 from threading import RLock, Timer
 from .providers import ProviderFactory
-from ..exceptions import CurrencyProviderRequestException
+from ..exceptions import CurrencyProviderRequestException, MissingRequestsException
 from ..utils import Singleton
 from ..logging_wrapper import LoggingWrapper as logging
 
@@ -17,23 +17,29 @@ class CurrencyService(metaclass=Singleton):
     def __init__(self):
         self.default_currencies = []
         self._lock = RLock()
-        self.provider_had_error = False
         self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
         self._provider = ProviderFactory.get_provider('fixerio')
         self._thread_id = 0
         self._is_running = False
 
-    def __get_currencies(self, *currencies):
-        if not self._cache.enabled or self._cache.should_update():
+    def __get_currencies(self, *currencies, force=False):
+        if force or not self._cache.enabled or self._cache.should_update():
             self._logger.info('Will load currencies')
-            currency_rates = self._provider.request_currencies()
+            try: 
+                currency_rates = self._provider.request_currencies(*currencies, force=force)
+            except MissingRequestsException as e:
+                self._cache.clear()
+                raise e
             self._cache.save(currency_rates)
         else:
             currency_rates = self._cache.get_rates(*currencies)
         
-        self.provider_had_error = False
         return currency_rates
+
+    @property
+    def provider_had_error(self):
+        return self._provider.had_error
 
     @lock
     def enable_cache(self, update_frequency, force_run=False):
@@ -60,15 +66,14 @@ class CurrencyService(metaclass=Singleton):
             self.run(force=force_run)
 
     @lock
-    def get_rates(self, *currencies):
+    def get_rates(self, *currencies, force=False):
         try:
-            return self.__get_currencies(*currencies)
+            return self.__get_currencies(*currencies, force=force)
         except CurrencyProviderRequestException:
-            self.provider_had_error = True
             return {}
 
     @lock
-    def _update_thread(self, thread_id):
+    def _update_thread(self, thread_id, force=False):
         if thread_id != self._thread_id:
             self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(thread_id, self._thread_id))
             return
@@ -77,16 +82,17 @@ class CurrencyService(metaclass=Singleton):
             self._is_running = False
             return
         try:
-            self.__get_currencies()
-            provider_had_error = False
+            self.__get_currencies(force=force)
         except CurrencyProviderRequestException as e:
             self._logger.error('Error when contacting provider: {}'.format(e))
-            provider_had_error = True
-        
-        self.provider_had_error = provider_had_error
-        if not provider_had_error:
+        except MissingRequestsException as e:
+            self._logger.error(e)
+            return
+
+        if not self._provider.had_error:
             timer_thread = Timer(self._cache.next_update_seconds(), self._update_thread, args=(thread_id,))
         else:
+            self._cache.clear()
             timer_thread = Timer(60, self._update_thread, args=(thread_id,))
 
         timer_thread.setDaemon(True)
@@ -96,9 +102,7 @@ class CurrencyService(metaclass=Singleton):
     def get_available_currencies(self):
         try:
             available_currencies = list(self.__get_currencies().keys())
-            self.provider_had_error = False
         except CurrencyProviderRequestException as e:
-            self.provider_had_error = True
             self._logger.error('Error when contacting provider: {}'.format(e))
             available_currencies = []
         return available_currencies
@@ -116,6 +120,6 @@ class CurrencyService(metaclass=Singleton):
         self._is_running = True
         self._logger.info('Currency Service is running')
         self._thread_id += 1
-        timer_thread = Timer(0.0, self._update_thread, args=(self._thread_id,))
+        timer_thread = Timer(0.0, self._update_thread, args=(self._thread_id,), kwargs={'force': force})
         timer_thread.setDaemon(True)
         timer_thread.start()
