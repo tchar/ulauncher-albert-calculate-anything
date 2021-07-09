@@ -2,7 +2,7 @@ import os
 import json
 from ..logging_wrapper import LoggingWrapper
 from ..utils import Singleton
-from ..constants import MAIN_DIR
+from ..constants import MAIN_DIR, TIME_LOCATION_REPLACE_REGEX
 
 class TimezoneCache(metaclass=Singleton):
     def __init__(self):
@@ -13,7 +13,7 @@ class TimezoneCache(metaclass=Singleton):
                 self._data = json.loads(f.read())
         except Exception as e:
             self._logger.error('Could not load timezone data: {}'.format(e))
-
+        
     def get(self, city_name, *search_terms):
         city_code = city_name.strip().lower()
         if city_code not in self._data:

@@ -101,7 +101,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             order += 1
         return items
 
-    def handle(self, query):
+    def handle(self, query, try_again=True):
         translator = Language().get_translator('time')
 
         if parsedatetime is None:
@@ -122,7 +122,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         query = TIME_QUERY_REGEX_SPLIT.split(query)
         if len(query) > 1:
-            query, location = map(str.strip, query) 
+            query, location = map(str.strip, query)
         else:
             query = query[0].strip()
             location = ''
@@ -130,6 +130,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         query = TIME_QUERY_REGEX.sub('', query)
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
+        query = list(query)
 
         signs = set(['+', '-'])
         cal = parsedatetime.Calendar()
@@ -150,7 +151,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 pass
             else:
                 if prev not in signs:
-                    return None
+                    if not try_again: return None
+                    new_query = 'now at ' + ' '.join(query).replace('now', '')
+                    print(new_query)
+                    return self.handle(new_query, try_again=False)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return None
