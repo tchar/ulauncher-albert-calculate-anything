@@ -125,7 +125,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             description = '{:g} + {:g}%'.format(a, b, result)
 
         return [QueryResult(
-            icon='images/icon.svg',
+            icon='images/percent.svg',
             value=result,
             name=result,
             description=description,

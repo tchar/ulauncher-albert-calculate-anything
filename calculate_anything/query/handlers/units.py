@@ -47,7 +47,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         if pint is None:
             return [QueryResult(
-                icon='images/units.svg',
+                icon='images/convert.svg',
                 value='pip install pint',
                 name=translator('install-pint'),
                 description=translator('install-pint-description'),
@@ -100,7 +100,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
 
             results.append(QueryResult(
-                icon='images/units.svg',
+                icon='images/convert.svg',
                 value=amount_converted.magnitude,
                 name='{:g} {}'.format(amount_converted.magnitude, unit_to_name),
                 description=description,
