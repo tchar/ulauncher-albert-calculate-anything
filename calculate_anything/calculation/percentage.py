@@ -48,7 +48,7 @@ class PercentageCalculation(Calculation):
    
         extra_descriptions = self._get_extra_descriptions()
         if extra_descriptions:
-            extra_descriptions = ' '.join(extra_descriptions)
+            extra_descriptions = ', '.join(extra_descriptions)
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
@@ -77,6 +77,11 @@ class NormalPercentageCalculation(PercentageCalculation):
 
         description = '{}% {{}} {}'.format(amount1, amount2)
         description = description.format(translator('of'))
+
+        extra_descriptions = self._get_extra_descriptions()
+        if extra_descriptions:
+            extra_descriptions = ', '.join(extra_descriptions)
+            description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
             icon='images/icon.svg',
@@ -108,6 +113,11 @@ class InversePercentageCalculation(PercentageCalculation):
             
         description = '{} {{}} {}% {{}} {}'.format(amount1, result_formatted, amount2)
         description = description.format(translator('is'), translator('of'))
+
+        extra_descriptions = self._get_extra_descriptions()
+        if extra_descriptions:
+            extra_descriptions = ', '.join(extra_descriptions)
+            description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
             icon='images/icon.svg',
