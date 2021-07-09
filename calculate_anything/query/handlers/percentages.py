@@ -1,3 +1,4 @@
+from calculate_anything.lang import Language
 import re
 from datetime import datetime
 from .calculator import CalculatorQueryHandler
@@ -25,44 +26,48 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
     def _calculate_convert_normal(self, query):
         matches = PERCENTAGES_REGEX_MATCH_NORMAL.findall(query)
         if not matches:
-            return None
+            return None, None
 
         percentage_from, percentage_to = matches[0]
         percentage_from = self._use_calculator(percentage_from)
 
         if percentage_from is None:
-            return None
+            return None, None
 
         percentage_to = self._use_calculator(percentage_to)
         if percentage_to is None:
-            return None
+            return None, None
 
         try:
-            result = float(percentage_from) * float(percentage_to) / 100
-            return '{:g}'.format(result)
+            percentage_from = float(percentage_from)
+            percentage_to = float(percentage_to)
+            result = percentage_from * percentage_to / 100
+            return '{:g}'.format(result), (percentage_from, percentage_to)
         except (TypeError, ValueError) as e:
-            return
+            return None, None
     
     def _calculate_convert_inverse(self, query):
         matches = PERCENTAGES_REGEX_MATCH_INVERSE.findall(query)
         if not matches:
-            return None
+            return None, None
 
         percentage_from, percentage_to = matches[0]
         percentage_from = self._use_calculator(percentage_from)
 
         if percentage_from is None:
-            return None
+            return None, None
 
         percentage_to = self._use_calculator(percentage_to)
         if percentage_to is None:
-            return None
+            return None, None
 
         try:
-            result = 100 * float(percentage_from) / float(percentage_to)
-            return '{:g}%'.format(result)
+            percentage_from = float(percentage_from)
+            percentage_to = float(percentage_to)
+            result = 100 * percentage_from / percentage_to
+            return '{:g}%'.format(result), (percentage_from, percentage_to)
         except (TypeError, ValueError) as e:
-            return
+            return None, None
 
     def _calculate_calc(self, query):
         query = query.lower()
@@ -70,40 +75,60 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         matches = PERCENTAGES_REGEX_CALC_MATCH.findall(query)
         if not matches:
-            return
+            return None, None
         
         amount, sign, percentage = matches[0]
 
 
         amount = self._use_calculator(amount)
         if amount is None:
-            return None
+            return None, None
         
         percentage = self._use_calculator(percentage)
         if percentage is None:
-            return None
+            return None, None
 
         try:
             amount = float(amount)
-            amount2 = float(percentage) * amount / 100
+            percentage = float(percentage)
+            amount2 = percentage * amount / 100
             result = amount + amount2 if sign == '+' else amount - amount2
-            return '{:g}'.format(result)
+            return '{:g}'.format(result), (amount, percentage)
         except (ValueError, TypeError):
-            return None        
+            return None, None   
 
     def handle(self, query):
-        result = (
-            self._calculate_convert_normal(query) or 
-            self._calculate_convert_inverse(query) or
-            self._calculate_calc(query)
-        )
+        result, values = self._calculate_convert_normal(query)
+        mode = 'normal'
+
+        if not result:
+            result, values = self._calculate_convert_inverse(query)
+            mode = 'inverse'
+        
+        if not result:
+            result, values = self._calculate_calc(query)
+            mode = 'calc'
+
         if not result:
             return
+
+        translator = Language().get_translator('percentage')
+
+        a, b = values
+        if mode == 'normal':
+            description = '{:g}% {{}} {:g}'.format(a, b, result)
+            description = description.format(translator('of'))
+        elif mode == 'inverse':
+            description = '{:g} {{}} {}% of {}'.format(a, result, b)
+            description = description.format(translator('is'))
+        elif mode == 'calc':
+            description = '{:g} + {:g}%'.format(a, b, result)
 
         return [QueryResult(
             icon='images/icon.svg',
             value=result,
             name=result,
+            description=description,
             is_error=False,
             clipboard=True
         )]
