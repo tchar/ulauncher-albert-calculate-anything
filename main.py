@@ -16,6 +16,7 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import QueryHandler
 from calculate_anything.lang import Language
+from calculate_anything.utils import get_or_default
 
 class ConverterExtension(Extension):
 
@@ -92,14 +93,13 @@ class PreferencesEventListener(EventListener):
 class PreferencesUpdateEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
-        
+
         service = CurrencyService()
         if event.id == 'cache':
-            old_value = int(event.old_value)
-            new_value = int(event.new_value)
-            if old_value <= 0 and new_value > 0:
-                service.enable_cache(new_value)
-            elif old_value > 0 and new_value <= 0:
+            new_value = get_or_default(event.new_value, int, 86400)
+            if new_value > 0:
+                service.enable_cache(new_value, force_run=True)
+            else:
                 service.disable_cache()
         elif event.id == 'default_currencies':
             default_currencies = event.new_value.split(',')
@@ -108,13 +108,12 @@ class PreferencesUpdateEventListener(EventListener):
             default_currencies = list(default_currencies)
             service.set_default_currencies(default_currencies)
         elif event.id == 'api_key':
-            service.set_api_key(event.new_value)
+            service.set_api_key(event.new_value, force_run=True)
             if service.provider_had_error:
                 service.get_rates()
         elif event.id == 'default_cities':
             default_cities = TimezoneService.parse_default_cities(event.new_value)
             TimezoneService().set_default_cities(default_cities)
-        service.run()
 
 if __name__ == '__main__':
     ConverterExtension().run()
