@@ -48,17 +48,21 @@ keys=($cmd t i m e space)
 run_xdotool
 sleep $sleep_big
 
-keys=( a t space P a r i s comma space F r a n c e )
+keys=( a t space P a r i s space F r a n c e )
 run_xdotool
 sleep $sleep_big
 
-keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
+keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
 run_xdotool
 keys=( p l u s space 2 space h o u r s space 3 space m i n space a t space P r a g u e )
 run_xdotool
 sleep $sleep_big
 
 keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace minus space 2 space y e a r s space 5 space m o n t h s )
+run_xdotool
+sleep $sleep_big
+
+keys=( space a t space D e l h i )
 run_xdotool
 sleep $sleep_big
 clear_all
