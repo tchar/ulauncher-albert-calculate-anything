@@ -1,5 +1,6 @@
 import os
 import json
+import unicodedata
 from .utils import Singleton
 from .constants import MAIN_DIR
 from .logging_wrapper import LoggingWrapper as logging
@@ -10,6 +11,13 @@ class Language(metaclass=Singleton):
         self._data = {}
         self._logger = logging.getLogger(__name__)
         self.set('en_US')
+
+    @staticmethod
+    def strip_accents(s):
+        return ''.join(
+            c for c in unicodedata.normalize('NFD', s)
+            if unicodedata.category(c) != 'Mn'
+        )
 
     def set(self, lang):
         if lang == self._lang:
