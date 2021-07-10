@@ -164,7 +164,7 @@ def handleQuery(query):
         items.append(
             Item(
                 id=__title__,
-                icon='images/icon.svg',
+                icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
                 text=Language().translate('no-result', 'misc'),
                 subtext=Language().translate('no-result-description', 'misc'),
             )
