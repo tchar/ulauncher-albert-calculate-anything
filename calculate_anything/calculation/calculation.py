@@ -1,6 +1,6 @@
+import re
 import cmath
 from .base import BaseCalculation
-from ..exceptions import BooleanComparisonException
 from ..query.result import QueryResult
 from ..lang import Language
 from ..constants import CALCULATOR_ERROR
@@ -13,13 +13,13 @@ class Calculation(BaseCalculation):
     VALUE_NONE = 4
     VALUE_UKNOWN = 5
 
-    def __init__(self, value=None, error=None, order=0):
+    def __init__(self, value=None, query='', error=None, order=0):
         if isinstance(value, complex):
             value = complex(
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)
             )
-        super().__init__(value=value, error=error, order=order)
+        super().__init__(value=value, query=query, error=error, order=order)
 
         if value is None: self.value_type = Calculation.VALUE_NONE
         elif isinstance(value, bool): self.value_type = Calculation.VALUE_BOOLEAN
@@ -44,6 +44,28 @@ class Calculation(BaseCalculation):
         if value_type == Calculation.VALUE_COMPLEX:
             return translator('result-complex')
         return ''
+
+    def format_query(self):
+        def sub_i(match):
+            group = match.group(0).lstrip()
+            if group.startswith('1j'):
+                return ' i '
+            return ' ' + group.replace('j', 'i')
+        
+        replace_special = {
+            '%': 'mod',
+            '//': 'div',
+            '**': '^',
+            ' ': ''
+        }
+
+        query = self.query
+        query = re.sub(r'(\s|\*\*)', lambda m: replace_special[m.group(0)], query)
+        query = re.split(r'(\/\/|[\+\-\/\*\%\^])', query)
+        query = ' '.join(query)
+        query = re.sub(r'(^|\s)\d+j(\s|$)', sub_i, query)
+        query = re.sub(r'(\/\/|\*\*|\%)', lambda m: replace_special[m.group(0)], query)
+        return query
 
     def format(self):
         real, imag = self.value.real, self.value.imag
@@ -74,7 +96,10 @@ class Calculation(BaseCalculation):
     @BaseCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
-        description = self.get_description()
+        description = self.format_query()
+        description_paren = self.get_description()
+        if description_paren:
+            description = '{} ({})'.format(description, description_paren)
 
         return QueryResult(
             icon='images/icon.svg',

@@ -35,7 +35,6 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         self._keywords_set = set(keywords)
 
     def parse_expression(self, expression):
-        if '%' in expression or '//' in expression: return ''
         expression = expression.strip().lower()
         expression = self._keywords_regex.split(expression)
         expr = ''
@@ -61,7 +60,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         expr = CALCULATOR_REPLACE_LEADING_ZEROS.sub(lambda r: r.group(0).replace('0', ''), expr)
         return expr
 
-    def _calculate_boolean_result(values, operators):
+    def _calculate_boolean_result(values, operators, subqueries):
         fixed_precisions = []
         for value in values:
             fixed_precision = complex(
@@ -87,7 +86,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 if value1.imag != 0 or value2.imag != 0:
                     return BooleanCalculation(value=None, error=BooleanComparisonException, order=0)
             result = result and op_dict[operator](value1.real, value2.real)
-        return BooleanCalculation(value=result, order=0)
+        return BooleanCalculation(value=result, query=subqueries, order=0)
 
     def handle(self, query, return_raw=False):
         if self._simple_eval is None:
@@ -120,9 +119,9 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         if len(values) != 1:
-            result = CalculatorQueryHandler._calculate_boolean_result(values, operators)
+            result = CalculatorQueryHandler._calculate_boolean_result(values, operators, subqueries)
         else:
-            result = Calculation(value=values[0])
+            result = Calculation(value=values[0], query=subqueries[0])
 
         if return_raw:
             return [result]

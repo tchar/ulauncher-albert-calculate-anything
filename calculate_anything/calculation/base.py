@@ -105,8 +105,9 @@ class BaseCalculation:
                 return func(self, *args, **kwargs)
             return _wrapper
 
-    def __init__(self, value=None, error=None, order=-1):
+    def __init__(self, value=None, query='', error=None, order=-1):
         self.value = value
+        self.query = query
         self.error = error
         self.order = order
         self._logger = logging.getLogger(__name__)

@@ -92,12 +92,7 @@ class InversePercentageCalculation(PercentageCalculation):
 
         name = '{}%'.format(result_formatted)
 
-        amount1 = self.amounts[0]
-        if amount1.value_type == Calculation.VALUE_IMAGINARY or amount1.value_type == Calculation.VALUE_COMPLEX:
-            amount1 = '({})'.format(amount1.format())
-        else:
-            amount1 = amount1.format()
-
+        amount1 = self.amounts[0].format()
         amount2 = self.amounts[1].format()
             
         description = '{} {{}} {}% {{}} {}'.format(amount1, result_formatted, amount2)
