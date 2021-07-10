@@ -56,15 +56,18 @@ class Calculation(BaseCalculation):
             '%': 'mod',
             '//': 'div',
             '**': '^',
+            '*': '×',
             ' ': ''
         }
 
         query = self.query
         query = re.sub(r'(\s|\*\*)', lambda m: replace_special[m.group(0)], query)
         query = re.split(r'(\/\/|[\+\-\/\*\%\^])', query)
+        query = map(lambda s: 'π' if s == 'pi' else s, query)
+        query = map(lambda s: 'τ' if s == 'tau' else s, query)
         query = ' '.join(query)
         query = re.sub(r'(^|\s)\d+j(\s|$)', sub_i, query)
-        query = re.sub(r'(\/\/|\*\*|\%)', lambda m: replace_special[m.group(0)], query)
+        query = re.sub(r'(\/\/|\*\*|\%|\*)', lambda m: replace_special[m.group(0)], query)
         return query
 
     def format(self):
