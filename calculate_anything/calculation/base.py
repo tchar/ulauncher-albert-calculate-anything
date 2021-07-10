@@ -1,9 +1,11 @@
 from functools import wraps
+from ..logging_wrapper import LoggingWrapper as logging
 from ..query.result import QueryResult
 from ..lang import Language
 from ..exceptions import (
-    CurrencyProviderException, DateOverflowException, ZeroDivisionException,
-    MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException
+    BooleanComparisonException, CurrencyProviderException, DateOverflowException, ZeroDivisionException,
+    MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
+    BooleanPercetageException
 )
 
 def zero_division_error_query_result():
@@ -52,12 +54,28 @@ def date_overflow_query_result():
         order=0
     )
 
-def currency_provider_error():
+def currency_provider_error_query_result():
     return QueryResult(
         icon='images/icon.svg',
         name=Language().translate('provider-error', 'currency'),
         description=Language().translate('provider-error-description', 'currency'),
         error=CurrencyProviderException,
+    )
+
+def boolean_comparison_error_query_result():
+    return QueryResult(
+        icon='images/icon.svg',
+        name=Language().translate('boolean-comparison-error', 'calculator'),
+        description=Language().translate('boolean-comparison-error-description', 'calculator'),
+        error=BooleanComparisonException
+    )
+
+def boolean_percentage_error_query_result():
+    return QueryResult(
+        icon='images/icon.svg',
+        name=Language().translate('boolean-percentage-error', 'calculator'),
+        description=Language().translate('boolean-percentage-error-description', 'calculator'),
+        error=BooleanPercetageException
     )
 
 class BaseCalculation:
@@ -76,9 +94,14 @@ class BaseCalculation:
                 if self.is_error(DateOverflowException):
                     return date_overflow_query_result()
                 if self.is_error(CurrencyProviderException):
-                    return currency_provider_error()
+                    return currency_provider_error_query_result()
+                if self.is_error(BooleanComparisonException):
+                    return boolean_comparison_error_query_result()
+                if self.is_error(BooleanPercetageException):
+                    return boolean_percentage_error_query_result()
                 if self.is_error():
-                    raise self._error('Uknown error type: {}'.format(self.error))
+                    self._logger.error('Uknown error type: {}'.format(self.error))
+                    raise self.error
                 return func(self, *args, **kwargs)
             return _wrapper
 
@@ -86,6 +109,7 @@ class BaseCalculation:
         self.value = value
         self.error = error
         self.order = order
+        self._logger = logging.getLogger(__name__)
 
     def is_error(self, _type=None):
         if _type is None:

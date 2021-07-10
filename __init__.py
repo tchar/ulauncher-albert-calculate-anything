@@ -145,6 +145,9 @@ def handleQuery(query):
 
         if result.clipboard is not None:
             actions = [ClipAction(text=result.clipboard, clipboardText=result.clipboard)]
+        else:
+            actions = []
+
         items.append(Item(
             id=__title__,
             icon=icon,

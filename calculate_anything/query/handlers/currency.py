@@ -1,11 +1,10 @@
-from calculate_anything.calculation.currency import CurrencyData
-from calculate_anything.exceptions import CurrencyProviderException, MissingRequestsException
 from datetime import datetime
 from .interface import QueryHandler
 from ...currency.service import CurrencyService
 from ...calculation import CurrencyCalculation
 from ...lang import Language
 from ...utils import Singleton
+from ...exceptions import CurrencyProviderException, MissingRequestsException
 from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
 
 class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
@@ -78,13 +77,11 @@ class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
             converted_amount = amount * rate
             date = datetime.fromtimestamp(rate_data['timestamp_refresh']) if rate_data['timestamp_refresh'] else None
             item = CurrencyCalculation(
-                value=CurrencyData(
-                    converted_amount=converted_amount,
-                    rate=rate,
-                    date=date,
-                    currency_from=currency_from,
-                    currency_to=currency_to,
-                ),
+                value=converted_amount,
+                rate=rate,
+                date=date,
+                currency_from=currency_from,
+                currency_to=currency_to,
                 order=len(items)
             )
             if not return_raw:

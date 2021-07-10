@@ -16,6 +16,15 @@ class CalculatorException(Exception):
 class ZeroDivisionException(CalculatorException):
     pass
 
+class BooleanPercetageException(CalculatorException):
+    pass
+
+class BooleanException(Exception):
+    pass
+
+class BooleanComparisonException(BooleanException):
+    pass
+
 class TimeException(Exception):
     pass
 

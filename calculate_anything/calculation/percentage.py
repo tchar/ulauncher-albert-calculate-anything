@@ -4,9 +4,8 @@ from ..lang import Language
 
 class PercentageCalculation(Calculation):
     def __init__(self, value=None, amounts=(), error=None, order=0):
-        super().__init__(value, has_boolean=False, error=error, order=order)
+        super().__init__(value, error=error, order=order)
         self.amounts = amounts
-        self.has_boolean = any(map(lambda amount: amount.has_boolean, self.amounts))
 
     def is_error(self, _type=None):
         if _type is None:
@@ -29,16 +28,6 @@ class PercentageCalculation(Calculation):
         elif value_type == Calculation.VALUE_IMAGINARY:
             extra_descriptions.append(translator('result-imaginary'))
         
-        value_1_type = self.amounts[0].value_type
-        value_2_type = self.amounts[1].value_type
-        if value_1_type == Calculation.VALUE_COMPLEX or value_2_type == Calculation.VALUE_COMPLEX:
-            extra_descriptions.append(translator('value-complex'))
-        elif value_1_type == Calculation.VALUE_IMAGINARY or value_2_type == Calculation.VALUE_IMAGINARY:
-            extra_descriptions.append(translator('value-imaginary'))
-
-        if self.has_boolean:
-            extra_descriptions.append(translator('query-boolean'))
-
         return extra_descriptions
 
     @Calculation.Decorators.handle_error_results

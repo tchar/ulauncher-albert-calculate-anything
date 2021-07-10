@@ -126,12 +126,17 @@
         
         "result-complex": "Result is a complex number",
         "result-imaginary": "Result is an imaginary number",
-        "value-complex": "Value is a complex number",
-        "value-imaginary": "Value is an imaginary number",
 
         "infinity": "Infinity",
         "infinite-result": "Creating a black hole aren't we?",
         "infinite-result-description": "Looks like you divided by zero somewhere",
+
+        "boolean-result": "Result is a boolean",
+        "boolean-comparison-error": "Complex numbers can't be inequally compared",
+        "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
+
+        "boolean-percentage-error": "Boolean in percentage calculation",
+        "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",
 
         "install-simpleeval": "Looks like simpleeval is not installed.",
         "install-simpleeval-description": "Install it with \"pip install simpleeval\" and restart launcher."

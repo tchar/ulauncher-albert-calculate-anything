@@ -1,5 +1,6 @@
 import cmath
 from .base import BaseCalculation
+from ..exceptions import BooleanComparisonException
 from ..query.result import QueryResult
 from ..lang import Language
 from ..constants import CALCULATOR_ERROR
@@ -8,22 +9,25 @@ class Calculation(BaseCalculation):
     VALUE_REAL = 0
     VALUE_COMPLEX = 1
     VALUE_IMAGINARY = 2
-    VALUE_NONE = 3
+    VALUE_BOOLEAN = 3
+    VALUE_NONE = 4
+    VALUE_UKNOWN = 5
 
-    def __init__(self, value=None, has_boolean=False, error=None, order=0):
-        if value is not None:
+    def __init__(self, value=None, error=None, order=0):
+        if isinstance(value, complex):
             value = complex(
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)
             )
         super().__init__(value=value, error=error, order=order)
 
-        self.has_boolean = has_boolean
-
         if value is None: self.value_type = Calculation.VALUE_NONE
-        elif self.value.imag == 0: self.value_type = Calculation.VALUE_REAL
-        elif self.value.real == 0: self.value_type = Calculation.VALUE_IMAGINARY
-        else: self.value_type = Calculation.VALUE_COMPLEX
+        elif isinstance(value, bool): self.value_type = Calculation.VALUE_BOOLEAN
+        elif isinstance(value, complex):
+            if self.value.imag == 0: self.value_type = Calculation.VALUE_REAL
+            elif self.value.real == 0: self.value_type = Calculation.VALUE_IMAGINARY
+            else: self.value_type = Calculation.VALUE_COMPLEX
+        else: self.value_type = Calculation.VALUE_UKNOWN
 
     @staticmethod
     def fix_number_precision(number):
@@ -34,8 +38,6 @@ class Calculation(BaseCalculation):
     def get_description(self):
         translator = Language().get_translator('calculator')
 
-        if self.has_boolean:
-            return translator('query-boolean') if self.has_boolean else ''
         value_type = self.value_type
         if value_type == Calculation.VALUE_IMAGINARY:
             return translator('result-imaginary')
@@ -81,4 +83,15 @@ class Calculation(BaseCalculation):
             clipboard=name,
             value=self.value,
             order=self.order
+        )
+
+class BooleanCalculation(Calculation):
+    @Calculation.Decorators.handle_error_results
+    def to_query_result(self):
+        result = str(self.value).lower()
+        return QueryResult(
+            icon='images/icon.svg',
+            name=result,
+            description=Language().translate('boolean-result', 'calculator'),
+            clipboard=result
         )

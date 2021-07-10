@@ -93,7 +93,6 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:
-            print(query)
             query, location = map(str.strip, query)
         else:
             query = query[0].strip()

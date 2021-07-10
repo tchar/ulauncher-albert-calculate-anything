@@ -1,8 +1,9 @@
+from calculate_anything.calculation.calculation import Calculation
 import re
 from .calculator import CalculatorQueryHandler
 from .interface import QueryHandler
 from ...calculation import InversePercentageCalculation, NormalPercentageCalculation, PercentageCalculation
-from ...exceptions import ZeroDivisionException
+from ...exceptions import BooleanPercetageException, ZeroDivisionException
 from ...utils import Singleton
 from ...constants import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
@@ -32,17 +33,18 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         if percentage_to is None:
             return None
 
-
         if percentage_from.error or percentage_to.error:
             return NormalPercentageCalculation(
                 amounts=(percentage_from, percentage_to)
             )
 
+        if percentage_from.value_type == Calculation.VALUE_BOOLEAN or percentage_to.value_type == Calculation.VALUE_BOOLEAN:
+            return PercentageCalculation(error=BooleanPercetageException, order=0)
+
         try:
             result = percentage_from.value * percentage_to.value / 100
             return NormalPercentageCalculation(
-                value=result,
-                amounts=(percentage_from, percentage_to),
+                value=result, amounts=(percentage_from, percentage_to)
             )
         except (TypeError, ValueError) as e:
             return None
@@ -71,12 +73,15 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return InversePercentageCalculation(
                 amounts=(percentage_from, percentage_to)
             )
+        
+        if percentage_from.value_type == Calculation.VALUE_BOOLEAN or percentage_to.value_type == Calculation.VALUE_BOOLEAN:
+            return PercentageCalculation(error=BooleanPercetageException, order=0)
 
         try:
             result = 100 * percentage_from.value / percentage_to.value
             return InversePercentageCalculation(
                 value=result,
-                amounts=(percentage_from, percentage_to),
+                amounts=(percentage_from, percentage_to)
             )
         except (TypeError, ValueError) as e:
             return None
@@ -109,15 +114,18 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 amounts=(amount, percentage)
             )
 
+        if percentage.value_type == Calculation.VALUE_BOOLEAN or amount.value_type == Calculation.VALUE_BOOLEAN:
+            return PercentageCalculation(error=BooleanPercetageException, order=0)
+
         try:
             amount2 = percentage.value * amount.value / 100
             result = amount.value + amount2 if sign == '+' else amount.value - amount2
             return PercentageCalculation(
                 value=result,
-                amounts=(amount, percentage),
+                amounts=(amount, percentage)
             )
-        except (ValueError, TypeError):
-            return None, None, None
+        except (ValueError, TypeError) as e:
+            return None
         except ZeroDivisionError:
             return PercentageCalculation(
                 amounts=(amount, percentage),
@@ -125,6 +133,8 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             )
 
     def handle(self, query, return_raw=False):
+        if '%' not in query: return
+
         calculation = self._calculate_convert_normal(query)
 
         if calculation is None:
