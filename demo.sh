@@ -140,5 +140,28 @@ run_xdotool
 sleep $sleep_big
 clear_all
 
+# Base N conversion
+
+old_cmd=$cmd
+cmd='h e x space'
+
+keys=( $cmd space f a 2 1 space plus space a 1 0 )
+run_xdotool
+sleep $sleep_big
+
+keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
+run_xdotool
+keys=( numbersign f f 1 2 3 4 )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+cmd='b i n space'
+keys=( $cmd parenleft 1 0 0 0 1 space x o r space 1 1 1 1 parenright space asciicircum space 1 space plus space 1 0 space m o d space 1 1 )
+run_xdotool
+sleep $sleep_big
+clear_all
+
+cmd=$old_cmd
 keys=( $cmd A n d space s o space m u c h space m o r e )
 run_xdotool

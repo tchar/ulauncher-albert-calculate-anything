@@ -5,6 +5,10 @@ from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.currency import CurrencyQueryHandler
 from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.query.handlers.base_n import (
+    Base10QueryHandler, Base16QueryHandler,
+    Base2QueryHandler, Base8QueryHandler
+)
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.exceptions import MissingRequestsException
 from ulauncher.api.client.Extension import Extension
@@ -28,17 +32,34 @@ class ConverterExtension(Extension):
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
 
 class KeywordQueryEventListener(EventListener):
-
     def on_event(self, event, extension):
         items = []
         error_num = 0
         query = event.get_argument() or ''
+        mode = 'calculator'
         if event.get_keyword() == extension.preferences['time_kw']:
             query = 'now ' + query
-            handlers = set([TimeQueryHandler])
+            handlers = [TimeQueryHandler]
+            mode = 'time'
+        elif event.get_keyword() == extension.preferences['dec_kw']:
+            handlers = [Base10QueryHandler]
+            mode = 'dec'
+        elif event.get_keyword() == extension.preferences['hex_kw']:
+            handlers = [Base16QueryHandler]
+            mode = 'hex'
+        elif event.get_keyword() == extension.preferences['oct_kw']:
+            handlers = [Base8QueryHandler]
+            mode = 'oct'
+        elif event.get_keyword() == extension.preferences['bin_kw']:
+            handlers = [Base2QueryHandler]
+            mode = 'bin'
         else:
-            handlers = set([CalculatorQueryHandler, PercentagesQueryHandler,UnitsQueryHandler, CurrencyQueryHandler])
-
+            handlers = [
+                CalculatorQueryHandler,
+                PercentagesQueryHandler,
+                UnitsQueryHandler,
+                CurrencyQueryHandler,
+            ]
         results = QueryHandler().handle(query, *handlers)
         for result in results:
             error_num += result.error is not None
@@ -65,7 +86,7 @@ class KeywordQueryEventListener(EventListener):
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
                 name=Language().translate('no-result', 'misc'),
-                description=Language().translate('no-result-description', 'misc'),
+                description=Language().translate('no-result-{}-description'.format(mode), 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
             ))

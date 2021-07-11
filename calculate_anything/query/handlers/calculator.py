@@ -5,7 +5,7 @@ try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = None
-from .interface import QueryHandler
+from .interface import QueryHandlerInterface
 from ...logging_wrapper import LoggingWrapper as logging
 from ...calculation import Calculation, BooleanCalculation
 from ...utils import is_types, Singleton
@@ -15,7 +15,7 @@ from ...constants import (
     CALCULATOR_QUERY_REPLACE, CALCULATOR_QUERY_REGEX_REPLACE,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
-class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
+class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def __init__(self):
         functions = {
             name: getattr(cmath, name)
@@ -39,6 +39,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         expression = self._keywords_regex.split(expression)
         expr = ''
         prev = ''
+        has_imaginary = False
         prev_space = False
         for c in expression:
             is_space = c.strip() == ''
@@ -48,21 +49,27 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev.isnumeric() and prev_space: return ''
                 expr += c
             elif c in ['i', 'j']:
+                has_imaginary = True
                 if prev in ['', '(', '+', '-', '*', '/']: expr += '1j'
                 else: expr += 'j'
             elif c[0] in ['i', 'j']:
-                if not c[1:].isnumeric(): return ''
+                if not c[1:].isnumeric(): return '', True
                 c = c[1:] + c[0]
                 expr += c
-            else: expr += c.replace('i', 'j')
+                has_imaginary = True
+            else:
+                c = c.replace('i', 'j')
+                has_imaginary = has_imaginary or 'j' in c
+                expr += c
             prev_space = is_space
             prev = prev if is_space else c
         expr = CALCULATOR_REPLACE_LEADING_ZEROS.sub(lambda r: r.group(0).replace('0', ''), expr)
-        return expr
+        return expr, has_imaginary
 
     def _calculate_boolean_result(values, operators, subqueries):
         fixed_precisions = []
         for value in values:
+            if is_types(value, int, float): value = complex(value, 0)
             fixed_precision = complex(
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)
@@ -98,7 +105,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         query = CALCULATOR_QUERY_REGEX_REPLACE.sub(lambda m: CALCULATOR_QUERY_REPLACE[re.escape(m.group(0))], query)
-        query = self.parse_expression(query)
+        query, _ = self.parse_expression(query)
         if not query:
             return None
 

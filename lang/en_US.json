@@ -135,14 +135,37 @@
         "boolean-comparison-error": "Complex numbers can't be inequally compared",
         "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
 
+        "bytes": "Bytes",
+        "dec": "Dec",
+        "oct": "Oct",
+        "bin": "bin",
+        "hex": "hex",
+
         "boolean-percentage-error": "Boolean in percentage calculation",
         "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",
+        
+        "wrong-base-error": "Invalid digits for this base",
+        "wrong-base-error-description": "Input contains digits not valid for this base",
+
+        "base-floating-error": "Result is a floating point number",
+        "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
 
         "install-simpleeval": "Looks like simpleeval is not installed.",
         "install-simpleeval-description": "Install it with \"pip install simpleeval\" and restart launcher."
     },
+    "color": {
+        "rgb": "rgb",
+        "hsv": "hsv",
+        "hsl": "hsl",
+        "cmyk": "cmyk"
+    },
     "misc": {
         "no-result": "Keep typing your query ...",
-        "no-result-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\""
+        "no-result-calculator-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\"",
+        "no-result-time-description": "Try expressions like \"time at Prague\", \"time + 2 hours at Berlin\"",
+        "no-result-dec-description": "Try expressions like \"159 mod 2 + 1\"",
+        "no-result-bin-description": "Try expressions like \"101010 and xor 110111\"",
+        "no-result-oct-description": "Try expressions like \"157517 + 123\"",
+        "no-result-hex-description": "Try expressions like \"f1a2 + 2 mod 1\", \"# fd1234\""
     }
 }

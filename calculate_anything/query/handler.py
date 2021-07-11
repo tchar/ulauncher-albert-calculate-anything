@@ -1,8 +1,10 @@
+from calculate_anything.query.handlers.base_n import Base10QueryHandler, Base2QueryHandler, Base8QueryHandler
 from .handlers import UnitsQueryHandler
 from .handlers import CalculatorQueryHandler
 from .handlers import CurrencyQueryHandler
 from .handlers import PercentagesQueryHandler
 from .handlers import TimeQueryHandler
+from .handlers import Base16QueryHandler
 from ..utils  import Singleton
 
 class QueryHandler(metaclass=Singleton):
@@ -12,7 +14,11 @@ class QueryHandler(metaclass=Singleton):
             CalculatorQueryHandler(),
             CurrencyQueryHandler(),
             PercentagesQueryHandler(),
-            TimeQueryHandler()
+            TimeQueryHandler(),
+            Base10QueryHandler(),
+            Base16QueryHandler(),
+            Base8QueryHandler(),
+            Base2QueryHandler()
         ]
 
     def handle(self, query, *handlers):

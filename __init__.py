@@ -18,8 +18,8 @@ DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens G
 # Set the following to True if you want to enable placeholder for empty results
 SHOW_EMPTY_PLACEHOLDER = False
 # Below line is the trigger keywords to your choice (put a space after your keyword)
-# First element is the calculator trigger, second element is the time conversion trigger
-__triggers__ = ['=', 'time']
+# Order of triggers: 'Calculator, Time, Decimal, Hexadecimal, Binary, Octal
+__triggers__ = ['=', 'time', 'dec', 'bin', 'hex', 'oct']
 ####################################################################################
 
 __title__ = 'Calculate Anything'
@@ -75,7 +75,8 @@ from calculate_anything.currency.service import CurrencyService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.query.handlers import (
     UnitsQueryHandler, CalculatorQueryHandler, CurrencyQueryHandler,
-    PercentagesQueryHandler, TimeQueryHandler
+    PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
+    Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
 from calculate_anything.query import QueryHandler
 from calculate_anything.lang import Language
@@ -111,11 +112,16 @@ def initialize():
 def finalize():
     CurrencyService().disable_cache()
 
-def is_time_trigger(trigger):
-    try:
-        return TRIGGERS[1] == trigger
-    except IndexError:
-        return False
+def is_trigger(query, index):
+    try: return TRIGGERS[index] == query.trigger
+    except IndexError: return False
+
+is_calculator_trigger = lambda query: is_trigger(query, 0)
+is_time_trigger = lambda query: is_trigger(query, 1)
+is_dec_trigger = lambda query: is_trigger(query, 2)
+is_bin_trigger = lambda query: is_trigger(query, 3)
+is_hex_trigger = lambda query: is_trigger(query, 4)
+is_oct_trigger = lambda query: is_trigger(query, 5)
 
 def handleQuery(query):
     if TRIGGERS and not query.isTriggered:
@@ -125,17 +131,31 @@ def handleQuery(query):
     items = []
     errors_num = 0
 
+    mode = 'calculator'
     if not TRIGGERS:
         handlers = []
-    elif is_time_trigger(query.trigger):
+    elif is_time_trigger(query):
         query_str = 'time ' + query_str
         handlers = [TimeQueryHandler]
+        mode = 'time'
+    elif is_dec_trigger(query):
+        handlers = [Base10QueryHandler]
+        mode = 'dec'
+    elif is_hex_trigger(query):
+        handlers = [Base16QueryHandler]
+        mode = 'hex'
+    elif is_oct_trigger(query):
+        handlers = [Base8QueryHandler]
+        mode = 'oct'
+    elif is_bin_trigger(query):
+        handlers = [Base2QueryHandler]
+        mode = 'bin'
     else:
         handlers = [
-            UnitsQueryHandler,
             CalculatorQueryHandler,
+            PercentagesQueryHandler,
+            UnitsQueryHandler,
             CurrencyQueryHandler,
-            PercentagesQueryHandler
         ]
     results = QueryHandler().handle(query_str, *handlers)
     for result in results:
@@ -169,7 +189,7 @@ def handleQuery(query):
                 id=__title__,
                 icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
                 text=Language().translate('no-result', 'misc'),
-                subtext=Language().translate('no-result-description', 'misc'),
+                subtext=Language().translate('no-result-{}-description'.format(mode), 'misc')
             )
         )
     if not items:

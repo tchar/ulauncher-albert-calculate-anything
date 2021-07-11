@@ -2,7 +2,7 @@ try:
     import pint
 except ImportError:
     pint = None
-from .interface import QueryHandler
+from .interface import QueryHandlerInterface
 from ..result import QueryResult
 from ...lang import Language
 from ...exceptions import MissingPintException
@@ -10,7 +10,7 @@ from ...utils import is_types, Singleton
 from ...logging_wrapper import LoggingWrapper as logging
 from ...constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
 
-class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
+class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def __init__(self):
         self._ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
         self._logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ try:
     import parsedatetime
 except ImportError:
     parsedatetime = None
-from .interface import QueryHandler
+from .interface import QueryHandlerInterface
 from ...calculation import LocationTimeCalculation, TimeCalculation
 from ...time.service import TimezoneService
 from ...exceptions import MissingParsedatetimeException, DateOverflowException
@@ -17,7 +17,7 @@ from ...constants import (
     TIME_LOCATION_REPLACE_REGEX
 )
 
-class TimeQueryHandler(QueryHandler, metaclass=Singleton):
+class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def __init__(self):
         self._logger = LoggingWrapper.getLogger(__name__)

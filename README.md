@@ -1,6 +1,24 @@
 # <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything Extension
 
-Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers for [Ulauncher](https://ulauncher.io/), with the help of [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) and [fixer.io](https://fixer.io)
+[Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) Calculator for Anything
+
+Calculator for Anything
+- `Currency Converter`: See [Currency](#currency) for examples
+- `Time Converter`: Compute time expressions, convert time to other timezones. See [Time](#time) for examples.
+- `Units Converter`: Compute and Convert units to other units. See [Units](#units) for examples.
+- `Normal Calculator`: Supports functions such as `cos`, `sin`, `tan`. Check [Calculator](#calculator) for examples.
+- `Complex Numbers` Calculator: Also supports Normal Calculator's functions. Check [Calculator](#calculator) for examples.
+- `Percentage Calculator` Calculate percentages see [Percentages](#percentages) for examples.
+    - Supports all expressions that Normal Calculator and Complex Calculator Support
+- `Base N Calculator`: Calculate numbers and expressions to other number base. See [Base N Calculator](#base-n-calculator) for examples.
+    - Base 16 (`hex`): Calculates expression to decimal, biniary, octal, color (i.e `RGB`, `YSV`, etc), Bytes (representation of `string`)
+    - Base 2 (`bin`), Base 8 (`oct`), Base 10 (`dec`)
+    - Supports functions: `or`, `xor`, `and`, `mod`, `div`, `+`, `-`, `/`  
+
+**The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects.**
+
+Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) [parsedatetime](https://github.com/bear/parsedatetime) and [fixer.io](https://fixer.io)
+Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers for 
 
 
 ## Albert Demo
@@ -139,6 +157,32 @@ If you select one results it will be copied to clipboard.
 - Convert 10 euros to american dollars, canadian dollars, bitcoin, and mexican pesos
     - `10 EUR to USD,canadian,bitcoin,mexican`
 
+### Time
+
+You can also add and subtract time
+For example if now is `2021-07-05 14:14:42` then you can use the following
+
+**NOTE: You can use the keyword now and time interchangeably in Albert**
+
+**In the following examples the time returned is accompanied by the date time in the `default cities` you specified in the extension preferences**
+
+- `time`: Returns 2021-07-05 14:14:42 as well as the date time in the default cities specified in settings
+- `time plus 1 hour`: Returns Today at 15:14:42 
+- `time + 1 day`: Returns Tomorrow at 14:14:42
+- `time minus 1 day`: Returns Yesterday at 14:14:42
+- `time + 2 hours` 2 minutes 5 seconds: Returns Today at 15:16:47
+- `time + 1 year`: Returns 2022-07-05 14:14:42
+- `time + 1 year 2 days 2 hours - 4 years 4 minutes`: Returns 2018-07-07 16:10:42
+
+**Specifying a custom city**
+
+You can use all the commands above followed by `at CITY NAME` or `at CITY NAME, COUNTRY NAME|COUNTRY CODE|STATE CODE` to get te result in your local time as well as the specified city
+- `time at Prague`
+- `time + 2 hours at Madrid`
+- `time + 2 hours at Vancouver, CA`: (There are two Vancouvers, so by specifying CA as returns the Canadian Vancouver)
+- `time + 2 days 3 seconds at Vancouver, Canada`
+- `time + 1 hour + 3 years at Athens, AL`: (Athens AL refenrs to Athens at Alabama)
+
 ### Units
 
 The units supported are all units that [pint](https://github.com/hgrecco/pint) supports (which is quite a lot)
@@ -184,32 +228,6 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
 - ``5 as % sqrt(2) + 5`: Returns 77.9519%
 - `1 + sin(pi) as % sqrt(2) + 5`: Returns 15.5904%
 
-### Time
-
-You can also add and subtract time
-For example if now is `2021-07-05 14:14:42` then you can use the following
-
-**NOTE: You can use the keyword now and time interchangeably in Albert**
-
-**In the following examples the time returned is accompanied by the date time in the `default cities` you specified in the extension preferences**
-
-- `time`: Returns 2021-07-05 14:14:42 as well as the date time in the default cities specified in settings
-- `time plus 1 hour`: Returns Today at 15:14:42 
-- `time + 1 day`: Returns Tomorrow at 14:14:42
-- `time minus 1 day`: Returns Yesterday at 14:14:42
-- `time + 2 hours` 2 minutes 5 seconds: Returns Today at 15:16:47
-- `time + 1 year`: Returns 2022-07-05 14:14:42
-- `time + 1 year 2 days 2 hours - 4 years 4 minutes`: Returns 2018-07-07 16:10:42
-
-**Specifying a custom city**
-
-You can use all the commands above followed by `at CITY NAME` or `at CITY NAME, COUNTRY NAME|COUNTRY CODE|STATE CODE` to get te result in your local time as well as the specified city
-- `time at Prague`
-- `time + 2 hours at Madrid`
-- `time + 2 hours at Vancouver, CA`: (There are two Vancouvers, so by specifying CA as returns the Canadian Vancouver)
-- `time + 2 days 3 seconds at Vancouver, Canada`
-- `time + 1 hour + 3 years at Athens, AL`: (Athens AL refenrs to Athens at Alabama)
-
 ### Calculator
 
 The calculator works like a normal calculator, but is able to work with complex numbers too.
@@ -227,6 +245,25 @@ Use j or i as the imaginary unit
 - `10 + sqrt(2) + j`: Answer is 11.4142 + j
 - `cos(1 + j)`: Answer is 0.83373 - 0.988898j
 - `e ^ (pi * j) + 1`: Answer is 0 (Euler's identity)
+
+### Base N Calculator
+
+Use with the keywords `hex`, `dec`, `bin`, `oct` by default.
+
+**Simple Cases**
+- `dec 1000`: Produces result in `hex`, `bin`, `oct`
+- `hex ffa12`: Produces result in `dec`, `bin`, `oct` as well as `bytes` representation of the input query (including spaces)
+- `bin 10101`: Produces result in `dec`, `hex`, `oct`
+
+**Special cases with `hex`**
+The hex calculator will always produce the `byte` representation of its input query.
+**Color Conversion with `hex`**
+If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it will convert the number representing a color to other color formats.
+- `hex #fa1234`: Produces colors result in `rgb`, `hsv`, `hsl`, `cmyk`.
+
+**Advanced Cases**
+- `dec/hex/bin/oct 10101 and 10110 xor 10 + 1010 - 1010 div 10 and 10101`: Produces the result in all available base-n (`dec`, `hex`, `oct`, `bin`)
+    - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
 
 ## Extending and More
 

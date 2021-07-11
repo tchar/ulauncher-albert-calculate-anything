@@ -1,9 +1,9 @@
 import locale
-from .base import BaseCalculation
+from .base import _Calculation
 from ..query.result import QueryResult
 from ..constants import FLAGS
 
-class CurrencyCalculation(BaseCalculation):
+class CurrencyCalculation(_Calculation):
     def __init__(self, value=None, error=None, order=0, rate=None, date=None, currency_from=None, currency_to=None):
         super().__init__(value=value, error=error, order=order)
         self.rate = rate
@@ -11,7 +11,7 @@ class CurrencyCalculation(BaseCalculation):
         self.currency_from = currency_from
         self.currency_to = currency_to
 
-    @BaseCalculation.Decorators.handle_error_results
+    @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         converted_amount = self.value
         rate = self.rate

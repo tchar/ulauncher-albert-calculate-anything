@@ -1,17 +1,22 @@
+from os import replace
 import re
 import cmath
-from .base import BaseCalculation
+from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
 from ..constants import CALCULATOR_ERROR
+from ..utils import or_regex
 
-class Calculation(BaseCalculation):
-    VALUE_REAL = 0
-    VALUE_COMPLEX = 1
-    VALUE_IMAGINARY = 2
-    VALUE_BOOLEAN = 3
-    VALUE_NONE = 4
-    VALUE_UKNOWN = 5
+class Calculation(_Calculation):
+    VALUE_UNKNOWN = -1
+    VALUE_NONE = 0
+    VALUE_BOOLEAN = 1
+    VALUE_INT = 2
+    VALUE_FLOAT = 3
+    VALUE_REAL = 4
+    VALUE_IMAGINARY = 5
+    VALUE_COMPLEX = 6
+    VALUE_STRING = 7
 
     def __init__(self, value=None, query='', error=None, order=0):
         if isinstance(value, complex):
@@ -22,12 +27,15 @@ class Calculation(BaseCalculation):
         super().__init__(value=value, query=query, error=error, order=order)
 
         if value is None: self.value_type = Calculation.VALUE_NONE
+        elif isinstance(value, int): self.value_type = Calculation.VALUE_INT
+        elif isinstance(value, float): self.value_type = Calculation.VALUE_FLOAT
         elif isinstance(value, bool): self.value_type = Calculation.VALUE_BOOLEAN
+        elif isinstance(value, str): self.value_type = Calculation.VALUE_STRING
         elif isinstance(value, complex):
             if self.value.imag == 0: self.value_type = Calculation.VALUE_REAL
             elif self.value.real == 0: self.value_type = Calculation.VALUE_IMAGINARY
             else: self.value_type = Calculation.VALUE_COMPLEX
-        else: self.value_type = Calculation.VALUE_UKNOWN
+        else: self.value_type = Calculation.VALUE_UNKNOWN
 
     @staticmethod
     def fix_number_precision(number):
@@ -57,14 +65,17 @@ class Calculation(BaseCalculation):
             '//': 'div',
             '**': '^',
             '*': '×',
-            ' ': ''
+            ' ': '',
+            'sqrt': '√',
+            'pi': 'π',
+            'tau': 'τ'
         }
 
         query = self.query
-        query = re.sub(r'(\s|\*\*)', lambda m: replace_special[m.group(0)], query)
+        query = re.sub(or_regex(replace_special), lambda m: replace_special[m.group(0)], query)
         query = re.split(r'(\/\/|[\+\-\/\*\%\^])', query)
-        query = map(lambda s: 'π' if s == 'pi' else s, query)
-        query = map(lambda s: 'τ' if s == 'tau' else s, query)
+        # query = map(lambda s: 'π' if s == 'pi' else s, query)
+        # query = map(lambda s: 'τ' if s == 'tau' else s, query)
         query = ' '.join(query)
         query = re.sub(r'(^|\s)\d+j(\s|$)', sub_i, query)
         query = re.sub(r'(\/\/|\*\*|\%|\*)', lambda m: replace_special[m.group(0)], query)
@@ -96,7 +107,7 @@ class Calculation(BaseCalculation):
                 name = '{:g} + {:g}i'.format(real, imag)
         return name
 
-    @BaseCalculation.Decorators.handle_error_results
+    @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
         description = self.format_query()

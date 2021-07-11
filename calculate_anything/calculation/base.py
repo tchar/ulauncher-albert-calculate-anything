@@ -3,7 +3,7 @@ from ..logging_wrapper import LoggingWrapper as logging
 from ..query.result import QueryResult
 from ..lang import Language
 from ..exceptions import (
-    BooleanComparisonException, CurrencyProviderException, DateOverflowException, ZeroDivisionException,
+    BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException, DateOverflowException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException
 )
@@ -78,7 +78,23 @@ def boolean_percentage_error_query_result():
         error=BooleanPercetageException
     )
 
-class BaseCalculation:
+def wrong_base_exception_query_result():
+    return QueryResult(
+        icon='images/icon.svg',
+        name=Language().translate('wrong-base-error', 'calculator'),
+        description=Language().translate('wrong-base-error-description', 'calculator'),
+        error=BooleanPercetageException
+    )
+
+def base_floating_point_exception_query_result():
+    return QueryResult(
+        icon='images/icon.svg',
+        name=Language().translate('base-floating-error', 'calculator'),
+        description=Language().translate('base-floating-error-description', 'calculator'),
+        error=BaseFloatingPointException
+    )
+
+class _Calculation:
     class Decorators:
         def handle_error_results(func):
             @wraps(func)
@@ -99,6 +115,10 @@ class BaseCalculation:
                     return boolean_comparison_error_query_result()
                 if self.is_error(BooleanPercetageException):
                     return boolean_percentage_error_query_result()
+                if self.is_error(WrongBaseException):
+                    return wrong_base_exception_query_result()
+                if self.is_error(BaseFloatingPointException):
+                    return base_floating_point_exception_query_result()
                 if self.is_error():
                     self._logger.error('Uknown error type: {}'.format(self.error))
                     raise self.error

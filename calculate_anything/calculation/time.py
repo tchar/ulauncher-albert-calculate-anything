@@ -1,12 +1,12 @@
 from datetime import datetime
-from .base import BaseCalculation
+from .base import _Calculation
 from ..lang import Language
 from ..constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
 from ..query.result import QueryResult
 
-class TimeCalculation(BaseCalculation):
+class TimeCalculation(_Calculation):
 
-    @BaseCalculation.Decorators.handle_error_results
+    @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         translator = Language().get_translator('time')
                 

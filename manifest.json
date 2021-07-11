@@ -18,9 +18,37 @@
     {
       "id": "time_kw",
       "type": "keyword",
-      "name": "Convert Time",
+      "name": "Calculate Anything: Time",
       "description": "Convert time to other timezones",
       "default_value": "time"
+    },
+    {
+      "id": "dec_kw",
+      "type": "keyword",
+      "name": "Calculate Anything: Dec",
+      "description": "Calculate and convert dec",
+      "default_value": "dec"
+    },
+    {
+      "id": "hex_kw",
+      "type": "keyword",
+      "name": "Calculate Anything: Hex",
+      "description": "Calculate and convert hex",
+      "default_value": "hex"
+    },
+    {
+      "id": "oct_kw",
+      "type": "keyword",
+      "name": "Calculate Anything: Oct",
+      "description": "Calculate and convert oct",
+      "default_value": "oct"
+    },
+    {
+      "id": "bin_kw",
+      "type": "keyword",
+      "name": "Calculate Anything: Bin",
+      "description": "Calculate and convert bin",
+      "default_value": "bin"
     },
     {
       "id": "api_key",
@@ -62,7 +90,7 @@
       "id": "show_empty_placeholder",
       "type": "select",
       "name": "Empty Placeholder",
-      "description": "Show empty placeholder when no there is no result",
+      "description": "Show empty placeholder when there is no result",
       "default_value": "n",
       "options": [
         {"value": "y", "text": "Yes"},

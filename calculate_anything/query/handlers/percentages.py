@@ -1,7 +1,7 @@
 from calculate_anything.calculation.calculation import Calculation
 import re
 from .calculator import CalculatorQueryHandler
-from .interface import QueryHandler
+from .interface import QueryHandlerInterface
 from ...calculation import InversePercentageCalculation, NormalPercentageCalculation, PercentageCalculation
 from ...exceptions import BooleanPercetageException, ZeroDivisionException
 from ...utils import Singleton
@@ -10,7 +10,7 @@ from ...constants import (
     PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE,
 )
 
-class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
+class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def _use_calculator(self, query):
         results = CalculatorQueryHandler().handle(query, return_raw=True)
