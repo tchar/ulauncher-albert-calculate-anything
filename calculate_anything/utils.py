@@ -1,5 +1,6 @@
 import re
 from itertools import combinations
+from .exceptions import MissingSimpleevalException
 
 def is_types(value, *types):
     return any(map(lambda t: isinstance(value, t), types))
@@ -16,6 +17,13 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+class StupidEval:
+    def __init__(self, *args, **kwargs):
+        self.operators = {}
+    def eval(self, query):
+        try:return int(query)
+        except (ValueError, TypeError): raise MissingSimpleevalException
 
 def partition(l):
     for i in range(len(l)):

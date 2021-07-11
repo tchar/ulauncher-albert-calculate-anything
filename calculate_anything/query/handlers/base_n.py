@@ -6,7 +6,8 @@ import ast
 try:
     from simpleeval import SimpleEval
 except ImportError:
-    SimpleEval = None
+    from ...utils import StupidEval
+    SimpleEval = StupidEval
 from .interface import QueryHandlerInterface
 from ...calculation import (
     BaseNCalculation, Base16StringCalculation, Base10Calculation, 
@@ -14,7 +15,7 @@ from ...calculation import (
 )
 from ...logging_wrapper import LoggingWrapper as logging
 from ...utils import Singleton, is_integer, or_regex
-from ...exceptions import BaseFloatingPointException, WrongBaseException, ZeroDivisionException
+from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
 space_in_middle_re = re.compile('\S\s+\S')
 expression_sub = {'mod': '%', 'div': '//', 'and': '&', 'or': '|', 'xor': '^', '=': '=='}
@@ -71,10 +72,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
                 expr += c
         return [expr], []
 
-    def _items_to_result(items, return_raw):
-        return items if return_raw else [item.to_query_result() for item in items]
-
-    def handle(self, query, return_raw=False):
+    def handle(self, query):
         if query.strip() == '':
             return None
         
@@ -86,10 +84,10 @@ class BaseNQueryHandler(QueryHandlerInterface):
             expressions, operators = self.parse_expression(query)
         except WrongBaseException:
             item = BaseNCalculation(error=WrongBaseException, order=-1)
-            return BaseNQueryHandler._items_to_result([item], return_raw)
+            return [item]
         except BaseFloatingPointException:
             item = BaseNCalculation(error=BaseFloatingPointException, order=0)
-            return BaseNQueryHandler._items_to_result([item], return_raw)
+            return [item]
         except ValueError: pass
         except Exception as e:
             self.__logger.error(e)
@@ -98,8 +96,12 @@ class BaseNQueryHandler(QueryHandlerInterface):
         results = []
         try:
             results = [self._simple_eval.eval(exp) for exp in expressions]
+        except MissingSimpleevalException:
+            item = BaseNCalculation(error=MissingSimpleevalException, order=-1)
+            return [item]
         except ZeroDivisionError:
             item = BaseNCalculation(error=ZeroDivisionException, order=-1)
+            return [item]
         except Exception:
             return None
         
@@ -125,7 +127,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
                 item_base = item.to_base_calculation(convert_class, order=len(items))
                 items.append(item_base)
         
-        return BaseNQueryHandler._items_to_result(items, return_raw)
+        return items
 
 class Base2QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
@@ -139,7 +141,7 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__(16, digits_base16_re, Base16Calculation, (Base10Calculation, Base2Calculation, Base8Calculation))
 
-    def handle(self, query, return_raw=False):
+    def handle(self, query):
         if query.strip() == '':
             return None
         items = []
@@ -151,13 +153,13 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
             if self._digits_re.match(color_query) and len(color_query) == 6:
                 items.extend(ColorBase16Calculation.get_color_calculations(color_query, order_offset=len(items)))
         else:
-            items_super = super().handle(query, return_raw=True)
+            items_super = super().handle(query)
             if items_super: items.extend(items_super)
             
         item = Base16StringCalculation(value=query, order=len(items))
         items.append(item)
 
-        return Base16QueryHandler._items_to_result(items, return_raw)
+        return items
 
 class Base10QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):

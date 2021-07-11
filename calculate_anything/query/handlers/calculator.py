@@ -4,7 +4,8 @@ import operator as op
 try:
     from simpleeval import SimpleEval
 except ImportError:
-    SimpleEval = None
+    from ...utils import StupidEval
+    SimpleEval = StupidEval
 from .interface import QueryHandlerInterface
 from ...logging_wrapper import LoggingWrapper as logging
 from ...calculation import Calculation, BooleanCalculation
@@ -22,7 +23,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             for name in dir(cmath)
             if not name.startswith('_') and not name.endswith('_')
         }
-        self._simple_eval = SimpleEval(functions=functions) if SimpleEval else None
+        self._simple_eval = SimpleEval(functions=functions)
         self._logger = logging.getLogger(__name__)
         self._function_names = list(functions.keys())
 
@@ -46,7 +47,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             if is_space: expr += c
             elif c in self._keywords_set: expr += c
             elif c.isnumeric(): 
-                if prev.isnumeric() and prev_space: return ''
+                if prev.isnumeric() and prev_space: return '', False
                 expr += c
             elif c in ['i', 'j']:
                 has_imaginary = True
@@ -95,11 +96,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             result = result and op_dict[operator](value1.real, value2.real)
         return BooleanCalculation(value=result, query=subqueries, order=0)
 
-    def handle(self, query, return_raw=False):
-        if self._simple_eval is None:
-            result = Calculation(error=MissingSimpleevalException)
-            return [result] if return_raw else [result.to_query_result()]
-
+    def handle(self, query):
         query = query.lower()
         if CALCULATOR_REGEX_REJECT.match(query):
             return None
@@ -111,26 +108,27 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
         subqueries = CALCULATOR_QUERY_SPLIT_EQUALITIES.split(query)
         subqueries, operators = subqueries[::2], subqueries[1::2]
+
         if any(map(lambda s: s.strip() == '', subqueries)):
             return
 
         try:
-            values = [self._simple_eval.eval(subquery) for subquery in subqueries]
+            results = [self._simple_eval.eval(subquery) for subquery in subqueries]
+        except MissingSimpleevalException:
+            item = Calculation(error=MissingSimpleevalException)
+            return [item]
         except ZeroDivisionError:
-            result = Calculation(error=ZeroDivisionException)
-            return [result] if return_raw else [result.to_query_result()]
+            item = Calculation(error=ZeroDivisionException)
+            return [item]
         except Exception as e:
             return None
         
-        if not any(map(lambda value: is_types(value, int, float, complex), values)):
+        if not any(map(lambda value: is_types(value, int, float, complex), results)):
             return None
 
-        if len(values) != 1:
-            result = CalculatorQueryHandler._calculate_boolean_result(values, operators, subqueries)
+        if len(results) != 1:
+            result = CalculatorQueryHandler._calculate_boolean_result(results, operators, subqueries)
         else:
-            result = Calculation(value=values[0], query=subqueries[0])
+            result = Calculation(value=results[0], query=subqueries[0])
 
-        if return_raw:
-            return [result]
-
-        return [result] if return_raw else [result.to_query_result()]
+        return [result]

@@ -111,6 +111,7 @@ class PreferencesEventListener(EventListener):
         service.set_default_currencies(default_currencies)
 
         service.set_api_key(event.preferences['api_key'])
+        service.enable().run()
 
         default_cities = TimezoneService.parse_default_cities(event.preferences['default_cities'])
         TimezoneService().set_default_cities(default_cities)
@@ -123,7 +124,7 @@ class PreferencesUpdateEventListener(EventListener):
         if event.id == 'cache':
             new_value = get_or_default(event.new_value, int, 86400)
             if new_value > 0:
-                service.enable_cache(new_value, force_run=True)
+                service.enable_cache(new_value).run(force=True)
             else:
                 service.disable_cache()
         elif event.id == 'default_currencies':

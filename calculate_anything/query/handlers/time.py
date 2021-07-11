@@ -56,7 +56,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
         return [], True
 
-    def _get_time_location(self, date, locations, order_offset=0, return_raw=False):
+    def _get_time_location(self, date, locations, order_offset=0):
         items = []
         order = 0
         for location in locations:
@@ -72,18 +72,16 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 location=location,
                 order=order+order_offset
             )
-            if not return_raw:
-                item = item.to_query_result()
             items.append(item)
             order += 1
         return items
 
-    def handle(self, query, try_again=True, return_raw=False):
+    def handle(self, query, try_again=True):
         if parsedatetime is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
             )
-            return [result] if return_raw else [result.to_query_result()]
+            return [result]
             
         query = query.lower()
         query = PLUS_MINUS_REGEX_REPLACE.sub(lambda m: PLUS_MINUS_REPLACE[re.escape(m.group(0))], query)
@@ -123,7 +121,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 if prev not in signs:
                     if not try_again: return None
                     new_query = 'now at ' + ' '.join(query).replace('now', '')
-                    return self.handle(new_query, try_again=False, return_raw=return_raw)
+                    return self.handle(new_query, try_again=False)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return None
@@ -156,7 +154,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             
         if date_overflows:
             result = TimeCalculation(error=DateOverflowException)
-            return [result] if return_raw else [result.to_query_result()]
+            return [result]
 
         locations, add_defaults = self._get_locations(location)
         order_offset_locations = 1 if add_defaults else 0
@@ -167,8 +165,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             self._get_time_location(
                 date,
                 locations, 
-                order_offset=order_offset_locations,
-                return_raw=return_raw
+                order_offset=order_offset_locations
             )
         )
 
@@ -176,8 +173,5 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             value=date,
             order=0 if add_defaults else len(items)
         )
-        if not return_raw:
-            item = item.to_query_result()
-
         items.append(item)
         return items

@@ -42,7 +42,7 @@ class CurrencyQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
         return amount, currency_from, currencies_to
 
-    def handle(self, query, return_raw=False):
+    def handle(self, query):
         query = self._extract_query(query)
         if not query:
             return
@@ -57,11 +57,11 @@ class CurrencyQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             rates = service.get_rates(currency_from, *currencies_to)
         except MissingRequestsException:
             result = CurrencyCalculation(error=MissingRequestsException, order=-1)
-            return [result] if return_raw else [result.to_query_result()]
+            return [result]
 
         if service.provider_had_error:
             result = CurrencyCalculation(error=CurrencyProviderException, order=-1)
-            return [result] if return_raw else [result.to_query_result()]
+            return [result]
         
         if currency_from not in rates:
             return
@@ -84,7 +84,5 @@ class CurrencyQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 currency_to=currency_to,
                 order=len(items)
             )
-            if not return_raw:
-                item = item.to_query_result()
             items.append(item)
         return items

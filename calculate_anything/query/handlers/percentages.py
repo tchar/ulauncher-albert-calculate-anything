@@ -13,7 +13,7 @@ from ...constants import (
 class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def _use_calculator(self, query):
-        results = CalculatorQueryHandler().handle(query, return_raw=True)
+        results = CalculatorQueryHandler().handle(query)
         if not results:
             return None
         
@@ -132,7 +132,7 @@ class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 error=ZeroDivisionException,
             )
 
-    def handle(self, query, return_raw=False):
+    def handle(self, query):
         if '%' not in query: return
 
         calculation = self._calculate_convert_normal(query)
@@ -146,4 +146,4 @@ class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         if calculation is None:
             return
 
-        return [calculation] if return_raw else [calculation.to_query_result()]
+        return [calculation]

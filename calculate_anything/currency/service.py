@@ -22,6 +22,7 @@ class CurrencyService(metaclass=Singleton):
         self._provider = ProviderFactory.get_provider('fixerio')
         self._thread_id = 0
         self._is_running = False
+        self._enabled = True
 
     def __get_currencies(self, *currencies, force=False):
         if force or not self._cache.enabled or self._cache.should_update():
@@ -42,16 +43,19 @@ class CurrencyService(metaclass=Singleton):
         return self._provider.had_error
 
     @lock
-    def enable_cache(self, update_frequency, force_run=False):
+    def enable_cache(self, update_frequency):
+        if not self._enabled:
+            self._logger.warning('Service is disabled, cannot enable cache')
+            return
         self._logger.info('Enabling cache with update frequence = {}'.format(update_frequency))
         self._cache.enable(update_frequency)
-        if self._cache.enabled:
-            self.run(force=force_run)
+        return self
 
     @lock
     def disable_cache(self):
         self._logger.info('Disabling cache')
         self._cache.disable()
+        return self
 
     @property
     @lock
@@ -59,14 +63,21 @@ class CurrencyService(metaclass=Singleton):
         return self._cache.enabled
 
     @lock
-    def set_api_key(self, api_key, force_run=False):
+    def set_api_key(self, api_key):
         self._logger.info('Updating api key = {}'.format(api_key))
         self._provider.set_api_key(api_key)
-        if self._provider.api_key_valid:
-            self.run(force=force_run)
+        return self
+
+    @lock
+    def set_provider(self, provider):
+        self._provider = provider
+        return self
 
     @lock
     def get_rates(self, *currencies, force=False):
+        if not self._enabled:
+            self._logger.warning('Service is disabled cannot get rates')
+            return {}
         try:
             return self.__get_currencies(*currencies, force=force)
         except CurrencyProviderRequestException:
@@ -74,6 +85,8 @@ class CurrencyService(metaclass=Singleton):
 
     @lock
     def _update_thread(self, thread_id, force=False):
+        if not self._enabled:
+            self._logger.info('Stipping thread (id={}). Service got disabled')
         if thread_id != self._thread_id:
             self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(thread_id, self._thread_id))
             return
@@ -123,3 +136,14 @@ class CurrencyService(metaclass=Singleton):
         timer_thread = Timer(0.0, self._update_thread, args=(self._thread_id,), kwargs={'force': force})
         timer_thread.setDaemon(True)
         timer_thread.start()
+
+    @lock
+    def enable(self):
+        self._enabled = True
+        return self
+
+    @lock
+    def disable(self):
+        self.disable_cache()
+        self._enabled = False
+        return self

@@ -3,12 +3,12 @@ try:
 except ImportError:
     pint = None
 from .interface import QueryHandlerInterface
-from ..result import QueryResult
+from ...calculation.units import UnitsCalculation
 from ...lang import Language
 from ...exceptions import MissingPintException
 from ...utils import is_types, Singleton
 from ...logging_wrapper import LoggingWrapper as logging
-from ...constants import UNIT_QUERY_REGEX, EMPTY_AMOUNT, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
+from ...constants import UNIT_QUERY_REGEX, UNIT_QUERY_REGEX_DEFAULT, UNIT_REGEX_SPLIT
 
 class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def __init__(self):
@@ -47,14 +47,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         translator = Language().get_translator('units')
 
         if pint is None:
-            return [QueryResult(
-                icon='images/convert.svg',
-                name=translator('install-pint'),
-                description=translator('install-pint-description'),
-                clipboard='pip install pint',
-                error=MissingPintException,
-                order=-1
-            )]
+            return [UnitsCalculation(error=MissingPintException)]
 
         query = UnitsQueryHandler._extract_query(query)
         if not query:
@@ -74,11 +67,8 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             units_to = [str(unit_from_ureg.units)]
 
         unit_from_name = str(unit_from_ureg.units)
-        is_temperature_from = 'degree_' in unit_from_name
-        unit_from_name = translator(unit_from_name).replace('**', '^').replace('_', ' ')
 
-        results = []
-        i = 0
+        items = []
         for unit_to in units_to:
             try:
                 unit_to_ureg = self._ureg.parse_expression(unit_to)
@@ -92,22 +82,14 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 rate = None
 
             unit_to_name = str(unit_to_ureg.units)
-            is_temperature_to = 'degree_' in unit_to_name
-            unit_to_name = translator(unit_to_name).replace('**', '^').replace('_', ' ')
-
-            if rate is None or unit_from_name == unit_to_name or is_temperature_from or is_temperature_to:
-                description = ''
-            else:
-                description = '1 {} = {:g} {}'.format(unit_from_name, rate, unit_to_name)
             
-            name = '{:g} {}'.format(amount_converted.magnitude, unit_to_name)
-            results.append(QueryResult(
-                icon='images/convert.svg',
-                name=name,
-                description=description,
-                clipboard=name,
-                value=amount_converted.magnitude,
-                order=i,
-            ))
-            i += 1
-        return results
+            items.append(
+                UnitsCalculation(
+                    value=amount_converted.magnitude,
+                    rate=rate,
+                    unit_from_name=unit_from_name,
+                    unit_to_name=unit_to_name,
+                    order=len(items)
+                )
+            )
+        return items

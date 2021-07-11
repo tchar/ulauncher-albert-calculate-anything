@@ -3,9 +3,10 @@ from ..logging_wrapper import LoggingWrapper as logging
 from ..query.result import QueryResult
 from ..lang import Language
 from ..exceptions import (
-    BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException, DateOverflowException, WrongBaseException, ZeroDivisionException,
+    BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
+    DateOverflowException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
-    BooleanPercetageException
+    BooleanPercetageException, MissingPintException
 )
 
 def zero_division_error_query_result():
@@ -94,6 +95,17 @@ def base_floating_point_exception_query_result():
         error=BaseFloatingPointException
     )
 
+def missing_pint_error_query_result():
+    translator = Language().get_translator('units')
+    return QueryResult(
+        icon='images/convert.svg',
+        name=translator('install-pint'),
+        description=translator('install-pint-description'),
+        clipboard='pip install pint',
+        error=MissingPintException,
+        order=-1
+    )
+
 class _Calculation:
     class Decorators:
         def handle_error_results(func):
@@ -119,6 +131,8 @@ class _Calculation:
                     return wrong_base_exception_query_result()
                 if self.is_error(BaseFloatingPointException):
                     return base_floating_point_exception_query_result()
+                if self.is_error(MissingPintException):
+                    return missing_pint_error_query_result()
                 if self.is_error():
                     self._logger.error('Uknown error type: {}'.format(self.error))
                     raise self.error

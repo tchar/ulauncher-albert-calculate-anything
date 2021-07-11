@@ -15,7 +15,7 @@ Calculator for Anything
     - Base 2 (`bin`), Base 8 (`oct`), Base 10 (`dec`)
     - Supports functions: `or`, `xor`, `and`, `mod`, `div`, `+`, `-`, `/`  
 
-**The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects.**
+**The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects. See [docs](docs/API.md) for more**
 
 Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) [parsedatetime](https://github.com/bear/parsedatetime) and [fixer.io](https://fixer.io)
 Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers for 
@@ -110,7 +110,10 @@ In the preferences you can define a comma separated list of default cities when 
 
 ### Commands and Syntax
 
-To convert anything you can use the keyword  (default `=` and `time` as in the demo for `Ulauncher`)
+To calculate/convert anything you can use the keywords
+- `=`: For currency, units and calculator
+- `time`: For time calculations
+- `dec`/`hex`/`bin`/`oct`: For base-n and calculations
 
 You can go directly to [examples](#examples) or use the ones from the demo
 
@@ -268,6 +271,8 @@ If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it 
 ## Extending and More
 
 The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert) do. You can extend it for other cases.
+
+See the [documentation](docs/API.md) for API call examples
 
 ### Adding flags
 
