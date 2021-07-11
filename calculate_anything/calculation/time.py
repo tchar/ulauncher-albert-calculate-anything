@@ -90,7 +90,7 @@ class LocationTimeCalculation(TimeCalculation):
             country_name = '{} {}'.format(state_name, country_name)
 
         name = '{}: {}'.format(city_name, location_time)
-        description = '{} - {} - {} ({}) '.format(location_date, country_name, timezone_name, utc)
+        description = '{} • {} • {} ({}) '.format(location_date, country_name, timezone_name, utc)
 
         if country_code in FLAGS:
             icon = 'images/flags/{}'.format(FLAGS[country_code])

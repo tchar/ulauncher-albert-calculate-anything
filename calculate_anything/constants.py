@@ -19,7 +19,7 @@ UNIT_QUERY_REGEX_DEFAULT = re.compile(r'^\s*(.*)\s*')
 UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
 
 CURRENCY_QUERY_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
-CURRENCY_QUERY_DEFAULT_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*?)\s*(?:to|in)?\s*$', flags=re.IGNORECASE)
+CURRENCY_QUERY_DEFAULT_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*?)(?:\s+(?:to|in)?\s*$|\s*$)', flags=re.IGNORECASE)
 CURRENCY_REGEX = re.compile(r'^[a-z]{3}$', flags=re.IGNORECASE)
 EMPTY_AMOUNT = re.compile(r'^\s*$')
 
