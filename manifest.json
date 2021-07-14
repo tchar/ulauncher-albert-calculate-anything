@@ -90,7 +90,7 @@
       "id": "units_conversion_mode",
       "type": "select",
       "name": "Units Conversion mode",
-      "default": "normal",
+      "default_value": "normal",
       "options": [
         {"value": "normal", "text": "Normal"},
         {"value": "crazy", "text": "CRAZY!!!"}
