@@ -101,7 +101,7 @@ class PreferencesEventListener(EventListener):
         cache_update = event.preferences['cache']
         cache_update = get_or_default(cache_update, int, 0)
 
-        units_mode = event.preferences['unit_conversion_mode']
+        units_mode = event.preferences['units_conversion_mode']
         units_mode = get_or_default(units_mode.lower(), str, 'normal',['normal', 'crazy'])
 
         units_service = UnitsService()
@@ -154,7 +154,7 @@ class PreferencesUpdateEventListener(EventListener):
         elif event.id == 'default_cities':
             default_cities = TimezoneService.parse_default_cities(event.new_value)
             TimezoneService().set_default_cities(default_cities)
-        elif event.id == 'unit_conversion_mode':
+        elif event.id == 'units_conversion_mode':
             units_mode = get_or_default(event.new_value.lower(), str, 'normal',['normal', 'crazy'])
             if units_mode == 'normal':
                 units_mode = UnitsService.MODE_NORMAL

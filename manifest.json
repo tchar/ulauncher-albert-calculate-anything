@@ -87,9 +87,9 @@
       "default_value": "New York City US, London GB, Madrid ES, Vancouver CA, Athens GR"
     },
     {
-      "id": "unit_conversion_mode",
+      "id": "units_conversion_mode",
       "type": "select",
-      "name": "Unit Conversion mode",
+      "name": "Units Conversion mode",
       "default": "normal",
       "options": [
         {"value": "normal", "text": "Normal"},

@@ -4,7 +4,7 @@
 
 The `calculate_anything` module does not depend on `Ulauncher` or `Albert` so it is extensible for other use cases.
 
-See [Features](#features) for supported features and [Contents](#contents) for installation instructions and more
+See [Features](#features) for supported features, [Contents](#contents) for installation instructions and more
 
 ## Albert Demo
 
@@ -32,7 +32,9 @@ Calculator for Anything
 **The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects. See [docs](docs/API.md) for more. The only python files that use dependencies for these launchers are `main.py`, `__init__.py` in the root of this project.**
 
 Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) [parsedatetime](https://github.com/bear/parsedatetime) and [fixer.io](https://fixer.io)
-Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers for 
+Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers.
+
+Optional Dependencies: [babel](https://github.com/python-babel/babel). Installing this will format your results in your language/locale.
 
 ## Contents
 
@@ -48,6 +50,9 @@ Currency and Unit converter as well as a Calculator for numbers, complex numbers
 Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
 ```bash
 pip install requests pint simpleeval parsedatetime
+
+# Optionally for translations and formatting to your locale
+pip install babel
 ```
 
 Open `Ulauncher` go to `Extensions` > `Add extension` and paste https://github.com/tchar/ulauncher-albert-calculate-anything
@@ -59,8 +64,18 @@ Similarly to `Ulauncher` the same dependencies are are required.
 To install the extension for Albert run
 ```bash
 pip install requests pint simpleeval parsedatetime
-mkdir -p ~/.local/share/albert/org.albert.extension.python/modules/
-git clone https://github.com/tchar/ulauncher-albert-calculate-anything ~/.local/share/albert/org.albert.extension.python/modules/
+
+# Optionally for translations and formatting to your locale
+pip install babel
+
+# Determine Install location
+[ -z "$XDG_DATA_HOME" ] && INSTALL_DIR=~/.local/share || INSTALL_DIR=$XDG_DATA_HOME
+
+# Create module directory if not exists
+mkdir -p $INSTALL_DIR/albert/org.albert.extension.python/modules/
+
+# Install extension
+git clone https://github.com/tchar/ulauncher-albert-calculate-anything $INSTALL_DIR/albert/org.albert.extension.python/modules/
 ```
 
 Open albert, enable `Python` extensions and then enable the `Calculate Anything` extension.
@@ -107,6 +122,19 @@ In the preferences you can define a comma separated list of default cities when 
 
 - ULauncher: Edit in `Default Currencies` preferences
 - Albert: Edit `DEFAULT_CITIES` in `__init__.py`
+
+### Units Conversion Mode
+
+In the preferences you can define a units conversion mode. For now there is normal (default) and crazy.
+
+Crazy means that the unit converter/calculator tries to convert all possible units (currency included) available under the name.
+
+See [Currency](#crazy-conversion) and [Units](#crazy-conversion-1) for more
+
+**Crazy mode is experimental and bugs are to be expected**
+
+- ULauncher: Edit in `Units Conversion mode` preferences
+- Albert: Edit `UNITS_CONVERSION_MODE` in `__init__.py`
 
 ### Show Empty Placeholder
 
@@ -155,22 +183,27 @@ If you select one results it will be copied to clipboard.
 
 ### Currency
 
-**Simple Conversion**
+#### **Simple Conversion**
 - Convert 10 euros to american dollars
-- `10 eur to USD`
-- `10 euros to $`
-- `10 eurs to dollars`
+    - `10 eur to USD`
+    - `10 euros to $`
+    - `10 eurs to dollars`
 
-**Multiple Conversion**
+#### **Multiple Conversion**
 - Convert 10 euros to american dollars, canadian dollars, bitcoin, and mexican pesos
     - `10 EUR to USD,canadian,bitcoin,mexican`
+
+#### **Crazy Conversion**
+If `crazy` mode is enabled in preferences you can convert any currency unit
+- Convert 1 us dollar per pound to euros per kilogram
+    - `1 $ / pound to EUR / kg`
+- Convert 10 us dollars  per square foot squared to canadian dollars per meter squared
+    - `10 $ / foot ^ 2 to CAD / meter ^ 2`
 
 ### Time
 
 You can also add and subtract time
 For example if now is `2021-07-05 14:14:42` then you can use the following
-
-**NOTE: You can use the keyword now and time interchangeably in Albert**
 
 **In the following examples the time returned is accompanied by the date time in the `default cities` you specified in the extension preferences**
 
@@ -182,7 +215,7 @@ For example if now is `2021-07-05 14:14:42` then you can use the following
 - `time + 1 year`: Returns 2022-07-05 14:14:42
 - `time + 1 year 2 days 2 hours - 4 years 4 minutes`: Returns 2018-07-07 16:10:42
 
-**Specifying a custom city**
+#### **Specifying a target city**
 
 You can use all the commands above followed by `at CITY NAME` or `at CITY NAME, COUNTRY NAME|COUNTRY CODE|STATE CODE` to get te result in your local time as well as the specified city
 - `time at Prague`
@@ -195,16 +228,16 @@ You can use all the commands above followed by `at CITY NAME` or `at CITY NAME, 
 
 The units supported are all units that [pint](https://github.com/hgrecco/pint) supports (which is quite a lot)
 
-**Simple Conversion**
+#### **Simple Conversion**
 - Convert 100 fahrenheit to celsius, which is  37.7778 Celcius
    - `100 f to c`
 
-**Multiple Conversion**
+#### **Multiple Conversion**
   - Convert 20 centimeters to inches and meters
-  - `20 cm in inches, m`
-  - `20 cm in inches,meters`
+    - `20 cm in inches, m`
+    - `20 cm in inches,meters`
 
-**Advanced Conversion**
+#### **Advanced Conversion**
 - Convert kilometers per meter to centimeters per minute, kilometers per minute, inches per second and centimeters per second.
     - `20 km/h to cm/min, km/minute, in/s, cm/sec`
 - Convert kilowhats per second to horsepower per hour and megawatts per second
@@ -218,9 +251,12 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
 - Convert kilometer * centimeter * second per gibabyte to inches * meter * hour per megabyte
     - `10 km * cm * s / gb to inches * meter * hour / mb`
 
+#### **Crazy Conversion**
+- `1 m to cm` may have two compatible units `meter` and `mole`, so it will return both results
+
 ### Percentages
 
-**Simple Cases**
+#### **Simple Cases**
 - Calculate what is 10% of 40 (Answer is 4)
     - `10% of 40`
 - To calculate what percentage of 30 is 5 (Answer is 16.6667%) any of the following works
@@ -230,7 +266,7 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
     - `5 in % of 30`
     - `5 in % 30`
 
-**Advanced Cases**
+#### **Advanced Cases**
 - `10% of cos(pi) + 5`: Returns 0.4
 - `3 + 2 * pi % of cos(pi) + 5`: Returns 0.371328
 - ``5 as % sqrt(2) + 5`: Returns 77.9519%
@@ -244,11 +280,11 @@ The following constants exist: `pi`, `e`, `tau` and others from [cmath](https://
 
 The following functions exist: `phase`, `polar`, `rect`, `exp`, `log`, `log10`, `sqrt`, `acos`, `asin`, `atan`, `cos`, `sin`, `tan`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh` and others from [cmath](https://docs.python.org/3/library/cmath.html)
 
-**Simple Cases**
+#### **Simple Cases**
 - `10 + sqrt(2)`: Answer is 11.4142
 - `10 + cos(pi) + 30 * e ^ 2`: Answer is 230.672
 
-**Complex Numbers**
+#### **Complex Numbers**
 Use j or i as the imaginary unit
 - `10 + sqrt(2) + j`: Answer is 11.4142 + j
 - `cos(1 + j)`: Answer is 0.83373 - 0.988898j
@@ -258,18 +294,19 @@ Use j or i as the imaginary unit
 
 Use with the keywords `hex`, `dec`, `bin`, `oct` by default.
 
-**Simple Cases**
+#### **Simple Cases**
 - `dec 1000`: Produces result in `hex`, `bin`, `oct`
 - `hex ffa12`: Produces result in `dec`, `bin`, `oct` as well as `bytes` representation of the input query (including spaces)
 - `bin 10101`: Produces result in `dec`, `hex`, `oct`
 
-**Special cases with `hex`**
+#### **Special cases with `hex`**
 The hex calculator will always produce the `byte` representation of its input query.
-**Color Conversion with `hex`**
+
+#### **Color Conversion with `hex`**
 If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it will convert the number representing a color to other color formats.
 - `hex #fa1234`: Produces colors result in `rgb`, `hsv`, `hsl`, `cmyk`.
 
-**Advanced Cases**
+#### **Advanced Cases**
 - `dec/hex/bin/oct 10101 and 10110 xor 10 + 1010 - 1010 div 10 and 10101`: Produces the result in all available base-n (`dec`, `hex`, `oct`, `bin`)
     - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
 
