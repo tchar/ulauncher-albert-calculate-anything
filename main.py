@@ -1,3 +1,4 @@
+from calculate_anything.units.service import UnitsService
 import locale
 locale.setlocale(locale.LC_ALL, '')
 from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
@@ -96,22 +97,35 @@ class KeywordQueryEventListener(EventListener):
 class PreferencesEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
-        cache_update = int(event.preferences['cache'])
 
-        service = CurrencyService()
+        cache_update = event.preferences['cache']
+        cache_update = get_or_default(cache_update, int, 0)
+
+        units_mode = event.preferences['unit_conversion_mode']
+        units_mode = get_or_default(units_mode.lower(), str, 'normal',['normal', 'crazy'])
+
+        units_service = UnitsService()
+        currency_service = CurrencyService()
         if not cache_update:
-            service.disable_cache()
+            currency_service.disable_cache()
         else:
-            service.enable_cache(cache_update)
+            currency_service.enable_cache(cache_update)
+        
+        if units_mode == 'normal':
+            units_service.set_unit_conversion_mode(UnitsService.MODE_NORMAL)
+        else:
+            units_service.set_unit_conversion_mode(UnitsService.MODE_CRAZY)
 
         default_currencies = event.preferences['default_currencies'].split(',')
         default_currencies = map(str.strip, default_currencies)
         default_currencies = map(str.upper, default_currencies)
         default_currencies = list(default_currencies)
-        service.set_default_currencies(default_currencies)
+        currency_service.set_default_currencies(default_currencies)
 
-        service.set_api_key(event.preferences['api_key'])
-        service.enable().run()
+        currency_service.set_api_key(event.preferences['api_key'])
+        
+        units_service.enable().run()
+        currency_service.enable().run()
 
         default_cities = TimezoneService.parse_default_cities(event.preferences['default_cities'])
         TimezoneService().set_default_cities(default_cities)
@@ -134,12 +148,19 @@ class PreferencesUpdateEventListener(EventListener):
             default_currencies = list(default_currencies)
             service.set_default_currencies(default_currencies)
         elif event.id == 'api_key':
-            service.set_api_key(event.new_value, force_run=True)
-            try: service.get_rates(force=True)
+            service.set_api_key(event.new_value)
+            try: service.run(force=True)
             except MissingRequestsException: pass
         elif event.id == 'default_cities':
             default_cities = TimezoneService.parse_default_cities(event.new_value)
             TimezoneService().set_default_cities(default_cities)
+        elif event.id == 'unit_conversion_mode':
+            units_mode = get_or_default(event.new_value.lower(), str, 'normal',['normal', 'crazy'])
+            if units_mode == 'normal':
+                units_mode = UnitsService.MODE_NORMAL
+            else:
+                units_mode = UnitsService.MODE_CRAZY
+            UnitsService().set_unit_conversion_mode(units_mode)
 
 if __name__ == '__main__':
     ConverterExtension().run()

@@ -1,3 +1,5 @@
+# TODO: To be removed. Replaced by UnitsQueryHandler
+
 from datetime import datetime
 from .interface import QueryHandlerInterface
 from ...currency.service import CurrencyService
@@ -5,7 +7,7 @@ from ...calculation import CurrencyCalculation
 from ...lang import Language
 from ...utils import Singleton
 from ...exceptions import CurrencyProviderException, MissingRequestsException
-from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT, FLAGS
+from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT
 
 class CurrencyQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def _extract_query(self, query):

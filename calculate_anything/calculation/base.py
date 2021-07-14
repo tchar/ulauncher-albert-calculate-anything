@@ -10,93 +10,103 @@ from ..exceptions import (
 )
 
 def zero_division_error_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('infinite-result', 'calculator'),
-        description=Language().translate('infinite-result-description', 'calculator'),
+        name=translator('infinite-result-error'),
+        description=translator('infinite-result-error-description'),
         error=ZeroDivisionException
     )
 
 def missing_simpleeval_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         clipboard='pip install simpleeval',
-        name=Language().translate('install-simpleeval', 'calculator'),
-        description=Language().translate('install-simpleeval-description', 'calculator'),
+        name=translator('install-simpleeval'),
+        description=translator('install-simpleeval-description'),
         error=MissingSimpleevalException
     )
 
 def missing_parsedatetime_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
-        name=Language().translate('install-parsedatetime', 'time'),
-        description=Language().translate('install-parsedatetime-description', 'time'),
+        name=translator('install-parsedatetime'),
+        description=translator('install-parsedatetime-description'),
         clipboard='pip install parsedatetime',
         error=MissingParsedatetimeException,
         order=-1
     )
 
 def missing_requests_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
-        name=Language().translate('install-requests', 'currency'),
-        description=Language().translate('install-requests-description', 'currency'),
+        name=translator('install-requests'),
+        description=translator('install-requests-description'),
         clipboard='pip install requests',
         error=MissingRequestsException,
         order=-1
     )
 
 def date_overflow_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
-        name=Language().translate('years-overflow', 'time'),
-        description=Language().translate('years-overflow-description', 'time'),
+        name=translator('years-overflow'),
+        description=translator('years-overflow-description'),
         clipboard='',
         order=0
     )
 
 def currency_provider_error_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('provider-error', 'currency'),
-        description=Language().translate('provider-error-description', 'currency'),
+        name=translator('provider-error'),
+        description=translator('provider-error-description'),
         error=CurrencyProviderException,
     )
 
 def boolean_comparison_error_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('boolean-comparison-error', 'calculator'),
-        description=Language().translate('boolean-comparison-error-description', 'calculator'),
+        name=translator('boolean-comparison-error'),
+        description=translator('boolean-comparison-error-description'),
         error=BooleanComparisonException
     )
 
 def boolean_percentage_error_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('boolean-percentage-error', 'calculator'),
-        description=Language().translate('boolean-percentage-error-description', 'calculator'),
+        name=translator('boolean-percentage-error'),
+        description=translator('boolean-percentage-error-description'),
         error=BooleanPercetageException
     )
 
 def wrong_base_exception_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('wrong-base-error', 'calculator'),
-        description=Language().translate('wrong-base-error-description', 'calculator'),
+        name=translator('wrong-base-error'),
+        description=translator('wrong-base-error-description'),
         error=BooleanPercetageException
     )
 
 def base_floating_point_exception_query_result():
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=Language().translate('base-floating-error', 'calculator'),
-        description=Language().translate('base-floating-error-description', 'calculator'),
+        name=translator('base-floating-error'),
+        description=translator('base-floating-error-description'),
         error=BaseFloatingPointException
     )
 
 def missing_pint_error_query_result():
-    translator = Language().get_translator('units')
+    translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/convert.svg',
         name=translator('install-pint'),

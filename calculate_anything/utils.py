@@ -1,13 +1,20 @@
+import sys
 import re
 from itertools import combinations
 from .exceptions import MissingSimpleevalException
 
-def is_types(value, *types):
-    return any(map(lambda t: isinstance(value, t), types))
+def is_types(*types):
+    return lambda value: any(map(lambda t: isinstance(value, t), types))
 
-def get_or_default(value, _type, default):
+def is_not_types(*types):
+    return lambda value: not is_types(*types)(value)
+
+def get_or_default(value, _type, default, allowed_values=None):
     try:
-        return _type(value)
+        value = _type(value)
+        if allowed_values and value not in allowed_values:
+            return default
+        return value
     except Exception:
         return default
 
@@ -42,6 +49,25 @@ def or_regex(values, include=True):
     regex = '|'.join(regex)
     if include: regex = '(' + regex + ')'
     return regex
+
+def replace_dict_re_func(replace_dict, sort=True, ignorecase=False):
+    if ignorecase:
+        replace_dict = {k.lower(): v for k, v in replace_dict.items()}
+        case_f = lambda s: s.lower()
+    else:
+        case_f = lambda s: s
+    
+    regex = replace_dict
+    if sort or sys.version_info[:2] < (3, 7):
+        regex = sorted(regex, key=len, reverse=True)
+    regex = r'|'.join(map(re.escape, regex))
+    
+    if ignorecase:
+        regex = re.compile(regex, flags=re.IGNORECASE)
+    else:
+        regex = re.compile(regex)
+    
+    return lambda s: regex.sub(lambda m: replace_dict[case_f(m.group(0))], s)
 
 def hex_to_rgb(hex):
     r, g, b = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))

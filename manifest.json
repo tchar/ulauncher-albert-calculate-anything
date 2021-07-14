@@ -53,7 +53,7 @@
     {
       "id": "api_key",
       "type": "input",
-      "name": "API Key",
+      "name": "Currency API Key",
       "description": "Your fixer.io API key",
       "default_value": ""
     },
@@ -85,6 +85,16 @@
       "name": "Default Cities",
       "desciption": "A comma separated list of cities to display local time",
       "default_value": "New York City US, London GB, Madrid ES, Vancouver CA, Athens GR"
+    },
+    {
+      "id": "unit_conversion_mode",
+      "type": "select",
+      "name": "Unit Conversion mode",
+      "default": "normal",
+      "options": [
+        {"value": "normal", "text": "Normal"},
+        {"value": "crazy", "text": "CRAZY!!!"}
+      ]
     },
     {
       "id": "show_empty_placeholder",

@@ -14,7 +14,7 @@ class QueryHandler(metaclass=Singleton):
         self._handlers = [
             UnitsQueryHandler(),
             CalculatorQueryHandler(),
-            CurrencyQueryHandler(),
+            # CurrencyQueryHandler(),
             PercentagesQueryHandler(),
             TimeQueryHandler(),
             Base10QueryHandler(),

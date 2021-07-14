@@ -15,7 +15,7 @@ def lock(func):
 
 class CurrencyService(metaclass=Singleton):
     def __init__(self):
-        self.default_currencies = []
+        self._default_currencies = []
         self._lock = RLock()
         self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
@@ -23,6 +23,7 @@ class CurrencyService(metaclass=Singleton):
         self._thread_id = 0
         self._is_running = False
         self._enabled = True
+        self._update_callbacks = []
 
     def __get_currencies(self, *currencies, force=False):
         if force or not self._cache.enabled or self._cache.should_update():
@@ -37,6 +38,36 @@ class CurrencyService(metaclass=Singleton):
             currency_rates = self._cache.get_rates(*currencies)
         
         return currency_rates
+
+    @lock
+    def _update_thread(self, thread_id, force=False):
+        if not self._is_running:
+            self._logger.info('Stopping thread (id={}). Service stopped')
+        if thread_id != self._thread_id:
+            self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(thread_id, self._thread_id))
+            return
+        if not self._cache.enabled:
+            self._logger.info('Stopping thread (id={}). Cache not enabled'.format(thread_id))
+            self._is_running = False
+            return
+        try:
+            currency_rates = self.__get_currencies(force=force)
+            for callback in self._update_callbacks:
+                callback(currency_rates)
+        except CurrencyProviderRequestException as e:
+            self._logger.error('Error when contacting provider: {}'.format(e))
+        except MissingRequestsException as e:
+            self._logger.error(e)
+            return
+
+        if not self._provider.had_error:
+            timer_thread = Timer(self._cache.next_update_seconds(), self._update_thread, args=(thread_id,))
+        else:
+            self._cache.clear()
+            timer_thread = Timer(60, self._update_thread, args=(thread_id,))
+
+        timer_thread.setDaemon(True)
+        timer_thread.start()
 
     @property
     def provider_had_error(self):
@@ -74,56 +105,47 @@ class CurrencyService(metaclass=Singleton):
         return self
 
     @lock
-    def get_rates(self, *currencies, force=False):
-        if not self._enabled:
-            self._logger.warning('Service is disabled cannot get rates')
-            return {}
-        try:
-            return self.__get_currencies(*currencies, force=force)
-        except CurrencyProviderRequestException:
-            return {}
-
-    @lock
-    def _update_thread(self, thread_id, force=False):
-        if not self._enabled:
-            self._logger.info('Stipping thread (id={}). Service got disabled')
-        if thread_id != self._thread_id:
-            self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(thread_id, self._thread_id))
-            return
-        if not self._cache.enabled:
-            self._logger.info('Stopping thread (id={}). Cache not enabled'.format(thread_id))
-            self._is_running = False
-            return
-        try:
-            self.__get_currencies(force=force)
-        except CurrencyProviderRequestException as e:
-            self._logger.error('Error when contacting provider: {}'.format(e))
-        except MissingRequestsException as e:
-            self._logger.error(e)
-            return
-
-        if not self._provider.had_error:
-            timer_thread = Timer(self._cache.next_update_seconds(), self._update_thread, args=(thread_id,))
-        else:
-            self._cache.clear()
-            timer_thread = Timer(60, self._update_thread, args=(thread_id,))
-
-        timer_thread.setDaemon(True)
-        timer_thread.start()
-
-    @lock
-    def get_available_currencies(self):
-        try:
-            available_currencies = list(self.__get_currencies().keys())
-        except CurrencyProviderRequestException as e:
-            self._logger.error('Error when contacting provider: {}'.format(e))
-            available_currencies = []
-        return available_currencies
-
-    @lock
     def set_default_currencies(self, default_currencies):
         self._logger.info('Updating default currencies = {}'.format(default_currencies))
-        self.default_currencies =  default_currencies
+        self._default_currencies =  default_currencies
+
+    @property
+    @lock
+    def default_currencies(self):
+        return self._default_currencies
+
+    @lock
+    def add_update_callback(self, callback):
+        self._update_callbacks.append(callback)
+
+    @lock
+    def remove_update_callback(self, callback):
+        callbacks = self._update_callbacks
+        callbacks = [cb for cb in callbacks if cb != callback]
+        self._update_callbacks = callbacks
+    
+    @lock
+    def get_rate_timestamp(self, currency):
+        return self._cache.get_rate_timestamp(currency)
+
+    # @lock
+    # def get_rates(self, *currencies, force=False):
+    #     if not self._enabled:
+    #         self._logger.warning('Service is disabled cannot get rates')
+    #         return {}
+    #     try:
+    #         return self.__get_currencies(*currencies, force=force)
+    #     except CurrencyProviderRequestException:
+    #         return {}
+
+    # @lock
+    # def get_available_currencies(self):
+    #     try:
+    #         available_currencies = list(self.__get_currencies().keys())
+    #     except CurrencyProviderRequestException as e:
+    #         self._logger.error('Error when contacting provider: {}'.format(e))
+    #         available_currencies = []
+    #     return available_currencies
 
     @lock
     def run(self, force=False):
@@ -146,4 +168,9 @@ class CurrencyService(metaclass=Singleton):
     def disable(self):
         self.disable_cache()
         self._enabled = False
+        return self
+
+    @lock
+    def stop(self):
+        self._is_running = False
         return self

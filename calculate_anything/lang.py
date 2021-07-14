@@ -1,7 +1,7 @@
 import os
 import json
 import unicodedata
-from .utils import Singleton
+from .utils import Singleton, replace_dict_re_func
 from .constants import MAIN_DIR
 from .logging_wrapper import LoggingWrapper as logging
 
@@ -22,8 +22,9 @@ class Language(metaclass=Singleton):
     def set(self, lang):
         if lang == self._lang:
             return
-        lang_filepath = os.path.join(MAIN_DIR, 'lang', '{}.json'.format(lang))
+        lang_filepath = os.path.join(MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
         if not os.path.exists(lang_filepath):
+            self._logger.error('Language file does not exist: {}'.format(lang_filepath))
             return
         try:
             with open(lang_filepath) as f:
@@ -40,3 +41,28 @@ class Language(metaclass=Singleton):
         def _translator(word):
             return self.translate(word, mode)
         return _translator
+
+    def add_translation(self, word, translated_word, mode):
+        if mode not in self._data:
+            self._data[mode] = {}
+        self._data[mode][word] = translated_word
+
+    def get_translation_adder(self, mode):
+        def _translation_adder(word, translated_word):
+            self.add_translation(word, translated_word, mode)
+        return _translation_adder
+
+    def replace_all(self, string, mode, ignorecase=True):
+        if mode not in self._data:
+            return string
+        
+        return replace_dict_re_func(
+            self._data[mode],
+            sort=True,
+            ignorecase=ignorecase
+        )(string)
+
+    def get_replacer(self, mode, ignorecase=True):
+        def _replacer(string):
+            return self.replace_all(string, mode, ignorecase)
+        return _replacer

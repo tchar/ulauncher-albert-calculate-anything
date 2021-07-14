@@ -46,14 +46,15 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             is_space = c.strip() == ''
             if is_space: expr += c
             elif c in self._keywords_set: expr += c
+            elif 'j' in c: return '', False
             elif c.isnumeric(): 
                 if prev.isnumeric() and prev_space: return '', False
                 expr += c
-            elif c in ['i', 'j']:
+            elif c == 'i':
                 has_imaginary = True
                 if prev in ['', '(', '+', '-', '*', '/']: expr += '1j'
                 else: expr += 'j'
-            elif c[0] in ['i', 'j']:
+            elif c[0] == 'i':
                 if not c[1:].isnumeric(): return '', True
                 c = c[1:] + c[0]
                 expr += c
@@ -70,7 +71,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def _calculate_boolean_result(values, operators, subqueries):
         fixed_precisions = []
         for value in values:
-            if is_types(value, int, float): value = complex(value, 0)
+            if is_types(int, float)(value): value = complex(value, 0)
             fixed_precision = complex(
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)
@@ -123,7 +124,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         except Exception as e:
             return None
         
-        if not any(map(lambda value: is_types(value, int, float, complex), results)):
+        if not any(map(is_types(int, float, complex), results)):
             return None
 
         if len(results) != 1:

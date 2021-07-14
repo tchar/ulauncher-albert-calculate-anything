@@ -9,7 +9,7 @@ class TimezoneCache(metaclass=Singleton):
         self._data = {}
         self._logger = LoggingWrapper.getLogger(__name__)
         try:
-            with open(os.path.join(MAIN_DIR, 'time', 'timezones.json'), 'r') as f:
+            with open(os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json'), 'r') as f:
                 self._data = json.loads(f.read())
         except Exception as e:
             self._logger.error('Could not load timezone data: {}'.format(e))

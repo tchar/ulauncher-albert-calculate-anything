@@ -1,3 +1,5 @@
+# TODO: To be removed, replaced by CurrencyUnitsCalculation
+
 import locale
 from .base import _Calculation
 from ..query.result import QueryResult

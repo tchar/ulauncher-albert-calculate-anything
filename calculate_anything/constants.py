@@ -13,10 +13,12 @@ PLUS_MINUS_REPLACE = dict((re.escape(k), v) for k, v in PLUS_MINUS_REPLACE.items
 PLUS_MINUS_REGEX_REPLACE = re.compile("|".join(PLUS_MINUS_REPLACE.keys()), flags=re.IGNORECASE)
 
 # Unit conversion regex match
-UNIT_QUERY_REGEX = re.compile(r'^\s*(.*?)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
+UNIT_QUERY_REGEX = re.compile(r'(.*?)\s+(?:to|in)\s+(.*)', flags=re.IGNORECASE)
 # Unit conversion when no target unit specified
-UNIT_QUERY_REGEX_DEFAULT = re.compile(r'^\s*(.*)\s*')
-UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
+# UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
+UNIT_SPLIT_RE = re.compile(r'([A-Za-z_]+)')
+UNIT_CURRENCY_RE = re.compile(r'currency_([A-Za-z]{3})')
+UNIT_ALIASES_RE = re.compile(r'^[a-zA-Z_]+$')
 
 CURRENCY_QUERY_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
 CURRENCY_QUERY_DEFAULT_REGEX = re.compile(r'^\s*(\d+\.?\d*)?\s*(.*?)(?:\s+(?:to|in)?\s*$|\s*$)', flags=re.IGNORECASE)
@@ -43,6 +45,7 @@ TIME_SUBQUERY_DIGITS= re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
 TIME_LOCATION_REPLACE_REGEX = re.compile(r'[\W_]+', flags=re.IGNORECASE|re.UNICODE)
 TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
+TIME_DATETIME_FORMAT_NUMBERS = '%Y-%m-%-d %H:%M'
 TIME_DATE_FORMAT = '%A %-d %B %Y'
 TIME_TIME_FORMAT = '%H:%M:%S'
 

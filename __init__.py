@@ -15,6 +15,8 @@ CACHE = 86400
 DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
 # Default cities to show when converting timezones
 DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'
+# Units conversion mode (normal or crazy)
+UNITS_CONVERSION_MODE = 'normal'
 # Set the following to True if you want to enable placeholder for empty results
 SHOW_EMPTY_PLACEHOLDER = False
 # Below line is the trigger keywords to your choice (put a space after your keyword)
@@ -72,6 +74,7 @@ except ImportError as e:
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
+from calculate_anything.units.service import UnitsService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.query.handlers import (
     UnitsQueryHandler, CalculatorQueryHandler, CurrencyQueryHandler,
@@ -80,36 +83,48 @@ from calculate_anything.query.handlers import (
 )
 from calculate_anything.query import QueryHandler
 from calculate_anything.lang import Language
+from calculate_anything.utils import get_or_default
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
-try:
-    API_KEY = API_KEY or ''
-    CACHE = int(CACHE)
-except (ValueError, TypeError):
-    CACHE = 86400
+API_KEY = API_KEY or ''
+UNITS_CONVERSION_MODE = get_or_default(
+    UNITS_CONVERSION_MODE.lower(),
+    str, 'normal', ['normal', 'crazy']
+)
+if UNITS_CONVERSION_MODE == 'normal':
+    UNITS_CONVERSION_MODE = UnitsService.MODE_NORMAL
+elif UNITS_CONVERSION_MODE == 'crazy':
+    UNITS_CONVERSION_MODE = 'crazy'
+CACHE = get_or_default(CACHE, int, 86400)
 
 TRIGGERS = globals().get('__triggers__') or []
 if isinstance(TRIGGERS, str):
     TRIGGERS = [TRIGGERS]
 
 def initialize():
-    service = CurrencyService()
-    service.set_api_key(API_KEY)
+    currency_service = CurrencyService()
+    units_service = UnitsService()
+    currency_service.set_api_key(API_KEY)
     if CACHE > 0:
-        service.enable_cache(CACHE)
+        currency_service.enable_cache(CACHE)
     else:
-        service.disable_cache()
+        currency_service.disable_cache()
     default_currencies = DEFAULT_CURRENCIES.split(',')
     default_currencies = map(str.strip, default_currencies)
     default_currencies = map(str.upper, default_currencies)
     default_currencies = list(default_currencies)
-    service.set_default_currencies(default_currencies)
-    service.run()
+    currency_service.set_default_currencies(default_currencies)
+
+    units_service.set_unit_conversion_mode(UNITS_CONVERSION_MODE)
 
     default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
     TimezoneService().set_default_cities(default_cities)
 
+    units_service.enable().run()
+    currency_service.enable().run()
+
 def finalize():
+    UnitsService().disable().stop()
     CurrencyService().disable_cache()
 
 def is_trigger(query, index):

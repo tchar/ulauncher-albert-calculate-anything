@@ -1,0 +1,41 @@
+@alias EUR = eur = euro = eurs = euros € 
+@alias JPY = yen = yens = ¥ 
+@alias USD = dollar = dollars = american = american dollars = us dollars = us dollar = us $ = us$ = $
+@alias BRL = R$ 
+@alias BGN = лв 
+@alias KHR = ៛ 
+@alias CNY = C¥ 
+@alias CRC = ₡ 
+@alias CUP = ₱ 
+@alias CZK = Kč 
+@alias DKK = kr 
+@alias DOP = RD$ 
+@alias GBP = £ 
+@alias GHS = ¢ 
+@alias GTQ = Q 
+@alias HNL = L 
+@alias HUF = Ft 
+@alias IDR = Rp 
+@alias INR = rupe = rupee = rupees
+@alias IDR = rupiah 
+@alias MXN = mexican pesos = mexican peso = mexican
+@alias ARS = argentinian pesos = argentinian peso = argentinian
+@alias COP = colombian pesos = colombian peso
+@alias CAD = canadian dollars = canadian dollar = canadian
+@alias ILS = ₪ 
+@alias JMD = J$ 
+@alias KRW = ₩ 
+@alias MKD = ден 
+@alias MYR = RM 
+@alias MZN = MT 
+@alias ANG = ƒ 
+@alias NIO = C$ 
+@alias NGN = ₦ 
+@alias PAB = B/. 
+@alias PYG = Gs 
+@alias PEN = S/. 
+@alias TTD = TT$ 
+@alias UAH = ₴ 
+@alias ZWD = Z$ 
+@alias BTC = bitcoin = bitcoins
+@alias ETH = ether = ehterium
