@@ -35,17 +35,17 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         return unit_from, units_to
 
     def _get_all_possible_units(self, unit_from):
+        matches = UNIT_SPLIT_RE.split(unit_from)
+        if len(matches) in [0, 1]:
+            return
+
         ureg = UnitsService().unit_registry
         replacer = Language().get_replacer('units', ignorecase=True)
 
         unit_from_alt = replacer(unit_from)
-        
         if unit_from_alt != unit_from:
             yield unit_from_alt
 
-        matches = UNIT_SPLIT_RE.split(unit_from)
-        if len(matches) in [0, 1]:
-            return
         expression_fmt = '{}'.join(matches[0::2])
 
         keys_dict = {}
@@ -87,21 +87,19 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             else:
                 expression = expression_fmt.format(*expression)
                 yield expression
+        yield unit_from
 
     def _get_only_one_unit(self, unit_from):
-        translator = Language().get_translator('units')
-        replacer = Language().get_replacer('units', ignorecase=True)
-
-        unit_from_alt = replacer(unit_from)
-        
-        if unit_from_alt != unit_from:
-            yield unit_from_alt
-
         matches = UNIT_SPLIT_RE.split(unit_from)
         if len(matches) in [0, 1]:
             return
 
-        yield unit_from
+        translator = Language().get_translator('units')
+        replacer = Language().get_replacer('units', ignorecase=True)
+
+        unit_from_alt = replacer(unit_from)
+        if unit_from_alt != unit_from:
+            yield unit_from_alt
         
         units = matches[1::2]
         units_alt = []
@@ -118,6 +116,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         unit_from_alt = ''.join(unit_from_alt)
         if unit_from_alt != unit_from:
             yield unit_from_alt
+        yield unit_from
 
     def _get_possible_units(self, unit_from):
         if UnitsService().unit_conversion_mode == UnitsService.MODE_NORMAL:
@@ -159,18 +158,18 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         base_currency = UnitsService().base_currency
         unit_from, units_to = query
         
-        units_from_ureg_set = set()
+        unit_dimensionalities = set()
         units_from_ureg = []
         with ureg.context('currency'):
             for expression in self._get_possible_units(unit_from):
                 unit_from_ureg = self._parse_safe(expression)
                 if unit_from_ureg is None:
                     continue
-                units_from_ureg_str = str(units_from_ureg)
-                if units_from_ureg_str in units_from_ureg_set:
+                unit_from_ureg_dim = unit_from_ureg.dimensionality
+                if unit_from_ureg_dim in unit_dimensionalities:
                     continue
                 units_from_ureg.append(unit_from_ureg)
-                units_from_ureg_set.add(units_from_ureg_str)
+                unit_dimensionalities.add(unit_from_ureg_dim)
 
         if not units_to:
             # Add currency units if compattible with units from and map them to units
@@ -219,7 +218,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 UnitClass = TemperatureUnitsCalculation
             else:
                 UnitClass = UnitsCalculation
-            
+
             items.append(
                 UnitClass(
                     value=unit_converted,

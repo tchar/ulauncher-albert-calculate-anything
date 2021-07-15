@@ -33,13 +33,8 @@ class AlbertLogger:
     def __init__(self, name):
         self._name = name
 
-    @staticmethod
-    def _escape(message):
-        return message.replace('%', '\\%')
-
     def _log(self, func, message, *args):
         message = str(message)
-        message = AlbertLogger._escape(message)
         if args:
             message = message % args
         message = '{}: {}'.format(self._name, message)
@@ -141,7 +136,7 @@ is_oct_trigger = lambda query: is_trigger(query, 5)
 def handleQuery(query):
     if TRIGGERS and not query.isTriggered:
         return
-    query_str = query.string.strip()
+    query_str = query.string
     query.disableSort()
     items = []
     errors_num = 0
@@ -174,6 +169,7 @@ def handleQuery(query):
         ]
     results = QueryHandler().handle(query_str, *handlers)
     for result in results:
+
         errors_num += result.error is not None
         icon = result.icon or 'images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)

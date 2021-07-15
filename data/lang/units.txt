@@ -1,4 +1,4 @@
-@alias kilometer = km
+@alias meter = m
 @alias hour = h
 @alias degree_Celsius = c
 @alias degree_Celsius = celcius
@@ -7,3 +7,8 @@
 @alias degree_Rankine = rankine
 @alias kelvin = k
 @alias byte = b
+@alias gigabyte = gb = gbyte
+@alias megabyte = mb = mbyte
+@alias terabyte = tb = tbyte
+@alias petabyte = pb = pbyte
+@reverse.alias byte / second = bps
