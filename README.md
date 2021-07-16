@@ -18,7 +18,7 @@ See [Features](#features) for supported features, [Contents](#contents) for inst
 
 Calculator for Anything
 - `Currency Converter`: See [Currency](#currency) for examples
-- `Time Converter`: Compute time expressions, convert time to other timezones. See [Time](#time) for examples.
+- `Time Converter`: Convert time to other timezones and compute time expressions or find time remaining until any date-time. See [Time](#time) for examples.
 - `Units Converter`: Compute and Convert units to other units. See [Units](#units) for examples.
 - `Normal Calculator`: Supports functions such as `cos`, `sin`, `tan`. Check [Calculator](#calculator) for examples.
 - `Complex Numbers` Calculator: Also supports Normal Calculator's functions. Check [Calculator](#calculator) for examples.
