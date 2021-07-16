@@ -1,23 +1,41 @@
 {
     "time": {
-        "last-year": "Last year",
-        "next-year": "Next year",
+        "is": "is",
+        "was": "was",
+        "on": "on",
+        "now": "now",
+        "year": "year",
+        "years": "years",
+        "months": "months",
+        "month": "month",
+        "weeks": "weeks",
+        "day": "day",
+        "days": "days",
+        "hour": "hour",
+        "hours": "hours",
+        "minute": "minute",
+        "minutes": "minutes",
+        "second": "second",
+        "seconds": "seconds",
+
+        "last-year": "last year",
+        "next-year": "next year",
         "years-from-now": "years from now",
         "years-ago": "years ago",
         
-        "last-month": "Last month",
-        "next-month": "Next month",
+        "last-month": "last month",
+        "next-month": "next month",
         "months-from-now": "months from now",
         "months-ago": "months ago",
         
-        "last-week": "Last week",
-        "next-week": "Next week",
+        "last-week": "last week",
+        "next-week": "next week",
         "weeks-from-now": "weeks from now",
         "weeks-ago": "weeks ago",
         
-        "yesterday": "Yesterday",
-        "tomorrow": "Tomorrow",
-        "today": "Today",
+        "yesterday": "yesterday",
+        "tomorrow": "tomorrow",
+        "today": "today",
         "days-from-now": "days from now",
         "days-ago": "days ago"
     },
@@ -28,13 +46,13 @@
         "result-imaginary": "Result is an imaginary number",
         "result-dimensionless": "Result has no dimensions",
 
-        "infinity": "Infinity",
+        "infinity": "infinity",
 
         "boolean-result": "Result is a boolean",
 
-        "bytes": "Bytes",
-        "dec": "Dec",
-        "oct": "Oct",
+        "bytes": "bytes",
+        "dec": "dec",
+        "oct": "oct",
         "bin": "bin",
         "hex": "hex"
     },
@@ -63,8 +81,14 @@
         "provider-error": "Currency Provider error. Did you set your API key?",
         "provider-error-description": "Set your API key in the extension preferences",
 
-        "years-overflow": "Hey I'm not a time machine",
-        "years-overflow-description": "Are you trying to crash me?",
+        "date-overflow": "Hey I'm not a time machine",
+        "date-overflow-description": "Are you trying to crash me?",
+
+        "date-add-date": "Hey you can't really add dates together",
+        "date-add-date-description": "Just because you are allowed to, doesn't mean it makes sense",
+
+        "unfully-parsed-date": "I understood",
+        "unfully-parsed-date-description": "You typed",
 
         "boolean-percentage-error": "Boolean in percentage calculation",
         "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",

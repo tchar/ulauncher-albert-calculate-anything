@@ -48,11 +48,13 @@ PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
 
 TIME_QUERY_REGEX = re.compile(r'\s*(now|time)', flags=re.IGNORECASE)
 TIME_QUERY_REGEX_SPLIT = re.compile(
-    r'\s(?:in?|at?)(?:\s|$)', flags=re.IGNORECASE)
+    r'\s(in?|at?|(?:un)?till?)(?:\s|$)', flags=re.IGNORECASE)
 TIME_SUBQUERY_REGEX = re.compile(
     r'.*[^\W_0-9].*', flags=re.IGNORECASE | re.UNICODE)
 TIME_SUBQUERY_DIGITS = re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
+# TIME_PROHIBITTED_CALC = re.compile(
+    # r'(next|last|previous|following|yesterday|tomorrow)[^\+\-\s]+[a-z]', flags=re.IGNORECASE)
 TIME_LOCATION_REPLACE_REGEX = re.compile(
     r'[\W_]+', flags=re.IGNORECASE | re.UNICODE)
 TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'

@@ -4,10 +4,11 @@ from ..query.result import QueryResult
 from ..lang import Language
 from ..exceptions import (
     BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
-    DateOverflowException, WrongBaseException, ZeroDivisionException,
+    DateOverflowException, DateAddDateException, MisparsedTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException, MissingPintException
 )
+from calculate_anything import exceptions
 
 def zero_division_error_query_result():
     translator = Language().get_translator('errors')
@@ -50,12 +51,36 @@ def missing_requests_query_result():
         order=-1
     )
 
-def date_overflow_query_result():
+def date_overflow_error_query_result():
     translator = Language().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
-        name=translator('years-overflow'),
-        description=translator('years-overflow-description'),
+        name=translator('date-overflow'),
+        description=translator('date-overflow-description'),
+        clipboard='',
+        order=0
+    )
+
+def date_add_date_query_result():
+    translator = Language().get_translator('errors')
+    return QueryResult(
+        icon='images/time.svg',
+        name=translator('date-add-date'),
+        description=translator('date-add-date-description'),
+        clipboard='',
+        order=0
+    )
+
+def misparsed_time_exception(exception):
+    translator = Language().get_translator('errors')
+    name = translator('unfully-parsed-date')
+    name = '{}: "{}"'.format(name, exception.extra['parsed_query'])
+    description = translator('unfully-parsed-date-description')
+    description = '{}: "{}"'.format(description, exception.extra['original_query'])
+    return QueryResult(
+        icon='images/time.svg',
+        name=name,
+        description=description,
         clipboard='',
         order=0
     )
@@ -130,7 +155,11 @@ class _Calculation:
                 if self.is_error(MissingRequestsException):
                     return missing_requests_query_result()
                 if self.is_error(DateOverflowException):
-                    return date_overflow_query_result()
+                    return date_overflow_error_query_result()
+                if self.is_error(DateAddDateException):
+                    return date_add_date_query_result()
+                if isinstance(self.error, MisparsedTimeException):
+                    return misparsed_time_exception(self.error)
                 if self.is_error(CurrencyProviderException):
                     return currency_provider_error_query_result()
                 if self.is_error(BooleanComparisonException):

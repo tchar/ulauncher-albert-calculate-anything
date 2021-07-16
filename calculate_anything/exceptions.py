@@ -1,6 +1,10 @@
 # Exceptions for Currency conversion
+class ExtendedException(Exception):
+    def __init__(self, message='', extra=None):
+        super().__init__(message)
+        self.extra = extra
 
-class CurrencyException(Exception):
+class CurrencyException(ExtendedException):
     pass
 
 class CurrencyProviderException(CurrencyException):
@@ -11,12 +15,12 @@ class CurrencyProviderRequestException(CurrencyProviderException):
 
 # Exceptions for unit conversion
 
-class UnitException(Exception):
+class UnitException(ExtendedException):
     pass
 
 # Calculator exceptions
 
-class CalculatorException(Exception):
+class CalculatorException(ExtendedException):
     pass
 
 class ZeroDivisionException(CalculatorException):
@@ -33,7 +37,7 @@ class BaseFloatingPointException(CalculatorException):
 
 # Exceptions for boolean representation in calculator
 
-class BooleanException(Exception):
+class BooleanException(ExtendedException):
     pass
 
 class BooleanComparisonException(BooleanException):
@@ -41,15 +45,21 @@ class BooleanComparisonException(BooleanException):
 
 # Exceptions for Time conversion
 
-class TimeException(Exception):
+class TimeException(ExtendedException):
     pass
 
 class DateOverflowException(TimeException):
     pass
 
+class DateAddDateException(TimeException):
+    pass
+
+class MisparsedTimeException(TimeException):
+    pass
+
 # Exceptions for missing modules
 
-class MissingModuleException(Exception):
+class MissingModuleException(ExtendedException):
     pass
 
 class MissingRequestsException(MissingModuleException):
