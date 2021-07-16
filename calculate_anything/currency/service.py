@@ -74,7 +74,7 @@ class CurrencyService(metaclass=Singleton):
 
     @property
     def provider_had_error(self):
-        return self._provider.had_error
+        return self._provider.had_error or not self._provider.api_key_valid
 
     @lock
     def enable_cache(self, update_frequency):

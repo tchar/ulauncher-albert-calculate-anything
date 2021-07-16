@@ -22,13 +22,16 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def __init__(self):
         self._logger = logging.getLogger(__name__)
 
-    def _items_for_currency_errors(self):
+    def _items_for_currency_errors(self, unit_dimensionalities):
         currency_service = CurrencyService()
         missing_requests = currency_service.enabled and currency_service.missing_requests
         currency_provider_had_error = currency_service.enabled and currency_service.provider_had_error
 
         missing_requests = currency_service.enabled and currency_service.missing_requests
-        currency_provider_had_error = currency_service.enabled and currency_service.provider_had_error
+        currency_provider_had_error = (
+            currency_service.enabled and currency_service.provider_had_error and
+            any(map(lambda d: '[currency]' in d, unit_dimensionalities))
+        )
         if missing_requests:
             item = UnitsCalculation(error=MissingRequestsException, order=-1)
             return [item]
@@ -193,7 +196,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 unit_dimensionalities.add(unit_from_ureg_dim)
 
         items = []
-        items.extend(self._items_for_currency_errors())
+        items.extend(self._items_for_currency_errors(unit_dimensionalities))
 
         if not units_to:
             # Add currency units if compattible with units from and map them to units
