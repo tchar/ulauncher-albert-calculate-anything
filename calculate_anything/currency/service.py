@@ -24,6 +24,7 @@ class CurrencyService(metaclass=Singleton):
         self._is_running = False
         self._enabled = True
         self._update_callbacks = []
+        self._missing_requests = False
 
     def __get_currencies(self, *currencies, force=False):
         if force or not self._cache.enabled or self._cache.should_update():
@@ -32,6 +33,7 @@ class CurrencyService(metaclass=Singleton):
                 currency_rates = self._provider.request_currencies(*currencies, force=force)
             except MissingRequestsException as e:
                 self._cache.clear()
+                self._missing_requests = True
                 raise e
             self._cache.save(currency_rates)
         else:
@@ -58,6 +60,7 @@ class CurrencyService(metaclass=Singleton):
             self._logger.error('Error when contacting provider: {}'.format(e))
         except MissingRequestsException as e:
             self._logger.error(e)
+            self._missing_requests = True
             return
 
         if not self._provider.had_error:
@@ -93,6 +96,11 @@ class CurrencyService(metaclass=Singleton):
     def cache_enabled(self):
         return self._cache.enabled
 
+    @property
+    @lock
+    def enabled(self):
+        return self._enabled
+
     @lock
     def set_api_key(self, api_key):
         self._logger.info('Updating api key = {}'.format(api_key))
@@ -127,6 +135,11 @@ class CurrencyService(metaclass=Singleton):
     @lock
     def get_rate_timestamp(self, currency):
         return self._cache.get_rate_timestamp(currency)
+
+    @property
+    @lock
+    def missing_requests(self):
+        return self._missing_requests
 
     # @lock
     # def get_rates(self, *currencies, force=False):

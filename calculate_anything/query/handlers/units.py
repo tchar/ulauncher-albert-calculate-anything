@@ -4,6 +4,10 @@ try:
     import pint
 except ImportError:
     pint = None
+try:
+    import requests
+except ImportError:
+    requests = None
 from .interface import QueryHandlerInterface
 from ...units import UnitsService
 from ...currency import CurrencyService
@@ -12,11 +16,26 @@ from ...lang import Language
 from ...logging_wrapper import LoggingWrapper as logging
 from ...utils import is_types, Singleton
 from ...constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
-from ...exceptions import MissingPintException
+from ...exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
 
 class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def __init__(self):
         self._logger = logging.getLogger(__name__)
+
+    def _items_for_currency_errors(self):
+        currency_service = CurrencyService()
+        missing_requests = currency_service.enabled and currency_service.missing_requests
+        currency_provider_had_error = currency_service.enabled and currency_service.provider_had_error
+
+        missing_requests = currency_service.enabled and currency_service.missing_requests
+        currency_provider_had_error = currency_service.enabled and currency_service.provider_had_error
+        if missing_requests:
+            item = UnitsCalculation(error=MissingRequestsException, order=-1)
+            return [item]
+        elif currency_provider_had_error:
+            item = UnitsCalculation(error=CurrencyProviderException, order=-1)
+            return [item]
+        return []
 
     @staticmethod
     def _extract_query(query):
@@ -149,7 +168,8 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             return None
 
         if pint is None:
-            return [UnitsCalculation(error=MissingPintException)]
+            item = UnitsCalculation(error=MissingPintException, order=-1)
+            return [item]
         
         query = UnitsQueryHandler._extract_query(query)
         if not query:
@@ -171,6 +191,9 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                     continue
                 units_from_ureg.append(unit_from_ureg)
                 unit_dimensionalities.add(unit_from_ureg_dim)
+
+        items = []
+        items.extend(self._items_for_currency_errors())
 
         if not units_to:
             # Add currency units if compattible with units from and map them to units
@@ -195,7 +218,6 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             units_to_ureg = filter(lambda u: u.magnitude == 1, units_to_ureg)
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
 
-        items = []
         for unit_from_ureg, unit_to_ureg in itertools.product(units_from_ureg, units_to_ureg):
             try:
                 if not unit_from_ureg.is_compatible_with(unit_to_ureg):
