@@ -31,7 +31,7 @@ Calculator for Anything
 
 **The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects. See [docs](docs/API.md) for more. The only python files that use dependencies for these launchers are `main.py`, `__init__.py` in the root of this project.**
 
-Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://github.com/hgrecco/pint) [parsedatetime](https://github.com/bear/parsedatetime) and [fixer.io](https://fixer.io)
+Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://pypi.org/project/Pint/) [parsedatetime](https://pypi.org/project/parsedatetime/) and [pytz](https://pypi.org/project/pytz/) (for parsedatetime) [fixer.io](https://fixer.io)
 Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers.
 
 Optional Dependencies: [babel](https://github.com/python-babel/babel). Installing this will format your results in your language/locale.
@@ -49,7 +49,8 @@ Optional Dependencies: [babel](https://github.com/python-babel/babel). Installin
 
 Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
 ```bash
-pip install requests pint simpleeval parsedatetime
+# You probably have some of them already installed
+pip install requests pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
 pip install babel
@@ -63,7 +64,8 @@ Similarly to `Ulauncher` the same dependencies are are required.
 
 To install the extension for Albert run
 ```bash
-pip install requests pint simpleeval parsedatetime
+# You probably have some of them already installed
+pip install requests pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
 pip install babel
