@@ -207,6 +207,8 @@ If `crazy` mode is enabled in preferences you can convert any currency unit
 You can also add and subtract time
 For example if now is `2021-07-05 14:14:42` then you can use the following
 
+Be careful to use date timespans like `2 years 5 months 2 weeks 3 days 1 hour 4 minutes 3 seconds` and not dates like `December 2022`.
+
 **In the following examples the time returned is accompanied by the date time in the `default cities` you specified in the extension preferences**
 
 - `time`: Returns 2021-07-05 14:14:42 as well as the date time in the default cities specified in settings
@@ -224,7 +226,26 @@ You can use all the commands above followed by `at CITY NAME` or `at CITY NAME, 
 - `time + 2 hours at Madrid`
 - `time + 2 hours at Vancouver, CA`: (There are two Vancouvers, so by specifying CA as returns the Canadian Vancouver)
 - `time + 2 days 3 seconds at Vancouver, Canada`
-- `time + 1 hour + 3 years at Athens, AL`: (Athens AL refenrs to Athens at Alabama)
+- `time + 1 hour + 3 years at Athens, AL`: (Athens AL refers to Athens at Alabama)
+
+#### **Using until**
+
+You can also use the until command (**Experimental**) to calculate duration of time until a specific date
+
+**Note: The midnight keyword shifts one day after, so midnight is considered to belong in the *next* day**
+
+In the following examples you can specify a specific date and time or say for example a number of years months etc.
+
+Keywords such as `a/next/last/previous/ago`, `years/months/weeks/days/hours/minutes/seconds`, `morning/noon/afternoon/evening/night/midnight`, `tomorrow/yesterday` and the combination of those will work like in the normal mode.
+
+- `time until December 31 midnight`: Prints remaining days, hours minutes until January 00:00:00 (end of day for December)
+- `time until midnight`: Prints remaining hours minutes seconds until midnight for this day (midnight is at 00:00:00)
+- `time until tomorrow`: Day starts at 09:00
+- `time until tomorrow evening`: Hours/Days until tomorrow at 18:00 
+- `time until a year ago`: Negative result
+- `time until 2000000 year`: Easter egg
+
+And many more combinations
 
 ### Units
 
