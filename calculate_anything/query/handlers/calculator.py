@@ -12,8 +12,7 @@ from ...calculation import Calculation, BooleanCalculation
 from ...utils import is_types, Singleton
 from ...exceptions import MissingSimpleevalException, ZeroDivisionException, BooleanComparisonException
 from ...constants import (
-    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REPLACE,
-    CALCULATOR_QUERY_REPLACE, CALCULATOR_QUERY_REGEX_REPLACE,
+    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE_FUNC,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
 class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
@@ -102,7 +101,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         if CALCULATOR_REGEX_REJECT.match(query):
             return None
 
-        query = CALCULATOR_QUERY_REGEX_REPLACE.sub(lambda m: CALCULATOR_QUERY_REPLACE[re.escape(m.group(0))], query)
+        query = CALCULATOR_QUERY_REGEX_REPLACE_FUNC(query)
         query, _ = self.parse_expression(query)
         if not query:
             return None

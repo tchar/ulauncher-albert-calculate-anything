@@ -13,7 +13,7 @@ from ...utils import Singleton, partition
 from ...logging_wrapper import LoggingWrapper
 from ...constants import (
     TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
-    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REPLACE, PLUS_MINUS_REGEX_REPLACE,
+    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REGEX_REPLACE_FUNC,
     TIME_LOCATION_REPLACE_REGEX
 )
 
@@ -76,15 +76,17 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             order += 1
         return items
 
+
     def handle(self, query, try_again=True):
         if parsedatetime is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
+                order=-1
             )
             return [result]
             
         query = query.lower()
-        query = PLUS_MINUS_REGEX_REPLACE.sub(lambda m: PLUS_MINUS_REPLACE[re.escape(m.group(0))], query)
+        query = PLUS_MINUS_REGEX_REPLACE_FUNC(query)
 
         if len(TIME_QUERY_REGEX.findall(query)) != 1:
             return

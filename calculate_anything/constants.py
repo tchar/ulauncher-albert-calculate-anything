@@ -1,6 +1,7 @@
 import os
 import re
 import calculate_anything
+from .utils import replace_dict_re_func
 
 XDG_FALLBACK = os.path.join(os.getenv('HOME'), '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
@@ -8,9 +9,7 @@ CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
 DATA_FILE = os.path.join(CACHE_DIR, 'data.json')
 
 # Replace plus with + and minus with -
-PLUS_MINUS_REPLACE = {'plus': '+', 'minus': '-'}
-PLUS_MINUS_REPLACE = dict((re.escape(k), v) for k, v in PLUS_MINUS_REPLACE.items())
-PLUS_MINUS_REGEX_REPLACE = re.compile("|".join(PLUS_MINUS_REPLACE.keys()), flags=re.IGNORECASE)
+PLUS_MINUS_REGEX_REPLACE_FUNC = replace_dict_re_func({'plus': '+', 'minus': '-'}, ignorecase=True)
 
 # Unit conversion regex match
 UNIT_QUERY_REGEX = re.compile(r'(.*?)\s+(?:to|in)\s+(.*)', flags=re.IGNORECASE)
@@ -28,9 +27,7 @@ EMPTY_AMOUNT = re.compile(r'^\s*$')
 CALCULATOR_ERROR = 1e-10
 CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/|==|[^A-Za-z]is[^A-Za-z]).*')
 CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
-CALCULATOR_QUERY_REPLACE = {'mod ': '%', 'div ': '//', '^': '**', '>=': '>=', '<=': '<=', '=': '=='}
-CALCULATOR_QUERY_REPLACE = dict((re.escape(k), v) for k, v in CALCULATOR_QUERY_REPLACE.items())
-CALCULATOR_QUERY_REGEX_REPLACE = re.compile(r'|'.join(CALCULATOR_QUERY_REPLACE.keys()))
+CALCULATOR_QUERY_REGEX_REPLACE_FUNC = replace_dict_re_func({'mod ': '%', 'div ': '//', '^': '**', '>=': '>=', '<=': '<=', '=': '=='}, ignorecase=True)
 CALCULATOR_REPLACE_LEADING_ZEROS = re.compile(r'(^|[\=\+\-\*\/\%])0+([1-9])')
 CALCULATOR_QUERY_SPLIT_EQUALITIES= re.compile(r'(==|>=|<=|>|<)')
 
