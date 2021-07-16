@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import unicodedata
 from .utils import Singleton, replace_dict_re_func
 from .constants import MAIN_DIR
@@ -59,7 +60,7 @@ class Language(metaclass=Singleton):
         return replace_dict_re_func(
             self._data[mode],
             sort=True,
-            ignorecase=ignorecase
+            flags=re.IGNORECASE if ignorecase else 0
         )(string)
 
     def get_replacer(self, mode, ignorecase=True):

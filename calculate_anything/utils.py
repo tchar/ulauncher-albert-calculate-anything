@@ -73,8 +73,8 @@ def or_regex(values: Iterable[str], include: Optional[bool] = True) -> str:
 
 def replace_dict_re_func(replace_dict: Dict[str, str],
                          sort: Optional[bool] = True,
-                         ignorecase: Optional[bool] = False) -> Callable[[str], str]:
-    if ignorecase:
+                         flags: int=0) -> Callable[[str], str]:
+    if flags & re.IGNORECASE:
         replace_dict = {k.lower(): v for k, v in replace_dict.items()}
         def case_f(s): return s.lower()
     else:
@@ -85,11 +85,7 @@ def replace_dict_re_func(replace_dict: Dict[str, str],
         regex = sorted(regex, key=len, reverse=True)
     regex = r'|'.join(map(re.escape, regex))
 
-    if ignorecase:
-        regex = re.compile(regex, flags=re.IGNORECASE)
-    else:
-        regex = re.compile(regex)
-
+    regex = re.compile(regex, flags=flags)
     return lambda s: regex.sub(lambda m: replace_dict[case_f(m.group(0))], s)
 
 

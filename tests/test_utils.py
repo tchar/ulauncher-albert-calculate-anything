@@ -1,3 +1,4 @@
+import re
 import pytest
 from collections import OrderedDict
 import calculate_anything.utils as utils
@@ -152,8 +153,8 @@ def test_replace_dict_re_func():
 
     # Test ignore case
     d = {'ABCD': '1', 'efgh': '2'}
-    assert f(d, ignorecase=False)(s) == 'abcd2'
-    assert f(d, ignorecase=True)(s) == '12'
+    assert f(d, flags=0)(s) == 'abcd2'
+    assert f(d, flags=re.IGNORECASE)(s) == '12'
 
     # Test unicode
     s_unicode = 'αβγδεηζθ'
