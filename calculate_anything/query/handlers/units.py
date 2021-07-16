@@ -35,10 +35,6 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         return unit_from, units_to
 
     def _get_all_possible_units(self, unit_from):
-        matches = UNIT_SPLIT_RE.split(unit_from)
-        if len(matches) in [0, 1]:
-            return
-
         ureg = UnitsService().unit_registry
         replacer = Language().get_replacer('units', ignorecase=True)
 
@@ -46,6 +42,11 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         if unit_from_alt != unit_from:
             yield unit_from_alt
 
+       
+        matches = UNIT_SPLIT_RE.split(unit_from)
+        if len(matches) in [0, 1]:
+            return
+        
         expression_fmt = '{}'.join(matches[0::2])
 
         keys_dict = {}
@@ -90,16 +91,16 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         yield unit_from
 
     def _get_only_one_unit(self, unit_from):
-        matches = UNIT_SPLIT_RE.split(unit_from)
-        if len(matches) in [0, 1]:
-            return
-
         translator = Language().get_translator('units')
         replacer = Language().get_replacer('units', ignorecase=True)
 
         unit_from_alt = replacer(unit_from)
         if unit_from_alt != unit_from:
             yield unit_from_alt
+       
+        matches = UNIT_SPLIT_RE.split(unit_from)
+        if len(matches) in [0, 1]:
+            return
         
         units = matches[1::2]
         units_alt = []
