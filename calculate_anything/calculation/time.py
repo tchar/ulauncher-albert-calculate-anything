@@ -1,4 +1,3 @@
-from datetime import datetime
 from .base import _Calculation
 from ..lang import Language
 from ..constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
