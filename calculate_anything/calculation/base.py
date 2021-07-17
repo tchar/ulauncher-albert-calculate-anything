@@ -8,7 +8,6 @@ from ..exceptions import (
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException, MissingPintException
 )
-from calculate_anything import exceptions
 
 def zero_division_error_query_result():
     translator = Language().get_translator('errors')
@@ -26,7 +25,8 @@ def missing_simpleeval_query_result():
         clipboard='pip install simpleeval',
         name=translator('install-simpleeval'),
         description=translator('install-simpleeval-description'),
-        error=MissingSimpleevalException
+        error=MissingSimpleevalException,
+        order=-1
     )
 
 def missing_parsedatetime_query_result():

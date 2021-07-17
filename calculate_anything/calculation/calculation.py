@@ -4,7 +4,7 @@ from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
 from ..constants import CALCULATOR_ERROR
-from ..utils import or_regex
+from ..utils import replace_dict_re_func
 
 class Calculation(_Calculation):
     VALUE_UNKNOWN = -1
@@ -38,8 +38,9 @@ class Calculation(_Calculation):
 
     @staticmethod
     def fix_number_precision(number):
-        if cmath.isclose(number, 0, abs_tol=CALCULATOR_ERROR):
-            return 0
+        number_dec = number % 1
+        if cmath.isclose(number_dec, 0, abs_tol=CALCULATOR_ERROR):
+            return int(number)
         return number
 
     def get_description(self):
@@ -47,37 +48,35 @@ class Calculation(_Calculation):
 
         value_type = self.value_type
         if value_type == Calculation.VALUE_IMAGINARY:
-            return translator('result-imaginary')
+            return translator('result-imaginary').capitalize()
         if value_type == Calculation.VALUE_COMPLEX:
-            return translator('result-complex')
+            return translator('result-complex').capitalize()
         return ''
 
     def format_query(self):
         def sub_i(match):
             group = match.group(0).lstrip()
             if group.startswith('1j'):
-                return ' i '
-            return ' ' + group.replace('j', 'i')
+                return 'i'
+            return group.replace('j', 'i')
         
         replace_special = {
             '%': 'mod',
             '//': 'div',
             '**': '^',
             '*': '×',
-            ' ': '',
             'sqrt': '√',
             'pi': 'π',
-            'tau': 'τ'
+            'tau': 'τ',
+            '==': '='
         }
 
         query = self.query
-        query = re.sub(or_regex(replace_special), lambda m: replace_special[m.group(0)], query)
-        query = re.split(r'(\/\/|[\+\-\/\*\%\^])', query)
-        # query = map(lambda s: 'π' if s == 'pi' else s, query)
-        # query = map(lambda s: 'τ' if s == 'tau' else s, query)
+        query = re.sub(r'\d+j', sub_i, query)
+        query = re.split(r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query)
+        query = map(str.strip, query)
         query = ' '.join(query)
-        query = re.sub(r'(^|\s)\d+j(\s|$)', sub_i, query)
-        query = re.sub(r'(\/\/|\*\*|\%|\*)', lambda m: replace_special[m.group(0)], query)
+        query = replace_dict_re_func(replace_special, sort=True)(query)
         return query
 
     def format(self):
@@ -106,6 +105,14 @@ class Calculation(_Calculation):
                 name = '{:g} + {:g}i'.format(real, imag)
         return name
 
+    def get_value(self):
+        value = self.value
+        value_type = self.value_type
+
+        if value_type == Calculation.VALUE_REAL:
+            return Calculation.fix_number_precision(value.real)
+        return value
+            
     @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
@@ -119,17 +126,24 @@ class Calculation(_Calculation):
             name=name,
             description=description,
             clipboard=name,
-            value=self.value,
+            value=self.get_value(),
             order=self.order
         )
 
 class BooleanCalculation(Calculation):
     @Calculation.Decorators.handle_error_results
     def to_query_result(self):
+        translator = Language().get_translator('calculator')
         result = str(self.value).lower()
+    
+        description = self.format_query()
+        result_is_bool_str = translator('result-boolean').capitalize()
+        description = '{} ({})'.format(description, result_is_bool_str)
+
         return QueryResult(
             icon='images/icon.svg',
             name=result,
-            description=Language().translate('boolean-result', 'calculator'),
-            clipboard=result
+            description=description,
+            clipboard=result,
+            value=self.value
         )

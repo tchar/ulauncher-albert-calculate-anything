@@ -42,13 +42,13 @@
     "calculator": {
         "query-boolean": "Query has boolean representation (1 = True, 0 = False)",
         
-        "result-complex": "Result is a complex number",
-        "result-imaginary": "Result is an imaginary number",
-        "result-dimensionless": "Result has no dimensions",
+        "result-complex": "result is a complex number",
+        "result-imaginary": "result is an imaginary number",
+        "result-dimensionless": "result has no dimensions",
+        "result-boolean": "Result is a boolean",
 
         "infinity": "infinity",
 
-        "boolean-result": "Result is a boolean",
 
         "bytes": "bytes",
         "dec": "dec",
