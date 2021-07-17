@@ -12,19 +12,57 @@ clear_all () {
     run_xdotool
 }
 
-sleep_small=0.02
-sleep_big=2
-if [ "$1" == "ulauncher" ]; then
-    ulauncher
-elif [ "$1" == "albert" ]; then
-    albert show
-else
-    exit
-fi
-sleep 0.05
-clear_all
-wmctrl -a "Ulauncher - Application Launcher"
-sleep 4.4
+#! /bin/bash
+
+setup_peek() {
+	launcher_info=$(xdotool search --onlyvisible --class "$launcher_class" getwindowgeometry --shell)
+	eval $launcher_info
+    launcher_screen=$SCREEN
+    launcher_id=$WINDOW
+    launcher_x=$X
+    launcher_y=$Y
+    launcher_w=$WIDTH
+    launcher_h=$HEIGHT
+    
+	peek_id=$(xdotool search --onlyvisible --class Peek)
+    if [ -z "$peek_id" ]; then
+		peek &>/dev/null &
+		sleep 0.1
+    	peek_id=$(xdotool search --onlyvisible --class Peek)
+	fi
+	move_x=$((launcher_x - 720 / 2 + launcher_w / 2 ))
+	move_y=$((launcher_y - pad_y ))
+    xdotool windowsize $peek_id 720 480
+    xdotool windowmove $peek_id $move_x $move_y
+}
+
+setup() {
+    if [ "$launcher_name" == "ulauncher" ]; then
+        ulauncher
+        launcher_class="Ulauncher"
+        pad_y=55
+    elif [ "$launcher_name" == "albert" ]; then
+        albert show
+        launcher_class="albert"
+        pad_y=70
+    else
+        echo "No launcher provided"
+        exit
+    fi
+
+    sleep_small=0.02
+    sleep_big=2
+    sleep 0.1
+    setup_peek
+
+    xdotool windowfocus $launcher_id
+    peek --start
+    sleep 3.5
+}
+
+finalize() {
+    peek --stop
+}
 
 demo_currency(){
     cmd="equal space"
@@ -182,7 +220,11 @@ demo_exit() {
 
     keys=( $cmd A n d space s o space m u c h space m o r e )
     run_xdotool
+    sleep $sleep_big
 }
+
+launcher_name=$1
+setup
 
 # Currency
 demo_currency
@@ -204,3 +246,5 @@ demo_base_n_calculator
 
 # Exit
 demo_exit
+
+finalize
