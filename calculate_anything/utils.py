@@ -1,12 +1,19 @@
+import importlib
 from typing import (
     Any, Callable, Collection, Container, Dict,
-    Generator, Iterable, List, Optional, Tuple, Type, Union
+    Generator, Iterable, List, Optional, Tuple, Type, Union,
 )
+from types import ModuleType
 import sys
 import re
 from itertools import combinations
 from .exceptions import MissingSimpleevalException
 
+def get_module(name: str) -> Union[None, ModuleType]:
+    try:
+        return importlib.import_module(name)
+    except ModuleNotFoundError:
+        return None
 
 def is_types(*types: List[Type[Any]]) -> bool:
     return lambda value: any(map(lambda t: isinstance(value, t), types))

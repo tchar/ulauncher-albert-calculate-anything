@@ -4,6 +4,11 @@ from collections import OrderedDict
 import calculate_anything.utils as utils
 from calculate_anything.exceptions import MissingSimpleevalException
 
+def test_get_module():
+    assert utils.get_module('os') is not None
+    assert utils.get_module('time') is not None
+    assert utils.get_module('some module that does not exist') is None
+    assert utils.get_module('some other module') is None
 
 @pytest.mark.parametrize('reverse', [False, True])
 def test_is_types(reverse):
