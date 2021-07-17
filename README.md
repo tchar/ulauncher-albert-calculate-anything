@@ -102,7 +102,7 @@ You can select from different currency providers. Supported providers are:
 - [fixer.io](https://fixer.io/): You need an API Key (see [Set API Key](#set-api-key)). Get a free one at https://fixer.io/signup (go to your `fixer.io` dashboard and get your API key)
 - [European Central Bank](https://www.ecb.europa.eu/home/html/index.en.html): No API key is requred, supports very few currencies
 
-- ULauncher: Select one in `Currency Provider`
+- ULauncher: Select one in currency provider
 - Albert: Modify the `CURRENCY_PROVIDER` in `__init__.py` to one of [`fixerio`, `ecb` (European Central Bank)]
 
 ### Set API Key
@@ -114,7 +114,7 @@ In order for the currency conversion to work for providers that need an API Key,
 
 ### Cache
 
-For currency conversion you can enable the cache (located by default at `~/.cache/extension_calculate_anything`) for a minimum of 1 day up to 1 year. This will store the results fetched by `fixer.io` to prevent redundant requests. This is especially helpful if you have a free plan on `fixer.io`. It will also display the results faster, since no request is made. If all requested currencies have been cached, not request is made to `fixer.io`
+For currency conversion you can enable the cache (located by default at `~/.cache/extension_calculate_anything`) for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, not request is made.
 
 - Ulauncher: Edit `Currency Cache` in the extension preferences
 - Albert: Edit `CACHE=86400` in `__init__.py` and set it to your interval in seconds
