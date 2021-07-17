@@ -1,15 +1,14 @@
 import locale
 from datetime import datetime
-try:
-    import babel
-except ImportError:
-    babel = None
-
+import re
 try:
     import babel.units as babel_units
 except ImportError:
     babel_units = None
-
+try:
+    import babel.numbers as babel_numbers
+except ImportError:
+    babel_numbers = None
 from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
@@ -45,57 +44,79 @@ class UnitsCalculation(_Calculation):
         return unit.dimensionality == '[currency]'
 
     def _format_babel(self):
-        if not babel:
+        # TODO: Fix translation with ratios
+        if not babel_units:
             raise Exception('Babel Missing')
         _locale = locale.getlocale()[0]
 
-        name = self.value.format_babel(locale=_locale, spec='g')
+        if not self.value.dimensionless:
+            name = self.value.format_babel(locale=_locale, spec='g')
+        else:
+            name = '{:g}'.format(self.value.magnitude)
         if self.rate is None:
             return name, ''
 
-        unit_from_name = self.unit_from.format_babel(locale=_locale, spec='g')
-        rate = self.rate.format_babel(locale=_locale, spec='g')
+        if not self.unit_from.dimensionless:
+            unit_from_name = self.unit_from.format_babel(
+                locale=_locale, spec='g')
+        else:
+            unit_from_name = '{:g}'.format(self.unit_from)
 
-        description = '1 {} = {}'.format(unit_from_name, rate)
+        rate = self.rate.format_babel(locale=_locale, spec='g')
+        if self.unit_from != self.unit_to:
+            description = '1 {} = {}'.format(unit_from_name, rate)
+        else:
+            description = ''
+
         return name, description
 
     def format(self):
         use_translator = True
-        if babel:
+        if babel_units:
             try:
                 name, description = self._format_babel()
                 use_translator = False
-            except Exception:
+            except Exception as e:
                 pass
 
+        translator = Language().get_translator('units')
         if use_translator:
-            translator = Language().get_translator('units')
-
             unit_name = str(self.value.units)
-            unit_to_name = str(self.unit_to)
 
             unit_name = translator(unit_name)
             name = '{:g} {}'.format(self.value.magnitude, unit_name)
 
-            if self.rate is not None:
-                unit_to_name = translator(unit_name)
-                description = '{:g} {}'.format(
-                    self.rate.magnitude, unit_to_name)
+            if self.rate is not None and self.unit_from != self.unit_to:
+                unit_from_name = str(self.unit_from)
+                description = '1 {} = {:g} {}'.format(
+                    unit_from_name, self.rate.magnitude, unit_name)
             else:
                 description = ''
+
+        if not self.value.dimensionless:
+            dimensionality = str(self.value.dimensionality)
+            dimensionality = re.sub(
+                r'\[(.*?)\]', lambda s: translator(s.group(0)[1:-1]), dimensionality)
+        else:
+            dimensionality = ''
+
+        if description and dimensionality:
+            description = '{} • [ {} ]'.format(description, dimensionality)
+        elif dimensionality:
+            description = '[ {} ]'.format(dimensionality)
+        else:
+            description = ''
 
         replace_func = replace_dict_re_func({'**': '^', '_': ' '}, sort=False)
         name = replace_func(name)
         description = replace_func(description)
+        description = description
 
         return name, description
 
     @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name, description = self.format()
-
-        if self.unit_from == self.unit_to:
-            description = ''
 
         descriptions = [description]
         if UnitsCalculation.is_strictly_dimensionless(self.value):
@@ -134,7 +155,7 @@ class TemperatureUnitsCalculation(UnitsCalculation):
             name = '{:g} {}'.format(self.value.magnitude, unit_name)
 
         name = replace_dict_re_func({'**': '^', '_': ' '}, sort=False)(name)
-        return name, ''
+        return name, '[temperature]'
 
 
 class CurrencyUnitsCalculation(UnitsCalculation):
@@ -144,20 +165,46 @@ class CurrencyUnitsCalculation(UnitsCalculation):
                          rate=rate, unit_from=unit_from, unit_to=unit_to)
         self.update_timestamp = update_timestamp
 
+    @staticmethod
+    def _currency_alias(currency_name):
+        try:
+            if babel_numbers.is_currency(currency_name):
+                return babel_numbers.get_currency_name(currency_name)
+        except Exception:
+            pass
+        return currency_name
+
     def format(self):
+        def currency_alias_f(m):
+            currency = m.group(0)[-3:]
+            currency_alias = CurrencyUnitsCalculation._currency_alias(currency)
+            if currency == currency_alias:
+                return currency
+            return '{} ({})'.format(currency, currency_alias)
+
         replace_func = replace_dict_re_func(
             {'currency_': '', '**': '^', '_': ' '}, sort=False)
 
-        unit_name = replace_func(str(self.value.units))
+        unit_name = str(self.value.units)
+        unit_name = replace_func(unit_name)
+        if babel_units is not None:
+            unit_name_alias = re.sub(r'([a-zA-Z]{3})', currency_alias_f, unit_name)
+        else:
+            unit_name_alias = unit_name
+        unit_name, clipboard = unit_name_alias, unit_name
         converted_amount = locale.currency(
             self.value.magnitude, symbol='', grouping=True)
 
         name = '{} {}'.format(converted_amount, unit_name)
+        clipboard = '{} {}'.format(converted_amount, clipboard)
         if self.rate is None:
             return name, ''
 
-        unit_from_name = replace_func(str(self.unit_from))
-        unit_to_name = replace_func(str(self.unit_to))
+        unit_from_name = str(self.unit_from)
+        unit_from_name = replace_func(unit_from_name)
+
+        unit_to_name = str(self.unit_to)
+        unit_to_name = replace_func(unit_to_name)
 
         rate_amount = '{:.6f}'.format(self.rate.magnitude)
 
@@ -168,11 +215,11 @@ class CurrencyUnitsCalculation(UnitsCalculation):
                 TIME_DATETIME_FORMAT_NUMBERS)
             description = '{} as of {}'.format(description, date)
 
-        return name, description
+        return name, description, clipboard
 
     @UnitsCalculation.Decorators.handle_error_results
     def to_query_result(self):
-        name, description = self.format()
+        name, description, clipboard = self.format()
 
         if self.unit_from == self.unit_to:
             description = ''
@@ -193,7 +240,7 @@ class CurrencyUnitsCalculation(UnitsCalculation):
             icon=icon,
             name=name,
             description=description,
-            clipboard=name,
+            clipboard=clipboard,
             value=self.value,
             order=self.order,
         )

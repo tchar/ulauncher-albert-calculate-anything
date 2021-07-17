@@ -178,6 +178,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         base_currency = UnitsService().base_currency
         unit_from, units_to = query
         
+        unit_from_ureg_currency = None
         unit_dimensionalities = set()
         units_from_ureg = []
         with ureg.context('currency'):
@@ -188,6 +189,8 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 unit_from_ureg_dim = unit_from_ureg.dimensionality
                 if unit_from_ureg_dim in unit_dimensionalities:
                     continue
+                if unit_from_ureg.dimensionality == '[currency]':
+                    unit_from_ureg_currency = unit_from_ureg.units
                 units_from_ureg.append(unit_from_ureg)
                 unit_dimensionalities.add(unit_from_ureg_dim)
 
@@ -198,15 +201,18 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             # Add currency units if compattible with units from and map them to units
             units_to_curr = CurrencyService().default_currencies
             units_to_curr = map(lambda s: 'currency_{}'.format(s), units_to_curr)
+            units_to_curr = filter(lambda s: s != str(unit_from_ureg_currency), units_to_curr)
             units_to_curr = map(ureg.parse_unit_name, units_to_curr)
             units_to_curr = map(lambda u: ' '.join(u[0]) if u else '', units_to_curr)
             units_to_curr = map(ureg.parse_units, units_to_curr)
             units_to_curr = filter(base_currency.is_compatible_with, units_to_curr)
 
+            units_to_curr_extra = [unit_from_ureg_currency] if unit_from_ureg_currency else []
+
             # Add all units from
             units_to_rest = filter(lambda u: not base_currency.is_compatible_with(u), units_from_ureg)
             units_to_rest = map(lambda u: u.units, units_to_rest)
-            units_to_ureg = itertools.chain(units_to_curr, units_to_rest)
+            units_to_ureg = itertools.chain(units_to_curr, units_to_curr_extra, units_to_rest)
         else:
             # Map to units and filter out if not compatible
             units_to_ureg = map(self._get_possible_units, units_to)
@@ -216,6 +222,9 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             # units_to_ureg = filter(lambda u: not u.units.unitless, units_to_ureg)
             units_to_ureg = filter(lambda u: u.magnitude == 1, units_to_ureg)
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
+
+            if unit_from_ureg_currency:
+                units_to_ureg = itertools.chain(units_to_ureg, [unit_from_ureg_currency])
 
         for unit_from_ureg, unit_to_ureg in itertools.product(units_from_ureg, units_to_ureg):
             try:

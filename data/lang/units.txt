@@ -1,18 +1,30 @@
 @alias picometer = pm
 @alias nanometer = nm
-@alias micrometer = um
+@alias micrometer = um = μm
 @alias millimeter = mm
 @alias centimeter = cm
 @alias decimeter = dm
 @alias meter = m
 @alias kilometer = km
+
+@alias picogram = pg
+@alias nanogram = ng
+@alias microgram = ug = μg
+@alias milligram = mg
+@alias centigram = cg
+@alias decigram = dg
+@alias gram = g
+@alias kilogram = kg
+
 @alias hour = h
+
 @alias degree_Celsius = c
 @alias degree_Celsius = celcius
 @alias degree_Fahrenheit = f
 @alias degree_Fahrenheit = farenheit
 @alias degree_Rankine = rankine
 @alias kelvin = k
+
 @alias byte = b
 @alias gigabyte = gb = gbyte
 @alias megabyte = mb = mbyte
