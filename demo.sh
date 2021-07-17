@@ -1,15 +1,97 @@
 #!/bin/bash
 run_xdotool () {
-    for key in "${keys[@]}"
-    do
-        xdotool key $key
+    for (( i=0; i<${#keys}; i++ )); do
+		key=${keys:$i:1}
+		if [ "$key" == " " ]; then
+			xdotool_key="space"
+		elif [ "$key" == "\t" ]; then
+			xdotool_key="Tab"
+		elif [ "$key" == "\n" ]; then
+			xdotool_key="Return"
+		elif [ "$key" == "\`" ]; then
+			xdotool_key="grave"
+		elif [ "$key" == "~" ]; then
+			xdotool_key="asciitilde"
+		elif [ "$key" == "!" ]; then
+			xdotool_key="exclam"
+		elif [ "$key" == "@" ]; then
+			xdotool_key="at"
+		elif [ "$key" == "#" ]; then
+			xdotool_key="numbersign"
+		elif [ "$key" == "$" ]; then
+			xdotool_key="dollar"
+		elif [ "$key" == "%" ]; then
+			xdotool_key="percent"
+		elif [ "$key" == "^" ]; then
+			xdotool_key="asciicircum"
+		elif [ "$key" == "\&" ]; then
+			xdotool_key="ambersand"
+		elif [ "$key" == "*" ]; then
+			xdotool_key="asterisk"
+		elif [ "$key" == "(" ]; then
+			xdotool_key="parenleft"
+		elif [ "$key" == ")" ]; then
+			xdotool_key="parenright"
+		elif [ "$key" == "-" ]; then
+			xdotool_key="minus"
+		elif [ "$key" == "_" ]; then
+			xdotool_key="underscore"
+		elif [ "$key" == "=" ]; then
+			xdotool_key="equal"
+		elif [ "$key" == "+" ]; then
+			xdotool_key="plus"
+		elif [ "$key" == "[" ]; then
+			xdotool_key="bracketleft"
+		elif [ "$key" == "{" ]; then
+			xdotool_key="braceleft"
+		elif [ "$key" == "]" ]; then
+			xdotool_key="bracketright"
+		elif [ "$key" == "}" ]; then
+			xdotool_key="braceright"
+		elif [ "$key" == "\\" ]; then
+			xdotool_key="backslash"
+		elif [ "$key" == "|" ]; then
+			xdotool_key="bar"
+		elif [ "$key" == ";" ]; then
+			xdotool_key="semicolon"
+		elif [ "$key" == ":" ]; then
+			xdotool_key="colon"
+		elif [ "$key" == "\'" ]; then
+			xdotool_key="apostrophe"
+		elif [ "$key" == "\"" ]; then
+			xdotool_key="quotedbl"
+		elif [ "$key" == "," ]; then
+			xdotool_key="comma"
+		elif [ "$key" == "<" ]; then
+			xdotool_key="less"
+		elif [ "$key" == "." ]; then
+			xdotool_key="period"
+		elif [ "$key" == ">" ]; then
+			xdotool_key="greater"
+		elif [ "$key" == "/" ]; then
+			xdotool_key="slash"
+		elif [ "$key" == "?" ]; then
+			xdotool_key="question"
+		else
+			xdotool_key=$key
+		fi
+		xdotool key $xdotool_key
         sleep $sleep_small
-    done
+	done
 }
 
-clear_all () {
-    keys=( ctrl+a BackSpace )
-    run_xdotool
+clear_launcher () {
+    if [ -z "$1" ]; then    
+        xdotool key ctrl+a
+        xdotool key BackSpace
+        sleep $sleep_small
+    else
+        for (( c=1; c<=$1; c++ ));
+        do
+            xdotool key BackSpace
+            sleep $sleep_small
+        done
+    fi
 }
 
 #! /bin/bash
@@ -65,160 +147,148 @@ finalize() {
 }
 
 demo_currency(){
-    cmd="equal space"
-
-    keys=( $cmd 5 0 0 space dollar )
+    keys="= 500 $"
     run_xdotool
     sleep $sleep_big
 
-    keys=( space t o space E U R comma space b i t c o i n comma space c a n a d i a n comma space m e x i c a n  )
+    keys=" to EUR, bitcoin, canadian, mexican"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 }
 
 demo_time(){
-    cmd="t i m e space"
-
-    keys=($cmd )
+    keys="time "
     run_xdotool
     sleep $sleep_big
 
-    keys=( a t space P a r i s space F r a n c e )
+    keys="at Paris France"
     run_xdotool
     sleep $sleep_big
 
-    keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
-    run_xdotool
-    keys=( p l u s space 2 space h o u r s space 3 space m i n space a t space P r a g u e )
-    run_xdotool
-    sleep $sleep_big
-
-    keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace minus space 2 space y e a r s space 5 space m o n t h s )
+    clear_launcher 15
+    keys="+ 2 hours 3 min at Prague"
     run_xdotool
     sleep $sleep_big
 
-    keys=( space a t space D e l h i )
+    clear_launcher 9
+    keys="- 2 years 5 months"
     run_xdotool
     sleep $sleep_big
-    clear_all
 
-    keys=( $cmd u n t i l space D e c e m b e r space 3 1  space m i d n i g h t )
+    keys=" at Delhi"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd u n t i l space t o m o r r o w space a f t e r n o o n )
+    keys="time until December 31 midnight"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
+
+    keys="time until tomorrow afternoon"
+    run_xdotool
+    sleep $sleep_big
+    clear_launcher
 }
 
 demo_units() {
     cmd="equal space"
 
-    keys=( $cmd 3 8 space c space t o  space f )
+    keys="= 38 c to f"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 1 0 space m space plus space 1 5 8 space c m )
+    keys="= 10 m + 158 cm"
     run_xdotool
     sleep $sleep_big
 
-    keys=( space t o space i n comma space c m comma space k m )
+    keys=" to in, cm, km"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 6 0 space m p h space t o space k p h comma space m i l e s space p e r space m i n u t e comma space i n c h slash h )
+    keys="= 60 mph to kph, miles per minute, inch/h"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 1 0 space m asciicircum space 2 space t o space i n c h space asciicircum space 2 comma space c m space asterisk space c m )
+    keys="= 10 m ^ 2 to inch ^ 2, cm ^ 2"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 }
 
 demo_percentages() {
     cmd="equal space"
 
-    keys=( $cmd 1 0 0 space plus space 5 0 percent )
+    keys="= 10 + 50%"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd s q r t parenleft 2 parenright space plus space 5 0 percent )
+    keys="= sqrt(2) + 50%"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 1 0 0 space a s space percent space o f space 2 0 0)
+    keys="= 100 as % of 200"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 5 0 percent space o f space 4 )
+    keys="= 50% of 4"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 5 0 percent space o f space 1 0 0 space plus space s q r t parenleft 2 parenright space plus space 1 period 5 )
+    keys="= 50 % of 100 + sqrt(2) + 1.5"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 }
 
-demo_calculator() {
-    cmd="equal space"
-    
-    keys=( $cmd 1 0 space plus space 2 space plus space s q r t parenleft 2 parenright space plus space c o s parenleft p i parenright space plus space s i n parenleft e parenright )
+demo_calculator() {    
+    keys="= 10 + 2 + sqrt(2) + acosh(pi) + sin(e)"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd 5 space plus space 3 i space minus space 8 i )
+    keys="= 5 + 3i - 8i"
     run_xdotool
     sleep $sleep_big
 
-    keys=( space plus space c o s parenleft 2 space plus space i parenright )
+    keys=" + tan(2 + i)"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    keys=( $cmd e asciicircum parenleft p i space asterisk space i parenright )
+    keys="= e ^ (pi * i) + 1"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 }
 
 demo_base_n_calculator() {
-    cmd='h e x space'
-
-    keys=( $cmd space f a 2 1 space plus space a 1 0 )
+    keys="hex fa21 + ad10"
     run_xdotool
     sleep $sleep_big
 
-    keys=( BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace )
-    run_xdotool
-    keys=( numbersign f f 1 2 3 4 )
+    clear_launcher 11
+    keys="#ff1234"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 
-    cmd='b i n space'
-    keys=( $cmd parenleft 1 0 0 0 1 space x o r space 1 1 1 1 parenright space asciicircum space 1 space plus space 1 0 space m o d space 1 1 )
+    keys="bin (10001 xor 1111) ^ 10 + 10 mod 11"
     run_xdotool
     sleep $sleep_big
-    clear_all
+    clear_launcher
 }
 
 demo_exit() {
-    cmd="equal space"
-
-    keys=( $cmd A n d space s o space m u c h space m o r e )
+    keys="= And so much more"
     run_xdotool
     sleep $sleep_big
 }
