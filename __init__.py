@@ -99,7 +99,8 @@ if isinstance(TRIGGERS, str):
 def initialize():
     currency_service = CurrencyService()
     units_service = UnitsService()
-    currency_service.set_api_key(API_KEY)
+    api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
+    currency_service.set_api_key(api_key)
     if CACHE > 0:
         currency_service.enable_cache(CACHE)
     else:

@@ -6,7 +6,7 @@
 @alias KHR = ៛ 
 @alias CNY = C¥ 
 @alias CRC = ₡ 
-@alias CUP = ₱ 
+@alias CUP = ₱ = cuban
 @alias CZK = Kč 
 @alias DKK = kr 
 @alias DOP = RD$ 

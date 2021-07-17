@@ -4,10 +4,6 @@ try:
     import pint
 except ImportError:
     pint = None
-try:
-    import requests
-except ImportError:
-    requests = None
 from .interface import QueryHandlerInterface
 from ...units import UnitsService
 from ...currency import CurrencyService
