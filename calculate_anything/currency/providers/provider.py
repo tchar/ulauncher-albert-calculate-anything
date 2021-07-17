@@ -1,6 +1,7 @@
+from ...utils import is_types, get_module
+has_requests = get_module('requests') is not None
 from datetime import datetime
-from ...utils import is_types
-from ...exceptions import CurrencyProviderRequestException
+from ...exceptions import CurrencyProviderRequestException, MissingRequestsException
 
 class CurrencyProvider:
     def __init__(self, api_key=''):
@@ -9,9 +10,14 @@ class CurrencyProvider:
         self.had_error = False
 
     def request_currencies(self, *currencies, force=False):
+        if not has_requests:
+            self.had_error = True
+            raise MissingRequestsException('requests is not installed')
         if not self.api_key_valid:
+            self.had_error = True
             raise CurrencyProviderRequestException('API Key is not valid')
         if not force and self.had_error and datetime.now().timestamp() - 60 <= self.last_request_timestamp:
+            self.had_error = True
             raise CurrencyProviderRequestException('Could not make request')
         self.last_request_timestamp = datetime.now().timestamp()
         return {}

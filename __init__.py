@@ -7,6 +7,8 @@ Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi 
 
 ################################### SETTINGS #######################################
 # Below are the settings for this extension
+# Currency provider: One of "fixerio", "ecb (European Central Bank)
+CURRENCY_PROVIDER='fixerio'
 # API Key is your fixer.io API key
 API_KEY = ''
 # Cache update interval in seconds (defaults to 1 day = 86400 seconds)
@@ -69,6 +71,7 @@ except ImportError as e:
 from calculate_anything import logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
+from calculate_anything.currency.providers import CurrencyProviderFactory
 from calculate_anything.units.service import UnitsService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.query.handlers import (
@@ -81,7 +84,12 @@ from calculate_anything.lang import Language
 from calculate_anything.utils import get_or_default
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
-API_KEY = API_KEY or ''
+CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
+CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'ecb', ['fixerio', 'ecb'])
+
+API_KEY = globals().get('API_KEY') or ''
+
+UNITS_CONVERSION_MODE = globals().get('UNITS_CONVERSION_MODE') or ''
 UNITS_CONVERSION_MODE = get_or_default(
     UNITS_CONVERSION_MODE.lower(),
     str, 'normal', ['normal', 'crazy']
@@ -90,6 +98,8 @@ if UNITS_CONVERSION_MODE == 'normal':
     UNITS_CONVERSION_MODE = UnitsService.MODE_NORMAL
 elif UNITS_CONVERSION_MODE == 'crazy':
     UNITS_CONVERSION_MODE = 'crazy'
+
+CACHE = globals().get('CACHE') or '86400'
 CACHE = get_or_default(CACHE, int, 86400)
 
 TRIGGERS = globals().get('__triggers__') or []
@@ -99,6 +109,8 @@ if isinstance(TRIGGERS, str):
 def initialize():
     currency_service = CurrencyService()
     units_service = UnitsService()
+
+    currency_service.set_provider(CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER))
     api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
     currency_service.set_api_key(api_key)
     if CACHE > 0:

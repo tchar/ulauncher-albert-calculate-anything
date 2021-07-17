@@ -168,6 +168,8 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         except ZeroDivisionError:
             item = Calculation(query=query, error=ZeroDivisionException)
             return [item]
+        except SyntaxError:
+            return []
         except Exception as e:
             self._logger.error(
                 'Got exception when trying to calculate {}: {}'.format(query, e))

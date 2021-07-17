@@ -21,6 +21,7 @@ class CurrencyCache:
     def __init__(self, _update_frequency=0):
         self._update_frequency = _update_frequency
         self._data = {
+            'provider': '',
             'exchange_rates': {},
             'last_update_timestamp': 0
         }
@@ -102,8 +103,13 @@ class CurrencyCache:
 
     @property
     @preload
+    def provider(self):
+        return self._data.get('provider', '')
+
+    @property
+    @preload
     def last_update_timestamp(self):
-        return self._data['last_update_timestamp']
+        return self._data.get('last_update_timestamp', 0)
 
     @preload
     def get_rates(self, *currencies):
@@ -148,10 +154,11 @@ class CurrencyCache:
             except Exception as e:
                 self._logger.error('Could not remove data file {}: {}'.format(DATA_FILE, e))
 
-    def save(self, exchange_rates):
+    def save(self, exchange_rates, provider):
         if not self.enabled:
             return
         self._data = {
+            'provider': provider,
             'exchange_rates': exchange_rates,
             'last_update_timestamp': datetime.now().timestamp()
         }

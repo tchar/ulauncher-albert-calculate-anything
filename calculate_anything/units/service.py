@@ -28,16 +28,27 @@ class UnitsService(metaclass=Singleton):
         ureg = self._unit_registry
         ctx = self._ctx
 
+        updated_currencies = set()
         for currency, currency_info in data.items():
             if 'currency_' + currency not in ureg:
                 ureg.define('currency_{} = nan currency_EUR'.format(currency))
                 ureg.define('@alias currency_{0} = {0}'.format(currency))
 
+            updated_currencies.add('currency_' + currency)
             currency_units = ureg('currency_' + currency)
             if currency_units.units == self._base_currency.units:
                 continue 
             rate = currency_info['rate']
             ctx.redefine('currency_{} = {} currency_EUR'.format(currency, 1 / rate))
+        
+        for currency in self._currencies_in_registry:
+            if currency in updated_currencies:
+                continue
+            if currency == 'currency_EUR':
+                continue
+            ctx.redefine('{} = nan currency_EUR'.format(currency))
+
+        self._currencies_in_registry = updated_currencies
         self._logger.info('Updated currency registry')
     
     def get_rate_timestamp(self, unit):
@@ -91,6 +102,7 @@ class UnitsService(metaclass=Singleton):
         elif self._running:
             return
 
+        self._currencies_in_registry = set()
         self._unit_registry = pint.UnitRegistry(
             autoconvert_offset_to_baseunit=True,
             case_sensitive=False

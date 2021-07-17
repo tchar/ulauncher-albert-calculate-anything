@@ -16,8 +16,6 @@ class FixerIOCurrencyProvider(CurrencyProvider):
         self._logger = logging.getLogger(__name__)
 
     def request_currencies(self, *currencies, force=False):
-        if requests is None:
-            raise MissingRequestsException('requests is not installed')
         super().request_currencies(*currencies, force=force)
         url = urllib.parse.urljoin(FixerIOCurrencyProvider.BASE_URL, FixerIOCurrencyProvider.PATH_URL)
         params = {'access_key': self._api_key, 'base': 'EUR'}

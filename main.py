@@ -1,4 +1,3 @@
-from calculate_anything.units.service import UnitsService
 import locale
 locale.setlocale(locale.LC_ALL, '')
 from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
@@ -10,6 +9,8 @@ from calculate_anything.query.handlers.base_n import (
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
+from calculate_anything.currency.providers import CurrencyProviderFactory
+from calculate_anything.units.service import UnitsService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.exceptions import MissingRequestsException
 from ulauncher.api.client.Extension import Extension
@@ -22,6 +23,7 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import QueryHandler
 from calculate_anything.lang import Language
+
 from calculate_anything.utils import get_or_default
 
 class ConverterExtension(Extension):
@@ -98,6 +100,11 @@ class PreferencesEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
 
+        currency_provider = event.preferences['currency_provider']
+        currency_provider = get_or_default(currency_provider, str, 'fixerio', ['fixerio', 'ecb'])
+        currency_provider = currency_provider.lower()
+        currency_provider = CurrencyProviderFactory.get_provider(currency_provider)
+
         cache_update = event.preferences['cache']
         cache_update = get_or_default(cache_update, int, 0)
 
@@ -106,6 +113,9 @@ class PreferencesEventListener(EventListener):
 
         units_service = UnitsService()
         currency_service = CurrencyService()
+        
+        currency_service.set_provider(currency_provider)
+
         if not cache_update:
             currency_service.disable_cache()
         else:
@@ -134,22 +144,22 @@ class PreferencesUpdateEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
 
-        service = CurrencyService()
+        currency_service = CurrencyService()
         if event.id == 'cache':
             new_value = get_or_default(event.new_value, int, 86400)
             if new_value > 0:
-                service.enable_cache(new_value).run(force=True)
+                currency_service.enable_cache(new_value).run(force=True)
             else:
-                service.disable_cache()
+                currency_service.disable_cache()
         elif event.id == 'default_currencies':
             default_currencies = event.new_value.split(',')
             default_currencies = map(str.strip, default_currencies)
             default_currencies = map(str.upper, default_currencies)
             default_currencies = list(default_currencies)
-            service.set_default_currencies(default_currencies)
+            currency_service.set_default_currencies(default_currencies)
         elif event.id == 'api_key':
-            service.set_api_key(event.new_value)
-            try: service.run(force=True)
+            currency_service.set_api_key(event.new_value)
+            try: currency_service.run(force=True)
             except MissingRequestsException: pass
         elif event.id == 'default_cities':
             default_cities = TimezoneService.parse_default_cities(event.new_value)
@@ -161,6 +171,15 @@ class PreferencesUpdateEventListener(EventListener):
             else:
                 units_mode = UnitsService.MODE_CRAZY
             UnitsService().set_unit_conversion_mode(units_mode)
+        elif event.id == 'currency_provider':
+            currency_provider = event.new_value
+            currency_provider = get_or_default(currency_provider, str, 'fixerio', ['fixerio', 'ecb'])
+            currency_provider = currency_provider.lower()
+            api_key = extension.preferences.get('api_key', '')
+            currency_provider = CurrencyProviderFactory.get_provider(currency_provider, api_key)
+            currency_service.set_provider(currency_provider)
+            try: currency_service.run(force=True)
+            except MissingRequestsException: pass
 
 if __name__ == '__main__':
     ConverterExtension().run()

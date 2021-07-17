@@ -31,7 +31,7 @@ Calculator for Anything
 
 **The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects. See [docs](docs/API.md) for more. The only python files that use dependencies for these launchers are `main.py`, `__init__.py` in the root of this project.**
 
-Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://pypi.org/project/Pint/) [parsedatetime](https://pypi.org/project/parsedatetime/) and [pytz](https://pypi.org/project/pytz/) (for parsedatetime) [fixer.io](https://fixer.io)
+Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://pypi.org/project/Pint/) [parsedatetime](https://pypi.org/project/parsedatetime/) and [pytz](https://pypi.org/project/pytz/) (for parsedatetime)
 Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers.
 
 Optional Dependencies: [babel](https://github.com/python-babel/babel). Installing this will format your results in your language/locale.
@@ -96,9 +96,18 @@ The extension can work in albert without keywords if you comment out the `__trig
 
 If you are using Ulauncher use the extension preferences.
 
+### Set Currency Provider
+
+You can select from different currency providers. Supported providers are:
+- [fixer.io](https://fixer.io/): You need an API Key (see [Set API Key](#set-api-key)). Get a free one at https://fixer.io/signup (go to your `fixer.io` dashboard and get your API key)
+- [European Central Bank](https://www.ecb.europa.eu/home/html/index.en.html): No API key is requred, supports very few currencies
+
+- ULauncher: Select one in `Currency Provider`
+- Albert: Modify the `CURRENCY_PROVIDER` in `__init__.py` to one of [`fixerio`, `ecb` (European Central Bank)]
+
 ### Set API Key
 
-In order for the currency conversion to work you need to provide a [fixer.io](https://fixer.io/) API Key. Sign up at https://fixer.io/signup (there is free subscription available) and then go to your `fixer.io` dashboard and get your API key.
+In order for the currency conversion to work for providers that need an API Key, you need to set it in the preferences.
 - ULauncher: Copy your api key to the `API KEY` box in preferences
 - Albert: Modify the `API_KEY` in `__init__.py`
 

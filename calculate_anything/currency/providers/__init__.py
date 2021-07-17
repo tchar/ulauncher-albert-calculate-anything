@@ -1,4 +1,5 @@
 from .provider import CurrencyProvider
 from .fixerio import FixerIOCurrencyProvider
-from .factory import ProviderFactory
+from .european_central_bank import ECBProvider
+from .factory import CurrencyProviderFactory
 from ...exceptions import CurrencyProviderException

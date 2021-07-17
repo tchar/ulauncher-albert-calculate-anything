@@ -1,7 +1,7 @@
+from calculate_anything.currency.providers.provider import CurrencyProvider
 from functools import wraps
 from .cache import CurrencyCache
 from threading import RLock, Timer
-from .providers import ProviderFactory
 from ..exceptions import CurrencyProviderRequestException, MissingRequestsException
 from ..utils import Singleton
 from .. import logging
@@ -19,7 +19,7 @@ class CurrencyService(metaclass=Singleton):
         self._lock = RLock()
         self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
-        self._provider = ProviderFactory.get_provider('fixerio')
+        self._provider = CurrencyProvider()
         self._thread_id = 0
         self._is_running = False
         self._enabled = True
@@ -27,15 +27,17 @@ class CurrencyService(metaclass=Singleton):
         self._missing_requests = False
 
     def __get_currencies(self, *currencies, force=False):
-        if force or not self._cache.enabled or self._cache.should_update():
+        provider = self._provider.__class__.__name__
+        if (force or not self._cache.enabled
+            or self._cache.should_update() or self._cache.provider != provider):
             self._logger.info('Will load currencies')
             try: 
+                self._cache.clear()
                 currency_rates = self._provider.request_currencies(*currencies, force=force)
             except MissingRequestsException as e:
-                self._cache.clear()
                 self._missing_requests = True
                 raise e
-            self._cache.save(currency_rates)
+            self._cache.save(currency_rates, provider)
         else:
             currency_rates = self._cache.get_rates(*currencies)
         
@@ -63,11 +65,13 @@ class CurrencyService(metaclass=Singleton):
             self._missing_requests = True
             return
 
+        next_update_seconds = 60
         if not self._provider.had_error:
-            timer_thread = Timer(self._cache.next_update_seconds(), self._update_thread, args=(thread_id,))
+            next_update_seconds = max(self._cache.next_update_seconds(), next_update_seconds)
+            timer_thread = Timer(next_update_seconds, self._update_thread, args=(thread_id,))
         else:
             self._cache.clear()
-            timer_thread = Timer(60, self._update_thread, args=(thread_id,))
+            timer_thread = Timer(next_update_seconds, self._update_thread, args=(thread_id,))
 
         timer_thread.setDaemon(True)
         timer_thread.start()
@@ -109,6 +113,7 @@ class CurrencyService(metaclass=Singleton):
 
     @lock
     def set_provider(self, provider):
+        self._logger.info('Updating provider to {}'.format(provider.__class__.__name__))
         self._provider = provider
         return self
 
