@@ -30,7 +30,7 @@ class UnitsCalculation(_Calculation):
 
     @staticmethod
     def is_strictly_dimensionless(unit):
-        return not unit.unitless and unit.dimensionless
+        return unit.unitless and unit.dimensionless
 
     @staticmethod
     def has_temperature(unit):
