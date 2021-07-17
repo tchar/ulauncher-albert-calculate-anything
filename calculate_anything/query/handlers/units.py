@@ -9,7 +9,7 @@ from ...units import UnitsService
 from ...currency import CurrencyService
 from ...calculation import UnitsCalculation, CurrencyUnitsCalculation, TemperatureUnitsCalculation
 from ...lang import Language
-from ...logging_wrapper import LoggingWrapper as logging
+from ... import logging
 from ...utils import is_types, Singleton
 from ...constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from ...exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException

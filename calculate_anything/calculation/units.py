@@ -13,7 +13,7 @@ except ImportError:
 from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
-from ..logging_wrapper import LoggingWrapper as logging
+from .. import logging
 from ..utils import replace_dict_re_func
 from ..constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
 

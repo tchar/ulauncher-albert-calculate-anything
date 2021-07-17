@@ -66,7 +66,7 @@ except ImportError as e:
     MAIN_DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(MAIN_DIR)
 
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything import logging
 logging.set_logging(AlbertLogging)
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.units.service import UnitsService

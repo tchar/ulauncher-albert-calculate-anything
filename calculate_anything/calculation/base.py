@@ -1,5 +1,5 @@
 from functools import wraps
-from ..logging_wrapper import LoggingWrapper as logging
+from .. import logging
 from ..query.result import QueryResult
 from ..lang import Language
 from ..exceptions import (

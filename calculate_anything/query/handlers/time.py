@@ -11,7 +11,7 @@ from ...calculation import LocationTimeCalculation, TimeCalculation
 from ...time.service import TimezoneService
 from ...exceptions import DateAddDateException, MissingParsedatetimeException, DateOverflowException, MisparsedTimeException
 from ...utils import Singleton, partition
-from ...logging_wrapper import LoggingWrapper
+from ... import logging 
 from ...constants import (
     TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REGEX_REPLACE_FUNC,
@@ -21,7 +21,7 @@ from ...constants import (
 class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def __init__(self):
-        self._logger = LoggingWrapper.getLogger(__name__)
+        self._logger = logging.getLogger(__name__)
         self._date_reference = datetime(year=2000, month=1, day=1)
 
     @staticmethod

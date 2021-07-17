@@ -8,7 +8,7 @@ except ImportError:
     from ...utils import StupidEval
     SimpleEval = StupidEval
 from .interface import QueryHandlerInterface
-from ...logging_wrapper import LoggingWrapper as logging
+from ... import logging
 from ...calculation import Calculation, BooleanCalculation
 from ...utils import is_types, Singleton
 from ...exceptions import MissingSimpleevalException, ZeroDivisionException, BooleanComparisonException

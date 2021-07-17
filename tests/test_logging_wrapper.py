@@ -1,5 +1,5 @@
 import logging as _logging
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything import logging
 
 
 class MockLogger:

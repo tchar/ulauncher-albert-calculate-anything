@@ -6,10 +6,9 @@ try:
 except ImportError:
     pint = None
 from ..currency import CurrencyService
-from ..lang import Language
-from ..logging_wrapper import LoggingWrapper as logging
+from .. import logging
 from ..utils import Singleton
-from ..constants import MAIN_DIR, UNIT_ALIASES_RE
+from ..constants import MAIN_DIR
 
 class UnitsService(metaclass=Singleton):
     MODE_NORMAL = 0

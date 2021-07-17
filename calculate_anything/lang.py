@@ -4,7 +4,7 @@ import re
 import unicodedata
 from .utils import Singleton, replace_dict_re_func
 from .constants import MAIN_DIR
-from .logging_wrapper import LoggingWrapper as logging
+from . import logging
 
 class Language(metaclass=Singleton):
     def __init__(self):

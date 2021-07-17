@@ -4,7 +4,7 @@ from threading import RLock, Timer
 from .providers import ProviderFactory
 from ..exceptions import CurrencyProviderRequestException, MissingRequestsException
 from ..utils import Singleton
-from ..logging_wrapper import LoggingWrapper as logging
+from .. import logging
 
 def lock(func):
     @wraps(func)

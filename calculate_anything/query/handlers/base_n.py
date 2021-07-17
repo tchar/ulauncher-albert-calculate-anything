@@ -13,11 +13,11 @@ from ...calculation import (
     BaseNCalculation, Base16StringCalculation, Base10Calculation, 
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
-from ...logging_wrapper import LoggingWrapper as logging
+from ... import logging
 from ...utils import Singleton, is_integer, or_regex
 from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
-space_in_middle_re = re.compile('\S\s+\S')
+space_in_middle_re = re.compile(r'\S\s+\S')
 expression_sub = {'mod': '%', 'div': '//', 'and': '&', 'or': '|', 'xor': '^', '=': '=='}
 expression_sub_re = re.compile(or_regex(expression_sub))
 

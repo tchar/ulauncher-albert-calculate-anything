@@ -5,7 +5,7 @@ except ImportError:
     requests = None
 from .provider import CurrencyProvider
 from ...exceptions import CurrencyProviderRequestException, MissingRequestsException
-from ...logging_wrapper import LoggingWrapper as logging
+from ... import logging
 
 class FixerIOCurrencyProvider(CurrencyProvider):
     BASE_URL = 'http://data.fixer.io/api/'

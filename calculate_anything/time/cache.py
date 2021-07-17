@@ -1,13 +1,13 @@
 import os
 import json
-from ..logging_wrapper import LoggingWrapper
+from .. import logging
 from ..utils import Singleton
 from ..constants import MAIN_DIR, TIME_LOCATION_REPLACE_REGEX
 
 class TimezoneCache(metaclass=Singleton):
     def __init__(self):
         self._data = {}
-        self._logger = LoggingWrapper.getLogger(__name__)
+        self._logger = logging.getLogger(__name__)
         try:
             with open(os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json'), 'r') as f:
                 self._data = json.loads(f.read())

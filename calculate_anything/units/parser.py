@@ -4,7 +4,7 @@ except ImportError:
     pint = None
 
 from ..lang import Language
-from ..logging_wrapper import LoggingWrapper as logging
+from .. import logging
 from ..constants import UNIT_ALIASES_RE
 
 class PintDefinitionParser:
