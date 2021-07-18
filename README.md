@@ -99,9 +99,10 @@ If you are using Ulauncher use the extension preferences.
 ### Set Currency Provider
 
 You can select from different currency providers. Supported providers are:
-- [fixer.io](https://fixer.io/): You need an API Key (see [Set API Key](#set-api-key)). Get a free one at https://fixer.io/signup (go to your `fixer.io` dashboard and get your API key). This will include all providers from [Internal]
-- [Internal]: If you select this option currencies are going to be fetched from a variet of providers like [coinbase](https://www.coinbase.com/), [mycurrency.net](https://www.mycurrency.net/) and [European Central Bank](https://www.ecb.europa.eu/home/html/index.en.html): No API key is requred.
+- [fixer.io](https://fixer.io/): You need an API Key (see [Set API Key](#set-api-key)). Get a free one at https://fixer.io/signup (go to your `fixer.io` dashboard and get your API key). This will include all providers from Internal
+- Internal: If you select this option currencies are going to be fetched from a variet of providers like [coinbase](https://www.coinbase.com/), [mycurrency.net](https://www.mycurrency.net/) and [European Central Bank](https://www.ecb.europa.eu/home/html/index.en.html): No API key is requred.
 
+Preferences:
 - ULauncher: Select one in currency provider
 - Albert: Modify the `CURRENCY_PROVIDER` in `__init__.py` to one of [`fixerio`, `internal` (European Central Bank)]
 
