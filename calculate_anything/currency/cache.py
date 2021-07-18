@@ -58,8 +58,6 @@ class CurrencyCache:
                     if not is_types(data.get('exchange_rates'), dict):
                         raise Exception('exchange rates is not a dict')
                     for k, v in data['exchange_rates'].items():
-                        if len(k) != 3:
-                            raise Exception('Currency {} is invalid'.format(k))
                         if not is_types(v, dict):
                             raise Exception('Currency {} rate is not a dict {}'.format(k, v))
                         if not is_types(v.get('rate'), int, float):

@@ -36,16 +36,13 @@ CurrencyService().enable().enable_cache(86400).run()
 # To disable
 CurrencyService().disable()
 
-# To set the API key
-CurrencyService().set_api_key('Your API key')
-
 # To set the default currencies for results when no target currency is set.
 CurrencyService().set_default_currencies(['EUR', 'USD', 'CAD', 'BTC'])
 ```
 
 The service by default uses the [fixer.io](https://fixer.io) currency provider.
 
-You can create your own provider by subclassing `CurrencyProvider` class and implement its methods.
+You can create your own provider by subclassing `CurrencyProvider` or `ApiKeyCurrencyProvider` (subclass of `CurrencyProvider`) class and implement its methods.
 
 For example:
 ```python
@@ -55,7 +52,7 @@ from calculate_anything.exceptions import (
     CurrencyProviderRequestException
 )
 
-class MyProvider(CurrencyProvider):
+class MyProvider(ApiKeyCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         # Write your code. Return a dictionary like
         if some_error:
@@ -75,13 +72,11 @@ class MyProvider(CurrencyProvider):
         pass
 
 my_provider = MyProvider()
+# Or implement it in __init__
+my_provider.set_api_key('your key')
 
 # Then set your provider to service with
-my_provider.set_api_key('your key')
-CurrencyService().set_provider(my_provider)
-
-# Or
-CurrencyService().set_provider(MyProvider()).set_api_key('your key')
+CurrencyService().add_provider(my_provider)
 
 # Force run to make it run now
 CurrencyService().run(force=True)

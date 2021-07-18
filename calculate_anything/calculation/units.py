@@ -176,21 +176,24 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
     def format(self):
         def currency_alias_f(m):
-            currency = m.group(0)[-3:]
+            currency = m.group(0)[9:]
             currency_alias = CurrencyUnitsCalculation._currency_alias(currency)
             if currency == currency_alias:
                 return currency
             return '{} ({})'.format(currency, currency_alias)
 
-        replace_func = replace_dict_re_func(
-            {'currency_': '', '**': '^', '_': ' '}, sort=False)
+        replace_dict = {'**': '^', '_': ' '}
 
         unit_name = str(self.value.units)
-        unit_name = replace_func(unit_name)
         if babel_units is not None:
-            unit_name_alias = re.sub(r'([a-zA-Z]{3})', currency_alias_f, unit_name)
+            unit_name_alias = re.sub(r'currency_([a-zA-Z]{3,})', currency_alias_f, unit_name)
         else:
             unit_name_alias = unit_name
+            replace_dict['currency_'] = ''
+        
+        replace_func = replace_dict_re_func(replace_dict, sort=True)
+
+        unit_name = replace_func(unit_name)
         unit_name, clipboard = unit_name_alias, unit_name
         converted_amount = locale.currency(
             self.value.magnitude, symbol='', grouping=True)

@@ -15,6 +15,9 @@ class Logger(Protocol):
     def error(message: str, *args: Any, **kwargs: Any) -> None:
         pass
 
+    def exception(message: str, *args: Any, **kwargs: Any) -> None:
+        pass
+
 
 class LoggingModule(Protocol):
     def getLogger(name: str) -> Logger:

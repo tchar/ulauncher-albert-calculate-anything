@@ -107,7 +107,6 @@ class UnitsService(metaclass=Singleton):
             autoconvert_offset_to_baseunit=True,
             case_sensitive=False
         )
-        self._unit_registry.define('UNIT_SERVICE_NONE = [unit_service_none]')
         self._ctx = pint.Context('currency')
         self._unit_registry.add_context(self._ctx)
 

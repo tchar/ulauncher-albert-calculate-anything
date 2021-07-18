@@ -54,11 +54,11 @@
       "id": "currency_provider",
       "type": "select",
       "name": "Currency Provider",
-      "description": "Your currency provider (European Central Bank does not require API key)",
+      "description": "Your currency provider that requires an API Key",
       "default_value": "fixerio",
       "options": [
-        {"value": "fixerio", "text": "fixer.io"},
-        {"value": "ecb", "text": "European Central Bank"}
+        {"value": "internal", "text": "Internal"},
+        {"value": "fixerio", "text": "fixer.io + Internal"}
       ]
     },
     {

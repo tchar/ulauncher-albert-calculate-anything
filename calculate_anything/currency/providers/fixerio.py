@@ -3,11 +3,11 @@ try:
     import requests
 except ImportError:
     requests = None
-from .provider import CurrencyProvider
+from .provider import ApiKeyCurrencyProvider
 from ...exceptions import CurrencyProviderRequestException, MissingRequestsException
 from ... import logging
 
-class FixerIOCurrencyProvider(CurrencyProvider):
+class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
     BASE_URL = 'http://data.fixer.io/api/'
     PATH_URL = '/latest'
     
@@ -23,17 +23,18 @@ class FixerIOCurrencyProvider(CurrencyProvider):
             params['symbols'] = ','.join(currencies)
 
         try:
-            result = requests.get(url, params=params)
-            data = result.json()
+            response = requests.get(url, params=params)
         except Exception as e:
             self._logger.error('Could not connect to fixer.io: {}'.format(e))
             self.had_error = True
-            raise CurrencyProviderRequestException('Could not connect to conversion service')
+            raise CurrencyProviderRequestException('Could not connect to fixerio')
         
-        if not str(result.status_code).startswith('2'):
+        if not str(response.status_code).startswith('2'):
             self.had_error = True
-            raise CurrencyProviderRequestException('Could not connect to conversion service')
-        elif not data['success']:
+            raise CurrencyProviderRequestException('Fixerio response code was {}'.format(response.status_code))
+        
+        data = response.json()
+        if not data['success']:
             self.had_error = True
             raise CurrencyProviderRequestException(data['error']['info'])
         

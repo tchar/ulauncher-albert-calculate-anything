@@ -1,30 +1,30 @@
-import locale
-locale.setlocale(locale.LC_ALL, '')
-from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
-from calculate_anything.query.handlers.units import UnitsQueryHandler
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.currency import CurrencyQueryHandler
-from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.utils import get_or_default
+from calculate_anything.lang import Language
+from calculate_anything.query import QueryHandler
+from calculate_anything.currency.service import CurrencyService
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.client.Extension import Extension
+from calculate_anything.exceptions import MissingRequestsException
+from calculate_anything.time.service import TimezoneService
+from calculate_anything.units.service import UnitsService
+from calculate_anything.currency.providers import CurrencyProviderFactory
 from calculate_anything.query.handlers.base_n import (
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-from calculate_anything.currency.providers import CurrencyProviderFactory
-from calculate_anything.units.service import UnitsService
-from calculate_anything.time.service import TimezoneService
-from calculate_anything.exceptions import MissingRequestsException
-from ulauncher.api.client.Extension import Extension
-from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from calculate_anything.currency.service import CurrencyService
-from calculate_anything.query import QueryHandler
-from calculate_anything.lang import Language
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.query.handlers.currency import CurrencyQueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
-from calculate_anything.utils import get_or_default
 
 class ConverterExtension(Extension):
 
@@ -32,7 +32,9 @@ class ConverterExtension(Extension):
         super(ConverterExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(PreferencesEvent, PreferencesEventListener())
-        self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
+        self.subscribe(PreferencesUpdateEvent,
+                       PreferencesUpdateEventListener())
+
 
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
@@ -79,10 +81,11 @@ class KeywordQueryEventListener(EventListener):
                 highlightable=highlightable,
                 on_enter=on_enter
             ))
-        
+
         should_show_placeholder = (
             query.strip() == '' or (
-                extension.preferences['show_empty_placeholder'] == 'y' and len(items) == error_num
+                extension.preferences['show_empty_placeholder'] == 'y' and len(
+                    items) == error_num
             )
         )
         if should_show_placeholder and len(items) == error_num:
@@ -96,31 +99,35 @@ class KeywordQueryEventListener(EventListener):
 
         return RenderResultListAction(items)
 
+
 class PreferencesEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
 
+        units_service = UnitsService()
+        currency_service = CurrencyService()
+
         currency_provider = event.preferences['currency_provider']
-        currency_provider = get_or_default(currency_provider, str, 'fixerio', ['fixerio', 'ecb'])
+        currency_provider = get_or_default(
+            currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
+
         currency_provider = currency_provider.lower()
-        currency_provider = CurrencyProviderFactory.get_provider(currency_provider)
+        currency_provider = CurrencyProviderFactory.get_provider(
+            currency_provider, api_key=event.preferences['api_key'])
+        currency_service.add_provider(currency_provider)
 
         cache_update = event.preferences['cache']
         cache_update = get_or_default(cache_update, int, 0)
 
         units_mode = event.preferences['units_conversion_mode']
-        units_mode = get_or_default(units_mode.lower(), str, 'normal',['normal', 'crazy'])
-
-        units_service = UnitsService()
-        currency_service = CurrencyService()
-        
-        currency_service.set_provider(currency_provider)
+        units_mode = get_or_default(
+            units_mode.lower(), str, 'normal', ['normal', 'crazy'])
 
         if not cache_update:
             currency_service.disable_cache()
         else:
             currency_service.enable_cache(cache_update)
-        
+
         if units_mode == 'normal':
             units_service.set_unit_conversion_mode(UnitsService.MODE_NORMAL)
         else:
@@ -132,13 +139,13 @@ class PreferencesEventListener(EventListener):
         default_currencies = list(default_currencies)
         currency_service.set_default_currencies(default_currencies)
 
-        currency_service.set_api_key(event.preferences['api_key'])
-        
         units_service.enable().run()
         currency_service.enable().run()
 
-        default_cities = TimezoneService.parse_default_cities(event.preferences['default_cities'])
+        default_cities = TimezoneService.parse_default_cities(
+            event.preferences['default_cities'])
         TimezoneService().set_default_cities(default_cities)
+
 
 class PreferencesUpdateEventListener(EventListener):
     def on_event(self, event, extension):
@@ -158,28 +165,55 @@ class PreferencesUpdateEventListener(EventListener):
             default_currencies = list(default_currencies)
             currency_service.set_default_currencies(default_currencies)
         elif event.id == 'api_key':
-            currency_service.set_api_key(event.new_value)
-            try: currency_service.run(force=True)
-            except MissingRequestsException: pass
+            currency_provider = extension.preferences['currency_provider']
+            currency_provider = get_or_default(
+                currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
+            currency_provider = currency_provider.lower()
+
+            api_key = event.new_value
+            currency_provider = CurrencyProviderFactory.get_provider(
+                currency_provider, api_key)
+            currency_service.add_provider(currency_provider)
+
+            try:
+                currency_service.run(force=True)
+            except MissingRequestsException:
+                pass
         elif event.id == 'default_cities':
-            default_cities = TimezoneService.parse_default_cities(event.new_value)
+            default_cities = TimezoneService.parse_default_cities(
+                event.new_value)
             TimezoneService().set_default_cities(default_cities)
         elif event.id == 'units_conversion_mode':
-            units_mode = get_or_default(event.new_value.lower(), str, 'normal',['normal', 'crazy'])
+            units_mode = get_or_default(
+                event.new_value.lower(), str, 'normal', ['normal', 'crazy'])
             if units_mode == 'normal':
                 units_mode = UnitsService.MODE_NORMAL
             else:
                 units_mode = UnitsService.MODE_CRAZY
             UnitsService().set_unit_conversion_mode(units_mode)
         elif event.id == 'currency_provider':
+            old_currency_provider = event.old_value
+
+            old_currency_provider = get_or_default(
+                old_currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
+            old_currency_provider = old_currency_provider.lower()
+            old_currency_provider = CurrencyProviderFactory.get_provider(
+                old_currency_provider)
+            currency_service.remove_provider(old_currency_provider)
+
             currency_provider = event.new_value
-            currency_provider = get_or_default(currency_provider, str, 'fixerio', ['fixerio', 'ecb'])
+            currency_provider = get_or_default(
+                currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
             currency_provider = currency_provider.lower()
             api_key = extension.preferences.get('api_key', '')
-            currency_provider = CurrencyProviderFactory.get_provider(currency_provider, api_key)
-            currency_service.set_provider(currency_provider)
-            try: currency_service.run(force=True)
-            except MissingRequestsException: pass
+            currency_provider = CurrencyProviderFactory.get_provider(
+                currency_provider, api_key)
+            currency_service.add_provider(currency_provider)
+            try:
+                currency_service.run(force=True)
+            except MissingRequestsException:
+                pass
+
 
 if __name__ == '__main__':
     ConverterExtension().run()

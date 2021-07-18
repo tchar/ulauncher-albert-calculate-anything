@@ -7,8 +7,8 @@ Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi 
 
 ################################### SETTINGS #######################################
 # Below are the settings for this extension
-# Currency provider: One of "fixerio", "ecb (European Central Bank)
-CURRENCY_PROVIDER='fixerio'
+# Currency provider: One of "internal", "fixerio")
+CURRENCY_PROVIDER='internal'
 # API Key is your fixer.io API key
 API_KEY = ''
 # Cache update interval in seconds (defaults to 1 day = 86400 seconds)
@@ -53,6 +53,9 @@ class AlbertLogger:
 
     def error(self, message, *args):
         self._log(critical, message, *args)
+
+    def exception(self, message, *args):
+        self._log(critical, message, *args)
     
 class AlbertLogging:
     def getLogger(name=''):
@@ -85,7 +88,7 @@ from calculate_anything.utils import get_or_default
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
-CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'ecb', ['fixerio', 'ecb'])
+CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'internal', CurrencyProviderFactory.get_available_providers)
 
 API_KEY = globals().get('API_KEY') or ''
 
@@ -110,9 +113,8 @@ def initialize():
     currency_service = CurrencyService()
     units_service = UnitsService()
 
-    currency_service.set_provider(CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER))
     api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
-    currency_service.set_api_key(api_key)
+    currency_service.add_provider(CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER, api_key))
     if CACHE > 0:
         currency_service.enable_cache(CACHE)
     else:

@@ -20,14 +20,13 @@ UNIT_QUERY_REGEX = re.compile(r'(.*?)\s+(?:to|in)\s+(.*)', flags=re.IGNORECASE)
 # Unit conversion when no target unit specified
 # UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
 UNIT_SPLIT_RE = re.compile(r'([A-Za-z_]+)')
-UNIT_CURRENCY_RE = re.compile(r'currency_([A-Za-z]{3})')
+UNIT_CURRENCY_RE = re.compile(r'currency_([A-Za-z]{3,})')
 UNIT_ALIASES_RE = re.compile(r'^[a-zA-Z_]+$')
 
 CURRENCY_QUERY_REGEX = re.compile(
     r'^\s*(\d+\.?\d*)?\s*(.*)\s+(?:to|in)\s+(.*)$', flags=re.IGNORECASE)
 CURRENCY_QUERY_DEFAULT_REGEX = re.compile(
     r'^\s*(\d+\.?\d*)?\s*(.*?)(?:\s+(?:to|in)?\s*$|\s*$)', flags=re.IGNORECASE)
-CURRENCY_REGEX = re.compile(r'^[a-z]{3}$', flags=re.IGNORECASE)
 EMPTY_AMOUNT = re.compile(r'^\s*$')
 
 CALCULATOR_ERROR = 1e-10
