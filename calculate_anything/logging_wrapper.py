@@ -1,26 +1,32 @@
 from typing import Any, Protocol
+from abc import abstractmethod
 import logging
 
 
 class Logger(Protocol):
-    def debug(message: str, *args: Any, **kwargs: Any) -> None:
+    @abstractmethod
+    def debug(self, message: str, *args: Any, **kwargs: Any) -> None: #pragma: no cover
         pass
 
-    def info(message: str, *args: Any, **kwargs: Any) -> None:
+    @abstractmethod
+    def info(self, message: str, *args: Any, **kwargs: Any) -> None: #pragma: no cover
         pass
 
-    def warning(message: str, *args: Any, **kwargs: Any) -> None:
+    @abstractmethod
+    def warning(self, message: str, *args: Any, **kwargs: Any) -> None: #pragma: no cover
         pass
 
-    def error(message: str, *args: Any, **kwargs: Any) -> None:
+    @abstractmethod
+    def error(self, message: str, *args: Any, **kwargs: Any) -> None: #pragma: no cover
         pass
 
-    def exception(message: str, *args: Any, **kwargs: Any) -> None:
+    @abstractmethod
+    def exception(self, message: str, *args: Any, **kwargs: Any) -> None: #pragma: no cover
         pass
 
 
 class LoggingModule(Protocol):
-    def getLogger(name: str) -> Logger:
+    def getLogger(name: str) -> Logger: #pragma: no cover
         pass
 
 

@@ -4,11 +4,13 @@ from collections import OrderedDict
 import calculate_anything.utils as utils
 from calculate_anything.exceptions import MissingSimpleevalException
 
+
 def test_get_module():
     assert utils.get_module('os') is not None
     assert utils.get_module('time') is not None
     assert utils.get_module('some module that does not exist') is None
     assert utils.get_module('some other module') is None
+
 
 @pytest.mark.parametrize('reverse', [False, True])
 def test_is_types(reverse):
@@ -125,14 +127,28 @@ def test_stupid_eval():
             stupid_eval.eval(v)
 
 
-def test_partition():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('input,expected', [
+    ([], []),
+    ([1], [[[1]]]),
+    ([1, 2], [[[1, 2]], [[1], [2]]]),
+    ([1, 2, 3], [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[1], [2], [3]]])
+])
+def test_partition(input, expected):
+    gen = utils.partition(input)
+    assert list(gen) == expected
 
 
-def test_or_regex():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('pattern,s,func,include,expected', [
+    ('abacd', 'abracadabra', lambda r, s: re.sub(r, '', s), False, 'rr'),
+    ('1=2', '=$#=123', lambda r, s: re.findall(
+        r, s), True, ['=', '=', '1', '2']),
+    ('x^y', '^yx', lambda r, s: re.match(r, s) is not None, False, True),
+    ('=*/+-><^', 'x^2+5x-21*2=0', lambda r, s: re.split(r, s), True,
+     ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']),
+])
+def test_or_regex(pattern, s, func, include, expected):
+    regex = utils.or_regex(pattern, include=include)
+    assert func(regex, s) == expected
 
 
 def test_replace_dict_re_func():
@@ -172,24 +188,95 @@ def test_replace_dict_re_func():
         assert f({1: '1'})(s)
 
 
-def test_hex_to_rgb():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('input,expected', [
+    ('000000', (0, 0, 0)),
+    ('FFFFFF', (255, 255, 255)),
+    ('FF0000', (255, 0, 0)),
+    ('00FF00', (0, 255, 0)),
+    ('00FFFF', (0, 255, 255)),
+    ('FF00FF', (255, 0, 255)),
+    ('C0C0C0', (192, 192, 192)),
+    ('008000', (0, 128, 0)),
+    ('800080', (128, 0, 128)),
+    ('008080', (0, 128, 128)),
+    ('000080', (0, 0, 128)),
+    ('ZFASD', ValueError),
+    ('A', ValueError),
+    (None, TypeError),
+])
+def test_hex_to_rgb(input, expected):
+    if isinstance(expected, tuple):
+        assert utils.hex_to_rgb(input)
+    else:
+        with pytest.raises(expected):
+            utils.hex_to_rgb(input)
 
 
-def test_rgb_to_cmyk():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('input,expected', [
+    ((139, 0, 22), (0, 100, 84, 45)),
+    ((178, 0, 31), (0, 100, 83, 30)),
+    ((0, 174, 114), (100, 0, 34, 32)),
+    ((103, 191, 127), (46, 0, 34, 25)),
+    ((93, 12, 123), (24, 90, 0, 52)),
+    ((121, 55, 139), (13, 60, 0, 45)),
+    ((215, 215, 215), (0, 0, 0, 16)),
+    ((194, 194, 194), (0, 0, 0, 24)),
+    ((1,), ValueError),
+    (1, TypeError),
+])
+def test_rgb_to_cmyk(input, expected):
+    if isinstance(expected, tuple):
+        result = utils.rgb_to_cmyk(input)
+        for r, e in zip(result, expected):
+            assert r == pytest.approx(e, 0.1)
+    else:
+        with pytest.raises(expected):
+            utils.rgb_to_cmyk(input)
 
 
-def test_rgb_to_hsv():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('input,expected', [
+    ((139, 0, 22), (351, 100, 54.4)),
+    ((178, 0, 31), (350, 100, 69.8)),
+    ((0, 174, 114), (159, 100, 68.2)),
+    ((103, 191, 127), (136, 46.1, 74.9)),
+    ((93, 12, 123), (284, 90.2, 48.2)),
+    ((121, 55, 139), (287, 60.4, 54.5)),
+    ((215, 215, 215), (0, 0, 84.3)),
+    ((194, 194, 194), (0, 0, 76.1)),
+    ((1,), ValueError),
+    (1, TypeError),
+])
+def test_rgb_to_hsv(input, expected):
+    if isinstance(expected, tuple):
+        result = utils.rgb_to_hsv(input)
+        for r, e in zip(result, expected):
+            assert r == pytest.approx(e, 0.1)
+    else:
+        with pytest.raises(expected):
+            utils.rgb_to_hsv(input)
 
 
-def test_rgb_to_hsl():
-    # TODO: Complete
-    pass
+@pytest.mark.parametrize('input,expected', [
+    ((139, 0, 22), (351, 100, 27.3)),
+    ((178, 0, 31), (350, 100, 34.9)),
+    ((0, 174, 114), (159, 100, 34.1)),
+    ((103, 191, 127), (136, 40.7, 57.6)),
+    ((93, 12, 123), (284, 82.2, 26.5)),
+    ((121, 55, 139), (287, 43.3, 38.0)),
+    ((215, 215, 215), (0, 0, 84.3)),
+    ((194, 194, 194), (0, 0, 76.1)),
+    ((1,), ValueError),
+    (1, TypeError),
+])
+def test_rgb_to_hsl(input, expected):
+    print(input)
+    if isinstance(expected, tuple):
+        result = utils.rgb_to_hsl(input)
+        for r, e in zip(result, expected):
+            assert r == pytest.approx(e, 0.1)
+    else:
+        with pytest.raises(expected):
+            utils.rgb_to_hsl(input)
 
 
 def test_is_integer():

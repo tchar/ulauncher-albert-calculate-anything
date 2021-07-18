@@ -26,9 +26,9 @@ class Calculation(_Calculation):
         super().__init__(value=value, query=query, error=error, order=order)
 
         if value is None: self.value_type = Calculation.VALUE_NONE
-        elif isinstance(value, int): self.value_type = Calculation.VALUE_INT
-        elif isinstance(value, float): self.value_type = Calculation.VALUE_FLOAT
         elif isinstance(value, bool): self.value_type = Calculation.VALUE_BOOLEAN
+        elif isinstance(value, float): self.value_type = Calculation.VALUE_FLOAT
+        elif isinstance(value, int): self.value_type = Calculation.VALUE_INT
         elif isinstance(value, str): self.value_type = Calculation.VALUE_STRING
         elif isinstance(value, complex):
             if self.value.imag == 0: self.value_type = Calculation.VALUE_REAL
@@ -41,6 +41,8 @@ class Calculation(_Calculation):
         number_dec = number % 1
         if cmath.isclose(number_dec, 0, abs_tol=CALCULATOR_ERROR):
             return int(number)
+        if cmath.isclose(number_dec, 1, abs_tol=CALCULATOR_ERROR):
+            return int(number) + 1
         return number
 
     def get_description(self):

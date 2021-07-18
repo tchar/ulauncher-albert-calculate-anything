@@ -14,19 +14,17 @@ from ...calculation import (
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
 from ... import logging
-from ...utils import Singleton, is_integer, or_regex
+from ...utils import Singleton, is_integer, or_regex, replace_dict_re_func
 from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
 space_in_middle_re = re.compile(r'\S\s+\S')
-expression_sub = {'mod': '%', 'div': '//', 'and': '&', 'or': '|', 'xor': '^', '=': '=='}
-expression_sub_re = re.compile(or_regex(expression_sub))
 
 expression_eq_split = re.compile(or_regex(['==', '>', '>=', '<', '<=']))
 
 keyword_set = set(['^', '|', '&', '%', '//' , '+', '-', '*', '/', '(', ')'])
 expression_split_re = re.compile(or_regex(keyword_set))
 
-digits_base2_re = re.compile(re.compile(r'^\s*([01]+)\s*$'))
+digits_base2_re = re.compile(r'^\s*([01]+)\s*$')
 digits_base8_re = re.compile(r'^\s*([0-7]+)\s*$')
 digits_base16_re = re.compile(r'^\s*([A-Fa-f0-9]+)\s*$')
 digits_base10_re = re.compile(r'^\s*([0-9]+)\s*$')
@@ -46,10 +44,14 @@ class BaseNQueryHandler(QueryHandlerInterface):
 
     def parse_expression(self, expression, split_eq=True, sub_kw=True):
         convert_to_base_n = lambda m: str(int(m.group(0), self._base))
-        sub_keywords = lambda s: expression_sub[s.group(0)]
 
         if sub_kw:
-            expression = expression_sub_re.sub(sub_keywords, expression)
+            replace_f = replace_dict_re_func({
+                'mod': '%', 'div': '//',
+                'and': '&', 'or': '|',
+                'xor': '^', '=': '=='
+            })
+            expression = replace_f(expression)
 
         if split_eq:
             expression = expression_eq_split.split(expression)
