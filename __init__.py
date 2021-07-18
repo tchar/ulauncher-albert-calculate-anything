@@ -88,7 +88,7 @@ from calculate_anything.utils import get_or_default
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
-CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'internal', CurrencyProviderFactory.get_available_providers)
+CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'internal', CurrencyProviderFactory.get_available_providers())
 
 API_KEY = globals().get('API_KEY') or ''
 
@@ -100,7 +100,7 @@ UNITS_CONVERSION_MODE = get_or_default(
 if UNITS_CONVERSION_MODE == 'normal':
     UNITS_CONVERSION_MODE = UnitsService.MODE_NORMAL
 elif UNITS_CONVERSION_MODE == 'crazy':
-    UNITS_CONVERSION_MODE = 'crazy'
+    UNITS_CONVERSION_MODE = UnitsService.MODE_CRAZY
 
 CACHE = globals().get('CACHE') or '86400'
 CACHE = get_or_default(CACHE, int, 86400)
@@ -220,4 +220,5 @@ def handleQuery(query):
         )
     if not items:
         return None
+
     return items
