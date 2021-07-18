@@ -136,6 +136,7 @@ def initialize():
 def finalize():
     UnitsService().disable().stop()
     CurrencyService().disable_cache()
+    TimezoneService().stop()
 
 def is_trigger(query, index):
     try: return TRIGGERS[index] == query.trigger

@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from functools import wraps
 from ..utils import is_types
-from ..constants import CACHE_DIR, DATA_FILE
+from ..constants import CACHE_DIR, CURRENCY_DATA_FILE
 from .. import logging
 
 class CacheException(Exception):
@@ -44,16 +44,16 @@ class CurrencyCache:
                 self._logger.error('Could not create cache directory {}: {}'.format(CACHE_DIR, e))
                 return False
 
-        if os.path.isdir(DATA_FILE):
+        if os.path.isdir(CURRENCY_DATA_FILE):
             try:
-                shutil.rmtree(DATA_FILE)
+                shutil.rmtree(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error('Could not remove data directory {}: {}'.format(DATA_FILE, e))
+                self._logger.error('Could not remove data directory {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
 
-        if os.path.exists(DATA_FILE):
+        if os.path.exists(CURRENCY_DATA_FILE):
             try:
-                with open(DATA_FILE, 'r') as f:
+                with open(CURRENCY_DATA_FILE, 'r') as f:
                     data = json.loads(f.read())
                     if not is_types(data.get('exchange_rates'), dict):
                         raise Exception('exchange rates is not a dict')
@@ -67,20 +67,20 @@ class CurrencyCache:
                     if not is_types(data.get('last_update_timestamp'), int, float):
                         raise Exception('last_update_timestamp is not a number')
             except Exception as e:
-                self._logger.error('Data file {} is possible corrupted, will try to remove it: {}'.format(DATA_FILE, e))
+                self._logger.error('Data file {} is possible corrupted, will try to remove it: {}'.format(CURRENCY_DATA_FILE, e))
                 try:
-                    os.remove(DATA_FILE)
+                    os.remove(CURRENCY_DATA_FILE)
                 except Exception as e:
-                    self._logger.error('Could not remove data file {}: {}'.format(DATA_FILE, e))
+                    self._logger.error('Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                     return False
 
-        if not os.path.exists(DATA_FILE):
+        if not os.path.exists(CURRENCY_DATA_FILE):
             data = {'exchange_rates': {}, 'last_update_timestamp': 0}
             try:
-                with open(DATA_FILE, 'w') as f:
+                with open(CURRENCY_DATA_FILE, 'w') as f:
                     f.write(json.dumps(data))
             except Exception as e:
-                self._logger.error('Could not write default data file {}: {}'.format(DATA_FILE, e))
+                self._logger.error('Could not write default data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
         return True
 
@@ -93,7 +93,7 @@ class CurrencyCache:
             self._data = {'exchange_rates': {}, 'last_update_timestamp': 0}
             return
 
-        with open(DATA_FILE, 'r') as f:
+        with open(CURRENCY_DATA_FILE, 'r') as f:
             self._data = json.loads(f.read())
 
         self._loaded = True
@@ -146,11 +146,11 @@ class CurrencyCache:
             'exchange_rates': {},
             'last_update_timestamp': 0
         }
-        if os.path.isfile(DATA_FILE):
+        if os.path.isfile(CURRENCY_DATA_FILE):
             try:
-                os.remove(DATA_FILE)
+                os.remove(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error('Could not remove data file {}: {}'.format(DATA_FILE, e))
+                self._logger.error('Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
 
     def save(self, exchange_rates, provider):
         if not self.enabled:
@@ -166,8 +166,8 @@ class CurrencyCache:
             self._use_only_memory = True
             return
         try:
-            with open(DATA_FILE, 'w') as f:
+            with open(CURRENCY_DATA_FILE, 'w') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:
-            self._logger.error('Could not save cache data {}: {}'.format(DATA_FILE, e))
+            self._logger.error('Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e))
         

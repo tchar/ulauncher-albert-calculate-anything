@@ -1,4 +1,3 @@
-from calculate_anything.calculation.time import TimedeltaCalculation
 import re
 import pytz
 from datetime import datetime, timedelta
@@ -7,7 +6,7 @@ try:
 except ImportError:
     parsedatetime = None
 from .interface import QueryHandlerInterface
-from ...calculation import LocationTimeCalculation, TimeCalculation
+from ...calculation import LocationTimeCalculation, TimeCalculation, TimedeltaCalculation
 from ...time.service import TimezoneService
 from ...exceptions import DateAddDateException, MissingParsedatetimeException, DateOverflowException, MisparsedTimeException
 from ...utils import Singleton, partition
@@ -53,8 +52,11 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def _get_locations(self, location):
         search_terms = []
-        locations = TimeQueryHandler._get_location_search_combinations(location)
-        
+        if len(location) >= 2:
+            locations = TimeQueryHandler._get_location_search_combinations(location)
+        else:
+            locations = []
+
         if not locations:
             return TimezoneService().get_defaults(), True
         

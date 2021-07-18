@@ -101,9 +101,9 @@ class UnitsCalculation(_Calculation):
             dimensionality = ''
 
         if description and dimensionality:
-            description = '{} • [ {} ]'.format(description, dimensionality)
+            description = '{} • [{}]'.format(description, dimensionality)
         elif dimensionality:
-            description = '[ {} ]'.format(dimensionality)
+            description = '[{}]'.format(dimensionality)
         else:
             description = ''
 

@@ -1,5 +1,5 @@
 import re
-from .cache import TimezoneCache
+from .sqlite_cache import SqliteTimezoneCache
 from ..utils import Singleton
 
 class TimezoneService(metaclass=Singleton):
@@ -7,7 +7,7 @@ class TimezoneService(metaclass=Singleton):
         self._default_cities = []
 
     def get(self, name, *search_terms):
-        return TimezoneCache().get(name, *search_terms)
+        return SqliteTimezoneCache().get(name, *search_terms)
 
     def get_defaults(self):
         return self._default_cities
@@ -31,11 +31,12 @@ class TimezoneService(metaclass=Singleton):
                 default_city = default_city.strip()
                 country_code = country_code.upper()
             if country_code:
-                cities_found_tmp = TimezoneCache().get(default_city, country_code)
+                cities_found_tmp = SqliteTimezoneCache().get(default_city, country_code, exact=True)
             else:
-                cities_found_tmp = TimezoneCache().get(default_city)
+                cities_found_tmp = SqliteTimezoneCache().get(default_city, exact=True)
             cities_found.extend(cities_found_tmp)
 
         return cities_found
 
-        
+    def stop(self):
+        SqliteTimezoneCache().close_db()        

@@ -9,7 +9,8 @@ if XDG_FALLBACK is None:
 XDG_FALLBACK = os.path.join(XDG_FALLBACK, '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
 CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
-DATA_FILE = os.path.join(CACHE_DIR, 'data.json')
+CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
+TIMEZONE_SQLITE_FILE = os.path.join(CACHE_DIR, 'timezones.sqlite3')
 
 # Replace plus with + and minus with -
 PLUS_MINUS_REGEX_REPLACE_FUNC = replace_dict_re_func(

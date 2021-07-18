@@ -69,33 +69,49 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 'An unexpected exception occured when requesting from provider {}: {}'.format(provider_name, e))
         return {}
 
-    def request_currencies(self, *currencies, force=False):
-        super().request_currencies(*currencies, force=force)
-
-        providers_currencies = {}
+    def _request_free(self, currencies, force):
+        if not self._free_providers:
+            return []
+    
         with ThreadPoolExecutor(max_workers=len(self._free_providers)) as executor:
-            free_tasks = []
+            tasks = []
             for provider_name, provider in self._free_providers.items():
                 task = executor.submit(
                     self._thread_request, provider_name, provider, *currencies, force=force)
-                free_tasks.append(task)
+                tasks.append(task)
+        return tasks
 
-            api_key_tasks = []
+    def _request_api(self, currencies, force):
+        if not self._api_providers:
+            return []
+
+        with ThreadPoolExecutor(max_workers=len(self._api_providers)) as executor:
+            tasks = []
             for provider_name, provider in self._api_providers.items():
                 task = executor.submit(
                     self._thread_request, provider_name, provider, *currencies, force=force)
-                api_key_tasks.append(task)
+                tasks.append(task)
+        return tasks
 
-            for task in as_completed(free_tasks):
-                result = task.result()
-                if result is not None:
-                    providers_currencies.update(result)
+    def request_currencies(self, *currencies, force=False):
+        super().request_currencies(*currencies, force=force)
 
-            for task in as_completed(api_key_tasks):
-                result = task.result()
-                if result is not None:
-                    providers_currencies.update(result)
+        tasks_free = self._request_free(currencies, force)
+        tasks_api = self._request_api(currencies, force)
+        
+        providers_currencies = {}
+    
+        for task in tasks_free:
+            result = task.result()
+            if result is not None:
+                providers_currencies.update(result)
 
+        for task in tasks_api:
+            result = task.result()
+            if result is not None:
+                providers_currencies.update(result)
+
+        self._logger.error(self._api_providers)
         self._had_error = (
             all(map(lambda provider: provider.had_error, self._free_providers.values())) and
             all(map(lambda provider: provider.had_error, self._api_providers.values()))

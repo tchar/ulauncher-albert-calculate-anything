@@ -1,12 +1,10 @@
-from calculate_anything.utils import get_or_default
-from calculate_anything.lang import Language
-from calculate_anything.query import QueryHandler
-from calculate_anything.currency.service import CurrencyService
+import locale
+locale.setlocale(locale.LC_ALL, '')
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
 from calculate_anything.exceptions import MissingRequestsException
@@ -17,14 +15,15 @@ from calculate_anything.query.handlers.base_n import (
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
+from calculate_anything.query import QueryHandler
+from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query.handlers.time import TimeQueryHandler
 from calculate_anything.query.handlers.currency import CurrencyQueryHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
-import locale
-locale.setlocale(locale.LC_ALL, '')
-
+from calculate_anything.lang import Language
+from calculate_anything.utils import get_or_default
 
 class ConverterExtension(Extension):
 
@@ -34,6 +33,7 @@ class ConverterExtension(Extension):
         self.subscribe(PreferencesEvent, PreferencesEventListener())
         self.subscribe(PreferencesUpdateEvent,
                        PreferencesUpdateEventListener())
+        self.subscribe(SystemExitEvent, SystemExitEventListener())
 
 
 class KeywordQueryEventListener(EventListener):
@@ -213,6 +213,11 @@ class PreferencesUpdateEventListener(EventListener):
                 currency_service.run(force=True)
             except MissingRequestsException:
                 pass
+
+class SystemExitEventListener(EventListener):
+    def on_event(self, event, extension):
+        TimezoneService().stop()
+        return super().on_event(event, extension)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import os
 import json
 from .. import logging
 from ..utils import Singleton
-from ..constants import MAIN_DIR, TIME_LOCATION_REPLACE_REGEX
+from ..constants import MAIN_DIR
 
 class TimezoneCache(metaclass=Singleton):
     def __init__(self):
