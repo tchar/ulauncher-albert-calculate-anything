@@ -388,7 +388,6 @@ def test_rgb_to_hsv(input, expected):
     (1, TypeError),
 ])
 def test_rgb_to_hsl(input, expected):
-    print(input)
     if isinstance(expected, tuple):
         result = utils.rgb_to_hsl(input)
         for r, e in zip(result, expected):

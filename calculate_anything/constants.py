@@ -5,7 +5,7 @@ from .utils import MultiReDict
 
 XDG_FALLBACK = os.getenv('HOME')
 if XDG_FALLBACK is None:
-    XDG_FALLBACK = os.path.expanduser('~')
+    XDG_FALLBACK = os.path.expanduser('~') #pragma: no cover
 XDG_FALLBACK = os.path.join(XDG_FALLBACK, '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
 CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
