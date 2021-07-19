@@ -288,6 +288,7 @@ class SqliteTimezoneCache(TimezoneCache, metaclass=Singleton):
                         WHERE datetime(timestamp, '+2 hour') < datetime('now', 'localtime')''')
         db_cache.commit()
         cursor.close()
+        self._last_clear_cache_timestamp = datetime.now().timestamp()
         self._logger.info('Cleared cache')
 
     def get(self, city_name, *search_terms, exact=False):
