@@ -13,7 +13,7 @@ from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
 from .. import logging
-from ..utils import MultiReDict
+from ..utils import multi_re
 from ..constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
 
 
@@ -107,9 +107,9 @@ class UnitsCalculation(_Calculation):
         else:
             description = ''
 
-        replace_re = MultiReDict({'**': '^', '_': ' '}, sort=False)
-        name = replace_re.sub(name)
-        description = replace_re.sub(description)
+        replace_re = multi_re.compile({'**': '^', '_': ' '}, sort=False)
+        name = replace_re.sub_dict(name)
+        description = replace_re.sub_dict(description)
         description = description
 
         return name, description
@@ -154,7 +154,7 @@ class TemperatureUnitsCalculation(UnitsCalculation):
             unit_name = str(self.value.units)
             name = '{:g} {}'.format(self.value.magnitude, unit_name)
 
-        name = MultiReDict({'**': '^', '_': ' '}, sort=False).sub(name)
+        name = multi_re.sub_dict({'**': '^', '_': ' '}, name, sort=False)
         return name, '[temperature]'
 
 
@@ -191,9 +191,9 @@ class CurrencyUnitsCalculation(UnitsCalculation):
             unit_name_alias = unit_name
             replace_dict['currency_'] = ''
         
-        replace_re = MultiReDict(replace_dict, sort=True)
+        replace_re = multi_re.compile(replace_dict, sort=True)
 
-        unit_name = replace_re.sub(unit_name)
+        unit_name = replace_re.sub_dict(unit_name)
         unit_name, clipboard = unit_name_alias, unit_name
         converted_amount = locale.currency(
             self.value.magnitude, symbol='', grouping=True)
@@ -204,10 +204,10 @@ class CurrencyUnitsCalculation(UnitsCalculation):
             return name, ''
 
         unit_from_name = str(self.unit_from)
-        unit_from_name = replace_re.sub(unit_from_name)
+        unit_from_name = replace_re.sub_dict(unit_from_name)
 
         unit_to_name = str(self.unit_to)
-        unit_to_name = replace_re.sub(unit_to_name)
+        unit_to_name = replace_re.sub_dict(unit_to_name)
 
         rate_amount = '{:.6f}'.format(self.rate.magnitude)
 

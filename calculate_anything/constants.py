@@ -1,7 +1,7 @@
 import os
 import re
 import calculate_anything
-from .utils import MultiReDict
+from .utils import multi_re
 
 XDG_FALLBACK = os.getenv('HOME')
 if XDG_FALLBACK is None:
@@ -13,7 +13,7 @@ CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
 TIMEZONE_SQLITE_FILE = os.path.join(CACHE_DIR, 'timezones.sqlite3')
 
 # Replace plus with + and minus with -
-PLUS_MINS_REGEX = MultiReDict(
+PLUS_MINS_REGEX = multi_re.compile(
     {'plus': '+', 'minus': '-'}, flags=re.IGNORECASE)
 
 # Unit conversion regex match
@@ -33,7 +33,7 @@ EMPTY_AMOUNT = re.compile(r'^\s*$')
 CALCULATOR_ERROR = 1e-10
 CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/|==|[^A-Za-z]is[^A-Za-z]).*')
 CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
-CALCULATOR_QUERY_REGEX_REPLACE = MultiReDict({
+CALCULATOR_QUERY_REGEX_REPLACE = multi_re.compile({
     'mod ': '%', 'div ': '//', '^': '**',
     '>=': '>=', '<=': '<=', '=': '=='
 }, flags=re.IGNORECASE)

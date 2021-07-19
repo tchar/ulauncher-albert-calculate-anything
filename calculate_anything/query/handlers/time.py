@@ -268,7 +268,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             return [result]
             
         query = query.lower()
-        query = PLUS_MINS_REGEX.sub(query)
+        query = PLUS_MINS_REGEX.sub_dict(query)
 
         if not TIME_QUERY_REGEX.match(query):
             return

@@ -4,7 +4,7 @@ from .base import _Calculation
 from ..query.result import QueryResult
 from ..lang import Language
 from ..constants import CALCULATOR_ERROR
-from ..utils import MultiReDict
+from ..utils import multi_re
 
 class Calculation(_Calculation):
     VALUE_UNKNOWN = -1
@@ -78,7 +78,7 @@ class Calculation(_Calculation):
         query = re.split(r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query)
         query = map(str.strip, query)
         query = ' '.join(query)
-        query = MultiReDict(replace_special, sort=True).sub(query)
+        query = multi_re.sub_dict(replace_special, query, sort=True)
         return query
 
     def format(self):

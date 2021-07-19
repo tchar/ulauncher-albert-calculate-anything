@@ -145,7 +145,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         if CALCULATOR_REGEX_REJECT.match(query):
             return None
 
-        query = CALCULATOR_QUERY_REGEX_REPLACE.sub(query)
+        query = CALCULATOR_QUERY_REGEX_REPLACE.sub_dict(query)
         query, _ = self._parse_expression(query)
         if not query:
             return None

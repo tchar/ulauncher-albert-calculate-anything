@@ -137,103 +137,83 @@ def test_partition(input, expected):
     gen = utils.partition(input)
     assert list(gen) == expected
 
+
 @pytest.mark.parametrize('input,expected', [
-    ([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]), 
-    ([1, 2, 1, 2, 4, 6], [1, 2, 4, 6]), 
-    (set([1, 2, 3, 4]), set([1, 2, 3, 4])), 
-    ([], []), 
+    ([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]),
+    ([1, 2, 1, 2, 4, 6], [1, 2, 4, 6]),
+    (set([1, 2, 3, 4]), set([1, 2, 3, 4])),
+    ([], []),
 ])
 def test_deduplicate(input, expected):
     _t = type(input)
     assert _t(utils.deduplicate(input)) == expected
 
-@pytest.mark.parametrize('test_spec', [{
+test_spec = [{
     # Test match
     'pattern':  'x^y',
-    'args': (),
-    'kwargs': {'include': False},
-    'f': {
-        'func': utils.MultiRe.match,
-        'args': ('^yx123',),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.match,
+    'args': ('^yx123',),
+    'kwargs': {},
     'assert_func': lambda r: r is not None,
 }, {
     # Test fullmatch
     'pattern':  'x^y123',
-    'args': (),
-    'kwargs': {'include': False},
-    'f': {
-        'func': utils.MultiRe.fullmatch,
-        'args': ('^yx',),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.fullmatch,
+    'args': ('^yx',),
     'assert_func': lambda r: r is None,
-},{
+}, {
     # Test split
     'pattern':  '=*/+-><^',
-    'args': (),
-    'kwargs': {'include': True},
-    'f': {
-        'func': utils.MultiRe.split,
-        'args': ('x^2+5x-21*2=0',),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.split,
+    'args': ('x^2+5x-21*2=0',),
     'assert_func': lambda r: r == ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']
 }, {
     # Test findall
     'pattern':  '1=2',
     'args': (),
-    'kwargs': {'include': True},
-    'f': {
-        'func': utils.MultiRe.findall,
-        'args': ('=$#=123',),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.findall,
+    'args': ('=$#=123',),
     'assert_func': lambda r: r == ['=', '=', '1', '2']
 }, {
     # Test search
     'pattern':  '+-*/',
-    'args': (),
-    'kwargs': {'include': True},
-    'f': {
-        'func': utils.MultiRe.search,
-        'args': ('1+2/3',),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.search,
+    'args': ('1+2/3',),
     'assert_func': lambda r: r is not None and r.group(0) == '+'
 }, {
     # Test sub
     'pattern':  'abacd',
-    'args': (),
-    'kwargs': {'include': True},
-    'f': {
-        'func': utils.MultiRe.sub,
-        'args': ('', 'abracadabra'),
-        'kwargs': {},
-    },
+    'func': utils.multi_re.sub,
+    'args': ('', 'abracadabra'),
     'assert_func': lambda r: r == 'rr'
 }, {
     # Test subn
-    'pattern':  ['Harry Potter'],
-    'args': (),
-    'kwargs': {'include': True, 'flags': re.IGNORECASE},
-    'f': {
-        'func': utils.MultiRe.subn,
-        'args': ('Lord Voldermort', 'My name is hArRy PotTeR, haRrY PotTer is awesome'),
-        'kwargs': {},
-    },
+    'pattern':  ['Harry potter', 'Hermione'],
+    'func': utils.multi_re.subn,
+    'args': ('Lord Voldermort', 'My name is harry potter, HeRmiOnE is awesome'),
+    'kwargs': {'flags': re.IGNORECASE},
     'assert_func': lambda r: r == ('My name is Lord Voldermort, Lord Voldermort is awesome', 2)
-}])
+}]
+@pytest.mark.parametrize('test_spec', test_spec)
 def test_multi_re(test_spec):
-    multi_re = utils.MultiRe(
-        test_spec['pattern'], *test_spec['args'], **test_spec['kwargs'])
-    result = test_spec['f']['func'](
-        multi_re, *test_spec['f']['args'], **test_spec['f']['kwargs'])
-    assert test_spec['assert_func'](result)
+    pattern = test_spec['pattern']
+    func = test_spec['func']
+    args = test_spec['args']
+    kwargs = test_spec.get('kwargs', {})
+    assert_func = test_spec['assert_func']
 
+    assert assert_func(func(pattern, *args, **kwargs))
 
-@pytest.mark.parametrize('test_spec', [{
+    with pytest.raises(ValueError):
+        utils.multi_re.sub_dict(pattern, args[0])
+    with pytest.raises(ValueError):
+        utils.multi_re.subn_dict(pattern, args[0])
+    with pytest.raises(ValueError):
+        utils.multi_re.compile(pattern).sub_dict(args[0])
+    with pytest.raises(ValueError):
+        utils.multi_re.compile(pattern).subn_dict(args[0])
+
+test_spec = [{
     # Test normal
     'string': 'abcdefgh',
     'dict':  {'abcd': '1234', 'efgh': '5678'},
@@ -276,34 +256,37 @@ def test_multi_re(test_spec):
     'string': 'αβγδεηζθ',
     'dict':  {'αβγδ': 'ικλμ', 'εηζθ': 'νξοπ'},
     'expected': ('ικλμνξοπ', 2)
-}, {
-    # Test Exception 1
-    'string': 'abcdefgh',
-    'dict': {'abc': 1},
-    'exception': TypeError,
-}, {
-    # Test Exception 1
-    'string': 'abcdefgh',
-    'dict': {1: '1'},
-    'exception': TypeError,
-}])
+}]
+@pytest.mark.parametrize('test_spec', test_spec)
 def test_multi_re_dict(test_spec):
-    string = test_spec['string']
+    string = test_spec.get('string')
     d = test_spec['dict']
-    args = test_spec.get('args', ())
     kwargs = test_spec.get('kwargs', {})
 
+    obj = utils.multi_re.compile(d, **kwargs)
+
     exception = test_spec.get('exception')
-    if exception:
-        result = None
+    if exception and string is None:
         with pytest.raises(exception):
-            utils.MultiReDict(d, *args, **kwargs).sub(string)
+            obj.sub_dict(string)
+        with pytest.raises(exception):
+            obj.sub_dict(string)
         return
-    
+
+    if string is None:
+        raise Exception('Did not provide string')
+
+    string = test_spec['string']
     expected = test_spec['expected']
-    result = utils.MultiReDict(d, *args, **kwargs).sub(string)
+
+    result = obj.sub_dict(string)
     assert result == expected[0]
-    result = utils.MultiReDict(d, *args, **kwargs).subn(string)
+    result = obj.subn_dict(string)
+    assert result == expected
+    
+    result = utils.multi_re.sub_dict(d, string, **kwargs)
+    assert result == expected[0]
+    result = utils.multi_re.subn_dict(d, string, **kwargs)
     assert result == expected
 
 

@@ -14,15 +14,15 @@ from ...calculation import (
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
 from ... import logging
-from ...utils import MultiRe, MultiReDict, Singleton, is_integer
+from ...utils import multi_re, Singleton, is_integer
 from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
 space_in_middle_re = re.compile(r'\S\s+\S')
 
-expression_eq_split = MultiRe(['==', '>', '>=', '<', '<='])
+expression_eq_split = multi_re.compile(['==', '>', '>=', '<', '<='], include=True)
 
 keyword_set = set(['^', '|', '&', '%', '//' , '+', '-', '*', '/', '(', ')'])
-expression_split_re = MultiRe(keyword_set)
+expression_split_re = multi_re.compile(keyword_set, include=True)
 
 digits_base2_re = re.compile(r'^\s*([01]+)\s*$')
 digits_base8_re = re.compile(r'^\s*([0-7]+)\s*$')
@@ -46,12 +46,11 @@ class BaseNQueryHandler(QueryHandlerInterface):
         convert_to_base_n = lambda m: str(int(m.group(0), self._base))
 
         if sub_kw:
-            replace_re = MultiReDict({
+            expression = multi_re.sub_dict({
                 'mod': '%', 'div': '//',
                 'and': '&', 'or': '|',
                 'xor': '^', '=': '=='
-            })
-            expression = replace_re.sub(expression)
+            }, expression)
 
         if split_eq:
             expression = expression_eq_split.split(expression)

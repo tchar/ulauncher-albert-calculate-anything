@@ -2,7 +2,7 @@ import os
 import json
 import re
 import unicodedata
-from .utils import Singleton, MultiReDict 
+from .utils import Singleton, multi_re 
 from .constants import MAIN_DIR
 from . import logging
 
@@ -57,11 +57,12 @@ class Language(metaclass=Singleton):
         if mode not in self._data:
             return string
         
-        return MultiReDict(
+        return multi_re.sub_dict(
             self._data[mode],
-            sort=True,
-            flags=re.IGNORECASE if ignorecase else 0
-        ).sub(string)
+            string,
+            flags=re.IGNORECASE if ignorecase else 0,
+            sort=True
+        )
 
     def get_replacer(self, mode, ignorecase=True):
         def _replacer(string):

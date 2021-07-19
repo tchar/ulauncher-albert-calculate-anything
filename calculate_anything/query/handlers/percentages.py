@@ -93,7 +93,7 @@ class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def _calculate_calc(self, query):
         query = query.lower()
-        query = PLUS_MINS_REGEX.sub(query)
+        query = PLUS_MINS_REGEX.sub_dict(query)
 
         matches = PERCENTAGES_REGEX_CALC_MATCH.findall(query)
         if not matches:
