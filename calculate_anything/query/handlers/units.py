@@ -39,16 +39,17 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     @staticmethod
     def _extract_query(query):
         matches = UNIT_QUERY_REGEX.findall(query)
-        if matches:
-            unit_from, units_to = matches[0]
-            units_to = units_to.split(',')
-        else:
-            unit_from = query
-            units_to = []
+        print(matches)
+        if not matches:
+            return None
+    
+        unit_from, units_to = matches[0]
+        units_to = units_to.split(',')
 
         unit_from = unit_from.strip()
         units_to = map(str.strip, units_to)
-        units_to = list(dict.fromkeys(units_to))
+        units_to = filter(None, units_to)
+        units_to = list(units_to)
 
         return unit_from, units_to
 

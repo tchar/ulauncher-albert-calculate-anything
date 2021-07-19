@@ -39,7 +39,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         locations_tmp = TIME_LOCATION_REPLACE_REGEX.sub(' ', location)
         locations_tmp = locations_tmp.split(' ')
         locations_tmp = map(str.strip, locations_tmp)
-        locations_tmp = filter(lambda s: s, locations_tmp)
+        locations_tmp = filter(None, locations_tmp)
         locations_tmp = list(locations_tmp)
         locations_tmp = partition(locations_tmp)
 
@@ -153,7 +153,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     def _calculate(self, query, suffix, try_again):
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
-        query = filter(lambda s: s != '', query)
+        query = filter(None, query)
         query = list(query)
     
         signs = set(['+', '-'])
