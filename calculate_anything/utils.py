@@ -1,7 +1,7 @@
 import importlib
 from typing import (
     Any, Callable, Collection, Container, Dict,
-    Generator, Iterable, List, Optional, Tuple, Type, Union,
+    Generator, Hashable, Iterable, List, Match, Optional, Tuple, Type, Union,
 )
 from types import ModuleType
 import sys
@@ -9,11 +9,13 @@ import re
 from itertools import combinations
 from .exceptions import MissingSimpleevalException
 
+
 def get_module(name: str) -> Union[None, ModuleType]:
     try:
         return importlib.import_module(name)
     except ModuleNotFoundError:
         return None
+
 
 def is_types(*types: List[Type[Any]]) -> bool:
     return lambda value: any(map(lambda t: isinstance(value, t), types))
@@ -69,31 +71,81 @@ def partition(l: List[Any]) -> Generator[List[Any], None, None]:
             yield result
 
 
-def or_regex(values: Iterable[str], include: Optional[bool] = True) -> str:
-    regex = sorted(values, key=len, reverse=True)
-    regex = map(re.escape, regex)
-    regex = '|'.join(regex)
-    if include:
-        regex = '(' + regex + ')'
-    return regex
+def deduplicate(value: Iterable[Hashable]) -> Generator[Hashable, None, None]:
+    value_set = set()
+    for v in value:
+        if v in value_set:
+            continue
+        value_set.add(v)
+        yield v
 
 
-def replace_dict_re_func(replace_dict: Dict[str, str],
-                         sort: Optional[bool] = True,
-                         flags: int=0) -> Callable[[str], str]:
-    if flags & re.IGNORECASE:
-        replace_dict = {k.lower(): v for k, v in replace_dict.items()}
-        def case_f(s): return s.lower()
-    else:
-        def case_f(s): return s
+class MultiRe:
+    def __init__(self, value: Union[Iterable[str], str],
+                 sort: bool = True, include: bool = True, flags: int = 0):
+        value = deduplicate(value)
+        sort = (sort or isinstance(value, set) or (
+                isinstance(value, dict) and sys.version_info[:2] < (3, 7)))
+        if sort:
+            value = sorted(value, key=len, reverse=True)
 
-    regex = replace_dict
-    if sort or sys.version_info[:2] < (3, 7):
-        regex = sorted(regex, key=len, reverse=True)
-    regex = r'|'.join(map(re.escape, regex))
+        regex = r'|'.join(map(re.escape, value))
 
-    regex = re.compile(regex, flags=flags)
-    return lambda s: regex.sub(lambda m: replace_dict[case_f(m.group(0))], s)
+        if include:
+            regex = '(' + regex + ')'
+
+        self._re = re.compile(regex, flags=flags)
+
+    def findall(self, s: str) -> List:
+        return self._re.findall(s)
+
+    def search(self, s: str) -> Optional[Match[str]]:
+        return self._re.search(s)
+
+    def match(self, s: str) -> Optional[Match[str]]:
+        return self._re.match(s)
+
+    def fullmatch(self, s: str) -> Optional[Match[str]]:
+        return self._re.fullmatch(s)
+
+    def split(self, s: str, maxsplit: int = 0) -> List[str]:
+        return self._re.split(s, maxsplit)
+
+    def _sub(self, repl, s, count, func):
+        return func(repl, s, count)
+
+    def sub(self, repl: Union[None, str, Callable[[Match], str]], s: str, count: int = 0) -> str:
+        return self._sub(repl, s, count, self._re.sub)
+
+    def subn(self, repl: Union[None, str, Callable[[Match], str]], s: str, count: int = 0) -> str:
+        return self._sub(repl, s, count, self._re.subn)
+
+
+class MultiReDict(MultiRe):
+    def __init__(self, value: Dict[str, str],
+                 sort: bool = True, include: bool = False, flags: int = 0):
+
+        if flags & re.IGNORECASE:
+            value = {k.lower(): v for k, v in value.items()}
+
+        sort = sort or sys.version_info[:2] < (3, 7)
+        super().__init__(value.keys(), sort=sort, include=include, flags=flags)
+
+        self._flags = flags
+        self._replace_dict = value
+
+    def _sub(self, s, count, func):
+        if self._flags & re.IGNORECASE:
+            def repl(m): return self._replace_dict[m.group(0).lower()]
+        else:
+            def repl(m): return self._replace_dict[m.group(0)]
+        return super()._sub(repl, s, count, func)
+
+    def sub(self, s: str, count: int = 0) -> str:
+        return self._sub(s, count, self._re.sub)
+
+    def subn(self, s: str, count: int = 0) -> str:
+        return self._sub(s, count, self._re.subn)
 
 
 def hex_to_rgb(hex: str) -> Tuple[int, int, int]:

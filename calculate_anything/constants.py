@@ -1,7 +1,7 @@
 import os
 import re
 import calculate_anything
-from .utils import replace_dict_re_func
+from .utils import MultiReDict
 
 XDG_FALLBACK = os.getenv('HOME')
 if XDG_FALLBACK is None:
@@ -13,7 +13,7 @@ CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
 TIMEZONE_SQLITE_FILE = os.path.join(CACHE_DIR, 'timezones.sqlite3')
 
 # Replace plus with + and minus with -
-PLUS_MINUS_REGEX_REPLACE_FUNC = replace_dict_re_func(
+PLUS_MINS_REGEX = MultiReDict(
     {'plus': '+', 'minus': '-'}, flags=re.IGNORECASE)
 
 # Unit conversion regex match
@@ -33,7 +33,7 @@ EMPTY_AMOUNT = re.compile(r'^\s*$')
 CALCULATOR_ERROR = 1e-10
 CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/|==|[^A-Za-z]is[^A-Za-z]).*')
 CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
-CALCULATOR_QUERY_REGEX_REPLACE_FUNC = replace_dict_re_func({
+CALCULATOR_QUERY_REGEX_REPLACE = MultiReDict({
     'mod ': '%', 'div ': '//', '^': '**',
     '>=': '>=', '<=': '<=', '=': '=='
 }, flags=re.IGNORECASE)
@@ -54,7 +54,7 @@ TIME_SUBQUERY_REGEX = re.compile(
 TIME_SUBQUERY_DIGITS = re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
 # TIME_PROHIBITTED_CALC = re.compile(
-    # r'(next|last|previous|following|yesterday|tomorrow)[^\+\-\s]+[a-z]', flags=re.IGNORECASE)
+# r'(next|last|previous|following|yesterday|tomorrow)[^\+\-\s]+[a-z]', flags=re.IGNORECASE)
 TIME_LOCATION_REPLACE_REGEX = re.compile(
     r'[\W_]+', flags=re.IGNORECASE | re.UNICODE)
 TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'

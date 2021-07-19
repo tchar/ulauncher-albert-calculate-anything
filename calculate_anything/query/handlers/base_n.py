@@ -14,15 +14,15 @@ from ...calculation import (
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
 from ... import logging
-from ...utils import Singleton, is_integer, or_regex, replace_dict_re_func
+from ...utils import MultiRe, MultiReDict, Singleton, is_integer
 from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
 space_in_middle_re = re.compile(r'\S\s+\S')
 
-expression_eq_split = re.compile(or_regex(['==', '>', '>=', '<', '<=']))
+expression_eq_split = MultiRe(['==', '>', '>=', '<', '<='])
 
 keyword_set = set(['^', '|', '&', '%', '//' , '+', '-', '*', '/', '(', ')'])
-expression_split_re = re.compile(or_regex(keyword_set))
+expression_split_re = MultiRe(keyword_set)
 
 digits_base2_re = re.compile(r'^\s*([01]+)\s*$')
 digits_base8_re = re.compile(r'^\s*([0-7]+)\s*$')
@@ -46,33 +46,45 @@ class BaseNQueryHandler(QueryHandlerInterface):
         convert_to_base_n = lambda m: str(int(m.group(0), self._base))
 
         if sub_kw:
-            replace_f = replace_dict_re_func({
+            replace_re = MultiReDict({
                 'mod': '%', 'div': '//',
                 'and': '&', 'or': '|',
                 'xor': '^', '=': '=='
             })
-            expression = replace_f(expression)
+            expression = replace_re.sub(expression)
 
         if split_eq:
             expression = expression_eq_split.split(expression)
             expression, operators = expression[::2], expression[1::2]
-            return [
-                self.parse_expression(subexp, split_eq=False, sub_kw=False)[0][0]
-                for subexp in expression
-            ], operators
+            
+            exprs = []
+            exprs_parsed = []
+
+            for subexp in expression:
+                expr_dec, _, expr_parsed = self.parse_expression(subexp, split_eq=False, sub_kw=False)
+                exprs.append(expr_dec[0])
+                exprs_parsed.append(expr_parsed[0])
+
+            return exprs, operators, exprs_parsed
 
         expression = expression_split_re.split(expression)
         expr = ''
+        expr_parsed = ''
         for c in expression:
-            if c.strip() == '': expr += c
-            elif c in keyword_set: expr += c
+            if c.strip() == '':
+                expr += c
+                expr_parsed += c
+            elif c in keyword_set:
+                expr += c
+                expr_parsed += c
             else:
                 if space_in_middle_re.search(c): raise ValueError
-                c, n = re.subn(self._digits_re, convert_to_base_n, c)
-                if n == 0 and '.' not in c: raise WrongBaseException
+                c_dec, n = re.subn(self._digits_re, convert_to_base_n, c)
+                if n == 0 and '.' not in c_dec: raise WrongBaseException
                 elif n == 0: raise BaseFloatingPointException
-                expr += c
-        return [expr], []
+                expr += c_dec
+                expr_parsed += c
+        return [expr], [], [expr_parsed]
 
     def handle(self, query):
         if query.strip() == '':
@@ -83,7 +95,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
         results = []
 
         try:
-            expressions, operators = self.parse_expression(query)
+            expr_dec, operators, expr_parsed = self.parse_expression(query)
         except WrongBaseException:
             item = BaseNCalculation(error=WrongBaseException, order=-1)
             return [item]
@@ -97,7 +109,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
 
         results = []
         try:
-            results = [self._simple_eval.eval(exp) for exp in expressions]
+            results = [self._simple_eval.eval(exp) for exp in expr_dec]
         except MissingSimpleevalException:
             item = BaseNCalculation(error=MissingSimpleevalException, order=-1)
             return [item]
@@ -115,7 +127,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
                 item = BaseNCalculation(value=results[0], order=0)
         # Boolean result
         elif len(results) > 1:
-            item = CalculatorQueryHandler._calculate_boolean_result(results, operators, [])
+            item = CalculatorQueryHandler._calculate_boolean_result(results, operators, expr_parsed)
 
         items = []
         if item.is_error(): items.append(item)

@@ -13,7 +13,7 @@ from ...calculation import Calculation, BooleanCalculation
 from ...utils import is_types, Singleton
 from ...exceptions import MissingSimpleevalException, ZeroDivisionException, BooleanComparisonException
 from ...constants import (
-    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE_FUNC,
+    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
 
@@ -113,7 +113,6 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             '<=': op.le
         }
         inequalities = set(['>', '<', '>=', '<='])
-
         query = ''
         result = True
         for i, [value1, value2, operator] in enumerate(zip(values, values[1:], operators)):
@@ -146,7 +145,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         if CALCULATOR_REGEX_REJECT.match(query):
             return None
 
-        query = CALCULATOR_QUERY_REGEX_REPLACE_FUNC(query)
+        query = CALCULATOR_QUERY_REGEX_REPLACE.sub(query)
         query, _ = self._parse_expression(query)
         if not query:
             return None

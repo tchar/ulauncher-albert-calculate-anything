@@ -137,55 +137,174 @@ def test_partition(input, expected):
     gen = utils.partition(input)
     assert list(gen) == expected
 
-
-@pytest.mark.parametrize('pattern,s,func,include,expected', [
-    ('abacd', 'abracadabra', lambda r, s: re.sub(r, '', s), False, 'rr'),
-    ('1=2', '=$#=123', lambda r, s: re.findall(
-        r, s), True, ['=', '=', '1', '2']),
-    ('x^y', '^yx', lambda r, s: re.match(r, s) is not None, False, True),
-    ('=*/+-><^', 'x^2+5x-21*2=0', lambda r, s: re.split(r, s), True,
-     ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']),
+@pytest.mark.parametrize('input,expected', [
+    ([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]), 
+    ([1, 2, 1, 2, 4, 6], [1, 2, 4, 6]), 
+    (set([1, 2, 3, 4]), set([1, 2, 3, 4])), 
+    ([], []), 
 ])
-def test_or_regex(pattern, s, func, include, expected):
-    regex = utils.or_regex(pattern, include=include)
-    assert func(regex, s) == expected
+def test_deduplicate(input, expected):
+    _t = type(input)
+    assert _t(utils.deduplicate(input)) == expected
+
+@pytest.mark.parametrize('test_spec', [{
+    # Test match
+    'pattern':  'x^y',
+    'args': (),
+    'kwargs': {'include': False},
+    'f': {
+        'func': utils.MultiRe.match,
+        'args': ('^yx123',),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r is not None,
+}, {
+    # Test fullmatch
+    'pattern':  'x^y123',
+    'args': (),
+    'kwargs': {'include': False},
+    'f': {
+        'func': utils.MultiRe.fullmatch,
+        'args': ('^yx',),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r is None,
+},{
+    # Test split
+    'pattern':  '=*/+-><^',
+    'args': (),
+    'kwargs': {'include': True},
+    'f': {
+        'func': utils.MultiRe.split,
+        'args': ('x^2+5x-21*2=0',),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r == ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']
+}, {
+    # Test findall
+    'pattern':  '1=2',
+    'args': (),
+    'kwargs': {'include': True},
+    'f': {
+        'func': utils.MultiRe.findall,
+        'args': ('=$#=123',),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r == ['=', '=', '1', '2']
+}, {
+    # Test search
+    'pattern':  '+-*/',
+    'args': (),
+    'kwargs': {'include': True},
+    'f': {
+        'func': utils.MultiRe.search,
+        'args': ('1+2/3',),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r is not None and r.group(0) == '+'
+}, {
+    # Test sub
+    'pattern':  'abacd',
+    'args': (),
+    'kwargs': {'include': True},
+    'f': {
+        'func': utils.MultiRe.sub,
+        'args': ('', 'abracadabra'),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r == 'rr'
+}, {
+    # Test subn
+    'pattern':  ['Harry Potter'],
+    'args': (),
+    'kwargs': {'include': True, 'flags': re.IGNORECASE},
+    'f': {
+        'func': utils.MultiRe.subn,
+        'args': ('Lord Voldermort', 'My name is hArRy PotTeR, haRrY PotTer is awesome'),
+        'kwargs': {},
+    },
+    'assert_func': lambda r: r == ('My name is Lord Voldermort, Lord Voldermort is awesome', 2)
+}])
+def test_multi_re(test_spec):
+    multi_re = utils.MultiRe(
+        test_spec['pattern'], *test_spec['args'], **test_spec['kwargs'])
+    result = test_spec['f']['func'](
+        multi_re, *test_spec['f']['args'], **test_spec['f']['kwargs'])
+    assert test_spec['assert_func'](result)
 
 
-def test_replace_dict_re_func():
-    f = utils.replace_dict_re_func
-
-    s = 'abcdefgh'
-
+@pytest.mark.parametrize('test_spec', [{
     # Test normal
-    d = {'abcd': '1234', 'efgh': '5678'}
-    assert f(d)(s) == '12345678'
-
-    d = {'abc': '1', 'ef': '2'}
-    assert f(d)(s) == '1d2gh'
-
+    'string': 'abcdefgh',
+    'dict':  {'abcd': '1234', 'efgh': '5678'},
+    'expected': ('12345678', 2)
+}, {
+    'string': 'abcdefgh',
+    'dict':  {'abc': '1', 'ef': '2'},
+    'expected': ('1d2gh', 2)
+}, {
     # Test with substrings
-    d = {'abcd': '1', 'abc': '2'}
-    assert f(d)(s) == '1efgh'
-
-    # Test with ordered dict
-    d = OrderedDict([('abc', '2'), ('abcd', '1')])
-    assert f(d, sort=False)(s) == '2defgh'
-    assert f(d, sort=True)(s) == '1efgh'
-
-    # Test ignore case
-    d = {'ABCD': '1', 'efgh': '2'}
-    assert f(d, flags=0)(s) == 'abcd2'
-    assert f(d, flags=re.IGNORECASE)(s) == '12'
-
+    'string': 'abcdefgh',
+    'dict':  {'abcd': '1', 'abc': '2'},
+    'expected': ('1efgh', 1)
+}, {
+    # Test with ordered dict sort
+    'string': 'abcdefgh',
+    'kwargs': {'sort': False},
+    'dict':  OrderedDict([('abc', '2'), ('abcd', '1')]),
+    'expected': ('2defgh', 1)
+}, {
+    # Test with ordered dict no sort
+    'string': 'abcdefgh',
+    'kwargs': {'sort': True},
+    'dict':  OrderedDict([('abc', '2'), ('abcd', '1')]),
+    'expected': ('1efgh', 1)
+}, {
+    # Test ignore case (No ignore)
+    'string': 'abcdefgh',
+    'kwargs': {'flags': 0},
+    'dict':  {'ABCD': '1', 'efgh': '2'},
+    'expected': ('abcd2', 1)
+}, {
+    # Test ignore case (Ignore)
+    'string': 'abcdefgh',
+    'kwargs': {'flags': re.IGNORECASE},
+    'dict':  {'ABCD': '1', 'efgh': '2'},
+    'expected': ('12', 2)
+}, {
     # Test unicode
-    s_unicode = 'αβγδεηζθ'
-    d = {'αβγδ': 'ικλμ', 'εηζθ': 'νξοπ'}
-    assert f(d)(s_unicode) == 'ικλμνξοπ'
+    'string': 'αβγδεηζθ',
+    'dict':  {'αβγδ': 'ικλμ', 'εηζθ': 'νξοπ'},
+    'expected': ('ικλμνξοπ', 2)
+}, {
+    # Test Exception 1
+    'string': 'abcdefgh',
+    'dict': {'abc': 1},
+    'exception': TypeError,
+}, {
+    # Test Exception 1
+    'string': 'abcdefgh',
+    'dict': {1: '1'},
+    'exception': TypeError,
+}])
+def test_multi_re_dict(test_spec):
+    string = test_spec['string']
+    d = test_spec['dict']
+    args = test_spec.get('args', ())
+    kwargs = test_spec.get('kwargs', {})
 
-    # Test exceptions
-    with pytest.raises(TypeError):
-        assert f({'abc': 1})(s)
-        assert f({1: '1'})(s)
+    exception = test_spec.get('exception')
+    if exception:
+        result = None
+        with pytest.raises(exception):
+            utils.MultiReDict(d, *args, **kwargs).sub(string)
+        return
+    
+    expected = test_spec['expected']
+    result = utils.MultiReDict(d, *args, **kwargs).sub(string)
+    assert result == expected[0]
+    result = utils.MultiReDict(d, *args, **kwargs).subn(string)
+    assert result == expected
 
 
 @pytest.mark.parametrize('input,expected', [

@@ -13,7 +13,7 @@ from ...utils import Singleton, partition
 from ... import logging 
 from ...constants import (
     TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
-    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINUS_REGEX_REPLACE_FUNC,
+    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
 
@@ -268,7 +268,7 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             return [result]
             
         query = query.lower()
-        query = PLUS_MINUS_REGEX_REPLACE_FUNC(query)
+        query = PLUS_MINS_REGEX.sub(query)
 
         if not TIME_QUERY_REGEX.match(query):
             return
