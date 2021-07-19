@@ -267,8 +267,8 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
 
 #### **Multiple Conversion**
   - Convert 20 centimeters to inches and meters
-    - `20 cm in inches, m`
-    - `20 cm in inches,meters`
+    - `20 cm to inches, m`
+    - `20 cm to inches,meters`
 
 #### **Advanced Conversion**
 - Convert kilometers per meter to centimeters per minute, kilometers per minute, inches per second and centimeters per second.
