@@ -189,7 +189,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 unit_from_ureg_dim = unit_from_ureg.dimensionality
                 if unit_from_ureg_dim in unit_dimensionalities:
                     continue
-                if unit_from_ureg.dimensionality == '[currency]':
+                if UnitsCalculation.is_currency(unit_from_ureg):
                     unit_from_ureg_currency = unit_from_ureg.units
                 units_from_ureg.append(unit_from_ureg)
                 unit_dimensionalities.add(unit_from_ureg_dim)
@@ -207,12 +207,10 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             units_to_curr = map(ureg.parse_units, units_to_curr)
             units_to_curr = filter(base_currency.is_compatible_with, units_to_curr)
 
-            units_to_curr_extra = [unit_from_ureg_currency] if unit_from_ureg_currency else []
-
             # Add all units from
             units_to_rest = filter(lambda u: not base_currency.is_compatible_with(u), units_from_ureg)
             units_to_rest = map(lambda u: u.units, units_to_rest)
-            units_to_ureg = itertools.chain(units_to_curr, units_to_curr_extra, units_to_rest)
+            units_to_ureg = itertools.chain(units_to_curr, units_to_rest)
         else:
             # Map to units and filter out if not compatible
             units_to_ureg = map(self._get_possible_units, units_to)
@@ -223,9 +221,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             units_to_ureg = filter(lambda u: u.magnitude == 1, units_to_ureg)
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
 
-            if unit_from_ureg_currency:
-                units_to_ureg = itertools.chain(units_to_ureg, [unit_from_ureg_currency])
-
+        added_currency = False
         for unit_from_ureg, unit_to_ureg in itertools.product(units_from_ureg, units_to_ureg):
             try:
                 if not unit_from_ureg.is_compatible_with(unit_to_ureg):
@@ -242,9 +238,10 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 continue
 
             kwargs = {}
-            if UnitsCalculation.has_currency(unit_converted):
+            if UnitsCalculation.is_currency(unit_converted):
                 UnitClass = CurrencyUnitsCalculation
                 kwargs = {'update_timestamp': UnitsService().get_rate_timestamp(unit_to_ureg)}
+                added_currency = True
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation
             else:
@@ -258,6 +255,18 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                     unit_to=unit_to_ureg,
                     order=len(items),
                     **kwargs
+                )
+            )
+
+        if unit_from_ureg_currency and added_currency:
+            items.append(
+                CurrencyUnitsCalculation(
+                    value=unit_from_ureg,
+                    rate=None,
+                    unit_from=unit_from_ureg.units,
+                    unit_to=unit_from_ureg.units,
+                    order=len(items),
+                    update_timestamp=None
                 )
             )
         return items

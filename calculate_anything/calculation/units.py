@@ -182,26 +182,25 @@ class CurrencyUnitsCalculation(UnitsCalculation):
                 return currency
             return '{} ({})'.format(currency, currency_alias)
 
-        replace_dict = {'**': '^', '_': ' '}
-
-        unit_name = str(self.value.units)
-        if babel_units is not None:
-            unit_name_alias = re.sub(r'currency_([a-zA-Z]{3,})', currency_alias_f, unit_name)
-        else:
-            unit_name_alias = unit_name
-            replace_dict['currency_'] = ''
+        replace_re = multi_re.compile(
+            {'currency_': '', '**': '^', '_': ' '}, sort=True)
         
-        replace_re = multi_re.compile(replace_dict, sort=True)
+        unit_name = str(self.value.units)
+        clipboard = replace_re.sub_dict(unit_name)
+    
+        if babel_units is not None:
+            unit_name = re.sub(
+                r'currency_([a-zA-Z]{3,})', currency_alias_f, unit_name)
+        else:
+            unit_name = clipboard
 
-        unit_name = replace_re.sub_dict(unit_name)
-        unit_name, clipboard = unit_name_alias, unit_name
         converted_amount = locale.currency(
             self.value.magnitude, symbol='', grouping=True)
 
         name = '{} {}'.format(converted_amount, unit_name)
         clipboard = '{} {}'.format(converted_amount, clipboard)
         if self.rate is None:
-            return name, ''
+            return name, '', clipboard
 
         unit_from_name = str(self.unit_from)
         unit_from_name = replace_re.sub_dict(unit_from_name)
