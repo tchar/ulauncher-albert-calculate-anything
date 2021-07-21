@@ -63,7 +63,6 @@ class AlbertLogging:
 
 import locale
 
-from calculate_anything import lang
 locale.setlocale(locale.LC_ALL, '')
 import os
 import sys
