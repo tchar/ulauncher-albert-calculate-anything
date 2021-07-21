@@ -3,7 +3,7 @@ try:
 except ImportError:
     pint = None
 
-from ..lang import Language
+from ..lang import LanguageService
 from .. import logging
 from ..constants import UNIT_ALIASES_RE
 
@@ -82,7 +82,7 @@ class PintDefinitionParser:
             self._logger.error('Got exception when parsing line {} in {}: {}'.format(line_n, file_path, e))
 
     def load_file(self, file_path, translation_mode, is_currency=True):
-        translation_adder = Language().get_translation_adder(translation_mode)
+        translation_adder = LanguageService().get_translation_adder(translation_mode)
         try:
             with open(file_path, 'r') as f:
                 for i, line in enumerate(f):

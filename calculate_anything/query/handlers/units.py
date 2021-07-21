@@ -8,7 +8,7 @@ from .interface import QueryHandlerInterface
 from ...units import UnitsService
 from ...currency import CurrencyService
 from ...calculation import UnitsCalculation, CurrencyUnitsCalculation, TemperatureUnitsCalculation
-from ...lang import Language
+from ...lang import LanguageService
 from ... import logging
 from ...utils import is_types, Singleton
 from ...constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
@@ -54,7 +54,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
     def _get_all_possible_units(self, unit_from):
         ureg = UnitsService().unit_registry
-        replacer = Language().get_replacer('units', ignorecase=True)
+        replacer = LanguageService().get_replacer('units', ignorecase=True)
 
         unit_from_alt = replacer(unit_from)
         if unit_from_alt != unit_from:
@@ -109,8 +109,8 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         yield unit_from
 
     def _get_only_one_unit(self, unit_from):
-        translator = Language().get_translator('units')
-        replacer = Language().get_replacer('units', ignorecase=True)
+        translator = LanguageService().get_translator('units')
+        replacer = LanguageService().get_replacer('units', ignorecase=True)
 
         unit_from_alt = replacer(unit_from)
         if unit_from_alt != unit_from:

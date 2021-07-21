@@ -1,10 +1,10 @@
 import pytest
-from calculate_anything.lang import Language
+from calculate_anything.lang import LanguageService
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.exceptions import ZeroDivisionException
 
-tr_calc = Language().get_translator('calculator')
-tr_err = Language().get_translator('errors')
+tr_calc = LanguageService().get_translator('calculator')
+tr_err = LanguageService().get_translator('errors')
 
 tests = [{
     # Normal test

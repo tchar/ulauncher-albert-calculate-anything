@@ -1,6 +1,5 @@
 from .handlers import UnitsQueryHandler
 from .handlers import CalculatorQueryHandler
-from .handlers import CurrencyQueryHandler
 from .handlers import PercentagesQueryHandler
 from .handlers import TimeQueryHandler
 from .handlers import (
@@ -14,7 +13,6 @@ class QueryHandler(metaclass=Singleton):
         self._handlers = [
             UnitsQueryHandler(),
             CalculatorQueryHandler(),
-            # CurrencyQueryHandler(),
             PercentagesQueryHandler(),
             TimeQueryHandler(),
             Base10QueryHandler(),

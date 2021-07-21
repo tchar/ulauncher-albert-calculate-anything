@@ -1,6 +1,6 @@
 from .calculation import Calculation
 from ..query.result import QueryResult
-from ..lang import Language
+from ..lang import LanguageService
 from ..utils import hex_to_rgb, rgb_to_hsv, rgb_to_cmyk, rgb_to_hsl
 
 class BaseNCalculation(Calculation):
@@ -25,7 +25,7 @@ class Base16StringCalculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = ":".join("{:02x}".format(ord(c)) for c in self.value)
-        description = Language().translate('bytes', 'calculator').upper()
+        description = LanguageService().translate('bytes', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
@@ -33,7 +33,7 @@ class Base10Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = str(int(self.value))
-        description = Language().translate('dec', 'calculator').upper()
+        description = LanguageService().translate('dec', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
@@ -41,7 +41,7 @@ class Base2Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = bin(int(self.value))[2:]
-        description = Language().translate('bin', 'calculator').upper()
+        description = LanguageService().translate('bin', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
@@ -49,7 +49,7 @@ class Base8Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = oct(int(self.value))[2:]
-        description = Language().translate('oct', 'calculator').upper()
+        description = LanguageService().translate('oct', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
@@ -57,7 +57,7 @@ class Base16Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
         name = hex(int(self.value))[2:]
-        description = Language().translate('hex', 'calculator').upper()
+        description = LanguageService().translate('hex', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
@@ -105,6 +105,6 @@ class ColorBase16Calculation(Base16Calculation):
         name = self.color_format.format(*self.value)
         description = ''
         if self.color_code:
-            description = Language().translate(self.color_code, 'color').upper()
+            description = LanguageService().translate(self.color_code, 'color').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(icon=icon, name=name, description=description, clipboard=clipboard)

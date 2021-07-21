@@ -1,6 +1,6 @@
 from .calculation import Calculation
 from ..query.result import QueryResult
-from ..lang import Language
+from ..lang import LanguageService
 
 class PercentageCalculation(Calculation):
     def __init__(self, value=None, amounts=(), error=None, order=0):
@@ -19,7 +19,7 @@ class PercentageCalculation(Calculation):
         )
 
     def _get_extra_descriptions(self):
-        translator = Language().get_translator('calculator')
+        translator = LanguageService().get_translator('calculator')
     
         value_type = self.value_type
         extra_descriptions = []
@@ -52,7 +52,7 @@ class PercentageCalculation(Calculation):
 class NormalPercentageCalculation(PercentageCalculation):
     @PercentageCalculation.Decorators.handle_error_results
     def to_query_result(self):
-        translator = Language().get_translator('calculator')
+        translator = LanguageService().get_translator('calculator')
         result_formatted = self.format()
         name = result_formatted
 
@@ -84,7 +84,7 @@ class NormalPercentageCalculation(PercentageCalculation):
 class InversePercentageCalculation(PercentageCalculation):
     @PercentageCalculation.Decorators.handle_error_results
     def to_query_result(self):
-        translator = Language().get_translator('calculator')
+        translator = LanguageService().get_translator('calculator')
         result_formatted = self.format()
 
         if self.value_type == Calculation.VALUE_IMAGINARY or self.value_type == Calculation.VALUE_COMPLEX:

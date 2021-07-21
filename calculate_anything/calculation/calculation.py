@@ -2,7 +2,7 @@ import re
 import cmath
 from .base import _Calculation
 from ..query.result import QueryResult
-from ..lang import Language
+from ..lang import LanguageService
 from ..constants import CALCULATOR_ERROR
 from ..utils import multi_re
 
@@ -46,7 +46,7 @@ class Calculation(_Calculation):
         return number
 
     def get_description(self):
-        translator = Language().get_translator('calculator')
+        translator = LanguageService().get_translator('calculator')
 
         value_type = self.value_type
         if value_type == Calculation.VALUE_IMAGINARY:
@@ -135,7 +135,7 @@ class Calculation(_Calculation):
 class BooleanCalculation(Calculation):
     @Calculation.Decorators.handle_error_results
     def to_query_result(self):
-        translator = Language().get_translator('calculator')
+        translator = LanguageService().get_translator('calculator')
         result = str(self.value).lower()
     
         description = self.format_query()

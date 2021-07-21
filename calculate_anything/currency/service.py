@@ -3,7 +3,7 @@ from .providers import CombinedCurrencyProvider
 from .cache import CurrencyCache
 from threading import RLock, Timer
 from ..exceptions import CurrencyProviderRequestException, MissingRequestsException
-from ..utils import Singleton
+from ..utils import Singleton, safe_operation
 from .. import logging
 
 
@@ -61,7 +61,8 @@ class CurrencyService(metaclass=Singleton):
         try:
             currency_rates = self.__get_currencies(force=force)
             for callback in self._update_callbacks:
-                callback(currency_rates)
+                with safe_operation():
+                    callback(currency_rates)
         except CurrencyProviderRequestException as e:
             self._logger.error('Error when contacting provider: {}'.format(e))
         except MissingRequestsException as e:

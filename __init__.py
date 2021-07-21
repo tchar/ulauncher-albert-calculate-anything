@@ -62,6 +62,8 @@ class AlbertLogging:
         return AlbertLogger(name)
 
 import locale
+
+from calculate_anything import lang
 locale.setlocale(locale.LC_ALL, '')
 import os
 import sys
@@ -73,17 +75,19 @@ except ImportError as e:
 
 from calculate_anything import logging
 logging.set_logging(AlbertLogging)
+from calculate_anything import init
+from calculate_anything.lang import LanguageService
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.currency.providers import CurrencyProviderFactory
 from calculate_anything.units.service import UnitsService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.query.handlers import (
-    UnitsQueryHandler, CalculatorQueryHandler, CurrencyQueryHandler,
+    UnitsQueryHandler, CalculatorQueryHandler,
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
 from calculate_anything.query import QueryHandler
-from calculate_anything.lang import Language
+from calculate_anything.lang import LanguageService
 from calculate_anything.utils import get_or_default, safe_operation
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
@@ -110,8 +114,14 @@ if isinstance(TRIGGERS, str):
     TRIGGERS = [TRIGGERS]
 
 def initialize():
+    init()
+
+    language_service = LanguageService()
     currency_service = CurrencyService()
     units_service = UnitsService()
+
+    with safe_operation('Set language'):
+        language_service.set('en_US')
 
     with safe_operation('Set API key'):
         api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
@@ -188,8 +198,7 @@ def handleQuery(query):
         handlers = [
             CalculatorQueryHandler,
             PercentagesQueryHandler,
-            UnitsQueryHandler,
-            CurrencyQueryHandler,
+            UnitsQueryHandler
         ]
     results = QueryHandler().handle(query_str, *handlers)
     for result in results:
@@ -223,8 +232,8 @@ def handleQuery(query):
             Item(
                 id=__title__,
                 icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
-                text=Language().translate('no-result', 'misc'),
-                subtext=Language().translate('no-result-{}-description'.format(mode), 'misc')
+                text=LanguageService().translate('no-result', 'misc'),
+                subtext=LanguageService().translate('no-result-{}-description'.format(mode), 'misc')
             )
         )
     if not items:

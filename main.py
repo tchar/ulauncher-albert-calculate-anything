@@ -1,12 +1,12 @@
 import locale
 locale.setlocale(locale.LC_ALL, '')
+from calculate_anything import init
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default, safe_operation
-from calculate_anything.lang import Language
+from calculate_anything.lang import LanguageService
 from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
 from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.currency import CurrencyQueryHandler
 from calculate_anything.query.handlers.time import TimeQueryHandler
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import QueryHandler
@@ -67,7 +67,6 @@ class KeywordQueryEventListener(EventListener):
                 CalculatorQueryHandler,
                 PercentagesQueryHandler,
                 UnitsQueryHandler,
-                CurrencyQueryHandler,
             ]
         results = QueryHandler().handle(query, *handlers)
         for result in results:
@@ -95,8 +94,8 @@ class KeywordQueryEventListener(EventListener):
         if should_show_placeholder and len(items) == error_num:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
-                name=Language().translate('no-result', 'misc'),
-                description=Language().translate('no-result-{}-description'.format(mode), 'misc'),
+                name=LanguageService().translate('no-result', 'misc'),
+                description=LanguageService().translate('no-result-{}-description'.format(mode), 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
             ))
@@ -107,9 +106,14 @@ class KeywordQueryEventListener(EventListener):
 class PreferencesEventListener(EventListener):
     def on_event(self, event, extension):
         super().on_event(event, extension)
+        init()
 
+        language_service = LanguageService()
         units_service = UnitsService()
         currency_service = CurrencyService()
+
+        with safe_operation('Set language'):
+            language_service.set('en_US')
 
         with safe_operation('Set currency providers'):
             currency_provider = event.preferences['currency_provider']

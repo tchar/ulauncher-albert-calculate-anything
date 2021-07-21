@@ -1,4 +1,4 @@
-from calculate_anything.lang import Language
+from calculate_anything.lang import LanguageService
 import pytest
 from calculate_anything.query.handlers.calculator import Calculation
 
@@ -34,7 +34,7 @@ def test_fix_number_presicion():
 
 
 def test_get_description():
-    translator = Language().get_translator('calculator')
+    translator = LanguageService().get_translator('calculator')
 
     description = Calculation(1).get_description()
     assert description == ''

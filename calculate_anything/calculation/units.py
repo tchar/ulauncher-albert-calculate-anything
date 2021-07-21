@@ -11,7 +11,7 @@ except ImportError:
     babel_numbers = None
 from .base import _Calculation
 from ..query.result import QueryResult
-from ..lang import Language
+from ..lang import LanguageService
 from .. import logging
 from ..utils import multi_re
 from ..constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
@@ -79,7 +79,7 @@ class UnitsCalculation(_Calculation):
             except Exception as e:
                 pass
 
-        translator = Language().get_translator('units')
+        translator = LanguageService().get_translator('units')
         if use_translator:
             unit_name = str(self.value.units)
 
@@ -120,7 +120,7 @@ class UnitsCalculation(_Calculation):
 
         descriptions = [description]
         if UnitsCalculation.is_strictly_dimensionless(self.value):
-            desc_part = Language().translate('result-dimensionless', 'calculator').capitalize()
+            desc_part = LanguageService().translate('result-dimensionless', 'calculator').capitalize()
             descriptions.append(desc_part)
 
         description = ' '.join(descriptions)

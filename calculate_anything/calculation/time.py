@@ -1,5 +1,5 @@
 from .base import _Calculation
-from ..lang import Language
+from ..lang import LanguageService
 from ..constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
 from ..query.result import QueryResult
 
@@ -10,7 +10,7 @@ class TimeCalculation(_Calculation):
 
     @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
-        translator = Language().get_translator('time')
+        translator = LanguageService().get_translator('time')
                 
         now = self.reference_date
         now_week = now.isocalendar()[1]
@@ -141,7 +141,7 @@ class TimedeltaCalculation(TimeCalculation):
     def to_query_result(self):
         sign, years_diff, days_diff, hours_diff, minutes_diff, seconds_diff = self._calculate_diff()
 
-        translator = Language().get_translator('time')
+        translator = LanguageService().get_translator('time')
         values = []
         if years_diff > 0:
             text = 'year' if years_diff == 1 else 'years'

@@ -1,17 +1,18 @@
 import os
 import json
 import re
+from typing import Callable
 import unicodedata
-from .utils import Singleton, multi_re 
+from .utils import Singleton, multi_re, safe_operation
 from .constants import MAIN_DIR
 from . import logging
 
-class Language(metaclass=Singleton):
+class LanguageService(metaclass=Singleton):
     def __init__(self):
         self._lang = None
         self._data = {}
+        self._update_callbacks = []
         self._logger = logging.getLogger(__name__)
-        self.set('en_US')
 
     @staticmethod
     def strip_accents(s):
@@ -23,16 +24,29 @@ class Language(metaclass=Singleton):
     def set(self, lang):
         if lang == self._lang:
             return
+        fallback = False
         lang_filepath = os.path.join(MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
         if not os.path.exists(lang_filepath):
             self._logger.error('Language file does not exist: {}'.format(lang_filepath))
-            return
-        try:
-            with open(lang_filepath) as f:
-                self._data = json.loads(f.read())
-        except Exception as e:
-            self._logger.error('Could not load language, falling back to en_US')
-        self._lang = 'en_US'
+            fallback = True
+        if not fallback:
+            try:
+                with open(lang_filepath) as f:
+                    self._data = json.loads(f.read())
+            except Exception as e:
+                self._logger.error('Could not load language, falling back to en_US')
+                fallback = True
+        
+        if fallback:
+            if lang == 'en_US':
+                self._logger.error('en_US does not exist, will not use any language aliases: {}'.format(lang_filepath))
+                return
+            return self.set('en_US')
+        
+        self._lang = lang
+        for callback in self._update_callbacks:
+            with safe_operation():
+                callback(lang)
 
     def translate(self, word, mode):
         word = str(word)
@@ -68,3 +82,6 @@ class Language(metaclass=Singleton):
         def _replacer(string):
             return self.replace_all(string, mode, ignorecase)
         return _replacer
+
+    def add_update_callback(self, callback: Callable[[str], None]) -> None:
+        self._update_callbacks.append(callback)
