@@ -1,9 +1,7 @@
 from contextlib import contextmanager
-from typing import Any, Callable, Container, Iterable, List, Optional, Type, Union
+from typing import Any, Container, Iterable, List, Optional, Type, Union
 from types import ModuleType
 import importlib
-from functools import wraps
-import traceback
 from .. import logging
 from ..exceptions import MissingSimpleevalException
 
@@ -60,11 +58,16 @@ class StupidEval:
 
 
 @contextmanager
-def safe_operation():
+def safe_operation(message: str=''):
+    logger = logging.getLogger(__name__)
+    if message:
+        logger.info(message)
     try:
         yield
     except Exception as e:
-        logger = logging.getLogger(__name__)
-        logger.exception('Got error in safe operation: {}'.format(e))
+        msg = e
+        if message:
+            msg = '{}: {}'.format(message, e)
+        logger.exception('Got error in safe operation: {}'.format(msg))
     finally:
         pass

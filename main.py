@@ -111,7 +111,7 @@ class PreferencesEventListener(EventListener):
         units_service = UnitsService()
         currency_service = CurrencyService()
 
-        with safe_operation():
+        with safe_operation('Set currency providers'):
             currency_provider = event.preferences['currency_provider']
             currency_provider = get_or_default(
                 currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
@@ -121,7 +121,7 @@ class PreferencesEventListener(EventListener):
                 currency_provider, api_key=event.preferences['api_key'])
             currency_service.add_provider(currency_provider)
 
-        with safe_operation():
+        with safe_operation('Set cache interval'):
             cache_update = event.preferences['cache']
             cache_update = get_or_default(cache_update, int, 0)
 
@@ -130,7 +130,7 @@ class PreferencesEventListener(EventListener):
             else:
                 currency_service.enable_cache(cache_update)
 
-        with safe_operation():
+        with safe_operation('Set units conversion mode'):
             units_mode = event.preferences['units_conversion_mode']
             units_mode = get_or_default(
                 units_mode.lower(), str, 'normal', ['normal', 'crazy'])
@@ -141,7 +141,7 @@ class PreferencesEventListener(EventListener):
             else:
                 units_service.set_unit_conversion_mode(UnitsService.MODE_CRAZY)
 
-        with safe_operation():
+        with safe_operation('Set default currencies'):
             default_currencies = event.preferences['default_currencies'].split(
                 ',')
             default_currencies = map(str.strip, default_currencies)
@@ -149,7 +149,7 @@ class PreferencesEventListener(EventListener):
             default_currencies = list(default_currencies)
             currency_service.set_default_currencies(default_currencies)
 
-        with safe_operation():
+        with safe_operation('Set default cities'):
             default_cities = TimezoneService.parse_default_cities(
                 event.preferences['default_cities'])
             TimezoneService().set_default_cities(default_cities)
@@ -159,7 +159,7 @@ class PreferencesEventListener(EventListener):
 
 
 class PreferencesUpdateEventListener(EventListener):
-    @safe_operation()
+    @safe_operation('Update preferences')
     def on_event(self, event, extension):
         super().on_event(event, extension)
 

@@ -87,7 +87,7 @@ def test_get_or_default():
 
 
 def test_safe_operation():
-    @utils.safe_operation()
+    @utils.safe_operation('Safe function operation')
     def some_function(raise_exc):
         if raise_exc:
             raise Exception
@@ -95,7 +95,7 @@ def test_safe_operation():
     some_function(raise_exc=False)
     some_function(raise_exc=True)
 
-    with utils.safe_operation():
+    with utils.safe_operation('Safe operation'):
         raise Exception
 
 

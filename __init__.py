@@ -113,28 +113,28 @@ def initialize():
     currency_service = CurrencyService()
     units_service = UnitsService()
 
-    with safe_operation():
+    with safe_operation('Set API key'):
         api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
         provider = CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER, api_key)
         currency_service.add_provider(provider)
 
-    with safe_operation():
+    with safe_operation('Set cache update interval'):
         if CACHE > 0:
             currency_service.enable_cache(CACHE)
         else:
             currency_service.disable_cache()
 
-    with safe_operation():
+    with safe_operation('Set default currencies'):
         default_currencies = DEFAULT_CURRENCIES.split(',')
         default_currencies = map(str.strip, default_currencies)
         default_currencies = map(str.upper, default_currencies)
         default_currencies = list(default_currencies)
         currency_service.set_default_currencies(default_currencies)
 
-    with safe_operation():
+    with safe_operation('Set units conversion mode'):
         units_service.set_unit_conversion_mode(UNITS_CONVERSION_MODE)
 
-    with safe_operation():
+    with safe_operation('Set default cities'):
         default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
         TimezoneService().set_default_cities(default_cities)
 
