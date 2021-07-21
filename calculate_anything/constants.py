@@ -3,21 +3,30 @@ import re
 import calculate_anything
 from .utils import multi_re
 
+MAIN_DIR = os.path.dirname(os.path.dirname(
+    os.path.realpath(calculate_anything.__file__)))
+FLAGS = {f.split('.')[0]: f for f in os.listdir(
+    os.path.join(MAIN_DIR, 'images/flags'))}
+
 XDG_FALLBACK = os.getenv('HOME')
 if XDG_FALLBACK is None:
-    XDG_FALLBACK = os.path.expanduser('~') #pragma: no cover
+    XDG_FALLBACK = os.path.expanduser('~')  # pragma: no cover
 XDG_FALLBACK = os.path.join(XDG_FALLBACK, '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
 CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
 CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
-TIMEZONE_SQLITE_FILE = os.path.join(CACHE_DIR, 'timezones.sqlite3')
+TIMEZONES_SQLITE_FILE_USER = os.path.join(CACHE_DIR, 'timezones_user.sqlite3')
+TIMEZONES_SQLITE_FILE_DEFAULT = os.path.join(CACHE_DIR, 'timezones.sqlite3')
+TIMEZONES_SQL_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
+TIMEZONES_JSON_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json')
 
 # Replace plus with + and minus with -
 PLUS_MINS_REGEX = multi_re.compile(
     {'plus': '+', 'minus': '-'}, flags=re.IGNORECASE)
 
 # Unit conversion regex match
-UNIT_QUERY_REGEX = re.compile(r'(.*?)(?:\s+to|\s*$)(?:\s+(.*))?', flags=re.IGNORECASE)
+UNIT_QUERY_REGEX = re.compile(
+    r'(.*?)(?:\s+to|\s*$)(?:\s+(.*))?', flags=re.IGNORECASE)
 # Unit conversion when no target unit specified
 # UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
 UNIT_SPLIT_RE = re.compile(r'([A-Za-z_]+)')
@@ -61,8 +70,3 @@ TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
 TIME_DATETIME_FORMAT_NUMBERS = '%Y-%m-%-d %H:%M'
 TIME_DATE_FORMAT = '%A %-d %B %Y'
 TIME_TIME_FORMAT = '%H:%M:%S'
-
-MAIN_DIR = os.path.dirname(os.path.dirname(
-    os.path.realpath(calculate_anything.__file__)))
-FLAGS = {f.split('.')[0]: f for f in os.listdir(
-    os.path.join(MAIN_DIR, 'images/flags'))}

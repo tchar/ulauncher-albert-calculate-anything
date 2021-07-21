@@ -2,14 +2,14 @@ import os
 import json
 from .. import logging
 from ..utils import Singleton
-from ..constants import MAIN_DIR
+from ..constants import TIMEZONES_SQL_FILE
 
-class TimezoneCache(metaclass=Singleton):
+class TimezoneJsonCache(metaclass=Singleton):
     def __init__(self):
         self._data = {}
         self._logger = logging.getLogger(__name__)
         try:
-            with open(os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json'), 'r') as f:
+            with open(TIMEZONES_SQL_FILE, 'r') as f:
                 self._data = json.loads(f.read())
         except Exception as e:
             self._logger.error('Could not load timezone data: {}'.format(e))

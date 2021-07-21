@@ -86,6 +86,19 @@ def test_get_or_default():
     assert utils.get_or_default(value, type, default, allowed) == expected
 
 
+def test_safe_operation():
+    @utils.safe_operation()
+    def some_function(raise_exc):
+        if raise_exc:
+            raise Exception
+
+    some_function(raise_exc=False)
+    some_function(raise_exc=True)
+
+    with utils.safe_operation():
+        raise Exception
+
+
 def test_singleton():
     class SingletonClass(metaclass=utils.Singleton):
         pass
@@ -127,26 +140,91 @@ def test_stupid_eval():
             stupid_eval.eval(v)
 
 
-@pytest.mark.parametrize('input,expected', [
-    ([], []),
-    ([1], [[[1]]]),
-    ([1, 2], [[[1, 2]], [[1], [2]]]),
-    ([1, 2, 3], [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[1], [2], [3]]])
-])
-def test_partition(input, expected):
-    gen = utils.partition(input)
+test_spec = [{
+    'list': [],
+    'expected': [],
+    'max_parts': None,
+}, {
+    'list': [1],
+    'expected': [([1],)],
+    'max_parts': None,
+}, {
+    'list': [1, 2],
+    'expected': [([1, 2],), ([1], [2])],
+    'max_parts': None,
+}, {
+    'list': [1, 2, 3],
+    'expected': [([1, 2, 3],), ([1, 2], [3]), ([1], [2, 3])],
+    'max_parts': None,
+}, {
+    'list': [1, 2, 3],
+    'expected': [([1, 2, 3],), ([1, 2], [3])],
+    'max_parts': 2,
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec)
+def test_partition(test_spec):
+    list_part = test_spec['list']
+    max_parts = test_spec['max_parts']
+    expected = test_spec['expected']
+
+    gen = utils.partition(list_part, max_parts)
     assert list(gen) == expected
 
 
-@pytest.mark.parametrize('input,expected', [
-    ([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]),
-    ([1, 2, 1, 2, 4, 6], [1, 2, 4, 6]),
-    (set([1, 2, 3, 4]), set([1, 2, 3, 4])),
-    ([], []),
-])
-def test_deduplicate(input, expected):
+test_spec = [{
+    'input': [(1, 2, 3,)],
+    'expected': [1, 2, 3]
+}, {
+    'input': [(1, 2, 3,), (4, 5, 6), 7],
+    'expected': [1, 2, 3, 4, 5, 6, 7]
+}, {
+    'input': [[[[[1]]]], [[[2]], [3, 4]], [5, 6, 7]],
+    'expected': [1, 2, 3, 4, 5, 6, 7]
+}, {
+    'input': [(1, 2, 3,), 'some', ['text', ['in', [[['nested'], 'lists']]]]],
+    'expected': [1, 2, 3, 'some', 'text', 'in', 'nested', 'lists']
+}, {
+    'input': [1, 2, 3, 4],
+    'expected': [1, 2, 3, 4]
+}, {
+    'input': [[[[[[], [[[], []]]]]]]],
+    'expected': []
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec)
+def test_flatten(test_spec):
+    input = test_spec['input']
+    expected = test_spec['expected']
+
+    assert list(utils.flatten(input)) == expected
+
+
+test_spec = [{
+    'input': [1, 2, 3, 4, 5, 6],
+    'expected': [1, 2, 3, 4, 5, 6]
+}, {
+    'input': [1, 2, 1, 2, 4, 6],
+    'expected': [1, 2, 4, 6]
+}, {
+    'input': set([1, 2, 3, 4]),
+    'expected': set([1, 2, 3, 4])
+}, {
+    'input': [],
+    'expected': []
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec)
+def test_deduplicate(test_spec):
+    input = test_spec['input']
+    expected = test_spec['expected']
+
     _t = type(input)
     assert _t(utils.deduplicate(input)) == expected
+
 
 test_spec = [{
     # Test match
@@ -194,6 +272,8 @@ test_spec = [{
     'kwargs': {'flags': re.IGNORECASE},
     'assert_func': lambda r: r == ('My name is Lord Voldermort, Lord Voldermort is awesome', 2)
 }]
+
+
 @pytest.mark.parametrize('test_spec', test_spec)
 def test_multi_re(test_spec):
     pattern = test_spec['pattern']
@@ -212,6 +292,7 @@ def test_multi_re(test_spec):
         utils.multi_re.compile(pattern).sub_dict(args[0])
     with pytest.raises(ValueError):
         utils.multi_re.compile(pattern).subn_dict(args[0])
+
 
 test_spec = [{
     # Test normal
@@ -257,6 +338,8 @@ test_spec = [{
     'dict':  {'αβγδ': 'ικλμ', 'εηζθ': 'νξοπ'},
     'expected': ('ικλμνξοπ', 2)
 }]
+
+
 @pytest.mark.parametrize('test_spec', test_spec)
 def test_multi_re_dict(test_spec):
     string = test_spec.get('string')
@@ -283,7 +366,7 @@ def test_multi_re_dict(test_spec):
     assert result == expected[0]
     result = obj.subn_dict(string)
     assert result == expected
-    
+
     result = utils.multi_re.sub_dict(d, string, **kwargs)
     assert result == expected[0]
     result = utils.multi_re.subn_dict(d, string, **kwargs)

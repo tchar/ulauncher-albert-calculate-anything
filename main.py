@@ -1,29 +1,33 @@
 import locale
 locale.setlocale(locale.LC_ALL, '')
-from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent
-from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.client.Extension import Extension
-from calculate_anything.exceptions import MissingRequestsException
-from calculate_anything.time.service import TimezoneService
-from calculate_anything.units.service import UnitsService
-from calculate_anything.currency.providers import CurrencyProviderFactory
+from calculate_anything import logging
+from calculate_anything.utils import get_or_default, safe_operation
+from calculate_anything.lang import Language
+from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.currency import CurrencyQueryHandler
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.currency.service import CurrencyService
+from calculate_anything.query import QueryHandler
 from calculate_anything.query.handlers.base_n import (
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-from calculate_anything.query import QueryHandler
-from calculate_anything.currency.service import CurrencyService
-from calculate_anything.query.handlers.time import TimeQueryHandler
-from calculate_anything.query.handlers.currency import CurrencyQueryHandler
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.units import UnitsQueryHandler
-from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
-from calculate_anything.lang import Language
-from calculate_anything.utils import get_or_default
+from calculate_anything.currency.providers import CurrencyProviderFactory
+from calculate_anything.units.service import UnitsService
+from calculate_anything.time.service import TimezoneService
+from calculate_anything.exceptions import MissingRequestsException
+from ulauncher.api.client.Extension import Extension
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+
+logger = logging.getLogger(__name__)
+
 
 class ConverterExtension(Extension):
 
@@ -107,47 +111,55 @@ class PreferencesEventListener(EventListener):
         units_service = UnitsService()
         currency_service = CurrencyService()
 
-        currency_provider = event.preferences['currency_provider']
-        currency_provider = get_or_default(
-            currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
+        with safe_operation():
+            currency_provider = event.preferences['currency_provider']
+            currency_provider = get_or_default(
+                currency_provider, str, 'internal', CurrencyProviderFactory.get_available_providers())
 
-        currency_provider = currency_provider.lower()
-        currency_provider = CurrencyProviderFactory.get_provider(
-            currency_provider, api_key=event.preferences['api_key'])
-        currency_service.add_provider(currency_provider)
+            currency_provider = currency_provider.lower()
+            currency_provider = CurrencyProviderFactory.get_provider(
+                currency_provider, api_key=event.preferences['api_key'])
+            currency_service.add_provider(currency_provider)
 
-        cache_update = event.preferences['cache']
-        cache_update = get_or_default(cache_update, int, 0)
+        with safe_operation():
+            cache_update = event.preferences['cache']
+            cache_update = get_or_default(cache_update, int, 0)
 
-        units_mode = event.preferences['units_conversion_mode']
-        units_mode = get_or_default(
-            units_mode.lower(), str, 'normal', ['normal', 'crazy'])
+            if not cache_update:
+                currency_service.disable_cache()
+            else:
+                currency_service.enable_cache(cache_update)
 
-        if not cache_update:
-            currency_service.disable_cache()
-        else:
-            currency_service.enable_cache(cache_update)
+        with safe_operation():
+            units_mode = event.preferences['units_conversion_mode']
+            units_mode = get_or_default(
+                units_mode.lower(), str, 'normal', ['normal', 'crazy'])
 
-        if units_mode == 'normal':
-            units_service.set_unit_conversion_mode(UnitsService.MODE_NORMAL)
-        else:
-            units_service.set_unit_conversion_mode(UnitsService.MODE_CRAZY)
+            if units_mode == 'normal':
+                units_service.set_unit_conversion_mode(
+                    UnitsService.MODE_NORMAL)
+            else:
+                units_service.set_unit_conversion_mode(UnitsService.MODE_CRAZY)
 
-        default_currencies = event.preferences['default_currencies'].split(',')
-        default_currencies = map(str.strip, default_currencies)
-        default_currencies = map(str.upper, default_currencies)
-        default_currencies = list(default_currencies)
-        currency_service.set_default_currencies(default_currencies)
+        with safe_operation():
+            default_currencies = event.preferences['default_currencies'].split(
+                ',')
+            default_currencies = map(str.strip, default_currencies)
+            default_currencies = map(str.upper, default_currencies)
+            default_currencies = list(default_currencies)
+            currency_service.set_default_currencies(default_currencies)
+
+        with safe_operation():
+            default_cities = TimezoneService.parse_default_cities(
+                event.preferences['default_cities'])
+            TimezoneService().set_default_cities(default_cities)
 
         units_service.enable().run()
         currency_service.enable().run()
 
-        default_cities = TimezoneService.parse_default_cities(
-            event.preferences['default_cities'])
-        TimezoneService().set_default_cities(default_cities)
-
 
 class PreferencesUpdateEventListener(EventListener):
+    @safe_operation()
     def on_event(self, event, extension):
         super().on_event(event, extension)
 
@@ -213,6 +225,7 @@ class PreferencesUpdateEventListener(EventListener):
                 currency_service.run(force=True)
             except MissingRequestsException:
                 pass
+
 
 class SystemExitEventListener(EventListener):
     def on_event(self, event, extension):

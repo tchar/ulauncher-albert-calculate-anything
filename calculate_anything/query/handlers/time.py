@@ -9,7 +9,7 @@ from .interface import QueryHandlerInterface
 from ...calculation import LocationTimeCalculation, TimeCalculation, TimedeltaCalculation
 from ...time.service import TimezoneService
 from ...exceptions import DateAddDateException, MissingParsedatetimeException, DateOverflowException, MisparsedTimeException
-from ...utils import Singleton, partition
+from ...utils import Singleton, partition, flatten, deduplicate
 from ... import logging 
 from ...constants import (
     TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
@@ -46,22 +46,22 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         locations = []
         for item in locations_tmp:
             location = ' '.join(map(str, item[0]))
-            search_terms = [' '.join(map(str, sublist)) for sublist in item[1:]]
+            search_terms = flatten(item[1:])
+            search_terms = deduplicate(search_terms)
+            search_terms = tuple(search_terms)
             locations.append((location, search_terms))
-        return sorted(locations, key=lambda item: len(item[0]))
+
+        locations = deduplicate(locations)
+        return locations
 
     def _get_locations(self, location):
         search_terms = []
-        if len(location) >= 2:
-            locations = TimeQueryHandler._get_location_search_combinations(location)
-        else:
-            locations = []
-
-        if not locations:
+        if len(location) < 2:
             return TimezoneService().get_defaults(), True
+
+        locations = TimeQueryHandler._get_location_search_combinations(location)
         
         for location, search_terms in locations:
-            location, search_terms
             found_locations = TimezoneService().get(location, *search_terms)
             if found_locations:
                 return found_locations, False

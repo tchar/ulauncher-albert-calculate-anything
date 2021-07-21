@@ -84,7 +84,7 @@ from calculate_anything.query.handlers import (
 )
 from calculate_anything.query import QueryHandler
 from calculate_anything.lang import Language
-from calculate_anything.utils import get_or_default
+from calculate_anything.utils import get_or_default, safe_operation
 from albert import ClipAction, Item, critical, debug, info, warning, critical
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
@@ -113,22 +113,30 @@ def initialize():
     currency_service = CurrencyService()
     units_service = UnitsService()
 
-    api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
-    currency_service.add_provider(CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER, api_key))
-    if CACHE > 0:
-        currency_service.enable_cache(CACHE)
-    else:
-        currency_service.disable_cache()
-    default_currencies = DEFAULT_CURRENCIES.split(',')
-    default_currencies = map(str.strip, default_currencies)
-    default_currencies = map(str.upper, default_currencies)
-    default_currencies = list(default_currencies)
-    currency_service.set_default_currencies(default_currencies)
+    with safe_operation():
+        api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
+        provider = CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER, api_key)
+        currency_service.add_provider(provider)
 
-    units_service.set_unit_conversion_mode(UNITS_CONVERSION_MODE)
+    with safe_operation():
+        if CACHE > 0:
+            currency_service.enable_cache(CACHE)
+        else:
+            currency_service.disable_cache()
 
-    default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
-    TimezoneService().set_default_cities(default_cities)
+    with safe_operation():
+        default_currencies = DEFAULT_CURRENCIES.split(',')
+        default_currencies = map(str.strip, default_currencies)
+        default_currencies = map(str.upper, default_currencies)
+        default_currencies = list(default_currencies)
+        currency_service.set_default_currencies(default_currencies)
+
+    with safe_operation():
+        units_service.set_unit_conversion_mode(UNITS_CONVERSION_MODE)
+
+    with safe_operation():
+        default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
+        TimezoneService().set_default_cities(default_cities)
 
     units_service.enable().run()
     currency_service.enable().run()

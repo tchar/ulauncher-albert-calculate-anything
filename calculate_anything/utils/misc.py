@@ -1,6 +1,10 @@
-import importlib
-from typing import Any, Container, Iterable, List, Optional, Type, Union
+from contextlib import contextmanager
+from typing import Any, Callable, Container, Iterable, List, Optional, Type, Union
 from types import ModuleType
+import importlib
+from functools import wraps
+import traceback
+from .. import logging
 from ..exceptions import MissingSimpleevalException
 
 
@@ -53,3 +57,14 @@ class StupidEval:
             return int(query)
         except (ValueError, TypeError):
             raise MissingSimpleevalException
+
+
+@contextmanager
+def safe_operation():
+    try:
+        yield
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.exception('Got error in safe operation: {}'.format(e))
+    finally:
+        pass

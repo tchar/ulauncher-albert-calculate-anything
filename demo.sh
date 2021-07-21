@@ -1,5 +1,108 @@
 #!/bin/bash
+
+setup_launcher() {
+	launcher_info=$(xdotool search --onlyvisible --class "$launcher_class" getwindowgeometry --shell)
+	eval $launcher_info
+    launcher_screen=$SCREEN
+    launcher_id=$WINDOW
+    launcher_x=$X
+    launcher_y=$Y
+    launcher_w=$WIDTH
+    launcher_h=$HEIGHT
+}
+
+setup_peek() {
+    if [ "$use_peek" == "nopeek" ]; then
+        return 0
+    fi
+	peek_id=$(xdotool search --onlyvisible --class Peek)
+    if [ -z "$peek_id" ]; then
+		peek &>/dev/null &
+		sleep 0.1
+        peek_id=$(xdotool search --onlyvisible --class Peek)
+	fi
+	move_x=$((launcher_x - 720 / 2 + launcher_w / 2 ))
+	move_y=$((launcher_y - pad_y ))
+    xdotool windowsize $peek_id 720 480
+    xdotool windowmove $peek_id $move_x $move_y
+    peek --start
+}
+
+setup() {
+    if [ "$launcher_name" == "ulauncher" ]; then
+        ulauncher
+        launcher_class="Ulauncher"
+        pad_y=55
+    elif [ "$launcher_name" == "albert" ]; then
+        albert show
+        launcher_class="albert"
+        pad_y=70
+    else
+        echo "No launcher provided"
+        exit
+    fi
+
+    sleep_small=0.02
+    sleep_big=2
+    sleep 0.1
+    setup_launcher
+    setup_peek
+
+    xdotool windowfocus $launcher_id
+    sleep 3.5
+}
+
+finalize() {
+    peek --stop
+}
+
 run_xdotool () {
+    for (( i=0; i<${#keys}; i++ )); do
+		key=${keys:$i:1}
+        case $key in
+            " ") xdotool_key="space";;
+            "\t") xdotool_key="Tab";;
+            "\n") xdotool_key="Return";;
+            "\`") xdotool_key="grave";;
+            "~") xdotool_key="asciitilde";;
+            "!") xdotool_key="exclam";;
+            "@") xdotool_key="at";;
+            "#") xdotool_key="numbersign";;
+            "$") xdotool_key="dollar";;
+            "%") xdotool_key="percent";;
+            "^") xdotool_key="asciicircum";;
+            "&") xdotool_key="ampersand";;
+            "*") xdotool_key="asterisk";;
+            "(") xdotool_key="parenleft";;
+            ")") xdotool_key="parenright";;
+            "-") xdotool_key="minus";;
+            "_") xdotool_key="underscore";;
+            "=") xdotool_key="equal";;
+            "+") xdotool_key="plus";;
+            "[") xdotool_key="bracketleft";;
+            "{") xdotool_key="braceleft";;
+            "]") xdotool_key="bracketright";;
+            "}") xdotool_key="braceright";;
+            "\\") xdotool_key="backslash";;
+            "|") xdotool_key="bar";;
+            ";") xdotool_key="semicolon";;
+            ":") xdotool_key="colon";;
+            "'") xdotool_key="apostrophe";;
+            "\"") xdotool_key="quotedbl";;
+            ",") xdotool_key="comma";;
+            "<") xdotool_key="less";;
+            ".") xdotool_key="period";;
+            ">") xdotool_key="greater";;
+            "/") xdotool_key="slash";;
+            "?") xdotool_key="question";;
+            *)    xdotool_key=$key;;
+        esac
+		xdotool key $xdotool_key
+        sleep 0.02
+	done
+}
+
+run_xdotool2 () {
     for (( i=0; i<${#keys}; i++ )); do
 		key=${keys:$i:1}
 		if [ "$key" == " " ]; then
@@ -92,58 +195,6 @@ clear_launcher () {
             sleep $sleep_small
         done
     fi
-}
-
-#! /bin/bash
-
-setup_peek() {
-	launcher_info=$(xdotool search --onlyvisible --class "$launcher_class" getwindowgeometry --shell)
-	eval $launcher_info
-    launcher_screen=$SCREEN
-    launcher_id=$WINDOW
-    launcher_x=$X
-    launcher_y=$Y
-    launcher_w=$WIDTH
-    launcher_h=$HEIGHT
-    
-	peek_id=$(xdotool search --onlyvisible --class Peek)
-    if [ -z "$peek_id" ]; then
-		peek &>/dev/null &
-		sleep 0.1
-    	peek_id=$(xdotool search --onlyvisible --class Peek)
-	fi
-	move_x=$((launcher_x - 720 / 2 + launcher_w / 2 ))
-	move_y=$((launcher_y - pad_y ))
-    xdotool windowsize $peek_id 720 480
-    xdotool windowmove $peek_id $move_x $move_y
-}
-
-setup() {
-    if [ "$launcher_name" == "ulauncher" ]; then
-        ulauncher
-        launcher_class="Ulauncher"
-        pad_y=55
-    elif [ "$launcher_name" == "albert" ]; then
-        albert show
-        launcher_class="albert"
-        pad_y=70
-    else
-        echo "No launcher provided"
-        exit
-    fi
-
-    sleep_small=0.02
-    sleep_big=2
-    sleep 0.1
-    setup_peek
-
-    xdotool windowfocus $launcher_id
-    peek --start
-    sleep 3.5
-}
-
-finalize() {
-    peek --stop
 }
 
 demo_currency(){
@@ -294,6 +345,7 @@ demo_exit() {
 }
 
 launcher_name=$1
+use_peek=$2
 setup
 
 # Currency

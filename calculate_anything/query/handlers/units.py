@@ -39,7 +39,6 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
     @staticmethod
     def _extract_query(query):
         matches = UNIT_QUERY_REGEX.findall(query)
-        print(matches)
         if not matches:
             return None
     

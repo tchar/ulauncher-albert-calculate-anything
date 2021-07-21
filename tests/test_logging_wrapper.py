@@ -25,6 +25,9 @@ class MockLogger:
     def error(self, message, *args):
         self._log(print, message, *args)
 
+    def exception(self, message, *args):
+        self._log(print, message, *args)
+
 
 class MockLogging:
     @staticmethod
