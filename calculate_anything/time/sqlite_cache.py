@@ -319,6 +319,7 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
             INNER JOIN queries_results qr ON qr.query_id = q.id
             INNER JOIN results r ON qr.result_id = r.data_id
             WHERE q.key IN ({})
+            GROUP BY r.data_id
             ORDER BY qr.result_order ASC'''.format(query), result_keys):
             city = json.loads(row[0])
             cities.append(city)
