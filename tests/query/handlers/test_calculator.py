@@ -276,6 +276,3 @@ def test_simpleeval_missing():
 
     # Set back SimpleEval
     calculator.SimpleEval = SimpleEval
-
-def test_misc_cov():
-    pass
