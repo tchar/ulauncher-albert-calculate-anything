@@ -1,3 +1,4 @@
+from calculate_anything.currency.providers.provider import ApiKeyCurrencyProvider, FreeCurrencyProvider
 from calculate_anything.currency.providers.fixerio import FixerIOCurrencyProvider
 from calculate_anything.currency.providers.european_central_bank import ECBProvider
 from calculate_anything.currency.providers.mycurrencynet import MyCurrencyNetCurrencyProvider

@@ -4,16 +4,14 @@ from calculate_anything import init
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default, safe_operation
 from calculate_anything.lang import LanguageService
-from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
-from calculate_anything.query.handlers.units import UnitsQueryHandler
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.time import TimeQueryHandler
-from calculate_anything.currency.service import CurrencyService
 from calculate_anything.query import MultiHandler
-from calculate_anything.query.handlers.base_n import (
+from calculate_anything.query.handlers import (
+    PercentagesQueryHandler, UnitsQueryHandler,
+    CalculatorQueryHandler, TimeQueryHandler,
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
+from calculate_anything.currency.service import CurrencyService
 from calculate_anything.currency.providers import CurrencyProviderFactory
 from calculate_anything.units.service import UnitsService
 from calculate_anything.time.service import TimezoneService

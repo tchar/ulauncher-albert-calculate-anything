@@ -1,9 +1,9 @@
 import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import StupidEval
 import calculate_anything.query.handlers.calculator as calculator
 from calculate_anything.query.handlers import CalculatorQueryHandler
-from calculate_anything.utils.misc import StupidEval
 from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
 from tests.utils import query_test_helper
 

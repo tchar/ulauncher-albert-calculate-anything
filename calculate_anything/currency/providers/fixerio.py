@@ -4,7 +4,7 @@ try:
 except ImportError:
     requests = None
 from calculate_anything.currency.providers.provider import ApiKeyCurrencyProvider
-from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+from calculate_anything.exceptions import CurrencyProviderRequestException
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 
 
