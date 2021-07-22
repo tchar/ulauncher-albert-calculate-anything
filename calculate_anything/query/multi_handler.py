@@ -1,13 +1,14 @@
-from .handlers import UnitsQueryHandler
-from .handlers import CalculatorQueryHandler
-from .handlers import PercentagesQueryHandler
-from .handlers import TimeQueryHandler
-from .handlers import (
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.query.handlers.base_n import (
     Base16QueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-from .. import logging
-from ..utils  import Singleton
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils.singleton import Singleton
+
 
 class MultiHandler(metaclass=Singleton):
     def __init__(self):
@@ -32,7 +33,8 @@ class MultiHandler(metaclass=Singleton):
             try:
                 result = handler.handle(query)
             except Exception as e:
-                self._logger.exception('Got exception when handling with: {}: {}'.format(handler.__class__.__name__, e))
+                self._logger.exception('Got exception when handling with: {}: {}'.format(
+                    handler.__class__.__name__, e))
                 result = None
 
             if not result:

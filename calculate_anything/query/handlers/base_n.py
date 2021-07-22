@@ -4,18 +4,21 @@ import ast
 try:
     from simpleeval import SimpleEval
 except ImportError:
-    from ...utils import StupidEval
+    from calculate_anything.utils import StupidEval
     SimpleEval = StupidEval
-from .base import QueryHandler
-from ...calculation import (
+from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.calculation.base_n import (
     BaseNCalculation, Base16StringCalculation, Base10Calculation,
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
-from .calculator import CalculatorQueryHandler
-from ... import logging
-from ...calculation import BooleanCalculation
-from ...utils import multi_re, Singleton, is_integer
-from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.calculation.calculation import BooleanCalculation
+from calculate_anything.utils import multi_re, Singleton, is_integer
+from calculate_anything.exceptions import (
+    BaseFloatingPointException, MissingSimpleevalException,
+    WrongBaseException, ZeroDivisionException
+)
 
 space_in_middle_re = re.compile(r'\S\s+\S')
 

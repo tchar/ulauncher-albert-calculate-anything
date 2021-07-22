@@ -5,10 +5,11 @@ try:
     import pint
 except ImportError:
     pint = None
-from ..currency import CurrencyService
-from .. import logging
-from ..utils import Singleton
-from ..constants import MAIN_DIR
+from calculate_anything.currency.service import CurrencyService
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.constants import MAIN_DIR
+
 
 class UnitsService(metaclass=Singleton):
     MODE_NORMAL = 0
@@ -37,10 +38,11 @@ class UnitsService(metaclass=Singleton):
             updated_currencies.add('currency_' + currency)
             currency_units = ureg('currency_' + currency)
             if currency_units.units == self._base_currency.units:
-                continue 
+                continue
             rate = currency_info['rate']
-            ctx.redefine('currency_{} = {} currency_EUR'.format(currency, 1 / rate))
-        
+            ctx.redefine('currency_{} = {} currency_EUR'.format(
+                currency, 1 / rate))
+
         for currency in self._currencies_in_registry:
             if currency in updated_currencies:
                 continue
@@ -50,7 +52,7 @@ class UnitsService(metaclass=Singleton):
 
         self._currencies_in_registry = updated_currencies
         self._logger.info('Updated currency registry')
-    
+
     def get_rate_timestamp(self, unit):
         if isinstance(unit, pint.Quantity):
             unit = unit.units
@@ -98,7 +100,8 @@ class UnitsService(metaclass=Singleton):
     def run(self, force=False):
         if pint is None:
             return
-        if force: pass
+        if force:
+            pass
         elif self._running:
             return
 
@@ -111,9 +114,12 @@ class UnitsService(metaclass=Singleton):
         self._unit_registry.add_context(self._ctx)
 
         pint_parser = PintDefinitionParser(self._unit_registry)
-        pint_parser.load_file(os.path.join(MAIN_DIR, 'data/currency/definitions.txt'), translation_mode='units', is_currency=True)
-        pint_parser.load_file(os.path.join(MAIN_DIR, 'data/lang/currency.txt'), translation_mode='units', is_currency=True)
-        pint_parser.load_file(os.path.join(MAIN_DIR, 'data/lang/units.txt'), translation_mode='units', is_currency=False)
+        pint_parser.load_file(os.path.join(
+            MAIN_DIR, 'data/currency/definitions.txt'), translation_mode='units', is_currency=True)
+        pint_parser.load_file(os.path.join(
+            MAIN_DIR, 'data/lang/currency.txt'), translation_mode='units', is_currency=True)
+        pint_parser.load_file(os.path.join(
+            MAIN_DIR, 'data/lang/units.txt'), translation_mode='units', is_currency=False)
         self._base_currency = self._unit_registry.Quantity(1, 'currency_EUR')
         CurrencyService().remove_update_callback(self._update_callback)
         CurrencyService().add_update_callback(self._update_callback)

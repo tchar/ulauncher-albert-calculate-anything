@@ -5,17 +5,25 @@ try:
     import parsedatetime
 except ImportError:
     parsedatetime = None
-from .base import QueryHandler
-from ...calculation import LocationTimeCalculation, TimeCalculation, TimedeltaCalculation
-from ...time.service import TimezoneService
-from ...exceptions import DateAddDateException, MissingParsedatetimeException, DateOverflowException, MisparsedTimeException
-from ...utils import Singleton, partition, flatten, deduplicate
-from ... import logging 
-from ...constants import (
+from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.calculation.time import (
+    LocationTimeCalculation, TimeCalculation,
+    TimedeltaCalculation
+)
+from calculate_anything.time.service import TimezoneService
+from calculate_anything.exceptions import (
+    DateAddDateException, MissingParsedatetimeException,
+    DateOverflowException, MisparsedTimeException
+)
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.iter import partition, flatten, deduplicate
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.constants import (
     TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
+
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
@@ -60,8 +68,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if len(location) < 2:
             return TimezoneService().get_defaults(), True
 
-        locations = TimeQueryHandler._get_location_search_combinations(location)
-        
+        locations = TimeQueryHandler._get_location_search_combinations(
+            location)
+
         for location, search_terms in locations:
             found_locations = TimezoneService().get(location, *search_terms)
             if found_locations:
@@ -76,9 +85,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:
-                self._logger.error('Could not find time zone: {}'.format(location))
+                self._logger.error(
+                    'Could not find time zone: {}'.format(location))
                 continue
-            
+
             location_datetime = date.astimezone(tz)
             item = LocationTimeCalculation(
                 value=location_datetime,
@@ -156,7 +166,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         query = map(str.strip, query)
         query = filter(None, query)
         query = list(query)
-    
+
         signs = set(['+', '-'])
         cal = parsedatetime.Calendar()
         date_td = timedelta()
@@ -178,12 +188,13 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev not in signs:
                     if not try_again:
                         return []
-                    new_query = self.keyword + ' at ' + ' '.join(query).replace('now', '')
+                    new_query = self.keyword + ' at ' + \
+                        ' '.join(query).replace('now', '')
                     return self.handle_raw(new_query, try_again=False)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return []
-                
+
                 try:
                     diff = cal.nlp(subquery, sourceTime=self._date_reference)
                 except (ValueError, OverflowError):
@@ -196,7 +207,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if parsed_query != subquery:
                     parsed_subqueries[i] = parsed_query
                     misparsed = True
-                    
+
                 diff = diff - self._date_reference
 
                 if TimeQueryHandler._timedelta_overflows(subquery, diff):
@@ -225,7 +236,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             items.append(item)
 
         if date_add_date_error:
-            item = TimeCalculation(error=DateAddDateException, order=len(items))
+            item = TimeCalculation(
+                error=DateAddDateException, order=len(items))
             items.append(item)
             return items
 
@@ -236,12 +248,14 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             date_overflows_error
 
         if date_overflows_error:
-            item = TimeCalculation(error=DateOverflowException, order=len(items))
+            item = TimeCalculation(
+                error=DateOverflowException, order=len(items))
             items.append(item)
             return items
 
         locations, added_defaults = self._get_locations(suffix)
-        order_offset_locations = len(items) + 1 if added_defaults else len(items)
+        order_offset_locations = len(
+            items) + 1 if added_defaults else len(items)
         location_items = (
             self._get_time_location(
                 date,
@@ -249,7 +263,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order_offset=order_offset_locations
             )
         )
-        order_next = len(items) if added_defaults else len(items) + len(location_items)
+        order_next = len(items) if added_defaults else len(
+            items) + len(location_items)
         items.extend(location_items)
 
         item = TimeCalculation(
@@ -282,9 +297,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             items = self._get_until(suffix)
         else:
             items = self._calculate(query, suffix, try_again)
-        
+
         return items
-    
+
     @QueryHandler.Decorators.can_handle
     def handle(self, query):
         return self.handle_raw(query)

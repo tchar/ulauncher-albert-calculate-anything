@@ -3,10 +3,10 @@ try:
     import requests
 except ImportError:
     requests = None
-from .provider import FreeCurrencyProvider
-from ... import logging
-from ...utils import get_or_default
-from ...exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.currency.providers.provider import FreeCurrencyProvider
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils import get_or_default
+from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
 
 
 class CoinbaseCurrencyProvider(FreeCurrencyProvider):
@@ -20,15 +20,18 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         try:
             response = requests.get(CoinbaseCurrencyProvider.BASE_URL)
         except Exception as e:
-            self._logger.error('Could not connect to mycurrency.net: {}'.format(e))
+            self._logger.error(
+                'Could not connect to mycurrency.net: {}'.format(e))
 
         if not str(response.status_code).startswith('2'):
             self.had_error = True
-            raise CurrencyProviderRequestException('Coinbase response code was {}'.format(response.status_code))
+            raise CurrencyProviderRequestException(
+                'Coinbase response code was {}'.format(response.status_code))
 
         data = response.json()
         if 'errors' in data:
-            message = data['errors'].get('message', 'Could not connect to coinbase')
+            message = data['errors'].get(
+                'message', 'Could not connect to coinbase')
             raise CurrencyProviderRequestException(message)
 
         base_currency = data['data']['currency']

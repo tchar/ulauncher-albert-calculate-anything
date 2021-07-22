@@ -1,5 +1,8 @@
-from .calculator import CalculatorQueryHandler
-from .units import UnitsQueryHandler
-from .percentages import PercentagesQueryHandler
-from .time import TimeQueryHandler
-from .base_n import Base10QueryHandler, Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.query.handlers.base_n import (
+    Base10QueryHandler, Base2QueryHandler,
+    Base8QueryHandler, Base16QueryHandler
+)

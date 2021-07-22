@@ -1,7 +1,8 @@
-from .base import _Calculation
-from ..lang import LanguageService
-from ..constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
-from ..query.result import QueryResult
+from calculate_anything.lang import LanguageService
+from calculate_anything.calculation.base import _Calculation
+from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
+from calculate_anything.query.result import QueryResult
+
 
 class TimeCalculation(_Calculation):
     def __init__(self, value=None, reference_date=None, query='', error=None, order=0):
@@ -11,7 +12,7 @@ class TimeCalculation(_Calculation):
     @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         translator = LanguageService().get_translator('time')
-                
+
         now = self.reference_date
         now_week = now.isocalendar()[1]
         date_week = self.value.isocalendar()[1]
@@ -27,7 +28,8 @@ class TimeCalculation(_Calculation):
                 description = translator('years-from-now')
             else:
                 description = translator('years-ago')
-            description = '{} {}'.format(abs(now.year - self.value.year), description)
+            description = '{} {}'.format(
+                abs(now.year - self.value.year), description)
         elif now.month - 1 == self.value.month:
             description = translator('last-month').capitalize()
         elif now.month + 1 == self.value.month:
@@ -37,7 +39,8 @@ class TimeCalculation(_Calculation):
                 description = translator('months-from-now')
             else:
                 description = translator('months ago')
-            description = '{} {}'.format(abs(now.month - self.value.month), description)
+            description = '{} {}'.format(
+                abs(now.month - self.value.month), description)
         elif now_week - 1 == date_week:
             description = translator('last-week').capitalize()
         elif now_week + 1 == date_week:
@@ -47,7 +50,8 @@ class TimeCalculation(_Calculation):
                 description = translator('weeks-from-now')
             else:
                 description = translator('weeks-ago')
-            description = '{} {}'.format(abs(now_week - date_week), description)
+            description = '{} {}'.format(
+                abs(now_week - date_week), description)
         elif now.day - 1 == self.value.day:
             description = translator('yesterday').capitalize()
         elif now.day + 1 == self.value.day:
@@ -57,7 +61,8 @@ class TimeCalculation(_Calculation):
                 description = translator('days-from-now')
             else:
                 description = translator('days-ago')
-            description = '{} {}'.format(abs(now.day - self.value.day), description)
+            description = '{} {}'.format(
+                abs(now.day - self.value.day), description)
         else:
             description = translator('today').capitalize()
 
@@ -72,6 +77,7 @@ class TimeCalculation(_Calculation):
             order=self.order
         )
 
+
 class LocationTimeCalculation(TimeCalculation):
     def __init__(self, value=None, location=None, error=None, order=-1):
         super().__init__(value=value, error=error, order=order)
@@ -82,10 +88,10 @@ class LocationTimeCalculation(TimeCalculation):
         timezone_name = self.value.tzname()
         utc = int(self.value.utcoffset().total_seconds() / 60 / 60)
         utc = 'UTC{:+}'.format(utc)
-        
+
         location_time = self.value.strftime(TIME_TIME_FORMAT)
         location_date = self.value.strftime(TIME_DATE_FORMAT)
-        
+
         city_name = self.location['name']
         country_name = self.location['country']
         country_code = self.location['cc'].upper()
@@ -94,7 +100,8 @@ class LocationTimeCalculation(TimeCalculation):
             country_name = '{} {}'.format(state_name, country_name)
 
         name = '{}: {}'.format(city_name, location_time)
-        description = '{} • {} • {} ({}) '.format(location_date, country_name, timezone_name, utc)
+        description = '{} • {} • {} ({}) '.format(
+            location_date, country_name, timezone_name, utc)
 
         if country_code in FLAGS:
             icon = 'images/flags/{}'.format(FLAGS[country_code])
@@ -109,6 +116,7 @@ class LocationTimeCalculation(TimeCalculation):
             value=self.value,
             order=self.order
         )
+
 
 class TimedeltaCalculation(TimeCalculation):
 
@@ -168,7 +176,7 @@ class TimedeltaCalculation(TimeCalculation):
             text = translator(text)
             value = '{} {}'.format(seconds_diff, text)
             values.append(value)
-            
+
         values = values[:3]
         value = ', '.join(values)
         if sign < 0:
@@ -181,7 +189,8 @@ class TimedeltaCalculation(TimeCalculation):
         else:
             is_on = '{} {}'.format(translator('was'), translator('on'))
 
-        description = '"{}" {} {}'.format(self.query.capitalize(), is_on, description_date)
+        description = '"{}" {} {}'.format(
+            self.query.capitalize(), is_on, description_date)
 
         return QueryResult(
             icon='images/time.svg',

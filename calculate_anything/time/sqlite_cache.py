@@ -8,10 +8,13 @@ try:
     import sqlite3
 except ImportError:
     sqlite3 = None
-from .json_cache import TimezoneJsonCache
-from .. import logging
-from ..utils import Singleton
-from ..constants import MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT, TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE
+from calculate_anything.time.json_cache import TimezoneJsonCache
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.constants import (
+    MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT,
+    TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE
+)
 
 
 def lock(func):
@@ -206,17 +209,19 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
 
         timezones_query = []
         timezones_params = []
-        
+
         for search_term in search_terms:
             search_term_upper = search_term.upper()
             search_term = '{}%'.format(search_term)
 
-            countries_query.extend(['iso2 = ?', 'iso3 = ?', 'name_alias LIKE ?'])
-            countries_params.extend([search_term_upper, search_term_upper, search_term])
-            
+            countries_query.extend(
+                ['iso2 = ?', 'iso3 = ?', 'name_alias LIKE ?'])
+            countries_params.extend(
+                [search_term_upper, search_term_upper, search_term])
+
             states_query.append('s.name LIKE ?')
             states_params.append(search_term)
-            
+
             timezones_query.append('t.name LIKE ?')
             timezones_params.append(search_term)
 
@@ -229,9 +234,10 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
             cities_param = city_name_search + '%'
         else:
             cities_query = 'name_alias = ?'
-            cities_param =city_name_search
+            cities_param = city_name_search
 
-        params = [cities_param, *countries_params, *states_params, *timezones_params, city_name_search]
+        params = [cities_param, *countries_params, *
+                  states_params, *timezones_params, city_name_search]
 
         query = '''SELECT
             city.id city_id, city.name city_name, city.state_name,

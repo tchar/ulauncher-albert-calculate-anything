@@ -1,1 +1,1 @@
-from .service import TimezoneService
+from calculate_anything.time.service import TimezoneService

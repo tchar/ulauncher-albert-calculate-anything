@@ -2,10 +2,10 @@ try:
     import pint
 except ImportError:
     pint = None
+from calculate_anything.lang import LanguageService
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.constants import UNIT_ALIASES_RE
 
-from ..lang import LanguageService
-from .. import logging
-from ..constants import UNIT_ALIASES_RE
 
 class PintDefinitionParser:
     def __init__(self, unit_registry: 'pint.registry.UnitRegistry'):
@@ -18,8 +18,10 @@ class PintDefinitionParser:
         definition = definition or 'nan currency EUR'
 
         if currency_upper not in self._unit_registry:
-            self._unit_registry.define('{} = {}'.format(currency_upper, definition))
-        self._unit_registry.define('@alias {} = {}'.format(currency_upper, currency_norm))
+            self._unit_registry.define(
+                '{} = {}'.format(currency_upper, definition))
+        self._unit_registry.define(
+            '@alias {} = {}'.format(currency_upper, currency_norm))
 
     def _process_alias(self, line, translation_adder, is_currency):
         aliases = line.lstrip('@alias').split('=')
@@ -79,16 +81,20 @@ class PintDefinitionParser:
                 return self._process_reverse_alias(line, translation_adder)
             return self._process_definition(line, is_currency)
         except Exception as e:
-            self._logger.error('Got exception when parsing line {} in {}: {}'.format(line_n, file_path, e))
+            self._logger.error(
+                'Got exception when parsing line {} in {}: {}'.format(line_n, file_path, e))
 
     def load_file(self, file_path, translation_mode, is_currency=True):
         translation_adder = LanguageService().get_translation_adder(translation_mode)
         try:
             with open(file_path, 'r') as f:
                 for i, line in enumerate(f):
-                    self._process_line(line, i + 1, file_path, translation_adder, is_currency)
+                    self._process_line(line, i + 1, file_path,
+                                       translation_adder, is_currency)
             self._logger.info('Loaded unit definitions: {}'.format(file_path))
         except FileNotFoundError:
-            self._logger.warning('Unit definitions file not found: {}'.format(file_path))
+            self._logger.warning(
+                'Unit definitions file not found: {}'.format(file_path))
         except Exception as e:
-            self._logger.error('Exception when loading unit definitons file {}: {}'.format(file_path, e))
+            self._logger.error(
+                'Exception when loading unit definitons file {}: {}'.format(file_path, e))

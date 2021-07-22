@@ -1,7 +1,7 @@
 from typing import Union, Iterable, List, Optional, Match, Callable, Dict
 import sys
 import re
-from .. import deduplicate
+from calculate_anything.utils.iter import deduplicate
 
 
 class _MultiRe:
@@ -16,7 +16,7 @@ class _MultiRe:
             if flags & re.IGNORECASE:
                 value = {k.lower(): v for k, v in value.items()}
             if sys.version_info[:2] < (3, 7):
-                sort = True #pragma: no cover
+                sort = True  # pragma: no cover
             self._replace_dict = value
         elif isinstance(value, set):
             sort = True

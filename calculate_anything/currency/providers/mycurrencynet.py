@@ -3,9 +3,10 @@ try:
     import requests
 except ImportError:
     requests = None
-from .provider import FreeCurrencyProvider
-from ... import logging
-from ...exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.currency.providers.provider import FreeCurrencyProvider
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
+
 
 class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
     BASE_URL = 'https://www.mycurrency.net/US.json'
@@ -21,13 +22,13 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         for rate in rates:
             if 'currency_code' not in rate or 'rate' not in rate:
                 continue
-            
+
             currency_code = rate['currency_code']
             if currency_code == 'EUR':
                 rate = 1.0
             else:
                 rate = rate['rate']
-            
+
             rates_dict[currency_code] = {
                 'rate': rate,
                 'timestamp_refresh': timestamp
@@ -41,7 +42,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
 
         base_currency = data['baseCurrency']
         rates = data['rates']
-        
+
         if base_currency == 'EUR':
             return MyCurrencyNetCurrencyProvider._convert_rates_to_dict(rates)
 
@@ -62,7 +63,8 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         if base_rate == request_base_rate:
             return MyCurrencyNetCurrencyProvider._convert_rates_to_dict(rates)
 
-        rates = map(lambda r: {**r, 'rate': r['rate'] * request_base_rate / base_rate}, rates)
+        rates = map(
+            lambda r: {**r, 'rate': r['rate'] * request_base_rate / base_rate}, rates)
         return MyCurrencyNetCurrencyProvider._convert_rates_to_dict(rates)
 
     def request_currencies(self, *currencies, force=False):
@@ -70,14 +72,16 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         try:
             response = requests.get(MyCurrencyNetCurrencyProvider.BASE_URL)
         except Exception as e:
-            self._logger.error('Could not connect to mycurrency.net: {}'.format(e))
+            self._logger.error(
+                'Could not connect to mycurrency.net: {}'.format(e))
             self.had_error = True
-            raise CurrencyProviderRequestException('Could not connect to conversion service')
+            raise CurrencyProviderRequestException(
+                'Could not connect to conversion service')
         if not str(response.status_code).startswith('2'):
             self.had_error = True
-            raise CurrencyProviderRequestException('mycurrency.net response code was {}'.format(response.status_code))
-        
+            raise CurrencyProviderRequestException(
+                'mycurrency.net response code was {}'.format(response.status_code))
+
         data = response.json()
         currencies = MyCurrencyNetCurrencyProvider._convert_rates(data)
         return currencies
-        

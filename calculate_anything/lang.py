@@ -3,9 +3,10 @@ import json
 import re
 from typing import Callable
 import unicodedata
-from .utils import Singleton, multi_re, safe_operation
-from .constants import MAIN_DIR
-from . import logging
+from calculate_anything.utils import Singleton, multi_re, safe_operation
+from calculate_anything.constants import MAIN_DIR
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+
 
 class LanguageService(metaclass=Singleton):
     def __init__(self):
@@ -25,24 +26,28 @@ class LanguageService(metaclass=Singleton):
         if lang == self._lang:
             return
         fallback = False
-        lang_filepath = os.path.join(MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
+        lang_filepath = os.path.join(
+            MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
         if not os.path.exists(lang_filepath):
-            self._logger.error('Language file does not exist: {}'.format(lang_filepath))
+            self._logger.error(
+                'Language file does not exist: {}'.format(lang_filepath))
             fallback = True
         if not fallback:
             try:
                 with open(lang_filepath) as f:
                     self._data = json.loads(f.read())
             except Exception as e:
-                self._logger.error('Could not load language, falling back to en_US')
+                self._logger.error(
+                    'Could not load language, falling back to en_US')
                 fallback = True
-        
+
         if fallback:
             if lang == 'en_US':
-                self._logger.error('en_US does not exist, will not use any language aliases: {}'.format(lang_filepath))
+                self._logger.error(
+                    'en_US does not exist, will not use any language aliases: {}'.format(lang_filepath))
                 return
             return self.set('en_US')
-        
+
         self._lang = lang
         for callback in self._update_callbacks:
             with safe_operation():
@@ -70,7 +75,7 @@ class LanguageService(metaclass=Singleton):
     def replace_all(self, string, mode, ignorecase=True):
         if mode not in self._data:
             return string
-        
+
         return multi_re.sub_dict(
             self._data[mode],
             string,

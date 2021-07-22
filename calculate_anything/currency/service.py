@@ -1,10 +1,10 @@
 from functools import wraps
-from .providers import CombinedCurrencyProvider
-from .cache import CurrencyCache
+from calculate_anything.currency.providers import CombinedCurrencyProvider
+from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
-from ..exceptions import CurrencyProviderRequestException, MissingRequestsException
-from ..utils import Singleton, safe_operation
-from .. import logging
+from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+from calculate_anything.utils import Singleton, safe_operation
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
 
 
 def lock(func):
@@ -50,7 +50,8 @@ class CurrencyService(metaclass=Singleton):
         if force:
             pass
         elif not self._is_running:
-            self._logger.info('Stopping thread (id={}). Service stopped'.format(thread_id))
+            self._logger.info(
+                'Stopping thread (id={}). Service stopped'.format(thread_id))
             return
         elif thread_id != self._thread_id:
             self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(
@@ -72,7 +73,7 @@ class CurrencyService(metaclass=Singleton):
             self._logger.error(e)
             self._missing_requests = True
             return
-        
+
         if force and not self._cache.enabled:
             self._logger.info(
                 'Stopping thread (id={}). Cache not enabled'.format(thread_id))

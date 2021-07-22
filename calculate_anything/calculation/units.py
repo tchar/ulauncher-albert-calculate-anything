@@ -9,12 +9,12 @@ try:
     import babel.numbers as babel_numbers
 except ImportError:
     babel_numbers = None
-from .base import _Calculation
-from ..query.result import QueryResult
-from ..lang import LanguageService
-from .. import logging
-from ..utils import multi_re
-from ..constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.calculation.base import _Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.lang import LanguageService
+from calculate_anything.utils import multi_re
+from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
 
 
 class UnitsCalculation(_Calculation):
@@ -120,7 +120,8 @@ class UnitsCalculation(_Calculation):
 
         descriptions = [description]
         if UnitsCalculation.is_strictly_dimensionless(self.value):
-            desc_part = LanguageService().translate('result-dimensionless', 'calculator').capitalize()
+            desc_part = LanguageService().translate(
+                'result-dimensionless', 'calculator').capitalize()
             descriptions.append(desc_part)
 
         description = ' '.join(descriptions)
@@ -184,10 +185,10 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
         replace_re = multi_re.compile(
             {'currency_': '', '**': '^', '_': ' '}, sort=True)
-        
+
         unit_name = str(self.value.units)
         clipboard = replace_re.sub_dict(unit_name)
-    
+
         if babel_units is not None:
             unit_name = re.sub(
                 r'currency_([a-zA-Z]{3,})', currency_alias_f, unit_name)

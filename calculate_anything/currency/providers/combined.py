@@ -4,13 +4,13 @@ if sys.version_info[:2] < (3, 7):
 else:
     OrderedDict = dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .provider import FreeCurrencyProvider, ApiKeyCurrencyProvider, _MockCurrencyProvider, _CurrencyProvider
-from .european_central_bank import ECBProvider
-from .mycurrencynet import MyCurrencyNetCurrencyProvider
-from .coinbase import CoinbaseCurrencyProvider
-from ... import logging
-from ...utils import is_types
-from ...exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.currency.providers.provider import FreeCurrencyProvider, ApiKeyCurrencyProvider, _MockCurrencyProvider
+from calculate_anything.currency.providers.european_central_bank import ECBProvider
+from calculate_anything.currency.providers.mycurrencynet import MyCurrencyNetCurrencyProvider
+from calculate_anything.currency.providers.coinbase import CoinbaseCurrencyProvider
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils import is_types
+from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
 
 
 class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
@@ -72,7 +72,7 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
     def _request_free(self, currencies, force):
         if not self._free_providers:
             return []
-    
+
         with ThreadPoolExecutor(max_workers=len(self._free_providers)) as executor:
             tasks = []
             for provider_name, provider in self._free_providers.items():
@@ -98,9 +98,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
 
         tasks_free = self._request_free(currencies, force)
         tasks_api = self._request_api(currencies, force)
-        
+
         providers_currencies = {}
-    
+
         for task in tasks_free:
             result = task.result()
             if result is not None:

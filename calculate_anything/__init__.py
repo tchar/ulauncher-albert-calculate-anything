@@ -1,8 +1,9 @@
-from .logging_wrapper import LoggingWrapper as logging
-from .lang import LanguageService
-from .currency import CurrencyService
-from .time import TimezoneService
-from .units import UnitsService
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.lang import LanguageService
+from calculate_anything.currency import CurrencyService
+from calculate_anything.time import TimezoneService
+from calculate_anything.units import UnitsService
+
 
 def init():
     """Define correct sequence of initializing services"""
@@ -10,4 +11,3 @@ def init():
     CurrencyService()
     TimezoneService()
     LanguageService()
-

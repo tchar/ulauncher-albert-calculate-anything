@@ -1,13 +1,14 @@
 from functools import wraps
-from .. import logging
-from ..query.result import QueryResult
-from ..lang import LanguageService
-from ..exceptions import (
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.query.result import QueryResult
+from calculate_anything.lang import LanguageService
+from calculate_anything.exceptions import (
     BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
     DateOverflowException, DateAddDateException, MisparsedTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException, MissingPintException
 )
+
 
 def zero_division_error_query_result():
     translator = LanguageService().get_translator('errors')
@@ -17,6 +18,7 @@ def zero_division_error_query_result():
         description=translator('infinite-result-error-description'),
         error=ZeroDivisionException
     )
+
 
 def missing_simpleeval_query_result():
     translator = LanguageService().get_translator('errors')
@@ -29,6 +31,7 @@ def missing_simpleeval_query_result():
         order=-1
     )
 
+
 def missing_parsedatetime_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -39,6 +42,7 @@ def missing_parsedatetime_query_result():
         error=MissingParsedatetimeException,
         order=-1
     )
+
 
 def missing_requests_query_result():
     translator = LanguageService().get_translator('errors')
@@ -51,6 +55,7 @@ def missing_requests_query_result():
         order=-1
     )
 
+
 def date_overflow_error_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -60,6 +65,7 @@ def date_overflow_error_query_result():
         clipboard='',
         order=0
     )
+
 
 def date_add_date_query_result():
     translator = LanguageService().get_translator('errors')
@@ -71,12 +77,14 @@ def date_add_date_query_result():
         order=0
     )
 
+
 def misparsed_time_exception(exception):
     translator = LanguageService().get_translator('errors')
     name = translator('unfully-parsed-date')
     name = '{}: "{}"'.format(name, exception.extra['parsed_query'])
     description = translator('unfully-parsed-date-description')
-    description = '{}: "{}"'.format(description, exception.extra['original_query'])
+    description = '{}: "{}"'.format(
+        description, exception.extra['original_query'])
     return QueryResult(
         icon='images/time.svg',
         name=name,
@@ -84,6 +92,7 @@ def misparsed_time_exception(exception):
         clipboard='',
         order=0
     )
+
 
 def currency_provider_error_query_result():
     translator = LanguageService().get_translator('errors')
@@ -94,6 +103,7 @@ def currency_provider_error_query_result():
         error=CurrencyProviderException,
     )
 
+
 def boolean_comparison_error_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -102,6 +112,7 @@ def boolean_comparison_error_query_result():
         description=translator('boolean-comparison-error-description'),
         error=BooleanComparisonException
     )
+
 
 def boolean_percentage_error_query_result():
     translator = LanguageService().get_translator('errors')
@@ -112,6 +123,7 @@ def boolean_percentage_error_query_result():
         error=BooleanPercetageException
     )
 
+
 def wrong_base_exception_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -121,6 +133,7 @@ def wrong_base_exception_query_result():
         error=BooleanPercetageException
     )
 
+
 def base_floating_point_exception_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -129,6 +142,7 @@ def base_floating_point_exception_query_result():
         description=translator('base-floating-error-description'),
         error=BaseFloatingPointException
     )
+
 
 def missing_pint_error_query_result():
     translator = LanguageService().get_translator('errors')
@@ -140,6 +154,7 @@ def missing_pint_error_query_result():
         error=MissingPintException,
         order=-1
     )
+
 
 class _Calculation:
     class Decorators:
@@ -173,7 +188,8 @@ class _Calculation:
                 if self.is_error(MissingPintException):
                     return missing_pint_error_query_result()
                 if self.is_error():
-                    self._logger.error('Uknown error type: {}'.format(self.error))
+                    self._logger.error(
+                        'Uknown error type: {}'.format(self.error))
                     raise self.error
                 return func(self, *args, **kwargs)
             return _wrapper

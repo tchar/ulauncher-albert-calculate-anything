@@ -1,10 +1,11 @@
 import re
 import cmath
-from .base import _Calculation
-from ..query.result import QueryResult
-from ..lang import LanguageService
-from ..constants import CALCULATOR_ERROR
-from ..utils import multi_re
+from calculate_anything.calculation.base import _Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.lang import LanguageService
+from calculate_anything.constants import CALCULATOR_ERROR
+from calculate_anything.utils import multi_re
+
 
 class Calculation(_Calculation):
     VALUE_UNKNOWN = -1
@@ -24,22 +25,31 @@ class Calculation(_Calculation):
             )
             if value.imag == 0:
                 value = value.real
-        
+
         if isinstance(value, float):
             value = Calculation.fix_number_precision(value)
 
         super().__init__(value=value, query=query, error=error, order=order)
 
-        if value is None: self.value_type = Calculation.VALUE_NONE
-        elif isinstance(value, bool): self.value_type = Calculation.VALUE_BOOLEAN
-        elif isinstance(value, float): self.value_type = Calculation.VALUE_FLOAT
-        elif isinstance(value, int): self.value_type = Calculation.VALUE_INT
-        elif isinstance(value, str): self.value_type = Calculation.VALUE_STRING
+        if value is None:
+            self.value_type = Calculation.VALUE_NONE
+        elif isinstance(value, bool):
+            self.value_type = Calculation.VALUE_BOOLEAN
+        elif isinstance(value, float):
+            self.value_type = Calculation.VALUE_FLOAT
+        elif isinstance(value, int):
+            self.value_type = Calculation.VALUE_INT
+        elif isinstance(value, str):
+            self.value_type = Calculation.VALUE_STRING
         elif isinstance(value, complex):
-            if self.value.imag == 0: self.value_type = Calculation.VALUE_REAL
-            elif self.value.real == 0: self.value_type = Calculation.VALUE_IMAGINARY
-            else: self.value_type = Calculation.VALUE_COMPLEX
-        else: self.value_type = Calculation.VALUE_UNKNOWN
+            if self.value.imag == 0:
+                self.value_type = Calculation.VALUE_REAL
+            elif self.value.real == 0:
+                self.value_type = Calculation.VALUE_IMAGINARY
+            else:
+                self.value_type = Calculation.VALUE_COMPLEX
+        else:
+            self.value_type = Calculation.VALUE_UNKNOWN
 
     @staticmethod
     def fix_number_precision(number):
@@ -66,7 +76,7 @@ class Calculation(_Calculation):
             if group.startswith('1j'):
                 return 'i'
             return group.replace('j', 'i')
-        
+
         replace_special = {
             '%': 'mod',
             '//': 'div',
@@ -80,7 +90,8 @@ class Calculation(_Calculation):
 
         query = self.query
         query = re.sub(r'\d+j', sub_i, query)
-        query = re.split(r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query)
+        query = re.split(
+            r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query)
         query = map(str.strip, query)
         query = ' '.join(query)
         query = multi_re.sub_dict(replace_special, query, sort=True)
@@ -88,7 +99,7 @@ class Calculation(_Calculation):
 
     def format(self):
         real, imag = self.value.real, self.value.imag
-        
+
         if real == 0 and imag == 0:
             name = '0'
         elif real == 0:
@@ -129,12 +140,13 @@ class Calculation(_Calculation):
             order=self.order
         )
 
+
 class BooleanCalculation(Calculation):
     @Calculation.Decorators.handle_error_results
     def to_query_result(self):
         translator = LanguageService().get_translator('calculator')
         result = str(self.value).lower()
-    
+
         description = self.format_query()
         result_is_bool_str = translator('result-boolean').capitalize()
         description = '{} ({})'.format(description, result_is_bool_str)

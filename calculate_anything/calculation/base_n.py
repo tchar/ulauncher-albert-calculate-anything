@@ -1,11 +1,12 @@
-from .calculation import Calculation
-from ..query.result import QueryResult
-from ..lang import LanguageService
-from ..utils import hex_to_rgb, rgb_to_hsv, rgb_to_cmyk, rgb_to_hsl
+from calculate_anything.calculation.calculation import Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.lang import LanguageService
+from calculate_anything.utils.colors import hex_to_rgb, rgb_to_hsv, rgb_to_cmyk, rgb_to_hsl
+
 
 class BaseNCalculation(Calculation):
     @staticmethod
-    def _get_query_result(icon='images/icon.svg' ,name='', description='', clipboard=''):
+    def _get_query_result(icon='images/icon.svg', name='', description='', clipboard=''):
         return QueryResult(
             icon=icon,
             name=name,
@@ -21,6 +22,7 @@ class BaseNCalculation(Calculation):
     def to_query_result(self):
         return BaseNCalculation._get_query_result(name=str(self.value))
 
+
 class Base16StringCalculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
@@ -28,6 +30,7 @@ class Base16StringCalculation(BaseNCalculation):
         description = LanguageService().translate('bytes', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
+
 
 class Base10Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
@@ -37,6 +40,7 @@ class Base10Calculation(BaseNCalculation):
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
+
 class Base2Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
@@ -44,6 +48,7 @@ class Base2Calculation(BaseNCalculation):
         description = LanguageService().translate('bin', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
+
 
 class Base8Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
@@ -53,6 +58,7 @@ class Base8Calculation(BaseNCalculation):
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
 
+
 class Base16Calculation(BaseNCalculation):
     @BaseNCalculation.Decorators.handle_error_results
     def to_query_result(self):
@@ -60,6 +66,7 @@ class Base16Calculation(BaseNCalculation):
         description = LanguageService().translate('hex', 'calculator').upper()
         clipboard = name
         return BaseNCalculation._get_query_result(name=name, description=description, clipboard=clipboard)
+
 
 class ColorBase16Calculation(Base16Calculation):
     def __init__(self, value=None, query='', error=None, order=0, color_code=None, color_format=None):
@@ -79,11 +86,11 @@ class ColorBase16Calculation(Base16Calculation):
 
         rgb = hex_to_rgb(value)
         items.append(ColorBase16Calculation(
-                value=rgb,
-                order=order_offset + 1,
-                color_code='rgb',
-                color_format='{:.0f}, {:.0f}, {:.0f}'
-            )
+            value=rgb,
+            order=order_offset + 1,
+            color_code='rgb',
+            color_format='{:.0f}, {:.0f}, {:.0f}'
+        )
         )
 
         for func, color_code, color_format in formats:
@@ -97,7 +104,6 @@ class ColorBase16Calculation(Base16Calculation):
                 )
             )
         return items
-        
 
     @Base16Calculation.Decorators.handle_error_results
     def to_query_result(self):

@@ -1,6 +1,6 @@
 from typing import Any, Protocol
 from abc import abstractmethod
-import logging
+import logging as _logging
 
 
 class Logger(Protocol):
@@ -31,7 +31,7 @@ class LoggingModule(Protocol):
 
 
 class LoggingWrapper:
-    logging: LoggingModule = logging
+    logging: LoggingModule = _logging
 
     @staticmethod
     def set_logging(logging: LoggingModule) -> None:

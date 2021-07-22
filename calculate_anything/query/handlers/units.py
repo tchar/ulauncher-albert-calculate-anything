@@ -4,15 +4,20 @@ try:
     import pint
 except ImportError:
     pint = None
-from .base import QueryHandler
-from ...units import UnitsService
-from ...currency import CurrencyService
-from ...calculation import UnitsCalculation, CurrencyUnitsCalculation, TemperatureUnitsCalculation
-from ...lang import LanguageService
-from ... import logging
-from ...utils import is_types, Singleton
-from ...constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
-from ...exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
+from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.units.service import UnitsService
+from calculate_anything.currency.service import CurrencyService
+from calculate_anything.calculation.units import (
+    UnitsCalculation, CurrencyUnitsCalculation,
+    TemperatureUnitsCalculation
+)
+from calculate_anything.lang import LanguageService
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import is_types
+from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
+from calculate_anything.exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
+
 
 class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
@@ -42,7 +47,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         matches = UNIT_QUERY_REGEX.findall(query)
         if not matches:
             return None
-    
+
         unit_from, units_to = matches[0]
         units_to = units_to.split(',')
 
@@ -61,11 +66,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         if unit_from_alt != unit_from:
             yield unit_from_alt
 
-       
         matches = UNIT_SPLIT_RE.split(unit_from)
         if len(matches) in [0, 1]:
             return
-        
+
         expression_fmt = '{}'.join(matches[0::2])
 
         keys_dict = {}
@@ -116,11 +120,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         unit_from_alt = replacer(unit_from)
         if unit_from_alt != unit_from:
             yield unit_from_alt
-       
+
         matches = UNIT_SPLIT_RE.split(unit_from)
         if len(matches) in [0, 1]:
             return
-        
+
         units = matches[1::2]
         units_alt = []
         for unit in units:
@@ -152,33 +156,36 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 return None
             if (UnitsService().unit_conversion_mode == UnitsService.MODE_NORMAL and
                 CurrencyUnitsCalculation.has_currency(unit) and
-                not CurrencyUnitsCalculation.is_currency(unit)):
+                    not CurrencyUnitsCalculation.is_currency(unit)):
                 return None
             return unit
-        except pint.errors.DimensionalityError: pass
-        except pint.errors.UndefinedUnitError: pass
-        except pint.errors.DefinitionSyntaxError: pass
+        except pint.errors.DimensionalityError:
+            pass
+        except pint.errors.UndefinedUnitError:
+            pass
+        except pint.errors.DefinitionSyntaxError:
+            pass
         except Exception as e:
             self._logger.error(e)
-    
+
     def handle_raw(self, query):
         if not UnitsService().running:
             return None
         elif '%' in query:
             return None
-        
+
         if pint is None:
             item = UnitsCalculation(error=MissingPintException, order=-1)
             return [item]
-        
+
         query = UnitsQueryHandler._extract_query(query)
         if not query:
             return None
-            
+
         ureg = UnitsService().unit_registry
         base_currency = UnitsService().base_currency
         unit_from, units_to = query
-        
+
         unit_from_ureg_currency = None
         unit_dimensionalities = set()
         units_from_ureg = []
@@ -201,15 +208,20 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         if not units_to:
             # Add currency units if compattible with units from and map them to units
             units_to_curr = CurrencyService().default_currencies
-            units_to_curr = map(lambda s: 'currency_{}'.format(s), units_to_curr)
-            units_to_curr = filter(lambda s: s != str(unit_from_ureg_currency), units_to_curr)
+            units_to_curr = map(
+                lambda s: 'currency_{}'.format(s), units_to_curr)
+            units_to_curr = filter(lambda s: s != str(
+                unit_from_ureg_currency), units_to_curr)
             units_to_curr = map(ureg.parse_unit_name, units_to_curr)
-            units_to_curr = map(lambda u: ' '.join(u[0]) if u else '', units_to_curr)
+            units_to_curr = map(lambda u: ' '.join(
+                u[0]) if u else '', units_to_curr)
             units_to_curr = map(ureg.parse_units, units_to_curr)
-            units_to_curr = filter(base_currency.is_compatible_with, units_to_curr)
+            units_to_curr = filter(
+                base_currency.is_compatible_with, units_to_curr)
 
             # Add all units from
-            units_to_rest = filter(lambda u: not base_currency.is_compatible_with(u), units_from_ureg)
+            units_to_rest = filter(
+                lambda u: not base_currency.is_compatible_with(u), units_from_ureg)
             units_to_rest = map(lambda u: u.units, units_to_rest)
             units_to_ureg = itertools.chain(units_to_curr, units_to_rest)
         else:
@@ -228,8 +240,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 if not unit_from_ureg.is_compatible_with(unit_to_ureg):
                     continue
                 unit_converted = unit_from_ureg.to(unit_to_ureg, 'currency')
-                if math.isnan(unit_converted.magnitude): continue
-                try: 
+                if math.isnan(unit_converted.magnitude):
+                    continue
+                try:
                     rate = unit_converted.magnitude / unit_from_ureg.magnitude
                     rate = ureg.Quantity(rate, unit_to_ureg)
                 except ZeroDivisionError:
@@ -241,7 +254,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             kwargs = {}
             if UnitsCalculation.is_currency(unit_converted):
                 UnitClass = CurrencyUnitsCalculation
-                kwargs = {'update_timestamp': UnitsService().get_rate_timestamp(unit_to_ureg)}
+                kwargs = {'update_timestamp': UnitsService(
+                ).get_rate_timestamp(unit_to_ureg)}
                 added_currency = True
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation

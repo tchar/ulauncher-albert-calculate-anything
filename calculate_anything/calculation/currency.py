@@ -1,9 +1,10 @@
 # TODO: To be removed, replaced by CurrencyUnitsCalculation
 
 import locale
-from .base import _Calculation
-from ..query.result import QueryResult
-from ..constants import FLAGS
+from calculate_anything.calculation.base import _Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.constants import FLAGS
+
 
 class CurrencyCalculation(_Calculation):
     def __init__(self, value=None, error=None, order=0, rate=None, date=None, currency_from=None, currency_to=None):
@@ -24,18 +25,21 @@ class CurrencyCalculation(_Calculation):
         if currency_from == currency_to:
             description = ''
         elif date:
-            description = '1 {} = {:f} {} as of {}'.format(currency_from, rate, currency_to, date)
+            description = '1 {} = {:f} {} as of {}'.format(
+                currency_from, rate, currency_to, date)
         else:
-            description = '1 {} = {:f} {}'.format(currency_from, rate, currency_to)
+            description = '1 {} = {:f} {}'.format(
+                currency_from, rate, currency_to)
 
         if currency_to in FLAGS:
             icon = 'images/flags/{}'.format(FLAGS[currency_to])
         else:
             icon = 'images/currency.svg'
-        
-        converted_amount = locale.currency(converted_amount, symbol='', grouping=True)
+
+        converted_amount = locale.currency(
+            converted_amount, symbol='', grouping=True)
         name = '{} {}'.format(converted_amount, currency_to)
-        
+
         return QueryResult(
             icon=icon,
             name=name,

@@ -2,8 +2,8 @@ from contextlib import contextmanager
 from typing import Any, Container, Iterable, List, Optional, Type, Union
 from types import ModuleType
 import importlib
-from .. import logging
-from ..exceptions import MissingSimpleevalException
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.exceptions import MissingSimpleevalException
 
 
 def get_module(name: str) -> Union[None, ModuleType]:

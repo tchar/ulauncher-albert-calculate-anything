@@ -1,7 +1,7 @@
-from ...utils import is_types, get_module
+from calculate_anything.utils import is_types, get_module
 has_requests = get_module('requests') is not None
 from datetime import datetime
-from ...exceptions import CurrencyProviderRequestException, MissingRequestsException
+from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
 
 class _MockCurrencyProvider:
     def __init__(self, *args, **kwargs):

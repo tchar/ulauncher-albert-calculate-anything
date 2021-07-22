@@ -1,6 +1,6 @@
-from .provider import _MockCurrencyProvider
-from .fixerio import FixerIOCurrencyProvider
-from ...exceptions import CurrencyProviderException
+from calculate_anything.currency.providers.provider import _MockCurrencyProvider
+from calculate_anything.currency.providers.fixerio import FixerIOCurrencyProvider
+from calculate_anything.exceptions import CurrencyProviderException
 
 
 class CurrencyProviderFactory:

@@ -3,12 +3,14 @@ import shutil
 import json
 from datetime import datetime
 from functools import wraps
-from ..utils import is_types
-from ..constants import CACHE_DIR, CURRENCY_DATA_FILE
-from .. import logging
+from calculate_anything.utils import is_types
+from calculate_anything.constants import CACHE_DIR, CURRENCY_DATA_FILE
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+
 
 class CacheException(Exception):
     pass
+
 
 def preload(func):
     @wraps(func)
@@ -16,6 +18,7 @@ def preload(func):
         self._load()
         return func(self, *args, **kwargs)
     return _wrapper
+
 
 class CurrencyCache:
     def __init__(self, _update_frequency=0):
@@ -34,21 +37,24 @@ class CurrencyCache:
             try:
                 os.remove(CACHE_DIR)
             except Exception as e:
-                self._logger.error('Could not remove cache file {}: {}'.format(CACHE_DIR, e))
+                self._logger.error(
+                    'Could not remove cache file {}: {}'.format(CACHE_DIR, e))
             return False
-        
+
         if not os.path.exists(CACHE_DIR):
             try:
                 os.makedirs(CACHE_DIR)
             except Exception as e:
-                self._logger.error('Could not create cache directory {}: {}'.format(CACHE_DIR, e))
+                self._logger.error(
+                    'Could not create cache directory {}: {}'.format(CACHE_DIR, e))
                 return False
 
         if os.path.isdir(CURRENCY_DATA_FILE):
             try:
                 shutil.rmtree(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error('Could not remove data directory {}: {}'.format(CURRENCY_DATA_FILE, e))
+                self._logger.error(
+                    'Could not remove data directory {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
 
         if os.path.exists(CURRENCY_DATA_FILE):
@@ -59,19 +65,24 @@ class CurrencyCache:
                         raise Exception('exchange rates is not a dict')
                     for k, v in data['exchange_rates'].items():
                         if not is_types(v, dict):
-                            raise Exception('Currency {} rate is not a dict {}'.format(k, v))
+                            raise Exception(
+                                'Currency {} rate is not a dict {}'.format(k, v))
                         if not is_types(v.get('rate'), int, float):
                             raise Exception('Currency rate is not a number')
                         if not is_types(v.get('timestamp_refresh'), int, float, type(None)):
-                            raise Exception('timestamp_refresh is not a number or None')
+                            raise Exception(
+                                'timestamp_refresh is not a number or None')
                     if not is_types(data.get('last_update_timestamp'), int, float):
-                        raise Exception('last_update_timestamp is not a number')
+                        raise Exception(
+                            'last_update_timestamp is not a number')
             except Exception as e:
-                self._logger.error('Data file {} is possible corrupted, will try to remove it: {}'.format(CURRENCY_DATA_FILE, e))
+                self._logger.error('Data file {} is possible corrupted, will try to remove it: {}'.format(
+                    CURRENCY_DATA_FILE, e))
                 try:
                     os.remove(CURRENCY_DATA_FILE)
                 except Exception as e:
-                    self._logger.error('Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                    self._logger.error(
+                        'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                     return False
 
         if not os.path.exists(CURRENCY_DATA_FILE):
@@ -80,14 +91,15 @@ class CurrencyCache:
                 with open(CURRENCY_DATA_FILE, 'w') as f:
                     f.write(json.dumps(data))
             except Exception as e:
-                self._logger.error('Could not write default data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                self._logger.error(
+                    'Could not write default data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
         return True
 
     def _load(self):
         if self._loaded or not self.enabled or self._use_only_memory:
             return
-        
+
         if not self._check_structure():
             self._use_only_memory = True
             self._data = {'exchange_rates': {}, 'last_update_timestamp': 0}
@@ -118,7 +130,7 @@ class CurrencyCache:
                 if currency in self._data['exchange_rates']
             }
         return self._data['exchange_rates']
-    
+
     @preload
     def get_rate_timestamp(self, currency):
         if currency not in self._data['exchange_rates']:
@@ -150,7 +162,8 @@ class CurrencyCache:
             try:
                 os.remove(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error('Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                self._logger.error(
+                    'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
 
     def save(self, exchange_rates, provider):
         if not self.enabled:
@@ -169,5 +182,5 @@ class CurrencyCache:
             with open(CURRENCY_DATA_FILE, 'w') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:
-            self._logger.error('Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e))
-        
+            self._logger.error(
+                'Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e))

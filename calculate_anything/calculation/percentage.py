@@ -1,6 +1,7 @@
-from .calculation import Calculation
-from ..query.result import QueryResult
-from ..lang import LanguageService
+from calculate_anything.calculation.calculation import Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.lang import LanguageService
+
 
 class PercentageCalculation(Calculation):
     def __init__(self, value=None, query='', amounts=(), error=None, order=0):
@@ -20,21 +21,24 @@ class PercentageCalculation(Calculation):
 
     def _get_extra_descriptions(self):
         translator = LanguageService().get_translator('calculator')
-    
+
         value_type = self.value_type
         extra_descriptions = []
         if value_type == Calculation.VALUE_COMPLEX:
-            extra_descriptions.append(translator('result-complex').capitalize())
+            extra_descriptions.append(
+                translator('result-complex').capitalize())
         elif value_type == Calculation.VALUE_IMAGINARY:
-            extra_descriptions.append(translator('result-imaginary').capitalize())
-        
+            extra_descriptions.append(translator(
+                'result-imaginary').capitalize())
+
         return extra_descriptions
 
     @Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
-        description = '({}) + ({:})%'.format(self.amounts[0].format(), self.amounts[1].format())
-   
+        description = '({}) + ({:})%'.format(
+            self.amounts[0].format(), self.amounts[1].format())
+
         extra_descriptions = self._get_extra_descriptions()
         if extra_descriptions:
             extra_descriptions = ', '.join(extra_descriptions)
@@ -48,6 +52,7 @@ class PercentageCalculation(Calculation):
             value=self.value,
             order=self.order
         )
+
 
 class NormalPercentageCalculation(PercentageCalculation):
     @PercentageCalculation.Decorators.handle_error_results
@@ -81,6 +86,7 @@ class NormalPercentageCalculation(PercentageCalculation):
             order=self.order
         )
 
+
 class InversePercentageCalculation(PercentageCalculation):
     @PercentageCalculation.Decorators.handle_error_results
     def to_query_result(self):
@@ -94,8 +100,9 @@ class InversePercentageCalculation(PercentageCalculation):
 
         amount1 = self.amounts[0].format()
         amount2 = self.amounts[1].format()
-            
-        description = '({}) {{}} {}% {{}} ({})'.format(amount1, result_formatted, amount2)
+
+        description = '({}) {{}} {}% {{}} ({})'.format(
+            amount1, result_formatted, amount2)
         description = description.format(translator('is'), translator('of'))
 
         extra_descriptions = self._get_extra_descriptions()

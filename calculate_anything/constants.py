@@ -1,7 +1,7 @@
 import os
 import re
 import calculate_anything
-from .utils import multi_re
+from calculate_anything.utils import multi_re
 
 MAIN_DIR = os.path.dirname(os.path.dirname(
     os.path.realpath(calculate_anything.__file__)))

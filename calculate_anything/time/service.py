@@ -1,6 +1,7 @@
 import re
-from .sqlite_cache import SqliteTimezoneCache
-from ..utils import Singleton
+from calculate_anything.time.sqlite_cache import SqliteTimezoneCache
+from calculate_anything.utils.singleton import Singleton
+
 
 class TimezoneService(metaclass=Singleton):
     def __init__(self):
@@ -23,7 +24,7 @@ class TimezoneService(metaclass=Singleton):
         cities_found = []
         for default_city in default_cities:
             default_city = default_city.strip().lower()
-            # Check for country code. It is messy but avoids keeping a regex 
+            # Check for country code. It is messy but avoids keeping a regex
             matches = regex.findall(default_city)
             country_code = None
             if matches:
@@ -31,7 +32,8 @@ class TimezoneService(metaclass=Singleton):
                 default_city = default_city.strip()
                 country_code = country_code.upper()
             if country_code:
-                cities_found_tmp = SqliteTimezoneCache().get(default_city, country_code, exact=True)
+                cities_found_tmp = SqliteTimezoneCache().get(
+                    default_city, country_code, exact=True)
             else:
                 cities_found_tmp = SqliteTimezoneCache().get(default_city, exact=True)
             cities_found.extend(cities_found_tmp)
@@ -39,4 +41,4 @@ class TimezoneService(metaclass=Singleton):
         return cities_found
 
     def stop(self):
-        SqliteTimezoneCache().close_db()        
+        SqliteTimezoneCache().close_db()

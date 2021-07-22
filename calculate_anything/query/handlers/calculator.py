@@ -5,14 +5,17 @@ import operator as op
 try:
     from simpleeval import SimpleEval
 except ImportError:  # pragma: no cover
-    from ...utils import StupidEval  # pragma: no cover
+    from calculate_anything.utils import StupidEval  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
-from .base import QueryHandler
-from ... import logging
-from ...calculation import Calculation, BooleanCalculation
-from ...utils import is_types, Singleton
-from ...exceptions import MissingSimpleevalException, ZeroDivisionException, BooleanComparisonException
-from ...constants import (
+from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.logging_wrapper import LoggingWrapper as logging
+from calculate_anything.calculation.calculation import Calculation, BooleanCalculation
+from calculate_anything.utils import is_types, Singleton
+from calculate_anything.exceptions import (
+    MissingSimpleevalException, ZeroDivisionException,
+    BooleanComparisonException
+)
+from calculate_anything.constants import (
     CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
