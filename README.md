@@ -2,7 +2,7 @@
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
-The `calculate_anything` module does not depend on `Ulauncher` or `Albert` so it is extensible for other use cases.
+The `calculate_anything` module does not depend on `Ulauncher` or `Albert` so it is extensible for other use cases (see [demo with prompt_toolkit](#extending-and-more)).
 
 See [Features](#features) for supported features, [Contents](#contents) for installation instructions and more
 
@@ -29,9 +29,9 @@ Calculator for Anything
     - Base 2 (`bin`), Base 8 (`oct`), Base 10 (`dec`)
     - Supports functions: `or`, `xor`, `and`, `mod`, `div`, `+`, `-`, `/`  
 
-**The calculate anything module does not depend on `ulauncher` or `albert`. You can adapt it for other projects. See [docs](docs/API.md) for more. The only python files that use dependencies for these launchers are `main.py`, `__init__.py` in the root of this project.**
+**The only launcher specific files for `ulauncher` and `albert` are `main.py`, `__init__.py` in the root of this project**
 
-Dependencies: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://pypi.org/project/Pint/) [parsedatetime](https://pypi.org/project/parsedatetime/) and [pytz](https://pypi.org/project/pytz/) (for parsedatetime)
+**Dependencies**: [simpleeval](https://github.com/danthedeckie/simpleeval), [pint](https://pypi.org/project/Pint/) [parsedatetime](https://pypi.org/project/parsedatetime/) and [pytz](https://pypi.org/project/pytz/) (for parsedatetime)
 Currency and Unit converter as well as a Calculator for numbers, complex numbers, percentages and time that supports mathematical functions and Complex Numbers.
 
 Optional Dependencies: [babel](https://github.com/python-babel/babel). Installing this will format your results in your language/locale.
@@ -348,6 +348,11 @@ If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it 
 The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert) do. You can extend it for other cases.
 
 See the [documentation](docs/API.md) for API call examples
+
+You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](prompt.py) file.
+
+Here is a demo
+![](images/demo-prompt_toolkit.gif)
 
 ### Adding flags
 

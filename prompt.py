@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')  # noqa: E402
 from prompt_toolkit.styles import Style
@@ -149,9 +151,13 @@ class Program(Validator):
         return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'.format(mode))
 
     def handle_c_a(self, event):
-        " Do something if Control-T has been pressed. "
-        event.current_buffer.reset()
-        self.reset()
+        pos = event.current_buffer.cursor_position
+        while event.current_buffer.cursor_position > 0:
+            event.current_buffer.cursor_left()
+
+        event.current_buffer.start_selection()
+        while event.current_buffer.cursor_position < pos:
+            event.current_buffer.cursor_right()
 
     def bottom_toolbar(self):
         if self._kw not in keywords:
@@ -182,7 +188,7 @@ session = PromptSession(
     validator=program,
     validate_while_typing=True,
     wrap_lines=True,
-    refresh_interval=0.01,
+    # refresh_interval=0.01,
     style=style)
 
 with patch_stdout():
