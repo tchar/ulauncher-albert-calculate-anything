@@ -352,6 +352,7 @@ See the [documentation](docs/API.md) for API call examples
 You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](prompt.py) file.
 
 Here is a demo
+
 ![](images/demo-prompt_toolkit.gif)
 
 ### Adding flags
