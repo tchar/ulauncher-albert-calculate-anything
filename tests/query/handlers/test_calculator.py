@@ -1,16 +1,17 @@
-from calculate_anything.utils.singleton import Singleton
 import pytest
-import calculate_anything.query.handlers.calculator as calculator
 from calculate_anything.lang import LanguageService
+from calculate_anything.utils.singleton import Singleton
+import calculate_anything.query.handlers.calculator as calculator
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.utils.misc import StupidEval
 from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
+from tests.utils import query_test_helper
 
 LanguageService().set('en_US')
 tr_calc = LanguageService().get_translator('calculator')
 tr_err = LanguageService().get_translator('errors')
 
-test_spec = [{
+test_spec_calculator = [{
     # Normal test
     'query': '= 1 + 1 + 1',
     'results': [{
@@ -208,46 +209,21 @@ test_spec = [{
 }]
 
 
-@pytest.mark.parametrize('test_spec', test_spec)
+@pytest.mark.parametrize('test_spec', test_spec_calculator)
 def test_calculator(test_spec):
-    results = CalculatorQueryHandler().handle(test_spec['query'])
-
-    if results is None:
-        assert len(test_spec['results']) == 0
-        return
-
-    assert len(results) == len(test_spec['results'])
-
-    for result, item in zip(results, test_spec['results']):
-        assert result.value == item['result']['value']
-        assert result.query == item['result']['query']
-        assert result.error == item['result']['error']
-        assert result.order == item['result']['order']
-
-        query_result = result.to_query_result()
-        assert query_result.icon == item['query_result']['icon']
-        assert query_result.name == item['query_result']['name']
-        assert query_result.description == item['query_result']['description']
-        assert query_result.clipboard == item['query_result']['clipboard']
-        assert query_result.error == item['query_result']['error']
-        assert query_result.order == item['query_result']['order']
-        assert query_result.value == item['query_result']['value']
-        # Although seems stupid we use this to distinguish between equalities in floats and ints
-        # For example 3.0 is not equal to 3 we want the type to be correct
-        assert isinstance(query_result.value,
-                          item['query_result']['value_type'])
+    query_test_helper(CalculatorQueryHandler, test_spec)
 
 
 def test_simpleeval_missing():
-    # Allow CalculatorQueryHandler to be reinstantiated 
+    # Allow CalculatorQueryHandler to be reinstantiated
     if CalculatorQueryHandler in Singleton._instances:
         del Singleton._instances[CalculatorQueryHandler]
     # Set stupid StupidEval as SimpleEval
     SimpleEval = calculator.SimpleEval
     calculator.SimpleEval = StupidEval
-    
+
     assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
-    
+
     # Test simple calculation that can be handled with StupidEval
     results = CalculatorQueryHandler().handle_raw('1245')
     assert len(results) == 1
@@ -260,7 +236,6 @@ def test_simpleeval_missing():
     assert query_result.order == 0
     assert query_result.value == 1245
     assert isinstance(query_result.value, int)
-
 
     # Test simple calculation that cannot be handled with StupidEval
     results = CalculatorQueryHandler().handle_raw('1 + 1 + 2')
@@ -276,3 +251,6 @@ def test_simpleeval_missing():
 
     # Set back SimpleEval
     calculator.SimpleEval = SimpleEval
+
+    if CalculatorQueryHandler in Singleton._instances:
+        del Singleton._instances[CalculatorQueryHandler]

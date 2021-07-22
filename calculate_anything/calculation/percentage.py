@@ -3,8 +3,8 @@ from ..query.result import QueryResult
 from ..lang import LanguageService
 
 class PercentageCalculation(Calculation):
-    def __init__(self, value=None, amounts=(), error=None, order=0):
-        super().__init__(value, error=error, order=order)
+    def __init__(self, value=None, query='', amounts=(), error=None, order=0):
+        super().__init__(value, query=query, error=error, order=order)
         self.amounts = amounts
 
     def is_error(self, _type=None):
@@ -24,16 +24,16 @@ class PercentageCalculation(Calculation):
         value_type = self.value_type
         extra_descriptions = []
         if value_type == Calculation.VALUE_COMPLEX:
-            extra_descriptions.append(translator('result-complex'))
+            extra_descriptions.append(translator('result-complex').capitalize())
         elif value_type == Calculation.VALUE_IMAGINARY:
-            extra_descriptions.append(translator('result-imaginary'))
+            extra_descriptions.append(translator('result-imaginary').capitalize())
         
         return extra_descriptions
 
     @Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
-        description = '{} + {:}%'.format(self.amounts[0].format(), self.amounts[1].format())
+        description = '({}) + ({:})%'.format(self.amounts[0].format(), self.amounts[1].format())
    
         extra_descriptions = self._get_extra_descriptions()
         if extra_descriptions:
@@ -95,7 +95,7 @@ class InversePercentageCalculation(PercentageCalculation):
         amount1 = self.amounts[0].format()
         amount2 = self.amounts[1].format()
             
-        description = '{} {{}} {}% {{}} {}'.format(amount1, result_formatted, amount2)
+        description = '({}) {{}} {}% {{}} ({})'.format(amount1, result_formatted, amount2)
         description = description.format(translator('is'), translator('of'))
 
         extra_descriptions = self._get_extra_descriptions()

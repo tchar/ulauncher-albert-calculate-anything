@@ -98,6 +98,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         for value in values:
             if is_types(int, float)(value):
                 value = complex(value, 0)
+            # Do this so if it is the case we have something like 1 + 0.00000000001j
+            # We consider it as 1 so it can be comparable with real numbers
             fixed_precision = complex(
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)

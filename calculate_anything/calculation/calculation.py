@@ -12,7 +12,6 @@ class Calculation(_Calculation):
     VALUE_BOOLEAN = 1
     VALUE_INT = 2
     VALUE_FLOAT = 3
-    VALUE_REAL = 4
     VALUE_IMAGINARY = 5
     VALUE_COMPLEX = 6
     VALUE_STRING = 7
@@ -23,6 +22,12 @@ class Calculation(_Calculation):
                 Calculation.fix_number_precision(value.real),
                 Calculation.fix_number_precision(value.imag)
             )
+            if value.imag == 0:
+                value = value.real
+        
+        if isinstance(value, float):
+            value = Calculation.fix_number_precision(value)
+
         super().__init__(value=value, query=query, error=error, order=order)
 
         if value is None: self.value_type = Calculation.VALUE_NONE
@@ -107,14 +112,6 @@ class Calculation(_Calculation):
                 name = '{:g} + {:g}i'.format(real, imag)
         return name
 
-    def get_value(self):
-        value = self.value
-        value_type = self.value_type
-
-        if value_type == Calculation.VALUE_REAL:
-            return Calculation.fix_number_precision(value.real)
-        return value
-            
     @_Calculation.Decorators.handle_error_results
     def to_query_result(self):
         name = self.format()
@@ -128,7 +125,7 @@ class Calculation(_Calculation):
             name=name,
             description=description,
             clipboard=name,
-            value=self.get_value(),
+            value=self.value,
             order=self.order
         )
 
