@@ -151,7 +151,7 @@ class _Calculation:
                 if self.is_error(MissingSimpleevalException):
                     return missing_simpleeval_query_result()
                 if self.is_error(MissingParsedatetimeException):
-                    return missing_simpleeval_query_result()
+                    return missing_parsedatetime_query_result()
                 if self.is_error(MissingRequestsException):
                     return missing_requests_query_result()
                 if self.is_error(DateOverflowException):
