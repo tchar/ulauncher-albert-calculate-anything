@@ -1,5 +1,3 @@
-from calculate_anything.calculation.calculation import BooleanCalculation
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 import re
 import operator
 import ast
@@ -8,20 +6,23 @@ try:
 except ImportError:
     from ...utils import StupidEval
     SimpleEval = StupidEval
-from .interface import QueryHandlerInterface
+from .base import QueryHandler
 from ...calculation import (
-    BaseNCalculation, Base16StringCalculation, Base10Calculation, 
+    BaseNCalculation, Base16StringCalculation, Base10Calculation,
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
+from .calculator import CalculatorQueryHandler
 from ... import logging
+from ...calculation import BooleanCalculation
 from ...utils import multi_re, Singleton, is_integer
 from ...exceptions import BaseFloatingPointException, MissingSimpleevalException, WrongBaseException, ZeroDivisionException
 
 space_in_middle_re = re.compile(r'\S\s+\S')
 
-expression_eq_split = multi_re.compile(['==', '>', '>=', '<', '<='], include=True)
+expression_eq_split = multi_re.compile(
+    ['==', '>', '>=', '<', '<='], include=True)
 
-keyword_set = set(['^', '|', '&', '%', '//' , '+', '-', '*', '/', '(', ')'])
+keyword_set = set(['^', '|', '&', '%', '//', '+', '-', '*', '/', '(', ')'])
 expression_split_re = multi_re.compile(keyword_set, include=True)
 
 digits_base2_re = re.compile(r'^\s*([01]+)\s*$')
@@ -29,8 +30,10 @@ digits_base8_re = re.compile(r'^\s*([0-7]+)\s*$')
 digits_base16_re = re.compile(r'^\s*([A-Fa-f0-9]+)\s*$')
 digits_base10_re = re.compile(r'^\s*([0-9]+)\s*$')
 
-class BaseNQueryHandler(QueryHandlerInterface):
-    def __init__(self, base, digits_re, base_class, convert_classes=[]):
+
+class BaseNQueryHandler(QueryHandler):
+    def __init__(self, keyword, base, digits_re, base_class, convert_classes=[]):
+        super().__init__(keyword)
         self._base = base
         self._digits_re = digits_re
         self._base_class = base_class
@@ -43,7 +46,7 @@ class BaseNQueryHandler(QueryHandlerInterface):
         self._logger = logging.getLogger(__name__)
 
     def parse_expression(self, expression, split_eq=True, sub_kw=True):
-        convert_to_base_n = lambda m: str(int(m.group(0), self._base))
+        def convert_to_base_n(m): return str(int(m.group(0), self._base))
 
         if sub_kw:
             expression = multi_re.sub_dict({
@@ -55,12 +58,13 @@ class BaseNQueryHandler(QueryHandlerInterface):
         if split_eq:
             expression = expression_eq_split.split(expression)
             expression, operators = expression[::2], expression[1::2]
-            
+
             exprs = []
             exprs_parsed = []
 
             for subexp in expression:
-                expr_dec, _, expr_parsed = self.parse_expression(subexp, split_eq=False, sub_kw=False)
+                expr_dec, _, expr_parsed = self.parse_expression(
+                    subexp, split_eq=False, sub_kw=False)
                 exprs.append(expr_dec[0])
                 exprs_parsed.append(expr_parsed[0])
 
@@ -77,18 +81,18 @@ class BaseNQueryHandler(QueryHandlerInterface):
                 expr += c
                 expr_parsed += c
             else:
-                if space_in_middle_re.search(c): raise ValueError
+                if space_in_middle_re.search(c):
+                    raise ValueError
                 c_dec, n = re.subn(self._digits_re, convert_to_base_n, c)
-                if n == 0 and '.' not in c_dec: raise WrongBaseException
-                elif n == 0: raise BaseFloatingPointException
+                if n == 0 and '.' not in c_dec:
+                    raise WrongBaseException
+                elif n == 0:
+                    raise BaseFloatingPointException
                 expr += c_dec
                 expr_parsed += c
         return [expr], [], [expr_parsed]
 
-    def handle(self, query):
-        if query.strip() == '':
-            return None
-        
+    def handle_raw(self, query):
         original_query = query
         query = query.lower()
         results = []
@@ -101,7 +105,8 @@ class BaseNQueryHandler(QueryHandlerInterface):
         except BaseFloatingPointException:
             item = BaseNCalculation(error=BaseFloatingPointException, order=0)
             return [item]
-        except ValueError: pass
+        except ValueError:
+            pass
         except Exception as e:
             self.__logger.error(e)
             return None
@@ -117,46 +122,59 @@ class BaseNQueryHandler(QueryHandlerInterface):
             return [item]
         except Exception:
             return None
-        
+
         if len(results) == 1:
             result = results[0]
             if not is_integer(result):
-                item = BaseNCalculation(error=BaseFloatingPointException, order=0)
+                item = BaseNCalculation(
+                    error=BaseFloatingPointException, order=0)
             else:
                 item = BaseNCalculation(value=results[0], order=0)
         # Boolean result
         elif len(results) > 1:
-            item = CalculatorQueryHandler._calculate_boolean_result(results, operators, expr_parsed)
+            item = CalculatorQueryHandler._calculate_boolean_result(
+                results, operators, expr_parsed)
 
         items = []
-        if item.is_error(): items.append(item)
-        elif isinstance(item, BooleanCalculation): items.append(item)
+        if item.is_error():
+            items.append(item)
+        elif isinstance(item, BooleanCalculation):
+            items.append(item)
         else:
             # Add item to original base if original query is not just a number
             if not self._digits_re.match(original_query):
                 item_base = item.to_base_calculation(self._base_class, order=0)
                 items.append(item_base)
             for convert_class in self._convert_classes:
-                item_base = item.to_base_calculation(convert_class, order=len(items))
+                item_base = item.to_base_calculation(
+                    convert_class, order=len(items))
                 items.append(item_base)
-        
+
         return items
+
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)
+
 
 class Base2QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
-        super().__init__(2, digits_base2_re, Base2Calculation, (Base10Calculation, Base16Calculation, Base8Calculation))
+        super().__init__('bin', 2, digits_base2_re, Base2Calculation,
+                         (Base10Calculation, Base16Calculation, Base8Calculation))
+
 
 class Base8QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
-        super().__init__(8, digits_base8_re, Base8Calculation, (Base10Calculation, Base2Calculation, Base16Calculation))
+        super().__init__('oct', 8, digits_base8_re, Base8Calculation,
+                         (Base10Calculation, Base2Calculation, Base16Calculation))
+
 
 class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
-        super().__init__(16, digits_base16_re, Base16Calculation, (Base10Calculation, Base2Calculation, Base8Calculation))
+        super().__init__('hex', 16, digits_base16_re, Base16Calculation,
+                         (Base10Calculation, Base2Calculation, Base8Calculation))
 
-    def handle(self, query):
-        if query.strip() == '':
-            return None
+    def handle_raw(self, query):
         items = []
 
         color_query = query.strip()
@@ -164,16 +182,24 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
         if is_color:
             color_query = color_query[1:].strip()
             if self._digits_re.match(color_query) and len(color_query) == 6:
-                items.extend(ColorBase16Calculation.get_color_calculations(color_query, order_offset=len(items)))
+                items.extend(ColorBase16Calculation.get_color_calculations(
+                    color_query, order_offset=len(items)))
         else:
-            items_super = super().handle(query)
-            if items_super: items.extend(items_super)
-            
+            items_super = super().handle_raw(query)
+            if items_super:
+                items.extend(items_super)
+
         item = Base16StringCalculation(value=query, order=len(items))
         items.append(item)
 
         return items
 
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)
+
+
 class Base10QueryHandler(BaseNQueryHandler, metaclass=Singleton):
     def __init__(self):
-        super().__init__(10, digits_base10_re, Base10Calculation, (Base16Calculation, Base2Calculation, Base8Calculation))
+        super().__init__('dec', 10, digits_base10_re, Base10Calculation,
+                         (Base16Calculation, Base2Calculation, Base8Calculation))

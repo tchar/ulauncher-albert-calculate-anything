@@ -21,7 +21,7 @@ class UnitsService(metaclass=Singleton):
         self._base_currency = None
         self._enabled = False
         self._running = False
-        self._unit_conversion_mode = UnitsService.MODE_CRAZY
+        self._unit_conversion_mode = UnitsService.MODE_NORMAL
 
     def _update_callback(self, data):
         self._logger.info('Updating currency registry')

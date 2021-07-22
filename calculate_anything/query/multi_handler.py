@@ -6,9 +6,10 @@ from .handlers import (
     Base16QueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
+from .. import logging
 from ..utils  import Singleton
 
-class QueryHandler(metaclass=Singleton):
+class MultiHandler(metaclass=Singleton):
     def __init__(self):
         self._handlers = [
             UnitsQueryHandler(),
@@ -20,6 +21,7 @@ class QueryHandler(metaclass=Singleton):
             Base8QueryHandler(),
             Base2QueryHandler()
         ]
+        self._logger = logging.getLogger(__name__)
 
     def handle(self, query, *handlers, return_raw=False):
         handlers = set(handlers)
@@ -27,7 +29,12 @@ class QueryHandler(metaclass=Singleton):
         for handler in self._handlers:
             if handlers and not handler.__class__ in handlers:
                 continue
-            result = handler.handle(query)
+            try:
+                result = handler.handle(query)
+            except Exception as e:
+                self._logger.exception('Got exception when handling with: {}: {}'.format(handler.__class__.__name__, e))
+                result = None
+
             if not result:
                 continue
             if not return_raw:

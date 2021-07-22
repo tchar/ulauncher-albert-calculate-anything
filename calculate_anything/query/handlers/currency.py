@@ -1,7 +1,7 @@
 # TODO: To be removed. Replaced by UnitsQueryHandler
 
 # from datetime import datetime
-# from .interface import QueryHandlerInterface
+# from .base import QueryHandler
 # from ...currency.service import CurrencyService
 # from ...calculation import CurrencyCalculation
 # from ...lang import LanguageService
@@ -9,7 +9,7 @@
 # from ...exceptions import CurrencyProviderException, MissingRequestsException
 # from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT
 
-# class CurrencyQueryHandler(QueryHandlerInterface, metaclass=Singleton):
+# class CurrencyQueryHandler(QueryHandler, metaclass=Singleton):
 #     def _extract_query(self, query):
 
 #         matches = CURRENCY_QUERY_REGEX.findall(query)

@@ -13,7 +13,7 @@ The following handlers are supported:
 - `Base8QueryHandler`: Handles Octal
 - `Base2QueryHandler`: Handles Binary
 
-There is also a generic handler (`QueryHandler`) which handles a request using all or a subset of handlers.
+There is also a generic handler (`MultiHandler`) which handles a request using all or a subset of handlers.
 
 ## Setup
 
@@ -87,15 +87,15 @@ CurrencyService().run(force=True)
 ```python
 # Import the handlers
 
-from calculate_anything.query import QueryHandler
+from calculate_anything.query import MultiHandler
 
 
 # Create a queries
 queries = [
-    '10 EUR to CAD',
-    '10 + sqrt(2) + 5i',
+    '= 10 EUR to CAD',
+    '= 10 + sqrt(2) + 5i',
     'time at Vancouver Canada',
-    '10 meters to inches',
+    '= 10 meters to inches',
     'bin 1011011 mod 1010 and 10',
     'hex #ff12dd',
     #....
@@ -103,7 +103,7 @@ queries = [
 
 # Get the results
 for query in queries:
-    result = QueryHandler().handle(query)
+    result = MultiHandler().handle(query)
     # Result is of QueryResult type with following attributes
     result.icon # relative path of icon
     result.name # result text (formatted)
@@ -129,13 +129,13 @@ from calculate_anything.query.handlers import (
 handlers = [CurrencyQueryHandler, TimeQueryHandler]
 
 for query in queries:
-    result = QueryHandler().handle(query, *handlers)
+    result = MultiHandler().handle(query, *handlers)
     # Do something with the result
 ```
 
 ## QueryResult
 
-The `QueryResult` object is returned when using the `QueryHandler` class
+The `QueryResult` object is returned when using the `MultiHandler` class
 In the case you want access to the underlying `Calculation` that produced the `QueryResult` you can pass a query directly to one of the handlers
 
 ```python
@@ -150,8 +150,8 @@ for calculation in calculations:
     calculation.format()
     calculation.to_query_result() # Returns the relevant QueryResult
 
-# You can also get the Calculations by using the QueryHandler like this
-calculations = QueryHandler().handle(query, return_raw=True)
+# You can also get the Calculations by using the MultiHandler like this
+calculations = MultiHandler().handle(query, return_raw=True)
 ```
 
 **Some subclasses of the Calculation object can have more properties.**

@@ -37,6 +37,8 @@ setup() {
         albert show
         launcher_class="albert"
         pad_y=70
+    elif [ "$launcher_name" == "prompt_toolkit" ]; then
+        use_peek="nopeek"
     else
         echo "No launcher provided"
         exit

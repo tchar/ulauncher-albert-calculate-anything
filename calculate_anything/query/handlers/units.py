@@ -4,7 +4,7 @@ try:
     import pint
 except ImportError:
     pint = None
-from .interface import QueryHandlerInterface
+from .base import QueryHandler
 from ...units import UnitsService
 from ...currency import CurrencyService
 from ...calculation import UnitsCalculation, CurrencyUnitsCalculation, TemperatureUnitsCalculation
@@ -14,8 +14,9 @@ from ...utils import is_types, Singleton
 from ...constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from ...exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
 
-class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
+class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
+        super().__init__('=')
         self._logger = logging.getLogger(__name__)
 
     def _items_for_currency_errors(self, unit_dimensionalities):
@@ -160,12 +161,12 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         except Exception as e:
             self._logger.error(e)
     
-    def handle(self, query):
+    def handle_raw(self, query):
         if not UnitsService().running:
             return None
-        elif '%' in query or query.strip() == '':
+        elif '%' in query:
             return None
-
+        
         if pint is None:
             item = UnitsCalculation(error=MissingPintException, order=-1)
             return [item]
@@ -173,7 +174,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         query = UnitsQueryHandler._extract_query(query)
         if not query:
             return None
-
+            
         ureg = UnitsService().unit_registry
         base_currency = UnitsService().base_currency
         unit_from, units_to = query
@@ -270,3 +271,7 @@ class UnitsQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 )
             )
         return items
+
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)

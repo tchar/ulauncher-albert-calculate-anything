@@ -7,7 +7,7 @@ try:
 except ImportError:
     from ...utils import StupidEval
     SimpleEval = StupidEval
-from .interface import QueryHandlerInterface
+from .base import QueryHandler
 from ... import logging
 from ...calculation import Calculation, BooleanCalculation
 from ...utils import is_types, Singleton
@@ -18,12 +18,13 @@ from ...constants import (
 )
 
 
-class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
+class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     """Class that handles Calculation expressions for numbers, complex numbers,
     equalities and inequalities.
     """
 
     def __init__(self):
+        super().__init__('=')
         # Cmath to set for simpleeval
         functions = {
             name: getattr(cmath, name)
@@ -128,7 +129,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
 
         return BooleanCalculation(value=result, query=query, order=0)
 
-    def handle(self, query: str) -> Union[List[Calculation], None]:
+    def handle_raw(self, query: str) -> Union[List[Calculation], None]:
         """Handles a calculation query
 
         Parameters
@@ -184,3 +185,7 @@ class CalculatorQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             result = Calculation(value=results[0], query=subqueries[0])
 
         return [result]
+
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)

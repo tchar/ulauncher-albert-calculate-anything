@@ -111,7 +111,6 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             if result is not None:
                 providers_currencies.update(result)
 
-        self._logger.error(self._api_providers)
         self._had_error = (
             all(map(lambda provider: provider.had_error, self._free_providers.values())) and
             all(map(lambda provider: provider.had_error, self._api_providers.values()))

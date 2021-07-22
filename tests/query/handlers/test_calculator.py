@@ -116,7 +116,7 @@ tests = [{
 
 @pytest.mark.parametrize('test', tests)
 def test_calculator(test):
-    results = CalculatorQueryHandler().handle(test['query'])
+    results = CalculatorQueryHandler().handle_raw(test['query'])
 
     assert len(results) == len(test['results'])
 

@@ -1,4 +1,3 @@
-from .interface import QueryHandlerInterface
 from .calculator import CalculatorQueryHandler
 from .units import UnitsQueryHandler
 from .percentages import PercentagesQueryHandler

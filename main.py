@@ -1,5 +1,5 @@
-import locale
-locale.setlocale(locale.LC_ALL, '')
+import locale  # noqa: E402
+locale.setlocale(locale.LC_ALL, '')  # noqa: E402
 from calculate_anything import init
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default, safe_operation
@@ -9,7 +9,7 @@ from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.time import TimeQueryHandler
 from calculate_anything.currency.service import CurrencyService
-from calculate_anything.query import QueryHandler
+from calculate_anything.query import MultiHandler
 from calculate_anything.query.handlers.base_n import (
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
@@ -47,28 +47,33 @@ class KeywordQueryEventListener(EventListener):
         query = event.get_argument() or ''
         mode = 'calculator'
         if event.get_keyword() == extension.preferences['time_kw']:
-            query = 'now ' + query
+            query = TimeQueryHandler().keyword + ' ' + query
             handlers = [TimeQueryHandler]
             mode = 'time'
         elif event.get_keyword() == extension.preferences['dec_kw']:
+            query = Base10QueryHandler().keyword + ' ' + query
             handlers = [Base10QueryHandler]
             mode = 'dec'
         elif event.get_keyword() == extension.preferences['hex_kw']:
+            query = Base16QueryHandler().keyword + ' ' + query
             handlers = [Base16QueryHandler]
             mode = 'hex'
         elif event.get_keyword() == extension.preferences['oct_kw']:
+            query = Base8QueryHandler().keyword + ' ' + query
             handlers = [Base8QueryHandler]
             mode = 'oct'
         elif event.get_keyword() == extension.preferences['bin_kw']:
+            query = Base2QueryHandler().keyword + ' ' + query
             handlers = [Base2QueryHandler]
             mode = 'bin'
         else:
+            query = CalculatorQueryHandler().keyword + ' ' + query
             handlers = [
                 CalculatorQueryHandler,
                 PercentagesQueryHandler,
                 UnitsQueryHandler,
             ]
-        results = QueryHandler().handle(query, *handlers)
+        results = MultiHandler().handle(query, *handlers)
         for result in results:
             error_num += result.error is not None
             highlightable = result.error is not None
@@ -95,7 +100,8 @@ class KeywordQueryEventListener(EventListener):
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
                 name=LanguageService().translate('no-result', 'misc'),
-                description=LanguageService().translate('no-result-{}-description'.format(mode), 'misc'),
+                description=LanguageService().translate(
+                    'no-result-{}-description'.format(mode), 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
             ))

@@ -31,6 +31,7 @@ __version__ = '0.0.1'
 __authors__ = 'Tilemachos Charalampous'
 __py_deps__ = ['requests', 'requests', 'pint' ,'simpleeval', 'parsedatetime']
 
+
 class AlbertLogger:
     def __init__(self, name):
         self._name = name
@@ -56,39 +57,40 @@ class AlbertLogger:
 
     def exception(self, message, *args):
         self._log(critical, message, *args)
+
     
 class AlbertLogging:
     def getLogger(name=''):
         return AlbertLogger(name)
 
-import locale
 
+import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')
-import os
-import sys
+import os  # noqa: E402
+import sys  # noqa: E402
 try:
-    from calculate_anything.constants import MAIN_DIR
+    from calculate_anything.constants import MAIN_DIR  # noqa: E402
 except ImportError as e:
     MAIN_DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(MAIN_DIR)
 
-from calculate_anything import logging
-logging.set_logging(AlbertLogging)
-from calculate_anything import init
-from calculate_anything.lang import LanguageService
-from calculate_anything.currency.service import CurrencyService
-from calculate_anything.currency.providers import CurrencyProviderFactory
-from calculate_anything.units.service import UnitsService
-from calculate_anything.time.service import TimezoneService
-from calculate_anything.query.handlers import (
+from calculate_anything import logging  # noqa: E402
+logging.set_logging(AlbertLogging)  # noqa: E402
+from calculate_anything import init  # noqa: E402
+from calculate_anything.lang import LanguageService  # noqa: E402
+from calculate_anything.currency.service import CurrencyService  # noqa: E402
+from calculate_anything.currency.providers import CurrencyProviderFactory  # noqa: E402
+from calculate_anything.units.service import UnitsService  # noqa: E402
+from calculate_anything.time.service import TimezoneService  # noqa: E402
+from calculate_anything.query.handlers import (  # noqa: E402
     UnitsQueryHandler, CalculatorQueryHandler,
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from calculate_anything.query import QueryHandler
-from calculate_anything.lang import LanguageService
-from calculate_anything.utils import get_or_default, safe_operation
-from albert import ClipAction, Item, critical, debug, info, warning, critical
+from calculate_anything.query import MultiHandler  # noqa: E402
+from calculate_anything.lang import LanguageService  # noqa: E402
+from calculate_anything.utils import get_or_default, safe_operation  # noqa: E402
+from albert import ClipAction, Item, critical, debug, info, warning, critical  # noqa: E402
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
 CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'internal', CurrencyProviderFactory.get_available_providers())
@@ -178,28 +180,34 @@ def handleQuery(query):
     if not TRIGGERS:
         handlers = []
     elif is_time_trigger(query):
-        query_str = 'time ' + query_str
+        query_str = TimeQueryHandler().keyword + ' ' + query_str
         handlers = [TimeQueryHandler]
         mode = 'time'
     elif is_dec_trigger(query):
+        query_str = Base10QueryHandler().keyword + ' ' + query_str
         handlers = [Base10QueryHandler]
         mode = 'dec'
     elif is_hex_trigger(query):
+        query_str = Base16QueryHandler().keyword + ' ' + query_str
         handlers = [Base16QueryHandler]
         mode = 'hex'
     elif is_oct_trigger(query):
+        query_str = Base8QueryHandler().keyword + ' ' + query_str
         handlers = [Base8QueryHandler]
         mode = 'oct'
     elif is_bin_trigger(query):
+        query_str = Base2QueryHandler().keyword + ' ' + query_str
         handlers = [Base2QueryHandler]
         mode = 'bin'
     else:
+        query_str = CalculatorQueryHandler().keyword + ' ' + query_str
         handlers = [
             CalculatorQueryHandler,
             PercentagesQueryHandler,
             UnitsQueryHandler
         ]
-    results = QueryHandler().handle(query_str, *handlers)
+
+    results = MultiHandler().handle(query_str, *handlers)
     for result in results:
 
         errors_num += result.error is not None

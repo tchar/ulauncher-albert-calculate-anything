@@ -55,9 +55,8 @@ PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(
     r'^\s*(.*)\s*(?:as|is what|in)\s*(?: a)?\s*(?:%|percent(?:age)?)\s(?:of )?(.*)\s*$', flags=re.IGNORECASE)
 PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
 
-TIME_QUERY_REGEX = re.compile(r'\s*(now|time)', flags=re.IGNORECASE)
 TIME_QUERY_REGEX_SPLIT = re.compile(
-    r'\s(in?|at?|(?:un)?till?)(?:\s|$)', flags=re.IGNORECASE)
+    r'(?:^|\s+)(in?|at?|(?:un)?till?)(?:\s+|$)', flags=re.IGNORECASE)
 TIME_SUBQUERY_REGEX = re.compile(
     r'.*[^\W_0-9].*', flags=re.IGNORECASE | re.UNICODE)
 TIME_SUBQUERY_DIGITS = re.compile(r'\d+\.?\d*')

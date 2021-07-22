@@ -1,7 +1,7 @@
 from calculate_anything.calculation.calculation import Calculation
 import re
 from .calculator import CalculatorQueryHandler
-from .interface import QueryHandlerInterface
+from .base import QueryHandler
 from ...calculation import InversePercentageCalculation, NormalPercentageCalculation, PercentageCalculation
 from ...exceptions import BooleanPercetageException, ZeroDivisionException
 from ...utils import Singleton
@@ -10,10 +10,12 @@ from ...constants import (
     PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINS_REGEX,
 )
 
-class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
+class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
+    def __init__(self):
+        super().__init__('=')
 
     def _use_calculator(self, query):
-        results = CalculatorQueryHandler().handle(query)
+        results = CalculatorQueryHandler().handle_raw(query)
         if not results:
             return None
         
@@ -132,8 +134,9 @@ class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 error=ZeroDivisionException,
             )
 
-    def handle(self, query):
-        if '%' not in query: return
+    def handle_raw(self, query):
+        if '%' not in query:
+            return None
 
         calculation = self._calculate_convert_normal(query)
 
@@ -147,3 +150,7 @@ class PercentagesQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             return
 
         return [calculation]
+        
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)

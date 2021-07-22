@@ -15,8 +15,8 @@ class TimezoneService(metaclass=Singleton):
     def set_default_cities(self, default_cities):
         self._default_cities = default_cities
 
-    @staticmethod
-    def parse_default_cities(default_cities_str):
+    @classmethod
+    def parse_default_cities(cls, default_cities_str):
         regex = re.compile(r'^(.*)\s+([a-z]{2})$', flags=re.IGNORECASE)
 
         default_cities = default_cities_str.strip().split(',')

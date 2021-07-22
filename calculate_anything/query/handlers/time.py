@@ -5,21 +5,22 @@ try:
     import parsedatetime
 except ImportError:
     parsedatetime = None
-from .interface import QueryHandlerInterface
+from .base import QueryHandler
 from ...calculation import LocationTimeCalculation, TimeCalculation, TimedeltaCalculation
 from ...time.service import TimezoneService
 from ...exceptions import DateAddDateException, MissingParsedatetimeException, DateOverflowException, MisparsedTimeException
 from ...utils import Singleton, partition, flatten, deduplicate
 from ... import logging 
 from ...constants import (
-    TIME_QUERY_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
+    TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
 
-class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
+class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     def __init__(self):
+        super().__init__('time')
         self._logger = logging.getLogger(__name__)
         self._date_reference = datetime(year=2000, month=1, day=1)
 
@@ -177,8 +178,8 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
                 if prev not in signs:
                     if not try_again:
                         return []
-                    new_query = 'now at ' + ' '.join(query).replace('now', '')
-                    return self.handle(new_query, try_again=False)
+                    new_query = self.keyword + ' at ' + ' '.join(query).replace('now', '')
+                    return self.handle_raw(new_query, try_again=False)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return []
@@ -259,19 +260,15 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
         items.append(item)
         return items
 
-    def handle(self, query, try_again=True):
+    def handle_raw(self, query, try_again=True):
         if parsedatetime is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
                 order=-1
             )
             return [result]
-            
         query = query.lower()
         query = PLUS_MINS_REGEX.sub_dict(query)
-
-        if not TIME_QUERY_REGEX.match(query):
-            return
 
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:
@@ -281,10 +278,13 @@ class TimeQueryHandler(QueryHandlerInterface, metaclass=Singleton):
             keyword = ''
             suffix = ''
 
-        query = TIME_QUERY_REGEX.sub('', query)
         if 'til' in keyword and query.strip() == '':
             items = self._get_until(suffix)
         else:
             items = self._calculate(query, suffix, try_again)
         
         return items
+    
+    @QueryHandler.Decorators.can_handle
+    def handle(self, query):
+        return self.handle_raw(query)

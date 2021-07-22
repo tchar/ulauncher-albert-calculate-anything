@@ -47,13 +47,16 @@ class CurrencyService(metaclass=Singleton):
 
     @lock
     def _update_thread(self, thread_id, force=False):
-        if not self._is_running:
-            self._logger.info('Stopping thread (id={}). Service stopped')
-        if thread_id != self._thread_id:
+        if force:
+            pass
+        elif not self._is_running:
+            self._logger.info('Stopping thread (id={}). Service stopped'.format(thread_id))
+            return
+        elif thread_id != self._thread_id:
             self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(
                 thread_id, self._thread_id))
             return
-        if not self._cache.enabled:
+        elif not self._cache.enabled:
             self._logger.info(
                 'Stopping thread (id={}). Cache not enabled'.format(thread_id))
             self._is_running = False
@@ -68,6 +71,12 @@ class CurrencyService(metaclass=Singleton):
         except MissingRequestsException as e:
             self._logger.error(e)
             self._missing_requests = True
+            return
+        
+        if force and not self._cache.enabled:
+            self._logger.info(
+                'Stopping thread (id={}). Cache not enabled'.format(thread_id))
+            self._is_running = False
             return
 
         next_update_seconds = 60
