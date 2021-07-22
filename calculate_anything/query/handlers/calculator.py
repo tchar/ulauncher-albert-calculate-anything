@@ -4,9 +4,9 @@ import cmath
 import operator as op
 try:
     from simpleeval import SimpleEval
-except ImportError:
-    from ...utils import StupidEval
-    SimpleEval = StupidEval
+except ImportError:  # pragma: no cover
+    from ...utils import StupidEval  # pragma: no cover
+    SimpleEval = StupidEval  # pragma: no cover
 from .base import QueryHandler
 from ... import logging
 from ...calculation import Calculation, BooleanCalculation
@@ -71,11 +71,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev in ['', '(', '+', '-', '*', '/']:
                     expr += '1j'
                 else:
-                    expr += 'j'
+                    return None, False
             elif c[0] == 'i':
                 if not c[1:].isnumeric():
                     return None, True
-                c = c[1:] + c[0]
+                c = c[1:] + 'j'
                 expr += c
                 has_imaginary = True
             else:
@@ -114,18 +114,22 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             '<=': op.le
         }
         inequalities = set(['>', '<', '>=', '<='])
+        inequality_error = False
         query = ''
         result = True
         for i, [value1, value2, operator] in enumerate(zip(values, values[1:], operators)):
             # If it is an inequality and either of the results have imaginary part
-            # Then add a BooleanComparisonException
+            # Then mark it as error, let query be constructed and return a BooleanComparisonException
             if operator in inequalities:
                 if value1.imag != 0 or value2.imag != 0:
-                    return BooleanCalculation(value=None, error=BooleanComparisonException, order=0)
+                    inequality_error = True
             result = result and op_dict[operator](value1.real, value2.real)
             if i == 0:
                 query += subqueries[i].strip()
             query += ' ' + operator + ' ' + subqueries[i + 1].strip()
+
+        if inequality_error:
+            return BooleanCalculation(value=None, query=query, error=BooleanComparisonException, order=0)
 
         return BooleanCalculation(value=result, query=query, order=0)
 
@@ -168,15 +172,15 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         except ZeroDivisionError:
             item = Calculation(query=query, error=ZeroDivisionException)
             return [item]
-        except SyntaxError:
-            return []
-        except Exception as e:
-            self._logger.error(
+        except SyntaxError:  # pragma: no cover (error handling just in case)
+            return None  # pragma: no cover
+        except Exception as e:  # pragma: no cover
+            self._logger.error(  # pragma: no cover
                 'Got exception when trying to calculate {}: {}'.format(query, e))
-            return None
+            return None  # pragma: no cover
 
         if not any(map(is_types(int, float, complex), results)):
-            return None
+            return None  # pragma: no cover (result must be one of int float complex, just in case)
 
         if len(results) != 1:
             result = CalculatorQueryHandler._calculate_boolean_result(

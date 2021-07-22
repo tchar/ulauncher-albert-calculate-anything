@@ -41,7 +41,8 @@ EMPTY_AMOUNT = re.compile(r'^\s*$')
 
 CALCULATOR_ERROR = 1e-10
 CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/|==|[^A-Za-z]is[^A-Za-z]).*')
-CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
+# TODO: Delete
+# CALCULATOR_IMAG_REPLACE = re.compile(r'([^a-zA-Z]\s*|\s+|^)i([^a-zA-Z0-9]|$)')
 CALCULATOR_QUERY_REGEX_REPLACE = multi_re.compile({
     'mod ': '%', 'div ': '//', '^': '**',
     '>=': '>=', '<=': '<=', '=': '=='
