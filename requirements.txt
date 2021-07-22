@@ -1,0 +1,4 @@
+requests==2.22.0
+Pint==0.17
+simpleeval==0.9.10
+parsedatetime==2.6
