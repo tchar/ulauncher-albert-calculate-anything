@@ -21,7 +21,7 @@ TIMEZONES_SQL_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
 TIMEZONES_JSON_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json')
 
 # Replace plus with + and minus with -
-PLUS_MINS_REGEX = multi_re.compile(
+PLUS_MINUS_REGEX = multi_re.compile(
     {'plus': '+', 'minus': '-'}, flags=re.IGNORECASE)
 
 # Unit conversion regex match
@@ -60,13 +60,14 @@ TIME_QUERY_REGEX_SPLIT = re.compile(
     r'(?:^|\s+)(in?|at?|(?:un)?till?)(?:\s+|$)', flags=re.IGNORECASE)
 TIME_SUBQUERY_REGEX = re.compile(
     r'.*[^\W_0-9].*', flags=re.IGNORECASE | re.UNICODE)
-TIME_SUBQUERY_DIGITS = re.compile(r'\d+\.?\d*')
 TIME_SPLIT_REGEX = re.compile(r'(\+|-)')
+# TODO: To be removed
+# TIME_SUBQUERY_DIGITS = re.compile(r'\d+\.?\d*')
 # TIME_PROHIBITTED_CALC = re.compile(
 # r'(next|last|previous|following|yesterday|tomorrow)[^\+\-\s]+[a-z]', flags=re.IGNORECASE)
 TIME_LOCATION_REPLACE_REGEX = re.compile(
     r'[\W_]+', flags=re.IGNORECASE | re.UNICODE)
-TIME_DATETIME_FORMAT = '%A %-d %B %Y %H:%M:%S'
-TIME_DATETIME_FORMAT_NUMBERS = '%Y-%m-%-d %H:%M'
-TIME_DATE_FORMAT = '%A %-d %B %Y'
+TIME_DATETIME_FORMAT = '%A %B %d %Y %H:%M:%S'
+TIME_DATETIME_FORMAT_NUMBERS = '%Y-%m-%d %H:%M'
+TIME_DATE_FORMAT = '%A %B %d %Y'
 TIME_TIME_FORMAT = '%H:%M:%S'

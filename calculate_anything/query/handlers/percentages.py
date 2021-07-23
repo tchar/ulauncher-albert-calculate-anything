@@ -7,7 +7,7 @@ from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisio
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.constants import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
-    PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINS_REGEX,
+    PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REGEX,
 )
 
 
@@ -110,7 +110,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _calculate_calc(self, query):
         query = query.lower()
-        query = PLUS_MINS_REGEX.sub_dict(query)
+        query = PLUS_MINUS_REGEX.sub_dict(query)
 
         matches = PERCENTAGES_REGEX_CALC_MATCH.findall(query)
         if not matches:

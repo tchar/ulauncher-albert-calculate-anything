@@ -20,7 +20,7 @@ from calculate_anything.utils.iter import partition, flatten, deduplicate
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 from calculate_anything.constants import (
     TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
-    TIME_SUBQUERY_DIGITS, TIME_SPLIT_REGEX, PLUS_MINS_REGEX,
+    TIME_SPLIT_REGEX, PLUS_MINUS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
 
@@ -30,21 +30,42 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__('time')
         self._logger = logging.getLogger(__name__)
-        self._date_reference = datetime(year=2000, month=1, day=1)
+        if parsedatetime is not None:
+            self._cal = parsedatetime.Calendar(
+                version=parsedatetime.VERSION_CONTEXT_STYLE)
+        else:
+            self._cal = None
 
-    @staticmethod
-    def _timedelta_overflows(query, td):
-        is_zero = TIME_SUBQUERY_DIGITS.findall(query)
-        is_zero = map(float, is_zero)
-        is_zero = map(lambda x: x == 0, is_zero)
-        is_zero = all(is_zero)
-        return not is_zero and td == timedelta()
+    # TODO: To be removed
+    # @staticmethod
+    # def _timedelta_overflows(query, td):
+    #     is_zero = TIME_SUBQUERY_DIGITS.findall(query)
+    #     is_zero = map(float, is_zero)
+    #     is_zero = map(lambda x: x == 0, is_zero)
+    #     is_zero = all(is_zero)
+    #     return not is_zero and td == timedelta()
+
+    def _parse_dt(self, query, reference_datetime):
+        try:
+            date = self._cal.nlp(query, sourceTime=reference_datetime)
+        except Exception as e:
+            self._logger.exception(
+                'Got unexpected exception when parsing datetime: '
+                '{} with reference time {}: {}'
+                .format(query, reference_datetime, e))
+            return None, None, None, None, False
+
+        if date is None:
+            return None, None, None, None, False
+
+        date, flags, _, _, parsed_query = date[0]
+        regex_match = re.match(r'^\s*\d+\s*$', parsed_query) is None
+        overflow = flags == parsedatetime.pdtContext(0)
+        td = date - reference_datetime
+        return date, td, parsed_query, regex_match, overflow
 
     def _get_location_search_combinations(location):
         location = location.strip()
-        if not location:
-            return []
-
         locations_tmp = TIME_LOCATION_REPLACE_REGEX.sub(' ', location)
         locations_tmp = locations_tmp.split(' ')
         locations_tmp = map(str.strip, locations_tmp)
@@ -84,10 +105,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         for location in locations:
             try:
                 tz = pytz.timezone(location['timezone'])
-            except pytz.UnknownTimeZoneError as e:
-                self._logger.error(
-                    'Could not find time zone: {}'.format(location))
-                continue
+            except pytz.UnknownTimeZoneError as e:  # pragma: no cover (just in case)
+                self._logger.error(  # pragma: no cover
+                    'Could not find time zone: {}: {}'.format(location, e))
+                continue  # pragma: no cover
 
             location_datetime = date.astimezone(tz)
             item = LocationTimeCalculation(
@@ -101,37 +122,25 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _get_until(self, query):
         now = datetime.now()
-        cal = parsedatetime.Calendar()
-        try:
-            date = cal.nlp(query, sourceTime=now)
-            if date is None:
-                return [TimeCalculation(
-                    value=now,
-                    reference_date=now,
-                    order=0
-                )]
+        date, _, parsed_query, match, overflow = self._parse_dt(query, now)
 
-            date, flags, _, _, parsed_query = date[0]
-            if re.match(r'^\s*\d+\s*$', parsed_query):
-                return []
-
-            if flags == 0:
-                raise OverflowError
-
-            diff = date - now
-            # Adjust midnights because they refer to same day whereas it should be "tomorrow"
-            is_currently_midnight = now.hour | now.minute | now.second | now.microsecond == 0
-            if not is_currently_midnight and 'midnight' in parsed_query:
-                date += timedelta(days=1)
-            overflows = False
-            if TimeQueryHandler._timedelta_overflows(query, diff):
-                overflows = True
-        except OverflowError as e:
-            overflows = True
-
-        if overflows:
+        if not any([date, parsed_query, match, overflow]):
+            item = TimeCalculation(
+                value=now,
+                reference_date=now,
+                order=0
+            )
+            return [item]
+        elif not match:
+            return []
+        elif overflow:
             item = TimedeltaCalculation(error=DateOverflowException)
             return [item]
+
+        # Adjust midnights because they refer to same day whereas it should be "tomorrow"
+        is_currently_midnight = now.hour | now.minute | now.second | now.microsecond == 0
+        if not is_currently_midnight and 'midnight' in parsed_query:
+            date += timedelta(days=1)
 
         items = []
         if parsed_query != query:
@@ -168,14 +177,14 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         query = list(query)
 
         signs = set(['+', '-'])
-        cal = parsedatetime.Calendar()
         date_td = timedelta()
         prev = None
 
         misparsed = False
         parsed_subqueries = query.copy()
-        date_overflows_error = False
+        date_overflows = False
         date_add_date_error = False
+        reference_dt = datetime.now()
 
         for i, subquery in enumerate(query):
             if subquery == '+':
@@ -185,39 +194,30 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev in signs:
                     return []
             else:
-                if prev not in signs:
-                    if not try_again:
-                        return []
-                    new_query = self.keyword + ' at ' + \
-                        ' '.join(query).replace('now', '')
-                    return self.handle_raw(new_query, try_again=False)
+                # TODO: To be removed
+                # if prev not in signs:
+                #     if not try_again:
+                #         return []
+                #     new_query = self.keyword + ' at ' + ' '.join(query)
+                #     return self.handle_raw(new_query, try_again=False)
 
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return []
 
-                try:
-                    diff = cal.nlp(subquery, sourceTime=self._date_reference)
-                except (ValueError, OverflowError):
-                    date_add_date_error = True
-                    break
-                if diff is None:
-                    return []
-
-                diff, _, _, _, parsed_query = diff[0]
+                date, td, parsed_query, match, overflow = self._parse_dt(
+                    subquery, reference_dt)
+                if not any([date, parsed_query, match, overflow]):
+                    return None
                 if parsed_query != subquery:
                     parsed_subqueries[i] = parsed_query
                     misparsed = True
-
-                diff = diff - self._date_reference
-
-                if TimeQueryHandler._timedelta_overflows(subquery, diff):
-                    date_overflows_error = True
+                if overflow:
+                    date_overflows = True
                     break
-
                 if prev == '+':
-                    date_td += diff
+                    date_td += td
                 else:
-                    date_td -= diff
+                    date_td -= td
             prev = subquery
 
         items = []
@@ -245,9 +245,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         try:
             date = now + date_td
         except OverflowError:
-            date_overflows_error
+            date_overflows = True
 
-        if date_overflows_error:
+        if date_overflows:
             item = TimeCalculation(
                 error=DateOverflowException, order=len(items))
             items.append(item)
@@ -276,14 +276,14 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         return items
 
     def handle_raw(self, query, try_again=True):
-        if parsedatetime is None:
+        if self._cal is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
                 order=-1
             )
             return [result]
         query = query.lower()
-        query = PLUS_MINS_REGEX.sub_dict(query)
+        query = PLUS_MINUS_REGEX.sub_dict(query)
 
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:

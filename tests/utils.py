@@ -1,12 +1,15 @@
+from datetime import timedelta
+from types import LambdaType
 
 
-def query_test_helper(cls, test_spec):
-    results = cls().handle(test_spec['query'])
-
+def _query_test_helper(results, test_spec):
     if results is None:
         assert len(test_spec['results']) == 0
         return
 
+    assert len(results) == len(test_spec['results'])
+
+    results = sorted(results, key=lambda result: result.order)
     assert len(results) == len(test_spec['results'])
 
     for result, item in zip(results, test_spec['results']):
@@ -27,3 +30,68 @@ def query_test_helper(cls, test_spec):
         # For example 3.0 is not equal to 3 we want the type to be correct
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])
+
+
+def query_test_helper(cls, test_spec):
+    results = cls().handle(test_spec['query'])
+    return _query_test_helper(results, test_spec)
+
+
+def query_test_helper_lazy(cls, test_spec):
+    """Transforms test_spec values from lazy to actual"""
+    results = cls().handle(test_spec['query'])
+
+    # Copy dict since we change it for reusability
+    test_spec = test_spec.copy()
+    test_spec['results'] = map(lambda result: {
+        k: {
+            k: v() if isinstance(v, LambdaType) else v
+            for k, v in result_d.items()
+        }
+        for k, result_d in result.items()
+    }, test_spec['results'])
+
+    test_spec['results'] = list(test_spec['results'])
+    return _query_test_helper(results, test_spec)
+
+
+class Approx:
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return repr(self.data)
+
+    def __str__(self):
+        return str(self.data)
+
+
+class ApproxDt(Approx):
+    def __init__(self, data, tol):
+        super().__init__(data)
+        self.tol = tol
+
+    def __eq__(self, other):
+        if self.data.tzinfo != other.tzinfo:
+            return False
+        small, big = sorted([self.data, other])
+        return big - small <= self.tol
+
+
+def approxdt(dt, tol=timedelta(seconds=1)):
+    return ApproxDt(dt, tol)
+
+
+class ApproxStr(Approx):
+    def __init__(self, data, chars_to_match):
+        super().__init__(data)
+        self.chars_to_match = chars_to_match
+
+    def __eq__(self, other):
+        small, big = sorted([self.data, other], key=len)
+        small = small[:self.chars_to_match]
+        return big.startswith(small)
+
+
+def approxstr(s, chars_to_match=-2):
+    return ApproxStr(s, chars_to_match)
