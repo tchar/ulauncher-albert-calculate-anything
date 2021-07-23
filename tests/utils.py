@@ -1,8 +1,10 @@
 from types import LambdaType
 from contextlib import contextmanager
 from datetime import datetime, timedelta
+from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
+from calculate_anything.time.service import TimezoneService
 import calculate_anything.query.handlers.calculator as calculator_handler
 import calculate_anything.query.handlers.time as time_handler
 from calculate_anything.utils import Singleton, StupidEval
@@ -25,6 +27,24 @@ def no_parsedatetime():
     time_handler.parsedatetime = None
     yield
     time_handler.parsedatetime = parsedatetime
+
+
+@contextmanager
+def no_default_cities():
+    default_cities = TimezoneService()._default_cities
+    TimezoneService().set_default_cities([])
+    yield
+    TimezoneService().set_default_cities(default_cities)
+
+
+def set_time_reference(datetime):
+    @contextmanager
+    def _set_time_reference():
+        now = time_handler.TimeQueryHandler.now
+        time_handler.TimeQueryHandler.now = lambda: datetime
+        yield
+        time_handler.TimeQueryHandler.now = now
+    return _set_time_reference
 
 
 @contextmanager
@@ -68,21 +88,22 @@ def approxdt(dt, tol=timedelta(seconds=5)):
 
 
 class ApproxStr(Approx):
-    def __init__(self, data, chars_to_match):
+    def __init__(self, data, reject_chars):
         super().__init__(data)
-        self.chars_to_match = chars_to_match
+        self.reject_chars = reject_chars
 
     def __eq__(self, other):
-        small, big = sorted([self.data, other], key=len)
-        small = small[:self.chars_to_match]
-        return big.startswith(small)
+        res = zip_longest(self.data, other, fillvalue=None)
+        res = map(lambda r: r[0] != r[1], res)
+        return sum(res) < self.reject_chars
 
 
-def approxstr(s, chars_to_match=-2):
-    return ApproxStr(s, chars_to_match)
+def approxstr(s, reject_chars=3):
+    return ApproxStr(s, reject_chars)
 
 
-def _query_test_helper(results, test_spec):
+def query_test_helper(cls, test_spec):
+    results = cls().handle(test_spec['query'])
     if results is None:
         assert len(test_spec['results']) == 0
         return
@@ -117,25 +138,3 @@ def _query_test_helper(results, test_spec):
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])
 
-
-def query_test_helper(cls, test_spec):
-    results = cls().handle(test_spec['query'])
-    return _query_test_helper(results, test_spec)
-
-
-def query_test_helper_lazy(cls, test_spec):
-    """Transforms test_spec values from lazy to actual"""
-    results = cls().handle(test_spec['query'])
-
-    # Copy dict since we change it for reusability
-    test_spec = test_spec.copy()
-    test_spec['results'] = map(lambda result: {
-        k: {
-            k: v() if isinstance(v, LambdaType) else v
-            for k, v in result_d.items()
-        }
-        for k, result_d in result.items()
-    }, test_spec['results'])
-
-    test_spec['results'] = list(test_spec['results'])
-    return _query_test_helper(results, test_spec)

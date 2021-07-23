@@ -106,7 +106,8 @@ class LocationTimeCalculation(TimeCalculation):
         if country_code in FLAGS:
             icon = 'images/flags/{}'.format(FLAGS[country_code])
         else:
-            icon = 'images/country.svg'
+            # Can't test this since we possible have all flags, leave it just in case
+            icon = 'images/country.svg' # pragma: no cover
 
         return QueryResult(
             icon=icon,

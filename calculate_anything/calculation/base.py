@@ -56,14 +56,14 @@ def missing_requests_query_result():
     )
 
 
-def date_overflow_error_query_result():
+def date_overflow_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
         name=translator('date-overflow'),
         description=translator('date-overflow-description'),
         clipboard='',
-        order=0
+        order=calculation.order
     )
 
 # TODO: To be removed
@@ -78,19 +78,19 @@ def date_overflow_error_query_result():
 #     )
 
 
-def misparsed_time_exception(exception):
+def misparsed_time_exception(calculation):
     translator = LanguageService().get_translator('errors')
     name = translator('unfully-parsed-date')
-    name = '{}: "{}"'.format(name, exception.extra['parsed_query'])
+    name = '{}: "{}"'.format(name, calculation.error.extra['parsed_query'])
     description = translator('unfully-parsed-date-description')
     description = '{}: "{}"'.format(
-        description, exception.extra['original_query'])
+        description, calculation.error.extra['original_query'])
     return QueryResult(
         icon='images/time.svg',
         name=name,
         description=description,
         clipboard='',
-        order=0
+        order=calculation.order
     )
 
 
@@ -170,12 +170,12 @@ class _Calculation:
                 if self.is_error(MissingRequestsException):
                     return missing_requests_query_result()
                 if self.is_error(DateOverflowException):
-                    return date_overflow_error_query_result()
+                    return date_overflow_error_query_result(self)
                 # TODO: To be removed
                 # if self.is_error(DateAddDateException):
                     # return date_add_date_query_result()
                 if isinstance(self.error, MisparsedTimeException):
-                    return misparsed_time_exception(self.error)
+                    return misparsed_time_exception(self)
                 if self.is_error(CurrencyProviderException):
                     return currency_provider_error_query_result()
                 if self.is_error(BooleanComparisonException):

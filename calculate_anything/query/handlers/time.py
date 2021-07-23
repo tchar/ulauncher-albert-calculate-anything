@@ -17,9 +17,10 @@ from calculate_anything.exceptions import (
 )
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.utils.iter import partition, flatten, deduplicate
+from calculate_anything.utils.datetime import parsedatetime_str
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 from calculate_anything.constants import (
-    TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
+    TIME_AGO_BEFORE_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SPLIT_REGEX, PLUS_MINUS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
@@ -44,6 +45,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     #     is_zero = map(lambda x: x == 0, is_zero)
     #     is_zero = all(is_zero)
     #     return not is_zero and td == timedelta()
+
+    @staticmethod
+    def now():
+        return datetime.now()
 
     def _parse_dt(self, query, reference_datetime):
         try:
@@ -122,7 +127,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         return items
 
     def _get_until(self, keyword, query):
-        now = datetime.now()
+        now = TimeQueryHandler.now().replace(microsecond=0)
         date, _, parsed_query, match, overflow = self._parse_dt(query, now)
 
         if parsed_query:
@@ -144,20 +149,20 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'parsed_query': parsed_query_kw_kw
                     }
                 ),
-                order=0
+                order=-100
             )
             item2 = TimeCalculation(
                 value=now,
                 reference_date=now,
                 query=keyword,
-                order=1
+                order=0
             )
             return [item1, item2]
         elif overflow:
             item = TimedeltaCalculation(
                 query=parsed_query_kw,
                 error=DateOverflowException,
-                order=0
+                order=-10
             )
             return [item]
 
@@ -166,6 +171,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if not is_currently_midnight and 'midnight' in parsed_query:
             date += timedelta(days=1)
 
+        items_pre = []
         items = []
         if parsed_query != query:
             original_query_kw_kw = '{} {} {}'.format(
@@ -181,9 +187,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'parsed_query': parsed_query_kw_kw,
                     }
                 ),
-                order=0
+                order=-100
             )
-            items.append(item)
+            items_pre.append(item)
         items.append(
             TimedeltaCalculation(
                 value=date - now,
@@ -199,7 +205,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             reference_date=now,
             order=len(items)
         ))
-        return items
+        return items_pre + items
 
     def _calculate(self, query, keyword, suffix):
         query = TIME_SPLIT_REGEX.split(query)
@@ -207,25 +213,23 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         query = filter(None, query)
         query = list(query)
 
-        signs = set(['+', '-'])
-        date_td = timedelta()
+        signs_set = set(['+', '-', 'before', 'ago'])
+        dates = []
+        signs = []
         prev = None
 
         misparsed = False
         parsed_subqueries = query.copy()
         date_overflows = False
-        now = datetime.now()
+        now = TimeQueryHandler.now().replace(microsecond=0)
 
         for i, subquery in enumerate(query):
-            if subquery == '+':
-                if prev in signs:
-                    return []
-            elif subquery == '-':
-                if prev in signs:
+            if subquery in signs_set:
+                if prev in signs_set:
                     return []
             else:
                 # TODO: To be removed
-                # if prev not in signs:
+                # if prev not in signs_set:
                 #     if not try_again:
                 #         return []
                 #     new_query = self.keyword + ' at ' + ' '.join(query)
@@ -234,30 +238,37 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if not TIME_SUBQUERY_REGEX.match(subquery):
                     return []
 
-                date, td, parsed_query, match, overflow = self._parse_dt(
-                    subquery, now)
+                sign = prev
+                virtual_subquery, n = TIME_AGO_BEFORE_REGEX.subn(' ', subquery)
+                if n:
+                    sign = '-'
+                virtual_subquery = virtual_subquery.strip()
+
+                date, _, parsed_query, match, overflow = self._parse_dt(
+                    virtual_subquery, now)
                 if not any([date, parsed_query, match, overflow]):
                     return None
-                if parsed_query != subquery:
+                
+                if parsed_query != virtual_subquery.rstrip():
                     parsed_subqueries[i] = parsed_query
                     misparsed = True
                 if overflow:
                     date_overflows = True
                     break
-                if prev == '+':
-                    date_td += td
-                else:
-                    date_td -= td
+                dates.append(date)
+                signs.append(sign)
             prev = subquery
 
         parsed_query_calc = ' '.join(parsed_subqueries)
         parsed_query_locs = parsed_query_calc
         if keyword:
             if parsed_query_locs:
-                parsed_query_locs = '{} {} {}'.format(parsed_query_locs, keyword, suffix)
+                parsed_query_locs = '{} {} {}'.format(
+                    parsed_query_locs, keyword, suffix)
             else:
                 parsed_query_locs = '{} {}'.format(keyword, suffix)
 
+        items_pre = []
         items = []
         if misparsed:
             original_query_kw = '{} {}'.format(self.keyword, ' '.join(query))
@@ -270,20 +281,28 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'original_query': original_query_kw,
                         'parsed_query': parsed_query_kw
                     }
-                )
+                ),
+                order=-100
             )
-            items.append(item)
+            items_pre.append(item)
+
+        try:
+            signs = list(1 if s == '+' else -1 for s in signs)
+            v = parsedatetime_str(now, dates, signs)
+            date = self._cal.parseDT(v, sourceTime=now)
+            if date is None:
+                return items_pre + items
+            date = date[0]
+        except OverflowError:
+            date_overflows = True
 
         if date_overflows:
             item = TimeCalculation(
                 query=parsed_query_calc,
                 error=DateOverflowException,
-                order=len(items
-                          ))
-            items.append(item)
-            return items
-
-        date = now + date_td
+                order=-10)
+            items_pre.append(item)
+            return items_pre + items
 
         locations, added_defaults = self._get_locations(suffix)
         order_offset_locations = len(
@@ -307,7 +326,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             order=order_next
         )
         items.append(item)
-        return items
+        return items_pre + items
 
     def handle_raw(self, query):
         if self._cal is None:

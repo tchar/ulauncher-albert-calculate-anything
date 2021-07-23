@@ -1,14 +1,25 @@
 from functools import lru_cache
 from datetime import datetime, timedelta
+import parsedatetime
 import pytest
 from pytz import timezone
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
-import calculate_anything.query.handlers.time as time_handler
 from calculate_anything.query.handlers import TimeQueryHandler
-from calculate_anything.constants import TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
-from calculate_anything.exceptions import DateOverflowException, MisparsedTimeException, MissingParsedatetimeException
-from tests.utils import no_parsedatetime, reset_instance, approxdt, approxstr, query_test_helper_lazy, query_test_helper, no_parsedatetime
+from calculate_anything.constants import (
+    TIME_DATETIME_FORMAT, TIME_DATE_FORMAT,
+    TIME_TIME_FORMAT
+)
+from calculate_anything.exceptions import (
+    DateOverflowException, MisparsedTimeException,
+    MissingParsedatetimeException
+)
+from tests.utils import (
+    no_default_cities, no_parsedatetime,
+    reset_instance, approxdt, approxstr,
+    query_test_helper, no_parsedatetime,
+    set_time_reference
+)
 
 
 LanguageService().set('en_US')
@@ -17,69 +28,30 @@ tr_err = LanguageService().get_translator('errors')
 default_cities = TimezoneService().parse_default_cities(
     'Athens GR,New York City US')
 TimezoneService().set_default_cities(default_cities)
+cal = parsedatetime.Calendar(version=parsedatetime.VERSION_CONTEXT_STYLE)
+time_reference = datetime(2021, 7, 15, 14, 0, 0)
 
 
-@lru_cache(maxsize=None)
-def get_result(description, query, order, td=timedelta()):
-    return {
-        'result': {
-            # Use lambda for lazy evaluation
-            'value': lambda: approxdt(datetime.now() + td),
-            'query': query,
-            'error': None,
-            'order': order
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': lambda: approxstr((datetime.now() + td).strftime(TIME_DATETIME_FORMAT)),
-            'description': lambda: description,
-            'clipboard': lambda: approxstr((datetime.now() + td).strftime(TIME_DATETIME_FORMAT)),
-            'error': None,
-            'value': lambda: approxdt(datetime.now() + td),
-            'value_type': datetime,
-            'order': order
-        }
-    }
+def now(tz=None):
+    """Set a datetime reference for testing"""
+    if tz:
+        ret = time_reference.astimezone(tz)
+    else:
+        ret = time_reference
+    return ret
 
 
-@lru_cache(maxsize=None)
-def get_resulttz(city_name, country_name, iso2, query, order, tz, td=timedelta()):
-    return {
-        'result': {
-            'value': lambda: approxdt(datetime.now(tz=timezone(tz)) + td),
-            'query': query,
-            'error': None,
-            'order': order
-        },
-        'query_result': {
-            'icon': 'images/flags/{}.svg'.format(iso2.upper()),
-            'name': lambda: approxstr(
-                '{}: {}'.format(
-                    city_name,
-                    (datetime.now(tz=timezone(tz)) + td).strftime(TIME_TIME_FORMAT))
-            ),
-            'description': lambda: approxstr(
-                '{} • {} • {}'.format(
-                    (datetime.now(tz=timezone(tz)) + td).strftime(
-                        TIME_DATE_FORMAT),
-                    country_name,
-                    int((datetime.now(tz=timezone(tz)) +
-                        td).utcoffset().total_seconds() / 60 / 60)
-                )
-            ),
-            'clipboard': lambda: approxstr(
-                '{}: {}'.format(
-                    city_name,
-                    (datetime.now(tz=timezone(tz)) + td).strftime(
-                        TIME_TIME_FORMAT)
-                )
-            ),
-            'error': None,
-            'value': lambda: approxdt(datetime.now(tz=timezone(tz)) + td),
-            'order': order,
-            'value_type': datetime
-        }
-    }
+def td_pdt(year=0, month=0, week=0, day=0, hour=0, minute=0, second=0):
+    vals = [year, month, week, day, hour, minute, second]
+    info = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
+
+    vals = zip(vals, info)
+    vals = filter(lambda v: v[0], vals)
+    vals = map(lambda v: (abs(v[0]), v[1] if v[0]
+               > 0 else v[1] + ' ago'), vals)
+    vals = map(lambda v: '{} {}'.format(v[0], v[1]), vals)
+    _now = now()
+    return cal.parseDT(', '.join(vals), sourceTime=_now)[0] - _now
 
 
 def timedelta_to_ydhms(dt: datetime, ref: datetime):
@@ -89,8 +61,11 @@ def timedelta_to_ydhms(dt: datetime, ref: datetime):
     else:
         sg = ''
 
-    print('dt', dt, 'ref', ref)
     y = dt.year - ref.year
+    dt = dt.replace(year=ref.year)
+    if dt < ref:
+        dt = dt.replace(year=ref.year + y)
+        y = 0
     td = dt - ref
     d = td.days
     h, remainder = divmod(td.seconds, 3600)
@@ -108,22 +83,90 @@ def timedelta_to_ydhms(dt: datetime, ref: datetime):
     return sg + ', '.join(ydhms)
 
 
-def get_resulttd(target: datetime, query: str, order: int):
+@lru_cache
+def get_result(description, query, order, td=timedelta()):
     return {
         'result': {
-            # Use lambda for lazy evaluation
-            'value': lambda: approxdt(target - datetime.now()),
+            'value': approxdt(now() + td),
             'query': query,
             'error': None,
             'order': order
         },
         'query_result': {
             'icon': 'images/time.svg',
-            'name': lambda: timedelta_to_ydhms(target, datetime.now()),
-            'description': lambda: '"{}" is on {}'.format(query.capitalize(), target.strftime(TIME_DATETIME_FORMAT)),
-            'clipboard': lambda: timedelta_to_ydhms(target, datetime.now()),
+            'name': approxstr((now() + td).strftime(TIME_DATETIME_FORMAT)),
+            'description': approxstr(description),
+            'clipboard': approxstr((now() + td).strftime(TIME_DATETIME_FORMAT)),
             'error': None,
-            'value': lambda: approxdt(target - datetime.now()),
+            'value': approxdt(now() + td),
+            'value_type': datetime,
+            'order': order
+        }
+    }
+
+
+@lru_cache
+def get_resulttz(city_name, country_name, iso2, query, order, tz, td=timedelta()):
+    return {
+        'result': {
+            'value': approxdt(now(tz=timezone(tz)) + td),
+            'query': query,
+            'error': None,
+            'order': order
+        },
+        'query_result': {
+            'icon': 'images/flags/{}.svg'.format(iso2.upper()),
+            'name': approxstr(
+                '{}: {}'.format(
+                    city_name,
+                    (now(tz=timezone(tz)) + td).strftime(TIME_TIME_FORMAT))
+            ),
+            'description': approxstr(
+                '{} • {} • {} ({})'.format(
+                    (now(tz=timezone(tz)) + td).strftime(
+                        TIME_DATE_FORMAT),
+                    country_name,
+                    now(tz=timezone(tz)).tzname(),
+                    'UTC{:+.0f}'.format((now(tz=timezone(tz)) +
+                                        td).utcoffset().total_seconds() / 60 / 60)
+                )
+            ),
+            'clipboard': approxstr(
+                '{}: {}'.format(
+                    city_name,
+                    (now(tz=timezone(tz)) + td).strftime(
+                        TIME_TIME_FORMAT)
+                )
+            ),
+            'error': None,
+            'value': approxdt(now(tz=timezone(tz)) + td),
+            'order': order,
+            'value_type': datetime
+        }
+    }
+
+
+def get_resulttd(target: timedelta, query: str, order: int):
+    return {
+        'result': {
+            'value': approxdt(target),
+            'query': query,
+            'error': None,
+            'order': order
+        },
+        'query_result': {
+            'icon': 'images/time.svg',
+            'name': approxstr(timedelta_to_ydhms(target + now(), now())),
+            'description': approxstr(
+                '"{}" {} on {}'.format(
+                    query.capitalize(),
+                    'is' if target + now() >= now() else 'was',
+                    (target + now()).strftime(TIME_DATETIME_FORMAT)
+                )
+            ),
+            'clipboard': approxstr(timedelta_to_ydhms(target + now(), now())),
+            'error': None,
+            'value': approxdt(target),
             'value_type': timedelta,
             'order': order
         }
@@ -145,7 +188,8 @@ test_spec_simple = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_simple)
 def test_simple(test_spec):
-    query_test_helper_lazy(TimeQueryHandler, test_spec)
+    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+        query_test_helper(TimeQueryHandler, test_spec)
 
 
 test_spec_target_city = [{
@@ -175,53 +219,54 @@ test_spec_target_city = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_target_city)
 def test_target_city(test_spec):
-    query_test_helper_lazy(TimeQueryHandler, test_spec)
+    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+        query_test_helper(TimeQueryHandler, test_spec)
 
 
 test_spec_time = [{
     # Normal test with time calculation
-    'query': 'time + 2 MONTH 1 day 2 HoUrS 30 minutes 2 seconds - 2 months 1 hour 2 minutes 1 SeCond',
+    'query': 'time + 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
     'results': [
         get_result('Tomorrow',
-                   query='+ 2 MONTH 1 day 2 HoUrS 30 minutes 2 seconds - 2 months 1 hour 2 minutes 1 SeCond',
-                   order=0, td=timedelta(days=1, seconds=5281)),
+                   query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
+                   order=0, td=td_pdt(day=1)),
         get_resulttz('Athens', 'Greece', 'GR',
-                     query='+ 2 MONTH 1 day 2 HoUrS 30 minutes 2 seconds - 2 months 1 hour 2 minutes 1 SeCond',
+                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
                      order=1, tz='Europe/Athens',
-                     td=timedelta(days=1, seconds=5281)),
+                     td=td_pdt(day=1)),
         get_resulttz('New York City', 'NY United States', 'US',
-                     query='+ 2 MONTH 1 day 2 HoUrS 30 minutes 2 seconds - 2 months 1 hour 2 minutes 1 SeCond',
+                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
                      order=2, tz='America/New_York',
-                     td=timedelta(days=1, seconds=5281))
+                     td=td_pdt(day=1))
     ]
 }, {
     # Test partial matching
-    'query': 'time + 1 hour 2 some text',
+    'query': 'time + 1 day 2 some text',
     'results': [{
         'result': {
             'value': None,
-            'query': '+ 1 hour',
+            'query': '+ 1 day',
             'error': MisparsedTimeException,
-            'order': 0
+            'order': -100
         },
         'query_result': {
             'icon': 'images/time.svg',
-            'name': '{}: "time + 1 hour"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time + 1 hour 2 some text"'.format(tr_err('unfully-parsed-date-description')),
+            'name': '{}: "time + 1 day"'.format(tr_err('unfully-parsed-date')),
+            'description': '{}: "time + 1 day 2 some text"'.format(tr_err('unfully-parsed-date-description')),
             'clipboard': '',
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -100
         }
     },
-        get_result('Today', query='+ 1 hour', order=1,
-                   td=timedelta(seconds=3600)),
-        get_resulttz('Athens', 'Greece', 'GR', query='+ 1 hour', order=2,
-                     tz='Europe/Athens', td=timedelta(seconds=3600)),
+        get_result('Tomorrow', query='+ 1 day', order=0,
+                   td=td_pdt(day=1)),
+        get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day', order=1,
+                     tz='Europe/Athens', td=td_pdt(day=1)),
         get_resulttz('New York City', 'NY United States', 'US',
-                     query='+ 1 hour', order=3, tz='America/New_York',
-                     td=timedelta(seconds=3600))
+                     query='+ 1 day', order=2, tz='America/New_York',
+                     td=td_pdt(day=1))
     ]
 }, {
     # Test overflows
@@ -231,7 +276,7 @@ test_spec_time = [{
             'value': None,
             'query': '+ 20000000 YeaRs',
             'error': DateOverflowException,
-            'order': 0
+            'order': -10
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -241,7 +286,7 @@ test_spec_time = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -10
         }
     }]
 }, {
@@ -265,7 +310,8 @@ test_spec_time = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_time)
 def test_time(test_spec):
-    query_test_helper_lazy(TimeQueryHandler, test_spec)
+    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+        query_test_helper(TimeQueryHandler, test_spec)
 
 
 test_spec_time_target_city = [{
@@ -275,44 +321,39 @@ test_spec_time_target_city = [{
         get_resulttz('Paris', 'France', 'FR',
                      query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs',
                      order=0, tz='Europe/Paris',
-                     td=timedelta(days=-8, seconds=-10560)),
+                     td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
         get_resulttz('Paris', 'TX United States', 'US',
                      query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs',
                      order=1, tz='America/Chicago',
-                     td=timedelta(days=-8, seconds=-10560)),
+                     td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
         get_result(tr_time('last-week').capitalize(),
                    query='- 1 WeEk 1 DaY 2 HouR 56 min',
-                   order=2, td=timedelta(days=-8, seconds=-10560)),
+                   order=2, td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
     ]
 }, {
     'query': 'time + 1 month at Prague CzEcHia',
     'results': [
         get_resulttz('Prague', 'Czechia', 'CZ', query='+ 1 month at Prague CzEcHia',
                      order=0, tz='Europe/Prague',
-                     td=timedelta(days=31)),
+                     td=td_pdt(month=1)),
         get_result(tr_time('next-month').capitalize(),
-                   query='+ 1 month', order=1, td=timedelta(days=31)),
+                   query='+ 1 month', order=1, td=td_pdt(month=1)),
     ]
 }]
 
 
 @ pytest.mark.parametrize('test_spec', test_spec_time_target_city)
 def test_time_target_city(test_spec):
-    query_test_helper_lazy(TimeQueryHandler, test_spec)
+    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+        query_test_helper(TimeQueryHandler, test_spec)
 
-
-tomorrow_morning = (datetime.now() + timedelta(days=1)
-                    ).replace(hour=9, minute=0, second=0, microsecond=0)
-
-# Add 2 days because midnight is same day at 00:00:00
-tomorrow_midnight = (datetime.now() + timedelta(days=2)
-                     ).replace(hour=0, minute=0, second=0, microsecond=0)
 
 test_spec_until = [{
     # Normal test
     'query': 'time uNTill tomorrow',
     'results': [
-        get_resulttd(tomorrow_morning, query='uNTill tomorrow', order=0),
+        get_resulttd(timedelta(seconds=68400),
+                     query='uNTill tomorrow', order=0),
         get_result('Now', query='uNTill tomorrow', order=1),
     ]
 }, {
@@ -323,7 +364,7 @@ test_spec_until = [{
             'value': None,
             'query': 'till',
             'error': MisparsedTimeException,
-            'order': 0
+            'order': -100
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -333,10 +374,10 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -100
         }
     },
-        get_result('Now', query='till', order=1)
+        get_result('Now', query='till', order=0)
     ]}, {
     # Partial parse until
     'query': 'time tIl tomorrow midnight m',
@@ -345,7 +386,7 @@ test_spec_until = [{
             'value': None,
             'query': 'tIl tomorrow midnight',
             'error': MisparsedTimeException,
-            'order': 0
+            'order': -100
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -355,12 +396,12 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -100
         }
     },
-        get_resulttd(tomorrow_midnight,
-                     query='tIl tomorrow midnight', order=1),
-        get_result('Now', query='tIl tomorrow midnight', order=2)
+        get_resulttd(timedelta(days=1, seconds=36000),
+                     query='tIl tomorrow midnight', order=0),
+        get_result('Now', query='tIl tomorrow midnight', order=1)
     ]}, {
     # Do not match digits only
     'query': 'time until 1245',
@@ -369,7 +410,7 @@ test_spec_until = [{
             'value': None,
             'query': 'until',
             'error': MisparsedTimeException,
-            'order': 0
+            'order': -100
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -379,9 +420,9 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -100
         }
-    }, get_result('Now', query='until', order=1),
+    }, get_result('Now', query='until', order=0),
     ]
 }, {
     # Test overflows
@@ -391,7 +432,7 @@ test_spec_until = [{
             'value': None,
             'query': 'until 20000 yEaR',
             'error': DateOverflowException,
-            'order': 0
+            'order': -10
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -401,7 +442,7 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': 0
+            'order': -10
         }
     }]
 }]
@@ -409,7 +450,8 @@ test_spec_until = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_until)
 def test_until(test_spec):
-    query_test_helper_lazy(TimeQueryHandler, test_spec)
+    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+        query_test_helper(TimeQueryHandler, test_spec)
 
 
 test_spec_parsedatetime_missing = [{
@@ -436,8 +478,169 @@ test_spec_parsedatetime_missing = [{
 }]
 
 
-@pytest.mark.parametrize('test_spec', test_spec_parsedatetime_missing)
+@ pytest.mark.parametrize('test_spec', test_spec_parsedatetime_missing)
 def test_parsedatetime_missing(test_spec):
     # Set parsedatetime to None
     with reset_instance(TimeQueryHandler, context=no_parsedatetime):
         query_test_helper(TimeQueryHandler, test_spec)
+
+
+# Some more tests for coverage
+test_spec_cov = [{
+    # Last year
+    'query': 'time - 1 year',
+    'results': [
+        get_result('Last year', query='- 1 year', order=0, td=td_pdt(year=-1)),
+    ]
+}, {
+    # Next year
+    'query': 'time + 1 year',
+    'results': [
+        get_result('Next year', query='+ 1 year', order=0, td=td_pdt(year=1)),
+    ]
+}, {
+    # Years from now
+    'query': 'time + 10 years',
+    'results': [
+        get_result('10 years from now', query='+ 10 years',
+                   order=0, td=td_pdt(year=10)),
+    ]
+}, {
+    # Years ago
+    'query': 'time - 5 years',
+    'results': [
+        get_result('5 years ago', query='- 5 years',
+                   order=0, td=td_pdt(year=-5)),
+    ]
+}, {
+    # Last month
+    'query': 'time - 1 month',
+    'results': [
+        get_result('Last month', query='- 1 month',
+                   order=0, td=td_pdt(month=-1)),
+    ]
+}, {
+    # Next month
+    'query': 'time + 1 month',
+    'results': [
+        get_result('Next month', query='+ 1 month',
+                   order=0, td=td_pdt(month=1)),
+    ]
+}, {
+    # months from now
+    'query': 'time + 2 months',
+    'results': [
+        get_result('2 months from now', query='+ 2 months',
+                   order=0, td=td_pdt(month=2)),
+    ]
+}, {
+    # months ago
+    'query': 'time - 5 months',
+    'results': [
+        get_result('5 months ago', query='- 5 months',
+                   order=0, td=td_pdt(month=-5)),
+    ]
+}, {
+    # next week
+    'query': 'time + 1 week',
+    'results': [
+        get_result('Next week', query='+ 1 week',
+                   order=0, td=td_pdt(week=1)),
+    ]
+}, {
+    # last week
+    'query': 'time - 1 week',
+    'results': [
+        get_result('Last week', query='- 1 week',
+                   order=0, td=td_pdt(week=-1)),
+    ]
+}, {
+    # weeks from now
+    'query': 'time + 2 weeks',
+    'results': [
+        get_result('2 weeks from now', query='+ 2 weeks',
+                   order=0, td=td_pdt(week=2)),
+    ]
+}, {
+    # weeks ago
+    'query': 'time - 2 weeks',
+    'results': [
+        get_result('2 weeks ago', query='- 2 weeks',
+                   order=0, td=td_pdt(week=-2)),
+    ]
+}, {
+    # yesterday
+    'query': 'time - 1 day',
+    'results': [
+        get_result('Yesterday', query='- 1 day',
+                   order=0, td=td_pdt(day=-1)),
+    ]
+}, {
+    # in 2 days
+    'query': 'time + 2 days',
+    'results': [
+        get_result('2 days from now', query='+ 2 days',
+                   order=0, td=td_pdt(day=2)),
+    ]
+}, {
+    # 3 days ago
+    'query': 'time - 3 days',
+    'results': [
+        get_result('3 days ago', query='- 3 days',
+                   order=0, td=td_pdt(day=-3)),
+    ]
+}, {
+    # today
+    'query': 'time + 5 hours 3 minutes',
+    'results': [
+        get_result('Today', query='+ 5 hours 3 minutes',
+                   order=0, td=td_pdt(hour=5, minute=3)),
+    ]
+}, {
+    # today
+    'query': 'time until 1 day ago',
+    'results': [
+        get_resulttd(timedelta(days=-1),
+                     query='until 1 day ago', order=0),
+        get_result('Now', query='until 1 day ago', order=1),
+    ]
+}, {
+    # months diff last year but not full year
+    'query': 'time until 8 months ago',
+    'results': [
+        get_resulttd(timedelta(days=-242),
+                     query='until 8 months ago', order=0),
+        get_result('Now', query='until 8 months ago', order=1),
+    ]
+}, {
+    # years diff
+    'query': 'time until next 2 years',
+    'results': [
+        get_resulttd(timedelta(days=730),
+                     query='until next 2 years', order=0),
+        get_result('Now', query='until next 2 years', order=1),
+    ]
+}, {
+    # minutes diff
+    'query': 'time until next 4 minutes',
+    'results': [
+        get_resulttd(timedelta(seconds=240),
+                     query='until next 4 minutes', order=0),
+        get_result('Now', query='until next 4 minutes', order=1),
+    ]
+}, {
+    # seconds diff
+    'query': 'time until 10 seconds ago',
+    'results': [
+        get_resulttd(timedelta(days=-1, seconds=86390),
+                     query='until 10 seconds ago', order=0),
+        get_result('Now', query='until 10 seconds ago', order=1),
+    ]
+}]
+
+
+@ pytest.mark.parametrize('test_spec', test_spec_cov)
+def test_coverage(test_spec):
+    with reset_instance(TimezoneService, context=no_default_cities):
+        with reset_instance(TimezoneService, context=set_time_reference(time_reference)):
+            query_test_helper(TimeQueryHandler, test_spec)
