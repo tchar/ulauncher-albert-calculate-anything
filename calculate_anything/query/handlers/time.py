@@ -3,8 +3,8 @@ import pytz
 from datetime import datetime, timedelta
 try:
     import parsedatetime
-except ImportError:
-    parsedatetime = None
+except ImportError:  # pragma: no cover (tested artificially)
+    parsedatetime = None  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.calculation.time import (
     LocationTimeCalculation, TimeCalculation,
@@ -12,8 +12,8 @@ from calculate_anything.calculation.time import (
 )
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.exceptions import (
-    DateAddDateException, MissingParsedatetimeException,
-    DateOverflowException, MisparsedTimeException
+    MissingParsedatetimeException, DateOverflowException,
+    MisparsedTimeException
 )
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.utils.iter import partition, flatten, deduplicate
@@ -48,12 +48,12 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def _parse_dt(self, query, reference_datetime):
         try:
             date = self._cal.nlp(query, sourceTime=reference_datetime)
-        except Exception as e:
-            self._logger.exception(
+        except Exception as e:  # pragma: no cover (catching unexpected exception)
+            self._logger.exception(  # pragma: no cover
                 'Got unexpected exception when parsing datetime: '
                 '{} with reference time {}: {}'
                 .format(query, reference_datetime, e))
-            return None, None, None, None, False
+            return None, None, None, None, False  # pragma: no cover
 
         if date is None:
             return None, None, None, None, False
@@ -99,7 +99,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         return [], True
 
-    def _get_time_location(self, date, locations, order_offset=0):
+    def _get_time_location(self, date, locations, parsed_query, order_offset=0):
         items = []
         order = 0
         for location in locations:
@@ -114,27 +114,51 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             item = LocationTimeCalculation(
                 value=location_datetime,
                 location=location,
+                query=parsed_query,
                 order=order+order_offset
             )
             items.append(item)
             order += 1
         return items
 
-    def _get_until(self, query):
+    def _get_until(self, keyword, query):
         now = datetime.now()
         date, _, parsed_query, match, overflow = self._parse_dt(query, now)
 
-        if not any([date, parsed_query, match, overflow]):
-            item = TimeCalculation(
-                value=now,
-                reference_date=now,
+        if parsed_query:
+            parsed_query_kw = '{} {}'.format(keyword, parsed_query)
+        else:
+            parsed_query_kw = keyword
+
+        if not any([date, parsed_query, match, overflow]) or not match:
+            original_query_kw_kw = '{} {} {}'.format(
+                self.keyword, keyword, query)
+            parsed_query_kw_kw = '{} {}'.format(self.keyword, keyword)
+
+            item1 = TimedeltaCalculation(
+                query=keyword,
+                error=MisparsedTimeException(
+                    message='Could not fully parse',
+                    extra={
+                        'original_query': original_query_kw_kw,
+                        'parsed_query': parsed_query_kw_kw
+                    }
+                ),
                 order=0
             )
-            return [item]
-        elif not match:
-            return []
+            item2 = TimeCalculation(
+                value=now,
+                reference_date=now,
+                query=keyword,
+                order=1
+            )
+            return [item1, item2]
         elif overflow:
-            item = TimedeltaCalculation(error=DateOverflowException)
+            item = TimedeltaCalculation(
+                query=parsed_query_kw,
+                error=DateOverflowException,
+                order=0
+            )
             return [item]
 
         # Adjust midnights because they refer to same day whereas it should be "tomorrow"
@@ -144,33 +168,40 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         items = []
         if parsed_query != query:
+            original_query_kw_kw = '{} {} {}'.format(
+                self.keyword, keyword, query)
+            parsed_query_kw_kw = '{} {} {}'.format(
+                self.keyword, keyword, parsed_query)
             item = TimedeltaCalculation(
+                query=parsed_query_kw,
                 error=MisparsedTimeException(
                     message='Could not fully parse',
                     extra={
-                        'original_query': query,
-                        'parsed_query': parsed_query
+                        'original_query': original_query_kw_kw,
+                        'parsed_query': parsed_query_kw_kw,
                     }
                 ),
-                order=-1
+                order=0
             )
             items.append(item)
         items.append(
             TimedeltaCalculation(
-                value=date,
+                value=date - now,
                 reference_date=now,
-                query=query,
+                target_date=date,
+                query=parsed_query_kw,
                 order=len(items)
             )
         )
         items.append(TimeCalculation(
             value=now,
+            query=parsed_query_kw,
             reference_date=now,
-            order=0
+            order=len(items)
         ))
         return items
 
-    def _calculate(self, query, suffix, try_again):
+    def _calculate(self, query, keyword, suffix):
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
         query = filter(None, query)
@@ -183,8 +214,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         misparsed = False
         parsed_subqueries = query.copy()
         date_overflows = False
-        date_add_date_error = False
-        reference_dt = datetime.now()
+        now = datetime.now()
 
         for i, subquery in enumerate(query):
             if subquery == '+':
@@ -205,7 +235,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                     return []
 
                 date, td, parsed_query, match, overflow = self._parse_dt(
-                    subquery, reference_dt)
+                    subquery, now)
                 if not any([date, parsed_query, match, overflow]):
                     return None
                 if parsed_query != subquery:
@@ -220,38 +250,40 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                     date_td -= td
             prev = subquery
 
+        parsed_query_calc = ' '.join(parsed_subqueries)
+        parsed_query_locs = parsed_query_calc
+        if keyword:
+            if parsed_query_locs:
+                parsed_query_locs = '{} {} {}'.format(parsed_query_locs, keyword, suffix)
+            else:
+                parsed_query_locs = '{} {}'.format(keyword, suffix)
+
         items = []
         if misparsed:
-            original_query = ' '.join(query)
-            parsed_query = ' '.join(parsed_subqueries)
+            original_query_kw = '{} {}'.format(self.keyword, ' '.join(query))
+            parsed_query_kw = '{} {}'.format(self.keyword, parsed_query_calc)
             item = TimeCalculation(
+                query=parsed_query_calc,
                 error=MisparsedTimeException(
                     'Could not fully parse',
                     extra={
-                        'original_query': original_query,
-                        'parsed_query': parsed_query
+                        'original_query': original_query_kw,
+                        'parsed_query': parsed_query_kw
                     }
                 )
             )
             items.append(item)
 
-        if date_add_date_error:
-            item = TimeCalculation(
-                error=DateAddDateException, order=len(items))
-            items.append(item)
-            return items
-
-        now = datetime.now()
-        try:
-            date = now + date_td
-        except OverflowError:
-            date_overflows = True
-
         if date_overflows:
             item = TimeCalculation(
-                error=DateOverflowException, order=len(items))
+                query=parsed_query_calc,
+                error=DateOverflowException,
+                order=len(items
+                          ))
             items.append(item)
             return items
+
+        date = now + date_td
 
         locations, added_defaults = self._get_locations(suffix)
         order_offset_locations = len(
@@ -260,6 +292,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             self._get_time_location(
                 date,
                 locations,
+                parsed_query_locs,
                 order_offset=order_offset_locations
             )
         )
@@ -270,21 +303,21 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         item = TimeCalculation(
             value=date,
             reference_date=now,
+            query=parsed_query_calc,
             order=order_next
         )
         items.append(item)
         return items
 
-    def handle_raw(self, query, try_again=True):
+    def handle_raw(self, query):
         if self._cal is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
                 order=-1
             )
             return [result]
-        query = query.lower()
-        query = PLUS_MINUS_REGEX.sub_dict(query)
 
+        query = PLUS_MINUS_REGEX.sub_dict(query)
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:
             query, keyword, suffix = map(str.strip, query)
@@ -293,10 +326,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             keyword = ''
             suffix = ''
 
-        if 'til' in keyword and query.strip() == '':
-            items = self._get_until(suffix)
+        if 'til' in keyword.lower() and query.strip() == '':
+            items = self._get_until(keyword, suffix)
         else:
-            items = self._calculate(query, suffix, try_again)
+            items = self._calculate(query, keyword, suffix)
 
         return items
 

@@ -51,8 +51,9 @@ class TimeException(ExtendedException):
 class DateOverflowException(TimeException):
     pass
 
-class DateAddDateException(TimeException):
-    pass
+# TODO: To be removed
+# class DateAddDateException(TimeException):
+    # pass
 
 class MisparsedTimeException(TimeException):
     pass

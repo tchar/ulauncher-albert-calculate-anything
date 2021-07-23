@@ -4,7 +4,7 @@ from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import (
     BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
-    DateOverflowException, DateAddDateException, MisparsedTimeException, WrongBaseException, ZeroDivisionException,
+    DateOverflowException, MisparsedTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException, MissingPintException
 )
@@ -66,16 +66,16 @@ def date_overflow_error_query_result():
         order=0
     )
 
-
-def date_add_date_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/time.svg',
-        name=translator('date-add-date'),
-        description=translator('date-add-date-description'),
-        clipboard='',
-        order=0
-    )
+# TODO: To be removed
+# def date_add_date_query_result():
+#     translator = LanguageService().get_translator('errors')
+#     return QueryResult(
+#         icon='images/time.svg',
+#         name=translator('date-add-date'),
+#         description=translator('date-add-date-description'),
+#         clipboard='',
+#         order=0
+#     )
 
 
 def misparsed_time_exception(exception):
@@ -171,8 +171,9 @@ class _Calculation:
                     return missing_requests_query_result()
                 if self.is_error(DateOverflowException):
                     return date_overflow_error_query_result()
-                if self.is_error(DateAddDateException):
-                    return date_add_date_query_result()
+                # TODO: To be removed
+                # if self.is_error(DateAddDateException):
+                    # return date_add_date_query_result()
                 if isinstance(self.error, MisparsedTimeException):
                     return misparsed_time_exception(self.error)
                 if self.is_error(CurrencyProviderException):

@@ -79,8 +79,8 @@ class TimeCalculation(_Calculation):
 
 
 class LocationTimeCalculation(TimeCalculation):
-    def __init__(self, value=None, location=None, error=None, order=-1):
-        super().__init__(value=value, error=error, order=order)
+    def __init__(self, value=None, location=None, query='', error=None, order=-1):
+        super().__init__(value=value, query=query, error=error, order=order)
         self.location = location
 
     @TimeCalculation.Decorators.handle_error_results
@@ -119,18 +119,21 @@ class LocationTimeCalculation(TimeCalculation):
 
 
 class TimedeltaCalculation(TimeCalculation):
+    def __init__(self, value=None, reference_date=None, target_date=None, query='', error=None, order=0):
+        super().__init__(value=value, reference_date=reference_date, query=query, error=error, order=order)
+        self.target_date = target_date
 
     def _calculate_diff(self):
-        value = self.value
+        target_date = self.target_date
         reference = self.reference_date
-        if value < reference:
-            value, reference = reference, value
+        if target_date < reference:
+            target_date, reference = reference, target_date
             sign = -1
         else:
             sign = 1
 
-        years_diff = value.year - reference.year
-        value = value.replace(year=reference.year)
+        years_diff = target_date.year - reference.year
+        value = target_date.replace(year=reference.year)
         if value < reference:
             value = value.replace(year=reference.year + years_diff)
             years_diff = 0
@@ -150,39 +153,39 @@ class TimedeltaCalculation(TimeCalculation):
         sign, years_diff, days_diff, hours_diff, minutes_diff, seconds_diff = self._calculate_diff()
 
         translator = LanguageService().get_translator('time')
-        values = []
+        names = []
         if years_diff > 0:
             text = 'year' if years_diff == 1 else 'years'
             text = translator(text)
-            value = '{} {}'.format(years_diff, text)
-            values.append(value)
+            name = '{} {}'.format(years_diff, text)
+            names.append(name)
         if days_diff > 0:
             text = 'day' if days_diff == 1 else 'days'
             text = translator(text)
-            value = '{} {}'.format(days_diff, text)
-            values.append(value)
+            name = '{} {}'.format(days_diff, text)
+            names.append(name)
         if hours_diff > 0:
             text = 'hour' if hours_diff == 1 else 'hours'
             text = translator(text)
-            value = '{} {}'.format(hours_diff, text)
-            values.append(value)
+            name = '{} {}'.format(hours_diff, text)
+            names.append(name)
         if minutes_diff > 0:
             text = 'minute' if minutes_diff == 1 else 'minutes'
             text = translator(text)
-            value = '{} {}'.format(minutes_diff, text)
-            values.append(value)
+            name = '{} {}'.format(minutes_diff, text)
+            names.append(name)
         if seconds_diff > 0:
             text = 'second' if seconds_diff == 1 else 'seconds'
             text = translator(text)
-            value = '{} {}'.format(seconds_diff, text)
-            values.append(value)
+            name = '{} {}'.format(seconds_diff, text)
+            names.append(name)
 
-        values = values[:3]
-        value = ', '.join(values)
+        names = names[:3]
+        name = ', '.join(names)
         if sign < 0:
-            value = '- {}'.format(value)
+            name = '- {}'.format(name)
 
-        description_date = self.value.strftime(TIME_DATETIME_FORMAT)
+        description_date = self.target_date.strftime(TIME_DATETIME_FORMAT)
 
         if sign > 0:
             is_on = '{} {}'.format(translator('is'), translator('on'))
@@ -194,9 +197,9 @@ class TimedeltaCalculation(TimeCalculation):
 
         return QueryResult(
             icon='images/time.svg',
-            name=value,
+            name=name,
             description=description,
-            clipboard=value,
+            clipboard=name,
             value=self.value,
             order=self.order
         )
