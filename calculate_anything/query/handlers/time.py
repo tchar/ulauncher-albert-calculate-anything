@@ -48,7 +48,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     @staticmethod
     def now():
-        return datetime.now()
+        return datetime.now().replace(microsecond=0)
 
     def _parse_dt(self, query, reference_datetime):
         try:
@@ -64,10 +64,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             return None, None, None, None, False
 
         date, flags, _, _, parsed_query = date[0]
-        regex_match = re.match(r'^\s*\d+\s*$', parsed_query) is None
-        overflow = flags == parsedatetime.pdtContext(0)
+        match = re.match(r'^\s*\d+\.?(\d+)?\s*$', parsed_query) is None
+        overflow = flags == parsedatetime.pdtContext(0) and match
         td = date - reference_datetime
-        return date, td, parsed_query, regex_match, overflow
+        return date, td, parsed_query, match, overflow
 
     def _get_location_search_combinations(location):
         location = location.strip()
@@ -127,7 +127,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         return items
 
     def _get_until(self, keyword, query):
-        now = TimeQueryHandler.now().replace(microsecond=0)
+        now = TimeQueryHandler.now()
         date, _, parsed_query, match, overflow = self._parse_dt(query, now)
 
         if parsed_query:
@@ -208,6 +208,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         return items_pre + items
 
     def _calculate(self, query, keyword, suffix):
+        original_query = query
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
         query = filter(None, query)
@@ -221,7 +222,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         misparsed = False
         parsed_subqueries = query.copy()
         date_overflows = False
-        now = TimeQueryHandler.now().replace(microsecond=0)
+        now = TimeQueryHandler.now()
 
         for i, subquery in enumerate(query):
             if subquery in signs_set:
@@ -248,15 +249,16 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                     virtual_subquery, now)
                 if not any([date, parsed_query, match, overflow]):
                     return None
-                
+
                 if parsed_query != virtual_subquery.rstrip():
                     parsed_subqueries[i] = parsed_query
                     misparsed = True
                 if overflow:
                     date_overflows = True
                     break
-                dates.append(date)
-                signs.append(sign)
+                if match:
+                    dates.append(date)
+                    signs.append(sign)
             prev = subquery
 
         parsed_query_calc = ' '.join(parsed_subqueries)
@@ -286,15 +288,24 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             )
             items_pre.append(item)
 
-        try:
-            signs = list(1 if s == '+' else -1 for s in signs)
-            v = parsedatetime_str(now, dates, signs)
-            date = self._cal.parseDT(v, sourceTime=now)
+        signs = list(1 if s == '+' else -1 for s in signs)
+        query_str = parsedatetime_str(now, dates, signs).strip()
+        if date_overflows:
+            pass
+        elif not query_str and original_query.strip() != '':
+            return items_pre + items
+        elif not query_str:
+            date = now
+        else:
+            date = self._cal.nlp(query_str, sourceTime=now)
             if date is None:
-                return items_pre + items
-            date = date[0]
-        except OverflowError:
-            date_overflows = True
+                self._logger.error(  # pragma: no cover (Should not enter, here, logging just in case)
+                    'Something went wrong when trying to calculate '
+                    'date from date chunks: dates={}, query={}'.format(dates, query_str))
+                return items_pre + items  # pragma: no cover
+            date, context, _, _, _ = date[0]
+            if context == parsedatetime.pdtContext(0):
+                date_overflows = True
 
         if date_overflows:
             item = TimeCalculation(

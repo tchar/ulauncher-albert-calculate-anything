@@ -29,6 +29,7 @@ default_cities = TimezoneService().parse_default_cities(
     'Athens GR,New York City US')
 TimezoneService().set_default_cities(default_cities)
 cal = parsedatetime.Calendar(version=parsedatetime.VERSION_CONTEXT_STYLE)
+dt_now = TimeQueryHandler.now()
 time_reference = datetime(2021, 7, 15, 14, 0, 0)
 
 
@@ -174,7 +175,7 @@ def get_resulttd(target: timedelta, query: str, order: int):
 
 
 test_spec_simple = [{
-    # Normal test
+    # Normal test 1
     'query': 'time',
     'results': [
         get_result('Now', query='', order=0),
@@ -183,6 +184,85 @@ test_spec_simple = [{
         get_resulttz('New York City', 'NY United States', 'US',
                      query='', order=2, tz='America/New_York')
     ]
+}, {
+    # Normal test 2
+    'query': 'time + 1 day before',
+    'results': [
+        get_result('Yesterday', query='+ 1 day before',
+                   order=0, td=timedelta(days=-1)),
+        get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day before',
+                     order=1, tz='Europe/Athens', td=timedelta(days=-1)),
+        get_resulttz('New York City', 'NY United States', 'US',
+                     query='+ 1 day before', order=2,
+                     tz='America/New_York', td=timedelta(days=-1))
+    ]
+}, {
+    # Overflow with one chunk
+    'query': 'time + 8000000 years',
+    'results': [{
+        'result': {
+            'value': None,
+            'query': '+ 8000000 years',
+            'error': DateOverflowException,
+            'order': -10
+        },
+        'query_result': {
+            'icon': 'images/time.svg',
+            'name': tr_err('date-overflow'),
+            'description': tr_err('date-overflow-description'),
+            'clipboard': '',
+            'error': None,
+            'value': None,
+            'value_type': type(None),
+            'order': -10
+        }
+    }]
+},{
+    # Overflow with multiple chunks
+    'query': 'time + 4000 years + 4000 years',
+    'results': [{
+        'result': {
+            'value': None,
+            'query': '+ 4000 years + 4000 years',
+            'error': DateOverflowException,
+            'order': -10
+        },
+        'query_result': {
+            'icon': 'images/time.svg',
+            'name': tr_err('date-overflow'),
+            'description': tr_err('date-overflow-description'),
+            'clipboard': '',
+            'error': None,
+            'value': None,
+            'value_type': type(None),
+            'order': -10
+        }
+    }]
+}, {
+    # Not parsed
+    'query': 'time + 1 microsecond',
+    'results': []
+}, {
+    # Partially parsed
+    'query': 'time + 0.1 microsecond',
+    'results': [{
+        'result': {
+            'value': None,
+            'query': '+ 0.1',
+            'error': MisparsedTimeException,
+            'order': -100
+        },
+        'query_result': {
+            'icon': 'images/time.svg',
+            'name': '{}: "time + 0.1"'.format(tr_err('unfully-parsed-date')),
+            'description': '{}: "time + 0.1 microsecond"'.format(tr_err('unfully-parsed-date-description')),
+            'clipboard': '',
+            'error': None,
+            'value': None,
+            'value_type': type(None),
+            'order': -100
+        }
+    },]
 }]
 
 
