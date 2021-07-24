@@ -72,8 +72,8 @@
         "no-result-hex-description": "Try expressions like \"f1a2 + 2 mod 1\", \"# fd1234\""
     },
     "errors": {
-        "infinite-result-error": "Creating a black hole aren't we?",
-        "infinite-result-error-description": "Looks like you divided by zero somewhere",
+        "zero-division-error": "Creating a black hole aren't we?",
+        "zero-division-error-description": "Looks like you divided by zero somewhere",
 
         "boolean-comparison-error": "Complex numbers can't be inequally compared",
         "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
@@ -83,9 +83,6 @@
 
         "date-overflow": "Hey I'm not a time machine",
         "date-overflow-description": "Are you trying to crash me?",
-
-        "date-add-date": "Hey you can't really add dates together",
-        "date-add-date-description": "Just because you are allowed to, doesn't mean it makes sense",
 
         "unfully-parsed-date": "I understood",
         "unfully-parsed-date-description": "You typed",
@@ -99,14 +96,14 @@
         "base-floating-error": "Result is a floating point number",
         "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
 
-        "install-requests": "Looks like requests is not installed.",
-        "install-requests-description": "Install it with \"pip install requests\" and restart launcher.",
+        "install-requests": "Looks like requests is not installed",
+        "install-requests-description": "Install it with \"pip install requests\" and restart launcher",
 
-        "install-simpleeval": "Looks like simpleeval is not installed.",
-        "install-simpleeval-description": "Install it with \"pip install simpleeval\" and restart launcher.",
+        "missing-simpleeval-error": "Looks like simpleeval is not installed",
+        "missing-simpleeval-error-description": "Install it with \"pip install simpleeval\" and restart launcher",
 
-        "install-parsedatetime": "Looks like parsedatetime is not installed.",
-        "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher.",
+        "install-parsedatetime": "Looks like parsedatetime is not installed",
+        "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher",
 
         "install-pint": "Looks like pint is not installed",
         "install-pint-description": "Install it with \"pip install pint\" and restart launcher"

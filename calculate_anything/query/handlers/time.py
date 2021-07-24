@@ -149,7 +149,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'parsed_query': parsed_query_kw_kw
                     }
                 ),
-                order=-100
+                order=-80
             )
             item2 = TimeCalculation(
                 value=now,
@@ -162,7 +162,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             item = TimedeltaCalculation(
                 query=parsed_query_kw,
                 error=DateOverflowException,
-                order=-10
+                order=-50
             )
             return [item]
 
@@ -187,7 +187,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'parsed_query': parsed_query_kw_kw,
                     }
                 ),
-                order=-100
+                order=-80
             )
             items_pre.append(item)
         items.append(
@@ -284,7 +284,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                         'parsed_query': parsed_query_kw
                     }
                 ),
-                order=-100
+                order=-80
             )
             items_pre.append(item)
 
@@ -311,7 +311,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             item = TimeCalculation(
                 query=parsed_query_calc,
                 error=DateOverflowException,
-                order=-10)
+                order=-50
+            )
             items_pre.append(item)
             return items_pre + items
 
@@ -343,7 +344,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if self._cal is None:
             result = TimeCalculation(
                 error=MissingParsedatetimeException,
-                order=-1
+                order=-1000
             )
             return [result]
 

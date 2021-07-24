@@ -87,7 +87,7 @@ from calculate_anything.query.handlers import (  # noqa: E402
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from calculate_anything.query import MultiHandler  # noqa: E402
+from calculate_anything.query.multi_handler import MultiHandler  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
 from calculate_anything.utils import get_or_default, safe_operation  # noqa: E402
 from albert import ClipAction, Item, critical, debug, info, warning, critical  # noqa: E402

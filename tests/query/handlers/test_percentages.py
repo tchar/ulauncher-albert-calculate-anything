@@ -61,15 +61,15 @@ test_spec_normal = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -82,15 +82,15 @@ test_spec_normal = [{
             'query': '',
             'value': None,
             'error': BooleanPercetageException,
-            'order': 0
+            'order': -20
         },
         'query_result': {
             'icon': 'images/icon.svg',
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
-            'clipboard': None,
+            'clipboard': '',
             'error': BooleanPercetageException,
-            'order': 0,
+            'order': -20,
             'value': None,
             'value_type': type(None)
         }
@@ -103,15 +103,15 @@ test_spec_normal = [{
             'query': '',
             'value': None,
             'error': BooleanPercetageException,
-            'order': 0
+            'order': -20
         },
         'query_result': {
             'icon': 'images/icon.svg',
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
-            'clipboard': None,
+            'clipboard': '',
             'error': BooleanPercetageException,
-            'order': 0,
+            'order': -20,
             'value': None,
             'value_type': type(None)
         }
@@ -183,15 +183,15 @@ test_spec_inverse = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -204,15 +204,15 @@ test_spec_inverse = [{
             'query': '',
             'value': None,
             'error': BooleanPercetageException,
-            'order': 0
+            'order': -20
         },
         'query_result': {
             'icon': 'images/icon.svg',
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
-            'clipboard': None,
+            'clipboard': '',
             'error': BooleanPercetageException,
-            'order': 0,
+            'order': -20,
             'value': None,
             'value_type': type(None)
         }
@@ -225,15 +225,15 @@ test_spec_inverse = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -246,15 +246,15 @@ test_spec_inverse = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -351,15 +351,15 @@ test_spec_calc = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -372,15 +372,15 @@ test_spec_calc = [{
             'query': '',
             'value': None,
             'error': BooleanPercetageException,
-            'order': 0
+            'order': -20
         },
         'query_result': {
             'icon': 'images/icon.svg',
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
-            'clipboard': None,
+            'clipboard': '',
             'error': BooleanPercetageException,
-            'order': 0,
+            'order': -20,
             'value': None,
             'value_type': type(None)
         }
@@ -393,15 +393,15 @@ test_spec_calc = [{
             'query': '',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }

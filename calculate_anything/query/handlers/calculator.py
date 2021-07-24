@@ -134,7 +134,12 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             query += ' ' + operator + ' ' + subqueries[i + 1].strip()
 
         if inequality_error:
-            return BooleanCalculation(value=None, query=query, error=BooleanComparisonException, order=0)
+            return BooleanCalculation(
+                value=None,
+                query=query,
+                error=BooleanComparisonException,
+                order=-10
+            )
 
         return BooleanCalculation(value=result, query=query, order=0)
 
@@ -172,10 +177,18 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 for subquery in subqueries
             ]
         except MissingSimpleevalException:
-            item = Calculation(query=query, error=MissingSimpleevalException)
+            item = Calculation(
+                query=query,
+                error=MissingSimpleevalException,
+                order=-1010
+            )
             return [item]
         except ZeroDivisionError:
-            item = Calculation(query=query, error=ZeroDivisionException)
+            item = Calculation(
+                query=query,
+                error=ZeroDivisionException,
+                order=-70
+            )
             return [item]
         except SyntaxError:  # pragma: no cover (error handling just in case)
             return None  # pragma: no cover

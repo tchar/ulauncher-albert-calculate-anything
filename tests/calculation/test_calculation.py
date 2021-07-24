@@ -1,6 +1,6 @@
 from calculate_anything.lang import LanguageService
 import pytest
-from calculate_anything.query.handlers.calculator import Calculation
+from calculate_anything.calculation.calculation import Calculation
 
 
 def test_calculation_precision():

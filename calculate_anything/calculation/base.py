@@ -9,27 +9,7 @@ from calculate_anything.exceptions import (
     BooleanPercetageException, MissingPintException
 )
 
-
-def zero_division_error_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('infinite-result-error'),
-        description=translator('infinite-result-error-description'),
-        error=ZeroDivisionException
-    )
-
-
-def missing_simpleeval_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        clipboard='pip install simpleeval',
-        name=translator('install-simpleeval'),
-        description=translator('install-simpleeval-description'),
-        error=MissingSimpleevalException,
-        order=-1
-    )
+# TODO: Fix this mess
 
 
 def missing_parsedatetime_query_result():
@@ -40,7 +20,31 @@ def missing_parsedatetime_query_result():
         description=translator('install-parsedatetime-description'),
         clipboard='pip install parsedatetime',
         error=MissingParsedatetimeException,
-        order=-1
+        order=-1000
+    )
+
+
+def missing_simpleeval_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('missing-simpleeval-error'),
+        description=translator('missing-simpleeval-error-description'),
+        clipboard='pip install simpleeval',
+        error=MissingSimpleevalException,
+        order=-1010
+    )
+
+
+def missing_pint_error_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/convert.svg',
+        name=translator('install-pint'),
+        description=translator('install-pint-description'),
+        clipboard='pip install pint',
+        error=MissingPintException,
+        order=-1020
     )
 
 
@@ -52,7 +56,55 @@ def missing_requests_query_result():
         description=translator('install-requests-description'),
         clipboard='pip install requests',
         error=MissingRequestsException,
-        order=-1
+        order=-1030
+    )
+
+
+def boolean_comparison_error_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('boolean-comparison-error'),
+        description=translator('boolean-comparison-error-description'),
+        clipboard='',
+        error=BooleanComparisonException,
+        order=-10
+    )
+
+
+def boolean_percentage_error_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('boolean-percentage-error'),
+        description=translator('boolean-percentage-error-description'),
+        clipboard='',
+        error=BooleanPercetageException,
+        order=-20
+    )
+
+
+def base_floating_point_exception_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('base-floating-error'),
+        description=translator('base-floating-error-description'),
+        clipboard='',
+        error=BaseFloatingPointException,
+        order=-30
+    )
+
+
+def wrong_base_exception_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('wrong-base-error'),
+        description=translator('wrong-base-error-description'),
+        clipboard='',
+        error=WrongBaseException,
+        order=-40
     )
 
 
@@ -63,19 +115,33 @@ def date_overflow_error_query_result(calculation):
         name=translator('date-overflow'),
         description=translator('date-overflow-description'),
         clipboard='',
-        order=calculation.order
+        error=DateOverflowException,
+        order=-50
     )
 
-# TODO: To be removed
-# def date_add_date_query_result():
-#     translator = LanguageService().get_translator('errors')
-#     return QueryResult(
-#         icon='images/time.svg',
-#         name=translator('date-add-date'),
-#         description=translator('date-add-date-description'),
-#         clipboard='',
-#         order=0
-#     )
+
+def currency_provider_error_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('provider-error'),
+        description=translator('provider-error-description'),
+        clipboard='',
+        error=CurrencyProviderException,
+        order=-60
+    )
+
+
+def zero_division_error_query_result():
+    translator = LanguageService().get_translator('errors')
+    return QueryResult(
+        icon='images/icon.svg',
+        name=translator('zero-division-error'),
+        description=translator('zero-division-error-description'),
+        clipboard='',
+        error=ZeroDivisionException,
+        order=-70
+    )
 
 
 def misparsed_time_exception(calculation):
@@ -90,69 +156,7 @@ def misparsed_time_exception(calculation):
         name=name,
         description=description,
         clipboard='',
-        order=calculation.order
-    )
-
-
-def currency_provider_error_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('provider-error'),
-        description=translator('provider-error-description'),
-        error=CurrencyProviderException,
-    )
-
-
-def boolean_comparison_error_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('boolean-comparison-error'),
-        description=translator('boolean-comparison-error-description'),
-        error=BooleanComparisonException
-    )
-
-
-def boolean_percentage_error_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('boolean-percentage-error'),
-        description=translator('boolean-percentage-error-description'),
-        error=BooleanPercetageException
-    )
-
-
-def wrong_base_exception_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('wrong-base-error'),
-        description=translator('wrong-base-error-description'),
-        error=BooleanPercetageException
-    )
-
-
-def base_floating_point_exception_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('base-floating-error'),
-        description=translator('base-floating-error-description'),
-        error=BaseFloatingPointException
-    )
-
-
-def missing_pint_error_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/convert.svg',
-        name=translator('install-pint'),
-        description=translator('install-pint-description'),
-        clipboard='pip install pint',
-        error=MissingPintException,
-        order=-1
+        order=-80
     )
 
 
@@ -171,9 +175,6 @@ class _Calculation:
                     return missing_requests_query_result()
                 if self.is_error(DateOverflowException):
                     return date_overflow_error_query_result(self)
-                # TODO: To be removed
-                # if self.is_error(DateAddDateException):
-                    # return date_add_date_query_result()
                 if isinstance(self.error, MisparsedTimeException):
                     return misparsed_time_exception(self)
                 if self.is_error(CurrencyProviderException):

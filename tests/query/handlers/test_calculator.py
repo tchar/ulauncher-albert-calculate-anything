@@ -1,7 +1,6 @@
 import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils.misc import StupidEval
-import calculate_anything.query.handlers.calculator as calculator
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
 from tests.utils import no_simpleeval, reset_instance, query_test_helper
@@ -39,15 +38,15 @@ test_spec_calculator = [{
             'query': '(1 + 2) / (1 - 1)',
             'value': None,
             'error': ZeroDivisionException,
-            'order': 0
+            'order': -70
         },
         'query_result': {
             'icon': 'images/icon.svg',
-            'name': tr_err('infinite-result-error'),
-            'description': tr_err('infinite-result-error-description'),
-            'clipboard': None,
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
             'error': ZeroDivisionException,
-            'order': 0,
+            'order': -70,
             'value': None,
             'value_type': type(None)
         }
@@ -123,15 +122,15 @@ test_spec_calculator = [{
             'value': None,
             'query': '1 + 1j > 0.5 + 2j',
             'error': BooleanComparisonException,
-            'order': 0
+            'order': -10
         },
         'query_result': {
             'icon': 'images/icon.svg',
             'name': tr_err('boolean-comparison-error'),
             'description': tr_err('boolean-comparison-error-description'),
-            'clipboard': None,
+            'clipboard': '',
             'error': BooleanComparisonException,
-            'order': 0,
+            'order': -10,
             'value': None,
             'value_type': type(None)
         }
@@ -213,34 +212,54 @@ def test_calculator(test_spec):
     query_test_helper(CalculatorQueryHandler, test_spec)
 
 
-def test_simpleeval_missing():
+test_spec_missing_simpleeval = [{
+    'query': '= 1245',
+    'results': [{
+        'result': {
+            'query': '1245',
+            'value': 1245,
+            'error': None,
+            'order': 0
+        },
+        'query_result': {
+            'icon': 'images/icon.svg',
+            'name': '1245',
+            'description': '1245',
+            'clipboard': '1245',
+            'error': None,
+            'order': 0,
+            'value': 1245,
+            'value_type': int
+        }
+    }]
+}, {
+    'query': '= 1245 + sqrt(2)',
+    'results': [{
+        'result': {
+            'query': '1245 + sqrt(2)',
+            'value': None,
+            'error': MissingSimpleevalException,
+            'order': -1010
+        },
+        'query_result': {
+            'icon': 'images/icon.svg',
+            'name': tr_err('missing-simpleeval-error'),
+            'description': tr_err('missing-simpleeval-error-description'),
+            'clipboard': 'pip install simpleeval',
+            'error': MissingSimpleevalException,
+            'order': -1010,
+            'value': None,
+            'value_type': type(None)
+        }
+    }]
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec_missing_simpleeval)
+def test_missing_simpleeval(test_spec):
     # Allow CalculatorQueryHandler to be reinstantiated
 
     with reset_instance(CalculatorQueryHandler, context=no_simpleeval):
-    # Set stupid StupidEval as SimpleEval
+        # Set stupid StupidEval as SimpleEval
         assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
-
-        # Test simple calculation that can be handled with StupidEval
-        results = CalculatorQueryHandler().handle_raw('1245')
-        assert len(results) == 1
-        query_result = results[0].to_query_result()
-        assert query_result.icon == 'images/icon.svg'
-        assert query_result.name == '1245'
-        assert query_result.description == '1245'
-        assert query_result.error == None
-        assert query_result.clipboard == '1245'
-        assert query_result.order == 0
-        assert query_result.value == 1245
-        assert isinstance(query_result.value, int)
-
-        # Test simple calculation that cannot be handled with StupidEval
-        results = CalculatorQueryHandler().handle_raw('1 + 1 + 2')
-        assert len(results) == 1
-        query_result = results[0].to_query_result()
-        assert query_result.icon == 'images/icon.svg'
-        assert query_result.name == tr_err('install-simpleeval')
-        assert query_result.description == tr_err('install-simpleeval-description')
-        assert query_result.error == MissingSimpleevalException
-        assert query_result.clipboard == 'pip install simpleeval'
-        assert query_result.order == -1
-        assert query_result.value == None
+        query_test_helper(CalculatorQueryHandler, test_spec)

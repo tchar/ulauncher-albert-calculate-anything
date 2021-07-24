@@ -4,7 +4,7 @@ from calculate_anything import init
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default, safe_operation
 from calculate_anything.lang import LanguageService
-from calculate_anything.query import MultiHandler
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import (
     PercentagesQueryHandler, UnitsQueryHandler,
     CalculatorQueryHandler, TimeQueryHandler,

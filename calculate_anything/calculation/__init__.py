@@ -1,4 +1,4 @@
-from calculate_anything.calculation.calculation import Calculation, BooleanCalculation
+from calculate_anything.calculation.calculation import BooleanCalculation
 from calculate_anything.calculation.currency import CurrencyCalculation
 from calculate_anything.calculation.time import TimeCalculation, LocationTimeCalculation, TimedeltaCalculation
 from calculate_anything.calculation.percentage import PercentageCalculation, NormalPercentageCalculation, InversePercentageCalculation

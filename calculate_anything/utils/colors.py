@@ -13,7 +13,6 @@ def rgb_to_cmyk(rgb: Collection[int]) -> Tuple[float, float, float]:
     c = (1 - r - k) / (1 - k) if k != 1 else 0
     m = (1 - g - k) / (1 - k) if k != 1 else 0
     y = (1 - b - k) / (1 - k) if k != 1 else 0
-    c, m, y, k = 100 * c, 100 * m, 100 * y, 100 * k
     return c, m, y, k
 
 
@@ -31,8 +30,8 @@ def rgb_to_hsv(rgb: Collection[int]) -> Tuple[float, float, float]:
     elif cmax == b:
         h = ((r - g) / delta) + 4
     h *= 60
-    s = 0 if cmax == 0 else 100 * delta / cmax
-    v = 100 * cmax
+    s = 0 if cmax == 0 else delta / cmax
+    v = cmax
     return h, s, v
 
 
@@ -51,6 +50,5 @@ def rgb_to_hsl(rgb: Collection[int]) -> Tuple[float, float, float]:
         h = ((r - g) / delta) + 4
     h *= 60
     l = (cmax + cmin) / 2.
-    s = 0 if delta == 0 else 100 * delta / (1 - abs(2 * l - 1))
-    l = 100 * l
+    s = 0 if delta == 0 else delta / (1 - abs(2 * l - 1))
     return h, s, l

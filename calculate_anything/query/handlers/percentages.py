@@ -23,29 +23,48 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         return results[0]
 
+    def _find_amounts(self, amount1, amount2):
+        amount1 = self._use_calculator(amount1)
+        if amount1 is None:
+            return None
+
+        amount2 = self._use_calculator(amount2)
+        if amount2 is None:
+            return None
+
+        if amount1.error:
+            return NormalPercentageCalculation(
+                error=amount1.error,
+                amounts=(amount1, amount2),
+                order=amount1.order
+            )
+        if amount2.error:
+            return NormalPercentageCalculation(
+                error=amount2.error,
+                amounts=(amount1, amount2),
+                order=amount2.order
+            )
+
+        if amount1.value_type == Calculation.VALUE_BOOLEAN or \
+                amount2.value_type == Calculation.VALUE_BOOLEAN:
+            return PercentageCalculation(error=BooleanPercetageException, order=-20)
+
+        return amount1, amount2
+
     def _calculate_convert_normal(self, query):
         matches = PERCENTAGES_REGEX_MATCH_NORMAL.findall(query)
         if not matches:
             return None
 
         percentage_from, percentage_to = matches[0]
-        percentage_from = self._use_calculator(percentage_from)
-        if percentage_from is None:
+        result = self._find_amounts(percentage_from, percentage_to)
+
+        if result is None:
             return None
+        if isinstance(result, Calculation):
+            return result
 
-        percentage_to = self._use_calculator(percentage_to)
-        if percentage_to is None:
-            return None
-
-        if percentage_from.error or percentage_to.error:
-            return NormalPercentageCalculation(
-                error=percentage_from.error or percentage_to.error,
-                amounts=(percentage_from, percentage_to)
-            )
-
-        if percentage_from.value_type == Calculation.VALUE_BOOLEAN or percentage_to.value_type == Calculation.VALUE_BOOLEAN:
-            return PercentageCalculation(error=BooleanPercetageException, order=0)
-
+        percentage_from, percentage_to = result
         try:
             result = percentage_from.value * percentage_to.value / 100
             query_percentage_from = percentage_from.query
@@ -70,23 +89,15 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         percentage_from, percentage_to = matches[0]
 
-        percentage_from = self._use_calculator(percentage_from)
-        if percentage_from is None:
+        percentage_from, percentage_to = matches[0]
+        result = self._find_amounts(percentage_from, percentage_to)
+
+        if result is None:
             return None
+        if isinstance(result, Calculation):
+            return result
 
-        percentage_to = self._use_calculator(percentage_to)
-        if percentage_to is None:
-            return None
-
-        if percentage_from.error or percentage_to.error:
-            return InversePercentageCalculation(
-                error=percentage_from.error or percentage_to.error,
-                amounts=(percentage_from, percentage_to)
-            )
-
-        if percentage_from.value_type == Calculation.VALUE_BOOLEAN or percentage_to.value_type == Calculation.VALUE_BOOLEAN:
-            return PercentageCalculation(error=BooleanPercetageException, order=0)
-
+        percentage_from, percentage_to = result
         try:
             result = 100 * percentage_from.value / percentage_to.value
             query_from = percentage_from.query
@@ -95,12 +106,14 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return InversePercentageCalculation(
                 value=result,
                 query=query,
-                amounts=(percentage_from, percentage_to)
+                amounts=(percentage_from, percentage_to),
+                order=0
             )
         except ZeroDivisionError:
             return InversePercentageCalculation(
                 amounts=(percentage_from, percentage_to),
                 error=ZeroDivisionException,
+                order=-70
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover
@@ -143,23 +156,14 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         if not amount.strip() or not percentage.strip():
             return None
 
-        amount = self._use_calculator(amount)
-        if amount is None:
+        result = self._find_amounts(amount, percentage)
+
+        if result is None:
             return None
+        if isinstance(result, Calculation):
+            return result
 
-        percentage = self._use_calculator(percentage)
-        if percentage is None:
-            return None
-
-        if amount.error or percentage.error:
-            return PercentageCalculation(
-                error=amount.error or percentage.error,
-                amounts=(amount, percentage)
-            )
-
-        if percentage.value_type == Calculation.VALUE_BOOLEAN or amount.value_type == Calculation.VALUE_BOOLEAN:
-            return PercentageCalculation(error=BooleanPercetageException, order=0)
-
+        amount, percentage = result
         try:
             amount2 = percentage.value * amount.value / 100
             result = amount.value + amount2 if sign == '+' else amount.value - amount2

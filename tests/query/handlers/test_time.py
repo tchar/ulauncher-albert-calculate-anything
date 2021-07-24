@@ -204,17 +204,17 @@ test_spec_simple = [{
             'value': None,
             'query': '+ 8000000 years',
             'error': DateOverflowException,
-            'order': -10
+            'order': -50
         },
         'query_result': {
             'icon': 'images/time.svg',
             'name': tr_err('date-overflow'),
             'description': tr_err('date-overflow-description'),
             'clipboard': '',
-            'error': None,
+            'error': DateOverflowException,
             'value': None,
             'value_type': type(None),
-            'order': -10
+            'order': -50
         }
     }]
 },{
@@ -225,17 +225,17 @@ test_spec_simple = [{
             'value': None,
             'query': '+ 4000 years + 4000 years',
             'error': DateOverflowException,
-            'order': -10
+            'order': -50
         },
         'query_result': {
             'icon': 'images/time.svg',
             'name': tr_err('date-overflow'),
             'description': tr_err('date-overflow-description'),
             'clipboard': '',
-            'error': None,
+            'error': DateOverflowException,
             'value': None,
             'value_type': type(None),
-            'order': -10
+            'order': -50
         }
     }]
 }, {
@@ -250,7 +250,7 @@ test_spec_simple = [{
             'value': None,
             'query': '+ 0.1',
             'error': MisparsedTimeException,
-            'order': -100
+            'order': -80
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -260,7 +260,7 @@ test_spec_simple = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': -100
+            'order': -80
         }
     },]
 }]
@@ -327,7 +327,7 @@ test_spec_time = [{
             'value': None,
             'query': '+ 1 day',
             'error': MisparsedTimeException,
-            'order': -100
+            'order': -80
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -337,7 +337,7 @@ test_spec_time = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': -100
+            'order': -80
         }
     },
         get_result('Tomorrow', query='+ 1 day', order=0,
@@ -356,17 +356,17 @@ test_spec_time = [{
             'value': None,
             'query': '+ 20000000 YeaRs',
             'error': DateOverflowException,
-            'order': -10
+            'order': -50
         },
         'query_result': {
             'icon': 'images/time.svg',
             'name': tr_err('date-overflow'),
             'description': tr_err('date-overflow-description'),
             'clipboard': '',
-            'error': None,
+            'error': DateOverflowException,
             'value': None,
             'value_type': type(None),
-            'order': -10
+            'order': -50
         }
     }]
 }, {
@@ -444,7 +444,7 @@ test_spec_until = [{
             'value': None,
             'query': 'till',
             'error': MisparsedTimeException,
-            'order': -100
+            'order': -80
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -454,7 +454,7 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': -100
+            'order': -80
         }
     },
         get_result('Now', query='till', order=0)
@@ -466,7 +466,7 @@ test_spec_until = [{
             'value': None,
             'query': 'tIl tomorrow midnight',
             'error': MisparsedTimeException,
-            'order': -100
+            'order': -80
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -476,7 +476,7 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': -100
+            'order': -80
         }
     },
         get_resulttd(timedelta(days=1, seconds=36000),
@@ -490,7 +490,7 @@ test_spec_until = [{
             'value': None,
             'query': 'until',
             'error': MisparsedTimeException,
-            'order': -100
+            'order': -80
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -500,7 +500,7 @@ test_spec_until = [{
             'error': None,
             'value': None,
             'value_type': type(None),
-            'order': -100
+            'order': -80
         }
     }, get_result('Now', query='until', order=0),
     ]
@@ -512,17 +512,17 @@ test_spec_until = [{
             'value': None,
             'query': 'until 20000 yEaR',
             'error': DateOverflowException,
-            'order': -10
+            'order': -50
         },
         'query_result': {
             'icon': 'images/time.svg',
             'name': tr_err('date-overflow'),
             'description': tr_err('date-overflow-description'),
             'clipboard': '',
-            'error': None,
+            'error': DateOverflowException,
             'value': None,
             'value_type': type(None),
-            'order': -10
+            'order': -50
         }
     }]
 }]
@@ -542,7 +542,7 @@ test_spec_parsedatetime_missing = [{
             'value': None,
             'query': '',
             'error': MissingParsedatetimeException,
-            'order': -1
+            'order': -1000
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -552,7 +552,7 @@ test_spec_parsedatetime_missing = [{
             'error': MissingParsedatetimeException,
             'value': None,
             'value_type': type(None),
-            'order': -1
+            'order': -1000
         }
     }]
 }]

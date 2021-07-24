@@ -96,6 +96,7 @@ class BaseNQueryHandler(QueryHandler):
         return [expr], [], [expr_parsed]
 
     def handle_raw(self, query):
+        query = query.strip()
         original_query = query
         query = query.lower()
         results = []
@@ -103,25 +104,39 @@ class BaseNQueryHandler(QueryHandler):
         try:
             expr_dec, operators, expr_parsed = self.parse_expression(query)
         except WrongBaseException:
-            item = BaseNCalculation(error=WrongBaseException, order=-1)
+            item = BaseNCalculation(
+                error=WrongBaseException,
+                query=original_query,
+                order=-40
+            )
             return [item]
         except BaseFloatingPointException:
-            item = BaseNCalculation(error=BaseFloatingPointException, order=0)
+            item = BaseNCalculation(
+                error=BaseFloatingPointException,
+                query=original_query,
+                order=-30
+            )
             return [item]
-        except ValueError:
-            pass
         except Exception as e:
-            self.__logger.error(e)
+            self._logger.error(e)
             return None
 
         results = []
         try:
             results = [self._simple_eval.eval(exp) for exp in expr_dec]
         except MissingSimpleevalException:
-            item = BaseNCalculation(error=MissingSimpleevalException, order=-1)
+            item = BaseNCalculation(
+                error=MissingSimpleevalException,
+                query=original_query,
+                order=-1
+            )
             return [item]
         except ZeroDivisionError:
-            item = BaseNCalculation(error=ZeroDivisionException, order=-1)
+            item = BaseNCalculation(
+                error=ZeroDivisionException,
+                query=original_query,
+                order=-70
+            )
             return [item]
         except Exception:
             return None
@@ -130,9 +145,15 @@ class BaseNQueryHandler(QueryHandler):
             result = results[0]
             if not is_integer(result):
                 item = BaseNCalculation(
-                    error=BaseFloatingPointException, order=0)
+                    error=BaseFloatingPointException,
+                    order=0
+                )
             else:
-                item = BaseNCalculation(value=results[0], order=0)
+                item = BaseNCalculation(
+                    value=results[0],
+                    query=original_query,
+                    order=0
+                )
         # Boolean result
         elif len(results) > 1:
             item = CalculatorQueryHandler._calculate_boolean_result(
@@ -178,6 +199,7 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
                          (Base10Calculation, Base2Calculation, Base8Calculation))
 
     def handle_raw(self, query):
+        original_query = query.strip()
         items = []
 
         color_query = query.strip()
@@ -186,15 +208,20 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
             color_query = color_query[1:].strip()
             if self._digits_re.match(color_query) and len(color_query) == 6:
                 items.extend(ColorBase16Calculation.get_color_calculations(
-                    color_query, order_offset=len(items)))
+                    color_query, query=original_query, order_offset=len(items)
+                ))
         else:
             items_super = super().handle_raw(query)
             if items_super:
                 items.extend(items_super)
 
-        item = Base16StringCalculation(value=query, order=len(items))
+        non_errors = sum(map(lambda item: not item.error, items))
+        item = Base16StringCalculation(
+            value=query,
+            query=original_query,
+            order=non_errors
+        )
         items.append(item)
-
         return items
 
     @QueryHandler.Decorators.can_handle
