@@ -42,35 +42,37 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         items = []
         error_num = 0
-        query = event.get_argument() or ''
+        query = event.get_query() or ''
+        query = query.replace(event.get_keyword() + ' ', '', 1)
         mode = 'calculator'
         if event.get_keyword() == extension.preferences['time_kw']:
-            query = TimeQueryHandler().keyword + ' ' + query
+            query = TimeQueryHandler().keyword + query
             handlers = [TimeQueryHandler]
             mode = 'time'
         elif event.get_keyword() == extension.preferences['dec_kw']:
-            query = Base10QueryHandler().keyword + ' ' + query
+            query = Base10QueryHandler().keyword + query
             handlers = [Base10QueryHandler]
             mode = 'dec'
         elif event.get_keyword() == extension.preferences['hex_kw']:
-            query = Base16QueryHandler().keyword + ' ' + query
+            query = Base16QueryHandler().keyword + query
             handlers = [Base16QueryHandler]
             mode = 'hex'
         elif event.get_keyword() == extension.preferences['oct_kw']:
-            query = Base8QueryHandler().keyword + ' ' + query
+            query = Base8QueryHandler().keyword + query
             handlers = [Base8QueryHandler]
             mode = 'oct'
         elif event.get_keyword() == extension.preferences['bin_kw']:
-            query = Base2QueryHandler().keyword + ' ' + query
+            query = Base2QueryHandler().keyword + query
             handlers = [Base2QueryHandler]
             mode = 'bin'
         else:
-            query = CalculatorQueryHandler().keyword + ' ' + query
+            query = CalculatorQueryHandler().keyword + query
             handlers = [
                 CalculatorQueryHandler,
                 PercentagesQueryHandler,
                 UnitsQueryHandler,
             ]
+
         results = MultiHandler().handle(query, *handlers)
         for result in results:
             error_num += result.error is not None

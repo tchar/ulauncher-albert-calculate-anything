@@ -1,10 +1,10 @@
 import re
 import operator
 import ast
+from calculate_anything.utils import StupidEval
 try:
     from simpleeval import SimpleEval
 except ImportError:
-    from calculate_anything.utils import StupidEval
     SimpleEval = StupidEval
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.calculation.base_n import (
@@ -14,7 +14,9 @@ from calculate_anything.calculation.base_n import (
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 from calculate_anything.calculation.calculation import BooleanCalculation
-from calculate_anything.utils import multi_re, Singleton, is_integer
+import calculate_anything.utils.multi_re as multi_re
+from calculate_anything.utils.misc import is_integer
+from calculate_anything.utils.singleton import Singleton, singleton
 from calculate_anything.exceptions import (
     BaseFloatingPointException, MissingSimpleevalException,
     WrongBaseException, ZeroDivisionException
@@ -34,6 +36,16 @@ digits_base16_re = re.compile(r'^\s*([A-Fa-f0-9]+)\s*$')
 digits_base10_re = re.compile(r'^\s*([0-9]+)\s*$')
 
 
+@singleton
+def get_simple_eval():
+    simple_eval = SimpleEval()
+    if not isinstance(simple_eval, StupidEval):
+        simple_eval.operators[ast.BitOr] = operator.or_
+        simple_eval.operators[ast.BitAnd] = operator.and_
+        simple_eval.operators[ast.BitXor] = operator.xor
+    return simple_eval
+
+
 class BaseNQueryHandler(QueryHandler):
     def __init__(self, keyword, base, digits_re, base_class, convert_classes=[]):
         super().__init__(keyword)
@@ -41,11 +53,7 @@ class BaseNQueryHandler(QueryHandler):
         self._digits_re = digits_re
         self._base_class = base_class
         self._convert_classes = convert_classes
-        self._simple_eval = SimpleEval() if SimpleEval else None
-        if self._simple_eval:
-            self._simple_eval.operators[ast.BitOr] = operator.or_
-            self._simple_eval.operators[ast.BitAnd] = operator.and_
-            self._simple_eval.operators[ast.BitXor] = operator.xor
+        self._simple_eval = get_simple_eval()
         self._logger = logging.getLogger(__name__)
 
     def parse_expression(self, expression, split_eq=True, sub_kw=True):
@@ -93,6 +101,8 @@ class BaseNQueryHandler(QueryHandler):
                     raise BaseFloatingPointException
                 expr += c_dec
                 expr_parsed += c
+        if expr == '':
+            return [], [], []
         return [expr], [], [expr_parsed]
 
     def handle_raw(self, query):
@@ -128,7 +138,7 @@ class BaseNQueryHandler(QueryHandler):
             item = BaseNCalculation(
                 error=MissingSimpleevalException,
                 query=original_query,
-                order=-1
+                order=-1010
             )
             return [item]
         except ZeroDivisionError:
@@ -215,13 +225,15 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
             if items_super:
                 items.extend(items_super)
 
-        non_errors = sum(map(lambda item: not item.error, items))
-        item = Base16StringCalculation(
-            value=query,
-            query=original_query,
-            order=non_errors
-        )
-        items.append(item)
+        if query != '':
+            non_errors = sum(map(lambda item: not item.error, items))
+            item = Base16StringCalculation(
+                value=query,
+                query=original_query,
+                order=non_errors
+            )
+            items.append(item)
+
         return items
 
     @QueryHandler.Decorators.can_handle

@@ -8,5 +8,5 @@ from calculate_anything.utils import multi_re
 from calculate_anything.utils.colors import (
     hex_to_rgb, rgb_to_cmyk, rgb_to_hsv, rgb_to_hsl
 )
-from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.singleton import Singleton, singleton
 from calculate_anything.utils.datetime import merge_dates, parsedatetime_str

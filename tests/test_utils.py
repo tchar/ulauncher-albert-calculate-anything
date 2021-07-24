@@ -108,6 +108,10 @@ def test_singleton():
             self.args = args
             self.kwargs = kwargs
 
+    @utils.singleton
+    def singletonfunc(value):
+        return value
+
     t1 = SingletonClass()
     t2 = SingletonClass()
 
@@ -123,6 +127,10 @@ def test_singleton():
     assert id(t1.kwargs) == id(t2.kwargs)
     assert t1 == t2
     assert id(t1) == id(t2)
+
+    v1 = singletonfunc(1)
+    v2 = singletonfunc(2)
+    assert v1 == v2 == 1
 
 
 def test_stupid_eval():

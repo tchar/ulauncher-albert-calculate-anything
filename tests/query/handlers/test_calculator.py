@@ -3,7 +3,7 @@ from calculate_anything.lang import LanguageService
 from calculate_anything.utils.misc import StupidEval
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
-from tests.utils import no_simpleeval, reset_instance, query_test_helper
+from tests.utils import calculator_no_simpleeval, reset_instance, query_test_helper
 
 LanguageService().set('en_US')
 tr_calc = LanguageService().get_translator('calculator')
@@ -259,7 +259,7 @@ test_spec_missing_simpleeval = [{
 def test_missing_simpleeval(test_spec):
     # Allow CalculatorQueryHandler to be reinstantiated
 
-    with reset_instance(CalculatorQueryHandler, context=no_simpleeval):
+    with reset_instance(CalculatorQueryHandler, context=calculator_no_simpleeval):
         # Set stupid StupidEval as SimpleEval
         assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
         query_test_helper(CalculatorQueryHandler, test_spec)

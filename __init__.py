@@ -180,23 +180,23 @@ def handleQuery(query):
     if not TRIGGERS:
         handlers = []
     elif is_time_trigger(query):
-        query_str = TimeQueryHandler().keyword + ' ' + query_str
+        query_str = TimeQueryHandler().keyword + query_str
         handlers = [TimeQueryHandler]
         mode = 'time'
     elif is_dec_trigger(query):
-        query_str = Base10QueryHandler().keyword + ' ' + query_str
+        query_str = Base10QueryHandler().keyword + query_str
         handlers = [Base10QueryHandler]
         mode = 'dec'
     elif is_hex_trigger(query):
-        query_str = Base16QueryHandler().keyword + ' ' + query_str
+        query_str = Base16QueryHandler().keyword + query_str
         handlers = [Base16QueryHandler]
         mode = 'hex'
     elif is_oct_trigger(query):
-        query_str = Base8QueryHandler().keyword + ' ' + query_str
+        query_str = Base8QueryHandler().keyword + query_str
         handlers = [Base8QueryHandler]
         mode = 'oct'
     elif is_bin_trigger(query):
-        query_str = Base2QueryHandler().keyword + ' ' + query_str
+        query_str = Base2QueryHandler().keyword + query_str
         handlers = [Base2QueryHandler]
         mode = 'bin'
     else:

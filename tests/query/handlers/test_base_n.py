@@ -8,10 +8,11 @@ from calculate_anything.query.handlers import (
 )
 from calculate_anything.exceptions import (
     BaseFloatingPointException,
+    MissingSimpleevalException,
     WrongBaseException,
     ZeroDivisionException
 )
-from tests.utils import query_test_helper
+from tests.utils import base_n_no_simpleeval, query_test_helper, reset_instance
 
 
 LanguageService().set('en_US')
@@ -75,7 +76,6 @@ def result_for_base16_string(value, query, order):
 
 
 def result_for_colors(value, query, order, color):
-    print(value)
     if color == 'RGB':
         name = '{}, {}, {}'.format(*value)
     elif color == 'HSV':
@@ -167,9 +167,26 @@ def result_for_base_floating_point_exc(query):
     }
 
 
-missing_simpleeval_result = {
+def missing_simpleeval_result(query):
+    return {
+        'result': {
+            'query': query,
+            'value': None,
+            'error': MissingSimpleevalException,
+            'order': -1010
+        },
+        'query_result': {
+            'icon': 'images/icon.svg',
+            'name': tr_err('missing-simpleeval-error'),
+            'description': tr_err('missing-simpleeval-error-description'),
+            'clipboard': 'pip install simpleeval',
+            'error': MissingSimpleevalException,
+            'order': -1010,
+            'value': None,
+            'value_type': type(None)
+        }
+    }
 
-}
 
 test_spec_base10 = [{
     # Simple test
@@ -282,3 +299,35 @@ test_spec_base16 = [{
 @pytest.mark.parametrize('test_spec', test_spec_base16)
 def test_base10(test_spec):
     query_test_helper(Base16QueryHandler, test_spec)
+
+
+test_spec_missing_simpleeval = [{
+    'query': 'hex aff mod 2',
+    'results': [
+        missing_simpleeval_result('aff mod 2'),
+        result_for_base16_string(
+            '20:61:66:66:20:6d:6f:64:20:32',
+            'aff mod 2',
+            0
+        )
+    ],
+    'class': Base16QueryHandler
+}, {
+    'query': 'dec 10 mod 2',
+    'results': [missing_simpleeval_result('10 mod 2')],
+    'class': Base10QueryHandler
+}, {
+    'query': 'bin 10 mod 1',
+    'results': [missing_simpleeval_result('10 mod 1')],
+    'class': Base2QueryHandler
+}, {
+    'query': 'oct 10 mod 7',
+    'results': [missing_simpleeval_result('10 mod 7')],
+    'class': Base8QueryHandler
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec_missing_simpleeval)
+def test_missing_simpleeval(test_spec):
+    with reset_instance(test_spec['class'], context=base_n_no_simpleeval):
+        query_test_helper(test_spec['class'], test_spec)

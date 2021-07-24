@@ -1,4 +1,3 @@
-from types import LambdaType
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
@@ -6,6 +5,7 @@ from simpleeval import SimpleEval
 import parsedatetime
 from calculate_anything.time.service import TimezoneService
 import calculate_anything.query.handlers.calculator as calculator_handler
+import calculate_anything.query.handlers.base_n as base_n_handler
 import calculate_anything.query.handlers.time as time_handler
 from calculate_anything.utils import Singleton, StupidEval
 
@@ -16,11 +16,20 @@ def empty_ctx():
 
 
 @contextmanager
-def no_simpleeval():
+def calculator_no_simpleeval():
     calculator_handler.SimpleEval = StupidEval
     yield
     calculator_handler.SimpleEval = SimpleEval
 
+@contextmanager
+def base_n_no_simpleeval():
+    base_n_handler.SimpleEval = StupidEval
+    get_simple_eval = base_n_handler.get_simple_eval
+    base_n_handler.get_simple_eval = lambda: StupidEval()
+    yield
+    base_n_handler.get_simple_eval = get_simple_eval
+    base_n_handler.SimpleEval = SimpleEval
+    
 
 @contextmanager
 def no_parsedatetime():
