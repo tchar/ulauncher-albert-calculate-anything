@@ -1,4 +1,5 @@
 from functools import wraps
+from abc import abstractmethod
 
 class QueryHandler:
     class Decorators:
@@ -28,9 +29,11 @@ class QueryHandler:
             return False
         return True
 
+    @abstractmethod
     def handle_raw(self, query, *args, **kwargs):
         pass
 
+    @abstractmethod
     @Decorators.can_handle
     def handle(self, query, *args, **kwargs):
         pass
