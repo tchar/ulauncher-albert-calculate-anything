@@ -58,7 +58,7 @@ test_spec_normal = [{
     'query': '= 1231 / (1-1) % of 2.477',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1231 / (1-1) % of 2.477',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70
@@ -79,7 +79,7 @@ test_spec_normal = [{
     'query': '= 10 = 10% of 2',
     'results': [{
         'result': {
-            'query': '',
+            'query': '10 = 10% of 2',
             'value': None,
             'error': BooleanPercetageException,
             'order': -20
@@ -100,7 +100,7 @@ test_spec_normal = [{
     'query': '= 1=0 % of 0',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1=0 % of 0',
             'value': None,
             'error': BooleanPercetageException,
             'order': -20
@@ -180,7 +180,7 @@ test_spec_inverse = [{
     'query': '= 1 /0 as % of  10',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1 /0 as % of  10',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70
@@ -201,7 +201,7 @@ test_spec_inverse = [{
     'query': '= 1 =1 as % of  2',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1 =1 as % of  2',
             'value': None,
             'error': BooleanPercetageException,
             'order': -20
@@ -222,7 +222,7 @@ test_spec_inverse = [{
     'query': '= 1 / 0 as % of  1 = 1',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1 / 0 as % of  1 = 1',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70
@@ -243,7 +243,7 @@ test_spec_inverse = [{
     'query': '= 2.25 as % of 0',
     'results': [{
         'result': {
-            'query': '',
+            'query': '2.25 as % of 0',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70
@@ -348,7 +348,7 @@ test_spec_calc = [{
     'query': '= 10 + 0.5/0 + 2%',
     'results': [{
         'result': {
-            'query': '',
+            'query': '10 + 0.5/0 + 2%',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70
@@ -369,7 +369,7 @@ test_spec_calc = [{
     'query': '= 10 = 10 + 2%',
     'results': [{
         'result': {
-            'query': '',
+            'query': '10 = 10 + 2%',
             'value': None,
             'error': BooleanPercetageException,
             'order': -20
@@ -390,7 +390,7 @@ test_spec_calc = [{
     'query': '= 1/0 + 2=2%',
     'results': [{
         'result': {
-            'query': '',
+            'query': '1/0 + 2=2%',
             'value': None,
             'error': ZeroDivisionException,
             'order': -70

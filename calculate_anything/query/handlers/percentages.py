@@ -23,7 +23,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         return results[0]
 
-    def _find_amounts(self, amount1, amount2):
+    def _find_amounts(self, amount1, amount2, query):
         amount1 = self._use_calculator(amount1)
         if amount1 is None:
             return None
@@ -36,18 +36,24 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return NormalPercentageCalculation(
                 error=amount1.error,
                 amounts=(amount1, amount2),
+                query=query,
                 order=amount1.order
             )
         if amount2.error:
             return NormalPercentageCalculation(
                 error=amount2.error,
                 amounts=(amount1, amount2),
+                query=query,
                 order=amount2.order
             )
 
         if amount1.value_type == Calculation.VALUE_BOOLEAN or \
                 amount2.value_type == Calculation.VALUE_BOOLEAN:
-            return PercentageCalculation(error=BooleanPercetageException, order=-20)
+            return PercentageCalculation(
+                error=BooleanPercetageException,
+                query=query,
+                order=-20
+            )
 
         return amount1, amount2
 
@@ -57,7 +63,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         percentage_from, percentage_to = matches[0]
-        result = self._find_amounts(percentage_from, percentage_to)
+        result = self._find_amounts(percentage_from, percentage_to, query)
 
         if result is None:
             return None
@@ -90,7 +96,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         percentage_from, percentage_to = matches[0]
 
         percentage_from, percentage_to = matches[0]
-        result = self._find_amounts(percentage_from, percentage_to)
+        result = self._find_amounts(percentage_from, percentage_to, query)
 
         if result is None:
             return None
@@ -112,6 +118,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         except ZeroDivisionError:
             return InversePercentageCalculation(
                 amounts=(percentage_from, percentage_to),
+                query=query,
                 error=ZeroDivisionException,
                 order=-70
             )
@@ -156,7 +163,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         if not amount.strip() or not percentage.strip():
             return None
 
-        result = self._find_amounts(amount, percentage)
+        result = self._find_amounts(amount, percentage, query)
 
         if result is None:
             return None
@@ -184,6 +191,8 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
     def handle_raw(self, query):
         if '%' not in query:
             return None
+
+        query = query.strip()
 
         calculation = self._calculate_convert_normal(query)
 
