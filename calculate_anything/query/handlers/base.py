@@ -21,7 +21,7 @@ class QueryHandler:
     def query_without_keyword(self, query, check=False):
         if check and not self.can_handle(query):
             return ''
-        return query[len(self.keyword):].strip()
+        return query[len(self.keyword):]
 
     def can_handle(self, query):
         if not query.startswith(self.keyword):

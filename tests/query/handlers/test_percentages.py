@@ -303,7 +303,7 @@ test_spec_calc = [{
     }],
 }, {
     # Complex test
-    'query': '= sqrt(1) + 2 + 5i + 125 + 5i + 3.5%',
+    'query': '= sqrt(1) + 2 + 5i + 125 + 5i + 3.5% ',
     'results': [{
         'result': {
             'value': pytest.approx(132.48 + 10.35j),
@@ -319,6 +319,27 @@ test_spec_calc = [{
             'error': None,
             'order': 0,
             'value': pytest.approx(132.48 + 10.35j),
+            'value_type': complex
+        }
+    }],
+}, {
+    # Imaginary test
+    'query': '= 5i + sqrt(2)%',
+    'results': [{
+        'result': {
+            'value': pytest.approx(5.07071j),
+            'query': '(5j) + (sqrt(2))%',
+            'error': None,
+            'order': 0
+        },
+        'query_result': {
+            'icon': 'images/icon.svg',
+            'name': '5.07071i',
+            'description': '(5i) + (1.41421)% ({})'.format(tr_calc('result-imaginary').capitalize()),
+            'clipboard': '5.07071i',
+            'error': None,
+            'order': 0,
+            'value': pytest.approx(5.07071j),
             'value_type': complex
         }
     }],
@@ -393,7 +414,15 @@ test_spec_calc = [{
     # Percentage uncalculateable
     'query': '= 2.255 + Some amount%',
     'results': [],
-}]
+}, {
+    # No 2 amounts 1
+    'query': '= 100%',
+    'results': [],
+}, {
+    # No 2 amounts 2
+    'query': '= + 100%',
+    'results': [],
+},]
 
 
 @pytest.mark.parametrize('test_spec', test_spec_calc)

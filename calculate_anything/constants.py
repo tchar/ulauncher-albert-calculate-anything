@@ -54,7 +54,7 @@ PERCENTAGES_REGEX_MATCH_NORMAL = re.compile(
     r'^\s*(.*)% of (.*)\s*$', flags=re.IGNORECASE)
 PERCENTAGES_REGEX_MATCH_INVERSE = re.compile(
     r'^\s*(.*)\s*(?:as|is what|in)\s*(?: a)?\s*(?:%|percent(?:age)?)\s(?:of )?(.*)\s*$', flags=re.IGNORECASE)
-PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^\s*(.*)\s*(\+|-)\s*(.*)\s*%\s*$')
+PERCENTAGES_REGEX_CALC_MATCH = re.compile(r'^.*%\s*$')
 
 TIME_QUERY_REGEX_SPLIT = re.compile(
     r'(?:^|\s+)(in?|at?|(?:un)?till?)(?:\s+|$)', flags=re.IGNORECASE)

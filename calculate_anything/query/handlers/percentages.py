@@ -112,11 +112,36 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         query = query.lower()
         query = PLUS_MINUS_REGEX.sub_dict(query)
 
-        matches = PERCENTAGES_REGEX_CALC_MATCH.findall(query)
-        if not matches:
+        if not PERCENTAGES_REGEX_CALC_MATCH.findall(query):
             return None
 
-        amount, sign, percentage = matches[0]
+        # Parse expression because it is ambiguous and difficult to match with regex
+        signs = set(['+', '-'])
+        percent_symbol_index = -1
+        parens = 0
+        for i, c in enumerate(reversed(query)):
+            if percent_symbol_index == -1 and c != '%':
+                continue
+            if c == '%':
+                percent_symbol_index = i
+                continue
+            if c == ')':
+                parens += 1
+            elif c == '(':
+                parens -= 1
+            if c in signs and parens == 0:
+                break
+        else:
+            return None
+
+        i = len(query) - i - 1
+        percent_symbol_index = len(query) - percent_symbol_index - 1
+
+        amount = query[:i]
+        sign = query[i]
+        percentage = query[i+1:percent_symbol_index]
+        if not amount.strip() or not percentage.strip():
+            return None
 
         amount = self._use_calculator(amount)
         if amount is None:
