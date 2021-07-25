@@ -369,6 +369,6 @@ Here is a demo
 
 If your currencie's flag is missing you can place it in the extension's flags directory at `images/flags/` and restart your launcher or make a pull request to include it.
 
-Make sure to name your flag image in uppercase 2 letter name of your country. To make a currency flag, simply link the country flag you want to the currency `e.g ln -s US.svg USD.svg` or add a completely new flat For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
+Make sure to name your flag image in uppercase 2 letter name of your country. To make a currency flag, simply link the country flag you want to the currency `e.g ln -s US.svg USD.svg` or add a completely new flag For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
 
-<div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+<div>Flag Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

@@ -253,6 +253,16 @@ test_spec_currency = [{
             order=1, icon='images/flags/AMD.svg'
         ), ]
 }, {
+    # Only one result (do not show duplicate 10 CAD)
+    'query': '= 10 CAD to CAD',
+    'results': [
+        get_unit_result(
+            '10 currency_CAD to currency_CAD',
+            approxunits(currency_amount(10, 'CAD', 'CAD', True)),
+            '10.00 CAD', '', order=0, icon='images/flags/CAD.svg'
+        ),
+    ]
+}, {
     'query': '= 0.1 BTC to cad,EUR,USD,AED',
     'results': [
         get_unit_result(

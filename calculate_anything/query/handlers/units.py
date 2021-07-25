@@ -203,7 +203,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 if unit_from_ureg_dim in unit_dimensionalities:
                     continue
                 if UnitsCalculation.is_currency(unit_from_ureg):
-                    unit_from_ureg_currency = unit_from_ureg.units
+                    unit_from_ureg_currency = unit_from_ureg
                 units_from_ureg.append(unit_from_ureg)
                 unit_dimensionalities.add(unit_from_ureg_dim)
 
@@ -212,11 +212,17 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         if not units_to:
             # Add currency units if compattible with units from and map them to units
+            if unit_from_ureg_currency:
+                unit_from_ureg_currency_str = str(
+                    unit_from_ureg_currency.units)
+            else:
+                unit_from_ureg_currency_str = None
+
             units_to_curr = CurrencyService().default_currencies
             units_to_curr = map(
                 lambda s: 'currency_{}'.format(s), units_to_curr)
-            units_to_curr = filter(lambda s: s != str(
-                unit_from_ureg_currency), units_to_curr)
+            units_to_curr = filter(
+                lambda s: s != unit_from_ureg_currency_str, units_to_curr)
             units_to_curr = map(ureg.parse_unit_name, units_to_curr)
             units_to_curr = map(lambda u: ' '.join(
                 u[0]) if u else '', units_to_curr)
@@ -258,10 +264,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
             kwargs = {}
             if UnitsCalculation.is_currency(unit_converted):
-                UnitClass = CurrencyUnitsCalculation
-                kwargs = {'update_timestamp': UnitsService(
-                ).get_rate_timestamp(unit_to_ureg)}
                 added_currency = True
+                # Continue in if same units, it will be added later
+                if unit_converted.units == unit_from_ureg.units:
+                    continue
+                UnitClass = CurrencyUnitsCalculation
+                kwargs = {
+                    'update_timestamp': UnitsService().get_rate_timestamp(unit_to_ureg)
+                }
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation
             else:
@@ -286,13 +296,13 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         if unit_from_ureg_currency and added_currency:
             items.append(
                 CurrencyUnitsCalculation(
-                    value=unit_from_ureg,
+                    value=unit_from_ureg_currency,
                     rate=None,
-                    unit_from=unit_from_ureg.units,
-                    unit_to=unit_from_ureg.units,
+                    unit_from=unit_from_ureg_currency.units,
+                    unit_to=unit_from_ureg_currency.units,
                     query='{0} {1} to {1}'.format(
-                        unit_from_ureg.magnitude,
-                        unit_from_ureg.units
+                        unit_from_ureg_currency.magnitude,
+                        unit_from_ureg_currency.units
                     ),
                     order=len(items),
                     update_timestamp=None
