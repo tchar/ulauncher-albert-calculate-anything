@@ -7,12 +7,10 @@ from prompt_toolkit import HTML, PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.key_binding import KeyBindings
-from calculate_anything.units.service import UnitsService
-from calculate_anything.currency.service import CurrencyService
-from calculate_anything.time.service import TimezoneService
-from calculate_anything import init, logging
+from calculate_anything.preferences import Preferences
+from calculate_anything import logging
 from calculate_anything.lang import LanguageService
-from calculate_anything.query import MultiHandler
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,
@@ -37,25 +35,21 @@ class SilentLogger:
 # Setup Calculate Anything (Order is important)
 # Uncomment this line to get log messages (use patch stdout in such case)
 logging.set_logging(SilentLogger())
-# Init to initialize Services properly
-init()
 
 # Set the language
-LanguageService().set('en_US')
-
-# Start the UnitService before currency so we get updates
-UnitsService().run()
+preferences = Preferences()
+preferences.language.set('en_US')
 
 # Set some default currencies
-CurrencyService().set_default_currencies(['USD', 'EUR', 'CAD', 'BTC'])
+preferences.currency.set_default_currencies(['USD', 'EUR', 'CAD', 'BTC'])
 
-# Enable currency service and cache
-CurrencyService().enable_cache(60 * 60 * 24).run()
+# Enable currency service and cache and run every day
+preferences.currency.enable_cache(60 * 60 * 24)
 
 # Set default cities for timezone conversion
-default_cities = TimezoneService.parse_default_cities(
-    'London GB,Athens GR,Tokyo JP')
-TimezoneService().set_default_cities(default_cities)
+preferences.time.set_default_cities('London GB,Athens GR,Tokyo JP')
+
+preferences.commit()
 # End setup
 
 # Define keywords, change dictionary keys to whatever you want
