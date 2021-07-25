@@ -65,7 +65,7 @@ class DateOverflowException(TimeException):
     pass
 
 
-class MisparsedTimeException(TimeException):
+class MisparsedDateTimeException(TimeException):
     pass
 
 # Exceptions for missing modules

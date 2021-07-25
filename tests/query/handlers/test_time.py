@@ -1,3 +1,4 @@
+from calculate_anything.utils.datetime import is_leap_year
 from functools import lru_cache
 from datetime import datetime, timedelta
 import parsedatetime
@@ -11,7 +12,7 @@ from calculate_anything.constants import (
     TIME_TIME_FORMAT
 )
 from calculate_anything.exceptions import (
-    DateOverflowException, MisparsedTimeException,
+    DateOverflowException, MisparsedDateTimeException,
     MissingParsedatetimeException
 )
 from tests.utils import (
@@ -63,9 +64,16 @@ def timedelta_to_ydhms(dt: datetime, ref: datetime):
         sg = ''
 
     y = dt.year - ref.year
-    dt = dt.replace(year=ref.year)
+    old_dt = dt
+    # Check if target date is february 29 before replacing years
+    # If not reference is leap year move to March 1st
+    if dt.month == 2 and dt.day == 29 \
+            and not is_leap_year(ref.year):
+        dt = dt.replace(year=ref.year, month=3, day=1)
+    else:
+        dt = dt.replace(year=ref.year)
     if dt < ref:
-        dt = dt.replace(year=ref.year + y)
+        dt = old_dt
         y = 0
     td = dt - ref
     d = td.days
@@ -174,6 +182,36 @@ def get_resulttd(target: timedelta, query: str, order: int):
     }
 
 
+def get_resultexc(query, exception, name_post='', desc_post=''):
+    if exception == DateOverflowException:
+        order = -50
+        name_key = 'date-overflow'
+        desc_key = 'date-overflow-description'
+    elif exception == MisparsedDateTimeException:
+        order = -80
+        name_key = 'misparsed-datetime'
+        desc_key = 'misparsed-datetime-description'
+
+    return {
+        'result': {
+            'value': None,
+            'query': query,
+            'error': exception,
+            'order': order
+        },
+        'query_result': {
+            'icon': 'images/time.svg',
+            'name': tr_err(name_key) + name_post,
+            'description': tr_err(desc_key) + desc_post,
+            'clipboard': '',
+            'error': exception,
+            'value': None,
+            'value_type': type(None),
+            'order': order
+        }
+    }
+
+
 test_spec_simple = [{
     # Normal test 1
     'query': 'time',
@@ -199,45 +237,11 @@ test_spec_simple = [{
 }, {
     # Overflow with one chunk
     'query': 'time + 8000000 years',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': '+ 8000000 years',
-            'error': DateOverflowException,
-            'order': -50
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': tr_err('date-overflow'),
-            'description': tr_err('date-overflow-description'),
-            'clipboard': '',
-            'error': DateOverflowException,
-            'value': None,
-            'value_type': type(None),
-            'order': -50
-        }
-    }]
-},{
+    'results': [get_resultexc('+ 8000000 years', DateOverflowException)]
+}, {
     # Overflow with multiple chunks
     'query': 'time + 4000 years + 4000 years',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': '+ 4000 years + 4000 years',
-            'error': DateOverflowException,
-            'order': -50
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': tr_err('date-overflow'),
-            'description': tr_err('date-overflow-description'),
-            'clipboard': '',
-            'error': DateOverflowException,
-            'value': None,
-            'value_type': type(None),
-            'order': -50
-        }
-    }]
+    'results': [get_resultexc('+ 4000 years + 4000 years', DateOverflowException)]
 }, {
     # Not parsed
     'query': 'time + 1 microsecond',
@@ -245,24 +249,11 @@ test_spec_simple = [{
 }, {
     # Partially parsed
     'query': 'time + 0.1 microsecond',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': '+ 0.1',
-            'error': MisparsedTimeException,
-            'order': -80
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': '{}: "time + 0.1"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time + 0.1 microsecond"'.format(tr_err('unfully-parsed-date-description')),
-            'clipboard': '',
-            'error': None,
-            'value': None,
-            'value_type': type(None),
-            'order': -80
-        }
-    },]
+    'results': [get_resultexc(
+        '+ 0.1', MisparsedDateTimeException,
+        name_post=': "time + 0.1"',
+        desc_post=': "time + 0.1 microsecond"'
+    ), ]
 }]
 
 
@@ -322,24 +313,12 @@ test_spec_time = [{
 }, {
     # Test partial matching
     'query': 'time + 1 day 2 some text',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': '+ 1 day',
-            'error': MisparsedTimeException,
-            'order': -80
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': '{}: "time + 1 day"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time + 1 day 2 some text"'.format(tr_err('unfully-parsed-date-description')),
-            'clipboard': '',
-            'error': None,
-            'value': None,
-            'value_type': type(None),
-            'order': -80
-        }
-    },
+    'results': [
+        get_resultexc(
+            '+ 1 day', MisparsedDateTimeException,
+            name_post=': "time + 1 day"',
+            desc_post=': "time + 1 day 2 some text"'
+        ),
         get_result('Tomorrow', query='+ 1 day', order=0,
                    td=td_pdt(day=1)),
         get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day', order=1,
@@ -351,24 +330,7 @@ test_spec_time = [{
 }, {
     # Test overflows
     'query': 'time + 20000000 YeaRs',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': '+ 20000000 YeaRs',
-            'error': DateOverflowException,
-            'order': -50
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': tr_err('date-overflow'),
-            'description': tr_err('date-overflow-description'),
-            'clipboard': '',
-            'error': DateOverflowException,
-            'value': None,
-            'value_type': type(None),
-            'order': -50
-        }
-    }]
+    'results': [get_resultexc('+ 20000000 YeaRs', DateOverflowException)]
 }, {
     # Invalid query 1
     'query': 'time ++ 1 month',
@@ -437,94 +399,60 @@ test_spec_until = [{
         get_result('Now', query='uNTill tomorrow', order=1),
     ]
 }, {
+    # Test february 29 leap year
+    'query': 'time until Feb 29 2024',
+    'results': [
+        get_resulttd(timedelta(days=959),
+                     query='until Feb 29 2024', order=0),
+        get_result('Now', query='until Feb 29 2024', order=1),
+    ]
+}, {
+    # Test february 29 no year
+    'query': 'time until Feb 29 2025',
+    'results': [get_resultexc('until Feb 29 2025', DateOverflowException)]
+}, {
     # Cannot parse until
     'query': 'time till SomeRandomString',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': 'till',
-            'error': MisparsedTimeException,
-            'order': -80
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': '{}: "time till"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time till SomeRandomString"'.format(tr_err('unfully-parsed-date-description')),
-            'clipboard': '',
-            'error': None,
-            'value': None,
-            'value_type': type(None),
-            'order': -80
-        }
-    },
+    'results': [
+        get_resultexc(
+            'till', MisparsedDateTimeException,
+            name_post=': "time till"',
+            desc_post=': "time till SomeRandomString"'
+        ),
         get_result('Now', query='till', order=0)
     ]}, {
     # Partial parse until
     'query': 'time tIl tomorrow midnight m',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': 'tIl tomorrow midnight',
-            'error': MisparsedTimeException,
-            'order': -80
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': '{}: "time tIl tomorrow midnight"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time tIl tomorrow midnight m"'.format(tr_err('unfully-parsed-date-description')),
-            'clipboard': '',
-            'error': None,
-            'value': None,
-            'value_type': type(None),
-            'order': -80
-        }
-    },
+    'results': [
+        get_resultexc(
+            'tIl tomorrow midnight', MisparsedDateTimeException,
+            name_post=': "time tIl tomorrow midnight"',
+            desc_post=': "time tIl tomorrow midnight m"'
+        ),
         get_resulttd(timedelta(days=1, seconds=36000),
                      query='tIl tomorrow midnight', order=0),
         get_result('Now', query='tIl tomorrow midnight', order=1)
     ]}, {
     # Do not match digits only
     'query': 'time until 1245',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': 'until',
-            'error': MisparsedTimeException,
-            'order': -80
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': '{}: "time until"'.format(tr_err('unfully-parsed-date')),
-            'description': '{}: "time until 1245"'.format(tr_err('unfully-parsed-date-description')),
-            'clipboard': '',
-            'error': None,
-            'value': None,
-            'value_type': type(None),
-            'order': -80
-        }
-    }, get_result('Now', query='until', order=0),
+    'results': [
+        get_resultexc(
+             'until', MisparsedDateTimeException,
+            name_post=': "time until"',
+            desc_post=': "time until 1245"'
+        ),
+        get_result('Now', query='until', order=0),
     ]
 }, {
     # Test overflows
     'query': 'time until 20000 yEaR',
-    'results': [{
-        'result': {
-            'value': None,
-            'query': 'until 20000 yEaR',
-            'error': DateOverflowException,
-            'order': -50
-        },
-        'query_result': {
-            'icon': 'images/time.svg',
-            'name': tr_err('date-overflow'),
-            'description': tr_err('date-overflow-description'),
-            'clipboard': '',
-            'error': DateOverflowException,
-            'value': None,
-            'value_type': type(None),
-            'order': -50
-        }
-    }]
+    'results': [get_resultexc('until 20000 yEaR', DateOverflowException)]
+}, {
+    # Some generic testing 1
+    'query': 'time until',
+    'results': [
+        get_result('Now', query='until', order=0),
+    ]
 }]
 
 

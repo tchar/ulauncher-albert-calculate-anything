@@ -1,6 +1,11 @@
 from operator import sub
 from itertools import zip_longest
 
+# https://stackoverflow.com/a/30714165
+def is_leap_year(year):
+    """Determine whether a year is a leap year."""
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
 
 def merge_dates(reference_date, dates, signs):
     if not dates:

@@ -5,7 +5,7 @@ from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import (
     BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
-    DateOverflowException, MisparsedTimeException, WrongBaseException, ZeroDivisionException,
+    DateOverflowException, MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
     BooleanPercetageException, MissingPintException
 )
@@ -147,9 +147,9 @@ def zero_division_error_query_result():
 
 def misparsed_time_exception(calculation):
     translator = LanguageService().get_translator('errors')
-    name = translator('unfully-parsed-date')
+    name = translator('misparsed-datetime')
     name = '{}: "{}"'.format(name, calculation.error.extra['parsed_query'])
-    description = translator('unfully-parsed-date-description')
+    description = translator('misparsed-datetime-description')
     description = '{}: "{}"'.format(
         description, calculation.error.extra['original_query'])
     return QueryResult(
@@ -157,6 +157,7 @@ def misparsed_time_exception(calculation):
         name=name,
         description=description,
         clipboard='',
+        error=MisparsedDateTimeException,
         order=-80
     )
 
@@ -178,7 +179,7 @@ class _Calculation:
                     return zero_division_error_query_result()
                 if self.is_error(DateOverflowException):
                     return date_overflow_error_query_result(self)
-                if isinstance(self.error, MisparsedTimeException):
+                if isinstance(self.error, MisparsedDateTimeException):
                     return misparsed_time_exception(self)
                 if self.is_error(CurrencyProviderException):
                     return currency_provider_error_query_result()

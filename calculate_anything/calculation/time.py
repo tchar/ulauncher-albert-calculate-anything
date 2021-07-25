@@ -1,3 +1,4 @@
+from calculate_anything.utils.datetime import is_leap_year
 from calculate_anything.lang import LanguageService
 from calculate_anything.calculation.base import _Calculation
 from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT, TIME_TIME_FORMAT
@@ -107,7 +108,7 @@ class LocationTimeCalculation(TimeCalculation):
             icon = 'images/flags/{}'.format(FLAGS[country_code])
         else:
             # Can't test this since we possible have all flags, leave it just in case
-            icon = 'images/country.svg' # pragma: no cover
+            icon = 'images/country.svg'  # pragma: no cover
 
         return QueryResult(
             icon=icon,
@@ -121,7 +122,8 @@ class LocationTimeCalculation(TimeCalculation):
 
 class TimedeltaCalculation(TimeCalculation):
     def __init__(self, value=None, reference_date=None, target_date=None, query='', error=None, order=0):
-        super().__init__(value=value, reference_date=reference_date, query=query, error=error, order=order)
+        super().__init__(value=value, reference_date=reference_date,
+                         query=query, error=error, order=order)
         self.target_date = target_date
 
     def _calculate_diff(self):
@@ -134,15 +136,17 @@ class TimedeltaCalculation(TimeCalculation):
             sign = 1
 
         years_diff = target_date.year - reference.year
-        value = target_date.replace(year=reference.year)
+        old_value = target_date
+        # Check if target date is february 29 before replacing years
+        # If not reference is leap year move to March 1st
+        if target_date.month == 2 and target_date.day == 29 \
+                and not is_leap_year(reference.year):
+            value = target_date.replace(year=reference.year, month=3, day=1)
+        else:
+            value = target_date.replace(year=reference.year)
         if value < reference:
-            value = value.replace(year=reference.year + years_diff)
+            value = old_value
             years_diff = 0
-        # months_diff = value.month - reference.month
-        # value = value.replace(month=reference.month)
-        # if value < reference:
-        #     value = value.replace(month=reference.month + months_diff)
-        #     months_diff  = 0
         date_dt = value - reference
         days_diff = date_dt.days
         hours_diff, remainder = divmod(date_dt.seconds, 3600)

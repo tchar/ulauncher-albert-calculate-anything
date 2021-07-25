@@ -84,8 +84,8 @@
         "date-overflow": "Hey I'm not a time machine",
         "date-overflow-description": "Are you trying to crash me?",
 
-        "unfully-parsed-date": "I understood",
-        "unfully-parsed-date-description": "You typed",
+        "misparsed-datetime": "I understood",
+        "misparsed-datetime-description": "You typed",
 
         "boolean-percentage-error": "Boolean in percentage calculation",
         "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",

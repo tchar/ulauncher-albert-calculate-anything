@@ -13,7 +13,7 @@ from calculate_anything.calculation.time import (
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.exceptions import (
     MissingParsedatetimeException, DateOverflowException,
-    MisparsedTimeException
+    MisparsedDateTimeException
 )
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.utils.iter import partition, flatten, deduplicate
@@ -36,15 +36,6 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 version=parsedatetime.VERSION_CONTEXT_STYLE)
         else:
             self._cal = None
-
-    # TODO: To be removed
-    # @staticmethod
-    # def _timedelta_overflows(query, td):
-    #     is_zero = TIME_SUBQUERY_DIGITS.findall(query)
-    #     is_zero = map(float, is_zero)
-    #     is_zero = map(lambda x: x == 0, is_zero)
-    #     is_zero = all(is_zero)
-    #     return not is_zero and td == timedelta()
 
     @staticmethod
     def now():
@@ -128,7 +119,12 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _get_until(self, keyword, query):
         now = TimeQueryHandler.now()
-        date, _, parsed_query, match, overflow = self._parse_dt(query, now)
+        if query.strip() == '':
+            date, parsed_query, match, overflow = now, '', True, False
+            no_query = True
+        else:            
+            date, _, parsed_query, match, overflow = self._parse_dt(query, now)
+            no_query = False
 
         if parsed_query:
             parsed_query_kw = '{} {}'.format(keyword, parsed_query)
@@ -142,7 +138,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
             item1 = TimedeltaCalculation(
                 query=keyword,
-                error=MisparsedTimeException(
+                error=MisparsedDateTimeException(
                     message='Could not fully parse',
                     extra={
                         'original_query': original_query_kw_kw,
@@ -180,7 +176,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 self.keyword, keyword, parsed_query)
             item = TimedeltaCalculation(
                 query=parsed_query_kw,
-                error=MisparsedTimeException(
+                error=MisparsedDateTimeException(
                     message='Could not fully parse',
                     extra={
                         'original_query': original_query_kw_kw,
@@ -190,15 +186,17 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order=-80
             )
             items_pre.append(item)
-        items.append(
-            TimedeltaCalculation(
-                value=date - now,
-                reference_date=now,
-                target_date=date,
-                query=parsed_query_kw,
-                order=len(items)
+
+        if not no_query:
+            items.append(
+                TimedeltaCalculation(
+                    value=date - now,
+                    reference_date=now,
+                    target_date=date,
+                    query=parsed_query_kw,
+                    order=len(items)
+                )
             )
-        )
         items.append(TimeCalculation(
             value=now,
             query=parsed_query_kw,
@@ -209,6 +207,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _calculate(self, query, keyword, suffix):
         original_query = query
+        query = PLUS_MINUS_REGEX.sub_dict(query)
         query = TIME_SPLIT_REGEX.split(query)
         query = map(str.strip, query)
         query = filter(None, query)
@@ -228,17 +227,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             if subquery in signs_set:
                 if prev in signs_set:
                     return []
-            else:
-                # TODO: To be removed
-                # if prev not in signs_set:
-                #     if not try_again:
-                #         return []
-                #     new_query = self.keyword + ' at ' + ' '.join(query)
-                #     return self.handle_raw(new_query, try_again=False)
-
-                if not TIME_SUBQUERY_REGEX.match(subquery):
+            elif not TIME_SUBQUERY_REGEX.match(subquery):
                     return []
-
+            else:
                 sign = prev
                 virtual_subquery, n = TIME_AGO_BEFORE_REGEX.subn(' ', subquery)
                 if n:
@@ -277,7 +268,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             parsed_query_kw = '{} {}'.format(self.keyword, parsed_query_calc)
             item = TimeCalculation(
                 query=parsed_query_calc,
-                error=MisparsedTimeException(
+                error=MisparsedDateTimeException(
                     'Could not fully parse',
                     extra={
                         'original_query': original_query_kw,
@@ -348,7 +339,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             )
             return [result]
 
-        query = PLUS_MINUS_REGEX.sub_dict(query)
+
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:
             query, keyword, suffix = map(str.strip, query)
