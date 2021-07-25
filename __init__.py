@@ -8,7 +8,7 @@ Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi 
 ################################### SETTINGS #######################################
 # Below are the settings for this extension
 # Currency provider: One of "internal", "fixerio")
-CURRENCY_PROVIDER='internal'
+CURRENCY_PROVIDER = 'internal'
 # API Key is your fixer.io API key
 API_KEY = ''
 # Cache update interval in seconds (defaults to 1 day = 86400 seconds)
@@ -29,7 +29,7 @@ __triggers__ = ['=', 'time', 'dec', 'bin', 'hex', 'oct']
 __title__ = 'Calculate Anything'
 __version__ = '0.0.1'
 __authors__ = 'Tilemachos Charalampous'
-__py_deps__ = ['requests', 'requests', 'pint' ,'simpleeval', 'parsedatetime']
+__py_deps__ = ['requests', 'requests', 'pint', 'simpleeval', 'parsedatetime']
 
 
 class AlbertLogger:
@@ -58,7 +58,7 @@ class AlbertLogger:
     def exception(self, message, *args):
         self._log(critical, message, *args)
 
-    
+
 class AlbertLogging:
     def getLogger(name=''):
         return AlbertLogger(name)
@@ -76,11 +76,8 @@ except ImportError as e:
 
 from calculate_anything import logging  # noqa: E402
 logging.set_logging(AlbertLogging)  # noqa: E402
-from calculate_anything import init  # noqa: E402
+from calculate_anything.preferences import Preferences  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
-from calculate_anything.currency.service import CurrencyService  # noqa: E402
-from calculate_anything.currency.providers import CurrencyProviderFactory  # noqa: E402
-from calculate_anything.units.service import UnitsService  # noqa: E402
 from calculate_anything.time.service import TimezoneService  # noqa: E402
 from calculate_anything.query.handlers import (  # noqa: E402
     UnitsQueryHandler, CalculatorQueryHandler,
@@ -89,84 +86,51 @@ from calculate_anything.query.handlers import (  # noqa: E402
 )
 from calculate_anything.query.multi_handler import MultiHandler  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
-from calculate_anything.utils import get_or_default, safe_operation  # noqa: E402
 from albert import ClipAction, Item, critical, debug, info, warning, critical  # noqa: E402
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
-CURRENCY_PROVIDER = get_or_default(CURRENCY_PROVIDER, str, 'internal', CurrencyProviderFactory.get_available_providers())
-
 API_KEY = globals().get('API_KEY') or ''
-
 UNITS_CONVERSION_MODE = globals().get('UNITS_CONVERSION_MODE') or ''
-UNITS_CONVERSION_MODE = get_or_default(
-    UNITS_CONVERSION_MODE.lower(),
-    str, 'normal', ['normal', 'crazy']
-)
-if UNITS_CONVERSION_MODE == 'normal':
-    UNITS_CONVERSION_MODE = UnitsService.MODE_NORMAL
-elif UNITS_CONVERSION_MODE == 'crazy':
-    UNITS_CONVERSION_MODE = UnitsService.MODE_CRAZY
-
-CACHE = globals().get('CACHE') or '86400'
-CACHE = get_or_default(CACHE, int, 86400)
-
+CACHE = globals().get('CACHE') or 86400
 TRIGGERS = globals().get('__triggers__') or []
 if isinstance(TRIGGERS, str):
     TRIGGERS = [TRIGGERS]
 
+
 def initialize():
-    init()
+    preferences = Preferences()
 
-    language_service = LanguageService()
-    currency_service = CurrencyService()
-    units_service = UnitsService()
+    preferences.language.set('en_US')
 
-    with safe_operation('Set language'):
-        language_service.set('en_US')
+    api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
+    preferences.currency.add_provider(CURRENCY_PROVIDER, api_key)
+    preferences.currency.set_cache_update_frequency(CACHE)
+    preferences.currency.set_default_currencies(DEFAULT_CURRENCIES)
 
-    with safe_operation('Set API key'):
-        api_key = API_KEY or os.environ.get('CALCULATE_ANYTHING_API_KEY') or ''
-        provider = CurrencyProviderFactory.get_provider(CURRENCY_PROVIDER, api_key)
-        currency_service.add_provider(provider)
+    preferences.units.set_conversion_mode(UNITS_CONVERSION_MODE)
 
-    with safe_operation('Set cache update interval'):
-        if CACHE > 0:
-            currency_service.enable_cache(CACHE)
-        else:
-            currency_service.disable_cache()
+    preferences.time.set_default_cities(DEFAULT_CITIES)
+    preferences.commit()
 
-    with safe_operation('Set default currencies'):
-        default_currencies = DEFAULT_CURRENCIES.split(',')
-        default_currencies = map(str.strip, default_currencies)
-        default_currencies = map(str.upper, default_currencies)
-        default_currencies = list(default_currencies)
-        currency_service.set_default_currencies(default_currencies)
-
-    with safe_operation('Set units conversion mode'):
-        units_service.set_unit_conversion_mode(UNITS_CONVERSION_MODE)
-
-    with safe_operation('Set default cities'):
-        default_cities = TimezoneService.parse_default_cities(DEFAULT_CITIES)
-        TimezoneService().set_default_cities(default_cities)
-
-    units_service.enable().run()
-    currency_service.enable().run()
 
 def finalize():
-    UnitsService().disable().stop()
-    CurrencyService().disable_cache()
     TimezoneService().stop()
 
-def is_trigger(query, index):
-    try: return TRIGGERS[index] == query.trigger
-    except IndexError: return False
 
-is_calculator_trigger = lambda query: is_trigger(query, 0)
-is_time_trigger = lambda query: is_trigger(query, 1)
-is_dec_trigger = lambda query: is_trigger(query, 2)
-is_bin_trigger = lambda query: is_trigger(query, 3)
-is_hex_trigger = lambda query: is_trigger(query, 4)
-is_oct_trigger = lambda query: is_trigger(query, 5)
+def is_trigger(query, index):
+    try:
+        return TRIGGERS[index] == query.trigger
+    except IndexError:
+        return False
+
+
+def is_calculator_trigger(query): return is_trigger(query, 0)
+def is_time_trigger(query): return is_trigger(query, 1)
+def is_dec_trigger(query): return is_trigger(query, 2)
+def is_bin_trigger(query): return is_trigger(query, 3)
+def is_hex_trigger(query): return is_trigger(query, 4)
+def is_oct_trigger(query): return is_trigger(query, 5)
+
 
 def handleQuery(query):
     if TRIGGERS and not query.isTriggered:
@@ -215,7 +179,8 @@ def handleQuery(query):
         icon = os.path.join(MAIN_DIR, icon)
 
         if result.clipboard is not None:
-            actions = [ClipAction(text=result.clipboard, clipboardText=result.clipboard)]
+            actions = [ClipAction(text=result.clipboard,
+                                  clipboardText=result.clipboard)]
         else:
             actions = []
 
@@ -226,7 +191,7 @@ def handleQuery(query):
             subtext=result.description,
             actions=actions
         ))
-    
+
     should_show_placeholder = (
         query_str == '' or (
             SHOW_EMPTY_PLACEHOLDER and (
@@ -240,7 +205,8 @@ def handleQuery(query):
                 id=__title__,
                 icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
                 text=LanguageService().translate('no-result', 'misc'),
-                subtext=LanguageService().translate('no-result-{}-description'.format(mode), 'misc')
+                subtext=LanguageService().translate(
+                    'no-result-{}-description'.format(mode), 'misc')
             )
         )
     if not items:

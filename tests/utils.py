@@ -75,7 +75,7 @@ def no_requests():
 
 @contextmanager
 def no_default_cities():
-    default_cities = TimezoneService()._default_cities
+    default_cities = TimezoneService().default_cities
     TimezoneService().set_default_cities([])
     yield
     TimezoneService().set_default_cities(default_cities)
@@ -101,15 +101,24 @@ def currency_provider_had_error():
 
 
 @contextmanager
-def reset_instance(cls, context=empty_ctx):
-    if cls in Singleton._instances:
-        del Singleton._instances[cls]
+def reset_instance(*classes, context=empty_ctx):
+    old_instances = {}
+    for cls in classes:
+        if cls in Singleton._instances:
+            instance = Singleton._instances[cls]
+            old_instances[cls] = instance
+            del Singleton._instances[cls]
 
     with context():
-        yield cls()
+        tmp_classes = tuple(cls() for cls in classes)
+        yield tmp_classes
 
-    del Singleton._instances[cls]
-    cls()
+    for cls in classes:
+        del Singleton._instances[cls]
+        if cls in old_instances:
+            Singleton._instances[cls] = old_instances[cls]
+        else:
+            cls()
 
 
 class Approx:

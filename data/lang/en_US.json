@@ -82,7 +82,7 @@
         "currency-provider-error-description": "Set your API key in the extension preferences",
 
         "date-overflow": "Hey I'm not a time machine",
-        "date-overflow-description": "Are you trying to crash me?",
+        "date-overflow-description": "I can't calculate dates in 1 million years, or March 32 ",
 
         "misparsed-datetime": "I understood",
         "misparsed-datetime-description": "You typed",

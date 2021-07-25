@@ -9,7 +9,7 @@ from calculate_anything.logging_wrapper import LoggingWrapper as logging
 from calculate_anything.exceptions import CurrencyProviderRequestException
 
 
-class ECBProvider(FreeCurrencyProvider):
+class ECBCurrencyProvider(FreeCurrencyProvider):
     BASE_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml'
 
     def __init__(self):
@@ -19,7 +19,7 @@ class ECBProvider(FreeCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
         try:
-            response = requests.get(ECBProvider.BASE_URL)
+            response = requests.get(ECBCurrencyProvider.BASE_URL)
         except Exception as e:
             self._logger.error(
                 'Could not connect to European Central Bank: {}'.format(e))

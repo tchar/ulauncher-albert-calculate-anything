@@ -3,13 +3,12 @@ if sys.version_info[:2] < (3, 7):
     from collections import OrderedDict
 else:
     OrderedDict = dict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from calculate_anything.currency.providers.provider import FreeCurrencyProvider, ApiKeyCurrencyProvider, _MockCurrencyProvider
-from calculate_anything.currency.providers.european_central_bank import ECBProvider
+from calculate_anything.currency.providers.european_central_bank import ECBCurrencyProvider
 from calculate_anything.currency.providers.mycurrencynet import MyCurrencyNetCurrencyProvider
 from calculate_anything.currency.providers.coinbase import CoinbaseCurrencyProvider
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
-from calculate_anything.utils import is_types
 from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
 
 
@@ -17,17 +16,15 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
     def __init__(self):
         super().__init__()
         free_providers = [
-            ECBProvider(),
+            ECBCurrencyProvider(),
             MyCurrencyNetCurrencyProvider(),
             CoinbaseCurrencyProvider(),
         ]
 
         self._free_providers = OrderedDict()
         for provider in free_providers:
-            self._free_providers[provider.__class__.__name__] = provider
-
+            self._free_providers[provider.__class__] = provider
         self._api_providers = OrderedDict()
-
         self._logger = logging.getLogger(__name__)
 
     @property
@@ -40,25 +37,26 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
 
     def add_provider(self, provider):
         # No need to add MockCurrencyProvider or FreeCurrencyProvider
-        if is_types(_MockCurrencyProvider, FreeCurrencyProvider)(provider):
+        if isinstance(provider, (_MockCurrencyProvider, FreeCurrencyProvider)):
             pass
         elif isinstance(provider, ApiKeyCurrencyProvider):
-            self._api_providers[provider.__class__.__name__] = provider
+            self._api_providers[provider.__class__] = provider
         return self
 
     def remove_provider(self, provider):
-        provider_name = provider.__class__.__name__
+        provider_cls = provider.__class__
         if isinstance(provider, _MockCurrencyProvider):
             pass
         elif isinstance(provider, FreeCurrencyProvider):
-            if provider_name in self._free_providers:
-                del self._free_providers[provider_name]
+            if provider_cls in self._free_providers:
+                del self._free_providers[provider_cls]
         elif isinstance(provider, ApiKeyCurrencyProvider):
-            if provider_name in self._api_providers:
-                del self._api_providers[provider_name]
+            if provider_cls in self._api_providers:
+                del self._api_providers[provider_cls]
         return self
 
-    def _thread_request(self, provider_name, provider, *currencies, force):
+    def _thread_request(self, provider_cls, provider, *currencies, force):
+        provider_name = provider_cls.__name__
         try:
             return provider.request_currencies(*currencies, force=force)
         except (CurrencyProviderException, CurrencyProviderRequestException) as e:
@@ -75,9 +73,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
 
         with ThreadPoolExecutor(max_workers=len(self._free_providers)) as executor:
             tasks = []
-            for provider_name, provider in self._free_providers.items():
+            for provider_cls, provider in self._free_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_name, provider, *currencies, force=force)
+                    self._thread_request, provider_cls, provider, *currencies, force=force)
                 tasks.append(task)
         return tasks
 
@@ -87,9 +85,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
 
         with ThreadPoolExecutor(max_workers=len(self._api_providers)) as executor:
             tasks = []
-            for provider_name, provider in self._api_providers.items():
+            for provider_cls, provider in self._api_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_name, provider, *currencies, force=force)
+                    self._thread_request, provider_cls, provider, *currencies, force=force)
                 tasks.append(task)
         return tasks
 

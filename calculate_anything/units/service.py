@@ -12,8 +12,8 @@ from calculate_anything.constants import MAIN_DIR
 
 
 class UnitsService(metaclass=Singleton):
-    MODE_NORMAL = 0
-    MODE_CRAZY = 1
+    CONVERSION_MODE_NORMAL = 0
+    CONVERSION_MODE_CRAZY = 1
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class UnitsService(metaclass=Singleton):
         self._base_currency = None
         self._enabled = False
         self._running = False
-        self._unit_conversion_mode = UnitsService.MODE_NORMAL
+        self._conversion_mode = UnitsService.CONVERSION_MODE_NORMAL
 
     def _update_callback(self, data):
         self._logger.info('Updating currency registry')
@@ -51,7 +51,8 @@ class UnitsService(metaclass=Singleton):
             ctx.redefine('{} = nan currency_EUR'.format(currency))
 
         self._currencies_in_registry = updated_currencies
-        self._logger.info('Updated currency registry')
+        self._logger.info(
+            'Updated currency registry with {} currencies'.format(len(data)))
 
     def get_rate_timestamp(self, unit):
         if isinstance(unit, pint.Quantity):
@@ -59,12 +60,12 @@ class UnitsService(metaclass=Singleton):
         unit_name = str(unit).replace('currency_', '')
         return CurrencyService().get_rate_timestamp(unit_name)
 
-    def set_unit_conversion_mode(self, mode):
-        self._unit_conversion_mode = mode
+    def set_conversion_mode(self, mode):
+        self._conversion_mode = mode
 
     @property
-    def unit_conversion_mode(self):
-        return self._unit_conversion_mode
+    def conversion_mode(self):
+        return self._conversion_mode
 
     @property
     def base_currency(self):

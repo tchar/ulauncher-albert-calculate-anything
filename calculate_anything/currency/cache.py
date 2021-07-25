@@ -21,8 +21,8 @@ def preload(func):
 
 
 class CurrencyCache:
-    def __init__(self, _update_frequency=0):
-        self._update_frequency = _update_frequency
+    def __init__(self, update_frequency=0):
+        self._update_frequency = update_frequency
         self._data = {
             'provider': '',
             'exchange_rates': {},

@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from functools import wraps
 from typing import Any, Container, Iterable, List, Optional, Type, Union
 from types import ModuleType
 import importlib
@@ -58,7 +59,7 @@ class StupidEval:
 
 
 @contextmanager
-def safe_operation(message: str=''):
+def safe_operation(message: str = ''):
     logger = logging.getLogger(__name__)
     if message:
         logger.info(message)
@@ -71,3 +72,11 @@ def safe_operation(message: str=''):
         logger.exception('Got error in safe operation: {}'.format(msg))
     finally:
         pass
+
+
+def lock(func):
+    @wraps(func)
+    def _wrapper(self, *args, **kwargs):
+        with self._lock:
+            return func(self, *args, **kwargs)
+    return _wrapper

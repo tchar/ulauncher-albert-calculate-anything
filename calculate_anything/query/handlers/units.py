@@ -146,9 +146,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         yield unit_from
 
     def _get_possible_units(self, unit_from):
-        if UnitsService().unit_conversion_mode == UnitsService.MODE_NORMAL:
+        if UnitsService().conversion_mode == UnitsService.CONVERSION_MODE_NORMAL:
             return self._get_only_one_unit(unit_from)
-        if UnitsService().unit_conversion_mode == UnitsService.MODE_CRAZY:
+        if UnitsService().conversion_mode == UnitsService.CONVERSION_MODE_CRAZY:
             return self._get_all_possible_units(unit_from)
         return self._get_only_one_unit(unit_from)
 
@@ -157,7 +157,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             unit = UnitsService().unit_registry.parse_expression(expression)
             if not isinstance(unit, pint.Quantity):
                 return None
-            if (UnitsService().unit_conversion_mode == UnitsService.MODE_NORMAL and
+            if (UnitsService().conversion_mode == UnitsService.CONVERSION_MODE_NORMAL and
                 CurrencyUnitsCalculation.has_currency(unit) and
                     not CurrencyUnitsCalculation.is_currency(unit)):
                 return None

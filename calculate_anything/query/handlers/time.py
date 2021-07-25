@@ -83,7 +83,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def _get_locations(self, location):
         search_terms = []
         if len(location) < 2:
-            return TimezoneService().get_defaults(), True
+            return TimezoneService().default_cities, True
 
         locations = TimeQueryHandler._get_location_search_combinations(
             location)
