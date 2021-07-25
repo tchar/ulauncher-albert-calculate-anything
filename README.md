@@ -42,6 +42,7 @@ Optional Dependencies: [babel](https://github.com/python-babel/babel). Installin
  - [Install for Albert](#install-for-albert)
  - [How to setup](#how-to-setup)
  - [Examples](#examples)
+ - [Known Issues](#known-issues)
  - [Extending and more](#extending-and-more)
 
 
@@ -342,6 +343,15 @@ If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it 
 #### **Advanced Cases**
 - `dec/hex/bin/oct 10101 and 10110 xor 10 + 1010 - 1010 div 10 and 10101`: Produces the result in all available base-n (`dec`, `hex`, `oct`, `bin`)
     - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
+
+## Known Issues
+If at any moment currency stops showing try removing the currency cache file
+
+```bash
+rm ~/.cache/extension_calculate_anything/currency_data.json
+```
+
+and restart the Launcher
 
 ## Extending and More
 
