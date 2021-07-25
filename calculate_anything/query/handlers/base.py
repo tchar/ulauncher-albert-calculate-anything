@@ -1,6 +1,7 @@
 from functools import wraps
 from abc import abstractmethod
 
+
 class QueryHandler:
     class Decorators:
         def can_handle(func):
@@ -12,7 +13,7 @@ class QueryHandler:
                 return func(self, query, *args, **kwargs)
             return _wrapper
 
-    def __init__(self, keyword: str=''):
+    def __init__(self, keyword: str = ''):
         self._keyword = keyword
 
     @property
@@ -31,9 +32,9 @@ class QueryHandler:
 
     @abstractmethod
     def handle_raw(self, query, *args, **kwargs):
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     @Decorators.can_handle
     def handle(self, query, *args, **kwargs):
-        pass
+        pass  # pragma: no cover

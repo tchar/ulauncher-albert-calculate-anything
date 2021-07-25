@@ -42,9 +42,7 @@ class Calculation(_Calculation):
         elif isinstance(value, str):
             self.value_type = Calculation.VALUE_STRING
         elif isinstance(value, complex):
-            if self.value.imag == 0:
-                self.value_type = Calculation.VALUE_REAL
-            elif self.value.real == 0:
+            if self.value.real == 0:
                 self.value_type = Calculation.VALUE_IMAGINARY
             else:
                 self.value_type = Calculation.VALUE_COMPLEX

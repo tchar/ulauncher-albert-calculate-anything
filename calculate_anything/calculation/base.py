@@ -1,4 +1,5 @@
 from functools import wraps
+from abc import abstractmethod
 from calculate_anything.logging_wrapper import LoggingWrapper as logging
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
@@ -16,8 +17,8 @@ def missing_parsedatetime_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
-        name=translator('install-parsedatetime'),
-        description=translator('install-parsedatetime-description'),
+        name=translator('missing-parsedatetime-error'),
+        description=translator('missing-parsedatetime-error-description'),
         clipboard='pip install parsedatetime',
         error=MissingParsedatetimeException,
         order=-1000
@@ -40,9 +41,9 @@ def missing_pint_error_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/convert.svg',
-        name=translator('install-pint'),
-        description=translator('install-pint-description'),
-        clipboard='pip install pint',
+        name=translator('missing-pint-error'),
+        description=translator('missing-pint-error-description'),
+        clipboard='pip install Pint',
         error=MissingPintException,
         order=-1020
     )
@@ -51,9 +52,9 @@ def missing_pint_error_query_result():
 def missing_requests_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon='images/time.svg',
-        name=translator('install-requests'),
-        description=translator('install-requests-description'),
+        icon='images/icon.svg',
+        name=translator('missing-requests-error'),
+        description=translator('missing-requests-error-description'),
         clipboard='pip install requests',
         error=MissingRequestsException,
         order=-1030
@@ -124,8 +125,8 @@ def currency_provider_error_query_result():
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
-        name=translator('provider-error'),
-        description=translator('provider-error-description'),
+        name=translator('currency-provider-error'),
+        description=translator('currency-provider-error-description'),
         clipboard='',
         error=CurrencyProviderException,
         order=-60
@@ -165,14 +166,16 @@ class _Calculation:
         def handle_error_results(func):
             @wraps(func)
             def _wrapper(self, *args, **kwargs):
-                if self.is_error(ZeroDivisionException):
-                    return zero_division_error_query_result()
+                if self.is_error(MissingPintException):
+                    return missing_pint_error_query_result()
                 if self.is_error(MissingSimpleevalException):
                     return missing_simpleeval_query_result()
                 if self.is_error(MissingParsedatetimeException):
                     return missing_parsedatetime_query_result()
                 if self.is_error(MissingRequestsException):
                     return missing_requests_query_result()
+                if self.is_error(ZeroDivisionException):
+                    return zero_division_error_query_result()
                 if self.is_error(DateOverflowException):
                     return date_overflow_error_query_result(self)
                 if isinstance(self.error, MisparsedTimeException):
@@ -187,12 +190,10 @@ class _Calculation:
                     return wrong_base_exception_query_result()
                 if self.is_error(BaseFloatingPointException):
                     return base_floating_point_exception_query_result()
-                if self.is_error(MissingPintException):
-                    return missing_pint_error_query_result()
                 if self.is_error():
-                    self._logger.error(
+                    self._logger.exception(  # pragma: no cover (just in case)
                         'Uknown error type: {}'.format(self.error))
-                    raise self.error
+                    raise self.error  # pragma: no cover
                 return func(self, *args, **kwargs)
             return _wrapper
 
@@ -208,5 +209,6 @@ class _Calculation:
             return self.error is not None
         return self.error == _type
 
+    @abstractmethod
     def to_query_result(self):
-        pass
+        pass  # pragma: no cover

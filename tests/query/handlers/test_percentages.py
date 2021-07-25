@@ -407,6 +407,27 @@ test_spec_calc = [{
         }
     }],
 }, {
+    # Rightmost error
+    'query': '= 1 + 2/0%',
+    'results': [{
+        'result': {
+            'query': '1 + 2/0%',
+            'value': None,
+            'error': ZeroDivisionException,
+            'order': -70
+        },
+        'query_result': {
+            'icon': 'images/icon.svg',
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
+            'error': ZeroDivisionException,
+            'order': -70,
+            'value': None,
+            'value_type': type(None)
+        }
+    }],
+}, {
     # Amount uncalculateable
     'query': '= Some amount + 40%',
     'results': [],
@@ -415,12 +436,20 @@ test_spec_calc = [{
     'query': '= 2.255 + Some amount%',
     'results': [],
 }, {
+    # Amount empty
+    'query': '= 100 + %',
+    'results': [],
+}, {
     # No 2 amounts 1
     'query': '= 100%',
     'results': [],
 }, {
     # No 2 amounts 2
     'query': '= + 100%',
+    'results': [],
+}, {
+    # Unmatched paren (for custom parsing)
+    'query': '= 100 + ((100)%',
     'results': [],
 },]
 

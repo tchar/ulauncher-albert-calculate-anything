@@ -1,9 +1,13 @@
+from calculate_anything.units.service import UnitsService
+import pytest
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
-from calculate_anything.time.service import TimezoneService
+from calculate_anything.time import TimezoneService
+from calculate_anything.currency import CurrencyService
+import calculate_anything.query.handlers.units as units_handler
 import calculate_anything.query.handlers.calculator as calculator_handler
 import calculate_anything.query.handlers.base_n as base_n_handler
 import calculate_anything.query.handlers.time as time_handler
@@ -21,6 +25,7 @@ def calculator_no_simpleeval():
     yield
     calculator_handler.SimpleEval = SimpleEval
 
+
 @contextmanager
 def base_n_no_simpleeval():
     base_n_handler.SimpleEval = StupidEval
@@ -29,13 +34,43 @@ def base_n_no_simpleeval():
     yield
     base_n_handler.get_simple_eval = get_simple_eval
     base_n_handler.SimpleEval = SimpleEval
-    
+
 
 @contextmanager
 def no_parsedatetime():
     time_handler.parsedatetime = None
     yield
     time_handler.parsedatetime = parsedatetime
+
+
+@contextmanager
+def no_pint(units_service=True):
+    pint = units_handler.pint
+    units_handler.pint = None
+    if units_service:
+        yield
+    else:
+        UnitsService()._running = False
+        yield
+        UnitsService()._running = True
+    units_handler.pint = pint
+
+
+@contextmanager
+def no_default_currencies():
+    default_currencies = CurrencyService().default_currencies
+    CurrencyService().set_default_currencies([])
+    yield
+    CurrencyService().set_default_currencies(default_currencies)
+
+
+@contextmanager
+def no_requests():
+    missing_requests = CurrencyService()._missing_requests
+    CurrencyService()._missing_requests = True
+    with no_default_currencies():
+        yield
+    CurrencyService()._missing_requests = missing_requests
 
 
 @contextmanager
@@ -54,6 +89,15 @@ def set_time_reference(datetime):
         yield
         time_handler.TimeQueryHandler.now = now
     return _set_time_reference
+
+
+@contextmanager
+def currency_provider_had_error():
+    provider_had_error = CurrencyService()._provider.had_error
+    CurrencyService()._provider.had_error = True
+    with no_default_currencies():
+        yield
+    CurrencyService()._provider.had_error = provider_had_error
 
 
 @contextmanager
@@ -111,39 +155,52 @@ def approxstr(s, reject_chars=3):
     return ApproxStr(s, reject_chars)
 
 
+class ApproxUnits(Approx):
+    def __init__(self, data, tol):
+        super().__init__(data)
+        self.tol = tol
+
+    def __eq__(self, other):
+        return self.data.units == other.units and \
+            pytest.approx(self.data.magnitude, self.tol) == other.magnitude
+
+
+def approxunits(unit, tol=0.01):
+    return ApproxUnits(unit, tol)
+
+
 def query_test_helper(cls, test_spec):
     results = cls().handle(test_spec['query'])
     if results is None:
         assert len(test_spec['results']) == 0
         return
 
-    assert len(results) == len(test_spec['results'])
+    assert len(test_spec['results']) == len(results)
 
     results = sorted(results, key=lambda result: result.order)
-    assert len(results) == len(test_spec['results'])
+    assert len(test_spec['results']) == len(results)
 
     for result, item in zip(results, test_spec['results']):
-        assert result.value == item['result']['value']
-        assert result.query == item['result']['query']
+        assert item['result']['value'] == result.value
+        assert item['result']['query'] == result.query
         assert (
-            result.error == item['result']['error'] or
+            item['result']['error'] == result.error or
             isinstance(result.error, item['result']['error'])
         )
-        assert result.order == item['result']['order']
+        assert item['result']['order'] == result.order
 
         query_result = result.to_query_result()
-        assert query_result.icon == item['query_result']['icon']
-        assert query_result.name == item['query_result']['name']
-        assert query_result.description == item['query_result']['description']
-        assert query_result.clipboard == item['query_result']['clipboard']
+        assert item['query_result']['icon'] == query_result.icon
+        assert item['query_result']['name'] == query_result.name
+        assert item['query_result']['description'] == query_result.description
+        assert item['query_result']['clipboard'] == query_result.clipboard
         assert (
-            query_result.error == item['query_result']['error'] or
+            item['query_result']['error'] == query_result.error or
             isinstance(query_result.error, item['query_result']['error'])
         )
-        assert query_result.order == item['query_result']['order']
-        assert query_result.value == item['query_result']['value']
+        assert item['query_result']['order'] == query_result.order
+        assert item['query_result']['value'] == query_result.value
         # Although seems stupid we use this to distinguish between equalities in floats and ints
         # For example 3.0 is not equal to 3 we want the type to be correct
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])
-

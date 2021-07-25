@@ -19,9 +19,9 @@ from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UN
 
 class UnitsCalculation(_Calculation):
 
-    def __init__(self, value=None, error=None, order=0,
+    def __init__(self, value=None, error=None, query='', order=0,
                  rate=None, unit_from=None, unit_to=None):
-        super().__init__(value=value, error=error, order=order)
+        super().__init__(value=value, query=query, error=error, order=order)
         self.rate = rate
         self.unit_from = unit_from
         self.unit_to = unit_to
@@ -49,7 +49,7 @@ class UnitsCalculation(_Calculation):
             raise Exception('Babel Missing')
         _locale = locale.getlocale()[0]
 
-        if not self.value.dimensionless:
+        if not UnitsCalculation.is_strictly_dimensionless(self.value):
             name = self.value.format_babel(locale=_locale, spec='g')
         else:
             name = '{:g}'.format(self.value.magnitude)
@@ -160,9 +160,9 @@ class TemperatureUnitsCalculation(UnitsCalculation):
 
 
 class CurrencyUnitsCalculation(UnitsCalculation):
-    def __init__(self, value=None, error=None, order=0,
+    def __init__(self, value=None, error=None,  query='', order=0,
                  rate=None, unit_from=None, unit_to=None, update_timestamp=None):
-        super().__init__(value=value, error=error, order=order,
+        super().__init__(value=value, error=error, query=query, order=order,
                          rate=rate, unit_from=unit_from, unit_to=unit_to)
         self.update_timestamp = update_timestamp
 
@@ -195,8 +195,11 @@ class CurrencyUnitsCalculation(UnitsCalculation):
         else:
             unit_name = clipboard
 
-        converted_amount = locale.currency(
-            self.value.magnitude, symbol='', grouping=True)
+        try:
+            converted_amount = locale.currency(
+                self.value.magnitude, symbol='', grouping=True)
+        except ValueError:
+            converted_amount = '{:.2f}'.format(self.value.magnitude)
 
         name = '{} {}'.format(converted_amount, unit_name)
         clipboard = '{} {}'.format(converted_amount, clipboard)

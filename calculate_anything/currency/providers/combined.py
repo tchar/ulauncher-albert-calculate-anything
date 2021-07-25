@@ -111,11 +111,11 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             if result is not None:
                 providers_currencies.update(result)
 
-        self._had_error = (
+        self.had_error = (
             all(map(lambda provider: provider.had_error, self._free_providers.values())) and
             all(map(lambda provider: provider.had_error, self._api_providers.values()))
         )
-        if self._had_error:
+        if self.had_error:
             raise CurrencyProviderException(
                 'Could not fetch any currency data from any provider')
 

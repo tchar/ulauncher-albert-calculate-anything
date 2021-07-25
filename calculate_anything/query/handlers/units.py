@@ -2,8 +2,8 @@ import math
 import itertools
 try:
     import pint
-except ImportError:
-    pint = None
+except ImportError:  # pragma: no cover (covered artificially in tests)
+    pint = None  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.units.service import UnitsService
 from calculate_anything.currency.service import CurrencyService
@@ -35,10 +35,13 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             any(map(lambda d: '[currency]' in d, unit_dimensionalities))
         )
         if missing_requests:
-            item = UnitsCalculation(error=MissingRequestsException, order=-1)
+            item = UnitsCalculation(
+                error=MissingRequestsException,
+                order=-1030
+            )
             return [item]
         elif currency_provider_had_error:
-            item = UnitsCalculation(error=CurrencyProviderException, order=-1)
+            item = UnitsCalculation(error=CurrencyProviderException, order=-60)
             return [item]
         return []
 
@@ -169,14 +172,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             self._logger.error(e)
 
     def handle_raw(self, query):
+        if '%' in query:
+            return None
+        if pint is None:
+            item = UnitsCalculation(
+                error=MissingPintException,
+                order=-1020
+            )
+            return [item]
         if not UnitsService().running:
             return None
-        elif '%' in query:
-            return None
-
-        if pint is None:
-            item = UnitsCalculation(error=MissingPintException, order=-1)
-            return [item]
 
         query = UnitsQueryHandler._extract_query(query)
         if not query:
@@ -268,6 +273,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     rate=rate,
                     unit_from=unit_from_ureg.units,
                     unit_to=unit_to_ureg,
+                    query='{} {} to {}'.format(
+                        unit_from_ureg.magnitude,
+                        unit_from_ureg.units,
+                        unit_to_ureg
+                    ),
                     order=len(items),
                     **kwargs
                 )
@@ -280,6 +290,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     rate=None,
                     unit_from=unit_from_ureg.units,
                     unit_to=unit_from_ureg.units,
+                    query='{0} {1} to {1}'.format(
+                        unit_from_ureg.magnitude,
+                        unit_from_ureg.units
+                    ),
                     order=len(items),
                     update_timestamp=None
                 )

@@ -546,8 +546,8 @@ test_spec_parsedatetime_missing = [{
         },
         'query_result': {
             'icon': 'images/time.svg',
-            'name': tr_err('install-parsedatetime'),
-            'description': tr_err('install-parsedatetime-description'),
+            'name': tr_err('missing-parsedatetime-error'),
+            'description': tr_err('missing-parsedatetime-error-description'),
             'clipboard': 'pip install parsedatetime',
             'error': MissingParsedatetimeException,
             'value': None,

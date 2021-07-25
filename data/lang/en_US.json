@@ -78,8 +78,8 @@
         "boolean-comparison-error": "Complex numbers can't be inequally compared",
         "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
 
-        "provider-error": "Currency Provider error. Did you set your API key?",
-        "provider-error-description": "Set your API key in the extension preferences",
+        "currency-provider-error": "Currency Provider error. Did you set your API key?",
+        "currency-provider-error-description": "Set your API key in the extension preferences",
 
         "date-overflow": "Hey I'm not a time machine",
         "date-overflow-description": "Are you trying to crash me?",
@@ -96,16 +96,16 @@
         "base-floating-error": "Result is a floating point number",
         "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
 
-        "install-requests": "Looks like requests is not installed",
-        "install-requests-description": "Install it with \"pip install requests\" and restart launcher",
+        "missing-requests-error": "Looks like requests is not installed",
+        "missing-requests-error-description": "Install it with \"pip install requests\" and restart launcher",
 
         "missing-simpleeval-error": "Looks like simpleeval is not installed",
         "missing-simpleeval-error-description": "Install it with \"pip install simpleeval\" and restart launcher",
 
-        "install-parsedatetime": "Looks like parsedatetime is not installed",
-        "install-parsedatetime-description": "Install it with \"pip install parsedatetime\" and restart launcher",
+        "missing-parsedatetime-error": "Looks like parsedatetime is not installed",
+        "missing-parsedatetime-error-description": "Install it with \"pip install parsedatetime\" and restart launcher",
 
-        "install-pint": "Looks like pint is not installed",
-        "install-pint-description": "Install it with \"pip install pint\" and restart launcher"
+        "missing-pint-error": "Looks like pint is not installed",
+        "missing-pint-error-description": "Install it with \"pip install pint\" and restart launcher"
     }
 }

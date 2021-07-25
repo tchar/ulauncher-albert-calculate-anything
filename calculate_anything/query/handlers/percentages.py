@@ -137,15 +137,11 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         # Parse expression because it is ambiguous and difficult to match with regex
         signs = set(['+', '-'])
-        percent_symbol_index = -1
         parens = 0
         for i, c in enumerate(reversed(query)):
-            if percent_symbol_index == -1 and c != '%':
-                continue
             if c == '%':
-                percent_symbol_index = i
-                continue
-            if c == ')':
+                pass
+            elif c == ')':
                 parens += 1
             elif c == '(':
                 parens -= 1
@@ -155,11 +151,10 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         i = len(query) - i - 1
-        percent_symbol_index = len(query) - percent_symbol_index - 1
 
         amount = query[:i]
         sign = query[i]
-        percentage = query[i+1:percent_symbol_index]
+        percentage = query[i+1:-1]
         if not amount.strip() or not percentage.strip():
             return None
 

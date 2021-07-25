@@ -143,6 +143,7 @@ class CurrencyService(metaclass=Singleton):
         self._logger.info(
             'Updating default currencies = {}'.format(default_currencies))
         self._default_currencies = default_currencies
+        return self
 
     @property
     @lock
