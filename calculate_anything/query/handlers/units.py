@@ -173,9 +173,9 @@ class UnitsQueryHandler(SingletonQueryHandler):
                 pint.errors.UndefinedUnitError,
                 pint.errors.DefinitionSyntaxError,
                 tokenize.TokenError) as e:
-            self._logger.debug('Got pint exception when trying to parse {!r}: {}'.format(expression, e))
+            self._logger.debug(
+                'Got pint exception when trying to parse {!r}: {}'.format(expression, e))
         except Exception as e:
-            self._logger.error(type(e))
             self._logger.exception(
                 'Got exception when trying to parse: {!r}: {}'.format(expression, e))
 
@@ -192,6 +192,7 @@ class UnitsQueryHandler(SingletonQueryHandler):
         if not UnitsService().running:
             return None
 
+        original_query = query
         query = UnitsQueryHandler._extract_query(query)
         if not query:
             return None
@@ -275,7 +276,8 @@ class UnitsQueryHandler(SingletonQueryHandler):
                 except ZeroDivisionError:
                     rate = None
             except Exception as e:
-                self._logger.error(e)
+                self._logger.exception(
+                    'Unexpected exception uni units conversion: {!r}: {}'.format(original_query, e))
                 continue
 
             kwargs = {}

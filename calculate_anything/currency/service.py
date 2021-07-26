@@ -62,9 +62,9 @@ class CurrencyService(metaclass=Singleton):
                 with safe_operation():
                     callback(currency_rates)
         except CurrencyProviderRequestException as e:
-            self._logger.error('Error when contacting provider: {}'.format(e))
+            self._logger.exception('Error when contacting provider: {}'.format(e))
         except MissingRequestsException as e:
-            self._logger.error(e)
+            self._logger.exception('Missing requests: {}'.format(e))
             self._missing_requests = True
             return
 

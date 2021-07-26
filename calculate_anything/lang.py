@@ -38,8 +38,8 @@ class LanguageService(metaclass=Singleton):
                 with open(lang_filepath) as f:
                     self._data = json.loads(f.read())
             except Exception as e:
-                self._logger.error(
-                    'Could not load language, falling back to en_US')
+                self._logger.exception(
+                    'Could not load language, falling back to en_US: {}: {}'.format(lang_filepath, e))
                 fallback = True
 
         if fallback:

@@ -23,7 +23,7 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         try:
             response = requests.get(CoinbaseCurrencyProvider.BASE_URL)
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Could not connect to mycurrency.net: {}'.format(e))
 
         if not str(response.status_code).startswith('2'):

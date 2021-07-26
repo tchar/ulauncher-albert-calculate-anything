@@ -64,7 +64,7 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         try:
             return provider.request_currencies(*currencies, force=force)
         except (CurrencyProviderException, CurrencyProviderRequestException) as e:
-            self._logger.error(
+            self._logger.exception(
                 'Got exception when requesting from provider {}: {}'.format(provider_name, e))
         except Exception as e:
             self._logger.exception(

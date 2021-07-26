@@ -76,6 +76,8 @@ class BaseNQueryHandler(SingletonQueryHandler):
             for subexp in expression:
                 expr_dec, _, expr_parsed = self._parse_expression(
                     subexp, split_eq=False, sub_kw=False)
+                if not expr_dec:
+                    return [], [], []
                 exprs.append(expr_dec[0])
                 exprs_parsed.append(expr_parsed[0])
 
@@ -128,7 +130,8 @@ class BaseNQueryHandler(SingletonQueryHandler):
             )
             return [item]
         except Exception as e:
-            self._logger.error(e)
+            self._logger.exception(
+                'Got exception when trying to parse expression: {!r}: {}'.format(query, e))
             return None
 
         results = []
@@ -151,7 +154,9 @@ class BaseNQueryHandler(SingletonQueryHandler):
         except Exception:
             return None
 
-        if len(results) == 1:
+        if len(results) == 0:
+            return None
+        elif len(results) == 1:
             result = results[0]
             if not is_integer(result):
                 item = BaseNCalculation(

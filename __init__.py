@@ -72,6 +72,11 @@ if isinstance(TRIGGERS, str):
 
 
 def initialize():
+    if not TRIGGERS:
+        CalculatorQueryHandler.keyword = ''
+        UnitsQueryHandler.keyword = ''
+        PercentagesQueryHandler.keyword = ''
+
     preferences = Preferences()
 
     preferences.language.set('en_US')
@@ -109,46 +114,46 @@ def is_oct_trigger(query): return is_trigger(query, 5)
 def handleQuery(query):
     if TRIGGERS and not query.isTriggered:
         return
-    query_str = query.string
+    query_nokw = query.string
     query.disableSort()
-    items = []
-    errors_num = 0
 
     mode = 'calculator'
     if not TRIGGERS:
         handlers = []
+        query_str = query_nokw
     elif is_time_trigger(query):
-        query_str = TimeQueryHandler.keyword + query_str
+        query_str = TimeQueryHandler.keyword + query_nokw
         handlers = [TimeQueryHandler]
         mode = 'time'
     elif is_dec_trigger(query):
-        query_str = Base10QueryHandler.keyword + query_str
+        query_str = Base10QueryHandler.keyword + query_nokw
         handlers = [Base10QueryHandler]
         mode = 'dec'
     elif is_hex_trigger(query):
-        query_str = Base16QueryHandler.keyword + query_str
+        query_str = Base16QueryHandler.keyword + query_nokw
         handlers = [Base16QueryHandler]
         mode = 'hex'
     elif is_oct_trigger(query):
-        query_str = Base8QueryHandler.keyword + query_str
+        query_str = Base8QueryHandler.keyword + query_nokw
         handlers = [Base8QueryHandler]
         mode = 'oct'
     elif is_bin_trigger(query):
-        query_str = Base2QueryHandler.keyword + query_str
+        query_str = Base2QueryHandler.keyword + query_nokw
         handlers = [Base2QueryHandler]
         mode = 'bin'
     else:
-        query_str = CalculatorQueryHandler().keyword + ' ' + query_str
+        query_str = CalculatorQueryHandler().keyword + ' ' + query_nokw
         handlers = [
             CalculatorQueryHandler,
             PercentagesQueryHandler,
             UnitsQueryHandler
         ]
 
+    items = []
+    had_any_non_error = False
     results = MultiHandler.handle(query_str, *handlers)
     for result in results:
-
-        errors_num += result.error is not None
+        had_any_non_error = had_any_non_error or result.error is not None
         icon = result.icon or 'images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)
 
@@ -166,13 +171,10 @@ def handleQuery(query):
             actions=actions
         ))
 
-    should_show_placeholder = (
-        query_str == '' or (
-            SHOW_EMPTY_PLACEHOLDER and (
-                TRIGGERS or query_str
-            ) and len(items) == errors_num
-        )
-    )
+    should_show_placeholder = query_nokw.strip() == '' and TRIGGERS or (
+            not had_any_non_error and
+            SHOW_EMPTY_PLACEHOLDER)
+
     if should_show_placeholder:
         items.append(
             Item(

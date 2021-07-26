@@ -20,6 +20,10 @@ class QueryHandler:
     def keyword(self):
         return self._keyword
 
+    @keyword.setter
+    def keyword(self, kw):
+        self._keyword = kw
+
     def query_without_keyword(self, query, check=False):
         if check and not self.can_handle(query):
             return ''
@@ -42,6 +46,10 @@ class SingletonQueryHandler(QueryHandler, metaclass=Singleton):
     @Singleton.property
     def keyword(self):
         return super().keyword
+
+    @keyword.setter
+    def keyword(self, kw):
+        self._keyword = kw
 
     @Singleton.method
     def query_without_keyword(self, query, check=False):

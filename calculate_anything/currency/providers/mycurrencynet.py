@@ -75,7 +75,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         try:
             response = requests.get(MyCurrencyNetCurrencyProvider.BASE_URL)
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Could not connect to mycurrency.net: {}'.format(e))
             self.had_error = True
             raise CurrencyProviderRequestException(

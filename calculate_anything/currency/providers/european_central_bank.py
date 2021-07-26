@@ -23,7 +23,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         try:
             response = requests.get(ECBCurrencyProvider.BASE_URL)
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Could not connect to European Central Bank: {}'.format(e))
             self.had_error = True
             raise CurrencyProviderRequestException(
@@ -40,20 +40,20 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             timestamp = tree[2][0].attrib['time']
             timestamp = datetime.strptime(timestamp, '%Y-%m-%d').timestamp()
         except (IndexError, KeyError) as e:
-            self._logger.error('Could not read update timestamp: {}'.format(e))
+            self._logger.exception('Could not read update timestamp: {}'.format(e))
             timestamp = datetime.now().timestamp()
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'An unexpected exception occured when reading update timestamp: {}'.format(e))
             timestamp = datetime.now().timestamp()
 
         try:
             tree[2][0]
         except IndexError as e:
-            self._logger.error('Could not read currencies: {}'.format(e))
+            self._logger.exception('Could not read currencies: {}'.format(e))
             raise CurrencyProviderRequestException(e)
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'An unexpected exception occured when reading currencies: {}'.format(e))
             raise CurrencyProviderRequestException(e)
 
@@ -65,10 +65,10 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
                 currency_data[curr] = {'rate': rate,
                                        'timestamp_refresh': timestamp}
             except (TypeError, ValueError):
-                self._logger.error(
+                self._logger.exception(
                     'Could not read rate for currency at line {}: {}'.format(i, e))
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'An unexpected exception occured when reading rate for currency at line {}: {}'.format(i, e))
 
         self.had_error = False

@@ -32,19 +32,11 @@ class CurrencyCache:
         self._logger = logging.getLogger(__name__)
 
     def _check_structure(self):
-        if os.path.isfile(CACHE_DIR):
-            try:
-                os.remove(CACHE_DIR)
-            except Exception as e:
-                self._logger.error(
-                    'Could not remove cache file {}: {}'.format(CACHE_DIR, e))
-            return False
-
         if not os.path.exists(CACHE_DIR):
             try:
                 os.makedirs(CACHE_DIR)
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'Could not create cache directory {}: {}'.format(CACHE_DIR, e))
                 return False
 
@@ -52,7 +44,7 @@ class CurrencyCache:
             try:
                 shutil.rmtree(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'Could not remove data directory {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
 
@@ -75,12 +67,12 @@ class CurrencyCache:
                         raise Exception(
                             'last_update_timestamp is not a number')
             except Exception as e:
-                self._logger.error('Data file {} is possible corrupted, will try to remove it: {}'.format(
+                self._logger.exception('Data file {} is possibly corrupted, will try to remove it: {}'.format(
                     CURRENCY_DATA_FILE, e))
                 try:
                     os.remove(CURRENCY_DATA_FILE)
                 except Exception as e:
-                    self._logger.error(
+                    self._logger.exception(
                         'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                     return False
 
@@ -90,7 +82,7 @@ class CurrencyCache:
                 with open(CURRENCY_DATA_FILE, 'w') as f:
                     f.write(json.dumps(data))
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'Could not write default data file {}: {}'.format(CURRENCY_DATA_FILE, e))
                 return False
         return True
@@ -161,7 +153,7 @@ class CurrencyCache:
             try:
                 os.remove(CURRENCY_DATA_FILE)
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
 
     def save(self, exchange_rates, provider):
@@ -181,5 +173,5 @@ class CurrencyCache:
             with open(CURRENCY_DATA_FILE, 'w') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e))

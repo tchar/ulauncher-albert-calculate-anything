@@ -83,7 +83,7 @@ class SqliteTimezoneCache(TimezoneJsonCache):
                     'Could not read database file {}: {}'.format(file_path, e))
                 mode |= MODE_DELETE
             except Exception as e:
-                self._logger.error(
+                self._logger.exception(
                     'Got unexpected error when reading database file: {}'.format(e))
                 mode |= MODE_DELETE
 

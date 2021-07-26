@@ -36,8 +36,6 @@ class ConverterExtension(Extension):
 
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
-        items = []
-        error_num = 0
         query_nokw = event.get_argument() or ''
         query = event.get_query() or ''
         query = query.replace(event.get_keyword() + ' ', '', 1)
@@ -70,9 +68,11 @@ class KeywordQueryEventListener(EventListener):
                 UnitsQueryHandler,
             ]
 
+        items = []
+        had_any_non_error = False
         results = MultiHandler.handle(query, *handlers)
         for result in results:
-            error_num += result.error is not None
+            had_any_non_error = had_any_non_error or result.error is not None
             if result.clipboard is not None:
                 on_enter = CopyToClipboardAction(result.clipboard)
             else:
@@ -85,15 +85,12 @@ class KeywordQueryEventListener(EventListener):
                 highlightable=False,
                 on_enter=on_enter
             ))
+        
+        should_show_placeholder = query_nokw.strip() == '' or (
+                not had_any_non_error and
+                extension.preferences['show_empty_placeholder'] == 'y')
 
-        should_show_placeholder = (
-            query_nokw.strip() == '' or (
-                extension.preferences['show_empty_placeholder'] == 'y' and len(
-                    items) == error_num
-            )
-        )
-
-        if should_show_placeholder and len(items) == error_num:
+        if should_show_placeholder:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
                 name=LanguageService.translate('no-result', 'misc'),

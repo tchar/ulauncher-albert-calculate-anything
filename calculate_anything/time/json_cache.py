@@ -13,7 +13,7 @@ class TimezoneJsonCache(metaclass=Singleton):
             with open(TIMEZONES_JSON_FILE, 'r') as f:
                 self._data = json.loads(f.read())
         except Exception as e:
-            self._logger.error('Could not load timezone data: {}'.format(e))
+            self._logger.exception('Could not load timezone data: {}'.format(e))
 
     @Singleton.method
     def get(self, city_name, *search_terms):

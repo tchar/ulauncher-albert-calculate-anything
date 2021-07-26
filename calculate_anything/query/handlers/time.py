@@ -104,7 +104,7 @@ class TimeQueryHandler(SingletonQueryHandler):
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:  # pragma: no cover (just in case)
-                self._logger.error(  # pragma: no cover
+                self._logger.exception(  # pragma: no cover
                     'Could not find time zone: {}: {}'.format(location, e))
                 continue  # pragma: no cover
 

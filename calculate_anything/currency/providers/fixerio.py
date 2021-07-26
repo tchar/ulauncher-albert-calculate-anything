@@ -30,7 +30,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
         try:
             response = requests.get(url, params=params)
         except Exception as e:
-            self._logger.error('Could not connect to fixer.io: {}'.format(e))
+            self._logger.exception('Could not connect to fixer.io: {}'.format(e))
             self.had_error = True
             raise CurrencyProviderRequestException(
                 'Could not connect to fixerio')

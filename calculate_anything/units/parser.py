@@ -81,7 +81,7 @@ class PintDefinitionParser:
                 return self._process_reverse_alias(line, translation_adder)
             return self._process_definition(line, is_currency)
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Got exception when parsing line {} in {}: {}'.format(line_n, file_path, e))
 
     def load_file(self, file_path, translation_mode, is_currency=True):
@@ -96,5 +96,5 @@ class PintDefinitionParser:
             self._logger.warning(
                 'Unit definitions file not found: {}'.format(file_path))
         except Exception as e:
-            self._logger.error(
+            self._logger.exception(
                 'Exception when loading unit definitons file {}: {}'.format(file_path, e))

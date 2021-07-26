@@ -202,7 +202,6 @@ class CalculatorQueryHandler(SingletonQueryHandler):
             self._logger.debug('Got simpleval Exception: when calculating {!r}'.format(query, e))
             return None
         except Exception as e:  # pragma: no cover
-            self._logger.error(type(e))
             self._logger.exception(  # pragma: no cover
                 'Got exception when trying to calculate {!r}: {}'.format(query, e))
             return None  # pragma: no cover
