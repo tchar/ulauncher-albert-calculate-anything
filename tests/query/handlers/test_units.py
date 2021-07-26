@@ -5,8 +5,8 @@ from datetime import datetime
 from calculate_anything.currency.service import CurrencyService
 import pytest
 from calculate_anything.lang import LanguageService
-from calculate_anything.units import UnitsService
-from calculate_anything.query.handlers import UnitsQueryHandler
+from calculate_anything.units.service import UnitsService
+from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.exceptions import *
 from tests.utils import approxunits, currency_provider_had_error, no_pint, no_requests, query_test_helper
 

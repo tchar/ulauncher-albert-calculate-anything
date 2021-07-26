@@ -4,11 +4,11 @@ from abc import abstractmethod
 from calculate_anything.units.service import UnitsService
 from calculate_anything.currency.providers.factory import CurrencyProviderFactory
 from calculate_anything.currency.providers.provider import _CurrencyProvider
-from calculate_anything.utils.misc import get_or_default, is_not_types, is_types, safe_operation
 from calculate_anything.currency.service import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.time.service import TimezoneService
 from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import get_or_default, is_not_types, is_types, safe_operation
 
 __all__ = ['Preferences']
 

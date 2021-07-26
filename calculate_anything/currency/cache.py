@@ -3,9 +3,9 @@ import shutil
 import json
 from datetime import datetime
 from functools import wraps
-from calculate_anything.utils import is_types
+from calculate_anything.utils.misc import is_types
 from calculate_anything.constants import CACHE_DIR, CURRENCY_DATA_FILE
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 
 
 class CacheException(Exception):

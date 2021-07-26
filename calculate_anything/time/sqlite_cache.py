@@ -9,20 +9,13 @@ try:
 except ImportError:
     sqlite3 = None
 from calculate_anything.time.json_cache import TimezoneJsonCache
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import lock
 from calculate_anything.constants import (
     MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT,
     TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE
 )
-
-
-def lock(func):
-    @wraps(func)
-    def _wrapper(self, *args, **kwargs):
-        with self._lock:
-            return func(self, *args, **kwargs)
-    return _wrapper
 
 
 class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):

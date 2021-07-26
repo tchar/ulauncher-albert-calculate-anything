@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Any, Container, Iterable, List, Optional, Type, Union
 from types import ModuleType
 import importlib
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.exceptions import MissingSimpleevalException
 
 

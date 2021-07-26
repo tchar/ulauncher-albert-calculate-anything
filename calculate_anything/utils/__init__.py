@@ -4,7 +4,6 @@ from calculate_anything.utils.misc import (
     safe_operation
 )
 from calculate_anything.utils.iter import partition, flatten, deduplicate
-from calculate_anything.utils import multi_re
 from calculate_anything.utils.colors import (
     hex_to_rgb, rgb_to_cmyk, rgb_to_hsv, rgb_to_hsl
 )

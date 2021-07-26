@@ -1,7 +1,7 @@
 from calculate_anything.calculation.calculation import Calculation
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.calculation.percentage import InversePercentageCalculation, NormalPercentageCalculation, PercentageCalculation
 from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisionException
 from calculate_anything.utils.singleton import Singleton

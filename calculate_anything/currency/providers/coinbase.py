@@ -4,8 +4,8 @@ try:
 except ImportError:
     requests = None
 from calculate_anything.currency.providers.provider import FreeCurrencyProvider
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
-from calculate_anything.utils import get_or_default
+import calculate_anything.log as logging
+from calculate_anything.utils.misc import get_or_default
 from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
 
 

@@ -5,7 +5,7 @@ except ImportError:
 from datetime import datetime
 from xml.etree import ElementTree
 from calculate_anything.currency.providers.provider import FreeCurrencyProvider
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.exceptions import CurrencyProviderRequestException
 
 

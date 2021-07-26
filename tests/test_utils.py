@@ -1,23 +1,27 @@
 import re
 import pytest
 from collections import OrderedDict
-import calculate_anything.utils as utils
+from calculate_anything.utils import misc as utils_misc
+from calculate_anything.utils import iter as utils_iter
+from calculate_anything.utils import multi_re
+from calculate_anything.utils import colors as utils_colors
+from calculate_anything.utils.singleton import Singleton, singleton
 from calculate_anything.exceptions import MissingSimpleevalException
 
 
 def test_get_module():
-    assert utils.get_module('os') is not None
-    assert utils.get_module('time') is not None
-    assert utils.get_module('some module that does not exist') is None
-    assert utils.get_module('some other module') is None
+    assert utils_misc.get_module('os') is not None
+    assert utils_misc.get_module('time') is not None
+    assert utils_misc.get_module('some module that does not exist') is None
+    assert utils_misc.get_module('some other module') is None
 
 
 @pytest.mark.parametrize('reverse', [False, True])
 def test_is_types(reverse):
     if reverse:
-        func = utils.is_not_types
+        func = utils_misc.is_not_types
     else:
-        func = utils.is_types
+        func = utils_misc.is_types
 
     for i in range(-1, 10):
         assert func(int)(i) != reverse
@@ -37,7 +41,7 @@ def test_is_types(reverse):
     assert func(str)(2.5) == reverse
     assert func(int, float, complex)('test_string') == reverse
 
-    assert func(utils.StupidEval)(utils.StupidEval()) != reverse
+    assert func(utils_misc.StupidEval)(utils_misc.StupidEval()) != reverse
 
     with pytest.raises(TypeError):
         func('object')('object')
@@ -48,46 +52,46 @@ def test_is_types(reverse):
 
 def test_get_or_default():
     value, type, default, allowed, expected = (1, int, 0, [], 1)
-    assert utils.get_or_default(value, type, default) == expected
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (1.1, int, True, [], 1)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('1.1', int, 'True', [], 'True')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('1', int, 'True', [], 1)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('some_text', int, 4, [], 4)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         'some text', int, 'some other text', [], 'some other text')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         'some text', int, 'other text', [], 'other text')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('0', str, 0, [], '0')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('1.1', float, 0, [], 1.1)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = ('True', bool, 2, [], True)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (1, int, 2, [1], 1)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         1, int, 'some value', ['Test', 1], 1)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         '1', str, 'some other value', ['1'], '1')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         'Test', bool, 'some other value', [2], 'some other value')
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
     value, type, default, allowed, expected = (
         'True', bool, 'some other value', [True], True)
-    assert utils.get_or_default(value, type, default, allowed) == expected
+    assert utils_misc.get_or_default(value, type, default, allowed) == expected
 
 
 def test_safe_operation():
-    @utils.safe_operation('Safe function operation')
+    @utils_misc.safe_operation('Safe function operation')
     def some_function(raise_exc):
         if raise_exc:
             raise Exception
@@ -95,12 +99,24 @@ def test_safe_operation():
     some_function(raise_exc=False)
     some_function(raise_exc=True)
 
-    with utils.safe_operation('Safe operation'):
+    with utils_misc.safe_operation('Safe operation'):
         raise Exception
 
 
+def test_is_integer():
+    # Test some integer numbers
+    integers = [1, 2.0, 1 + 0j, -17.0]
+    for integer in integers:
+        assert utils_misc.is_integer(integer)
+
+    # Test some non integer values
+    not_integers = [1.5, -1.124, 2 + 5j, 'some text', True]
+    for not_integer in not_integers:
+        assert not utils_misc.is_integer(not_integer)
+
+
 def test_singleton():
-    class SingletonClass(metaclass=utils.Singleton):
+    class SingletonClass(metaclass=Singleton):
         pass
 
     class SingletonClassWithArgs(SingletonClass):
@@ -108,7 +124,7 @@ def test_singleton():
             self.args = args
             self.kwargs = kwargs
 
-    @utils.singleton
+    @singleton
     def singletonfunc(value):
         return value
 
@@ -134,13 +150,13 @@ def test_singleton():
 
 
 def test_stupid_eval():
-    stupid_eval = utils.StupidEval()
+    stupid_eval = utils_misc.StupidEval()
     for i in range(10):
         assert stupid_eval.eval(str(i)) == i
 
     with_exception = [
         '1.1', 'some-text', 'True', '1 + 1',
-        True, 1, 1.2, 1 + 2j, utils.StupidEval,
+        True, 1, 1.2, 1 + 2j, utils_misc.StupidEval,
         stupid_eval, None
     ]
     for v in with_exception:
@@ -177,7 +193,7 @@ def test_partition(test_spec):
     max_parts = test_spec['max_parts']
     expected = test_spec['expected']
 
-    gen = utils.partition(list_part, max_parts)
+    gen = utils_iter.partition(list_part, max_parts)
     assert list(gen) == expected
 
 
@@ -207,7 +223,7 @@ def test_flatten(test_spec):
     input = test_spec['input']
     expected = test_spec['expected']
 
-    assert list(utils.flatten(input)) == expected
+    assert list(utils_iter.flatten(input)) == expected
 
 
 test_spec = [{
@@ -231,51 +247,51 @@ def test_deduplicate(test_spec):
     expected = test_spec['expected']
 
     _t = type(input)
-    assert _t(utils.deduplicate(input)) == expected
+    assert _t(utils_iter.deduplicate(input)) == expected
 
 
 test_spec = [{
     # Test match
     'pattern':  'x^y',
-    'func': utils.multi_re.match,
+    'func': multi_re.match,
     'args': ('^yx123',),
     'kwargs': {},
     'assert_func': lambda r: r is not None,
 }, {
     # Test fullmatch
     'pattern':  'x^y123',
-    'func': utils.multi_re.fullmatch,
+    'func': multi_re.fullmatch,
     'args': ('^yx',),
     'assert_func': lambda r: r is None,
 }, {
     # Test split
     'pattern':  '=*/+-><^',
-    'func': utils.multi_re.split,
+    'func': multi_re.split,
     'args': ('x^2+5x-21*2=0',),
     'assert_func': lambda r: r == ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']
 }, {
     # Test findall
     'pattern':  '1=2',
     'args': (),
-    'func': utils.multi_re.findall,
+    'func': multi_re.findall,
     'args': ('=$#=123',),
     'assert_func': lambda r: r == ['=', '=', '1', '2']
 }, {
     # Test search
     'pattern':  '+-*/',
-    'func': utils.multi_re.search,
+    'func': multi_re.search,
     'args': ('1+2/3',),
     'assert_func': lambda r: r is not None and r.group(0) == '+'
 }, {
     # Test sub
     'pattern':  'abacd',
-    'func': utils.multi_re.sub,
+    'func': multi_re.sub,
     'args': ('', 'abracadabra'),
     'assert_func': lambda r: r == 'rr'
 }, {
     # Test subn
     'pattern':  ['Harry potter', 'Hermione'],
-    'func': utils.multi_re.subn,
+    'func': multi_re.subn,
     'args': ('Lord Voldermort', 'My name is harry potter, HeRmiOnE is awesome'),
     'kwargs': {'flags': re.IGNORECASE},
     'assert_func': lambda r: r == ('My name is Lord Voldermort, Lord Voldermort is awesome', 2)
@@ -293,13 +309,13 @@ def test_multi_re(test_spec):
     assert assert_func(func(pattern, *args, **kwargs))
 
     with pytest.raises(ValueError):
-        utils.multi_re.sub_dict(pattern, args[0])
+        multi_re.sub_dict(pattern, args[0])
     with pytest.raises(ValueError):
-        utils.multi_re.subn_dict(pattern, args[0])
+        multi_re.subn_dict(pattern, args[0])
     with pytest.raises(ValueError):
-        utils.multi_re.compile(pattern).sub_dict(args[0])
+        multi_re.compile(pattern).sub_dict(args[0])
     with pytest.raises(ValueError):
-        utils.multi_re.compile(pattern).subn_dict(args[0])
+        multi_re.compile(pattern).subn_dict(args[0])
 
 
 test_spec = [{
@@ -354,7 +370,7 @@ def test_multi_re_dict(test_spec):
     d = test_spec['dict']
     kwargs = test_spec.get('kwargs', {})
 
-    obj = utils.multi_re.compile(d, **kwargs)
+    obj = multi_re.compile(d, **kwargs)
 
     exception = test_spec.get('exception')
     if exception and string is None:
@@ -375,9 +391,9 @@ def test_multi_re_dict(test_spec):
     result = obj.subn_dict(string)
     assert result == expected
 
-    result = utils.multi_re.sub_dict(d, string, **kwargs)
+    result = multi_re.sub_dict(d, string, **kwargs)
     assert result == expected[0]
-    result = utils.multi_re.subn_dict(d, string, **kwargs)
+    result = multi_re.subn_dict(d, string, **kwargs)
     assert result == expected
 
 
@@ -399,10 +415,10 @@ def test_multi_re_dict(test_spec):
 ])
 def test_hex_to_rgb(input, expected):
     if isinstance(expected, tuple):
-        assert utils.hex_to_rgb(input)
+        assert utils_colors.hex_to_rgb(input)
     else:
         with pytest.raises(expected):
-            utils.hex_to_rgb(input)
+            utils_colors.hex_to_rgb(input)
 
 
 @pytest.mark.parametrize('input,expected', [
@@ -419,11 +435,11 @@ def test_hex_to_rgb(input, expected):
 ])
 def test_rgb_to_cmyk(input, expected):
     if isinstance(expected, tuple):
-        result = utils.rgb_to_cmyk(input)
+        result = utils_colors.rgb_to_cmyk(input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            utils.rgb_to_cmyk(input)
+            utils_colors.rgb_to_cmyk(input)
 
 
 @pytest.mark.parametrize('input,expected', [
@@ -440,11 +456,11 @@ def test_rgb_to_cmyk(input, expected):
 ])
 def test_rgb_to_hsv(input, expected):
     if isinstance(expected, tuple):
-        result = utils.rgb_to_hsv(input)
+        result = utils_colors.rgb_to_hsv(input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            utils.rgb_to_hsv(input)
+            utils_colors.rgb_to_hsv(input)
 
 
 @pytest.mark.parametrize('input,expected', [
@@ -461,20 +477,8 @@ def test_rgb_to_hsv(input, expected):
 ])
 def test_rgb_to_hsl(input, expected):
     if isinstance(expected, tuple):
-        result = utils.rgb_to_hsl(input)
+        result = utils_colors.rgb_to_hsl(input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            utils.rgb_to_hsl(input)
-
-
-def test_is_integer():
-    # Test some integer numbers
-    integers = [1, 2.0, 1 + 0j, -17.0]
-    for integer in integers:
-        assert utils.is_integer(integer)
-
-    # Test some non integer values
-    not_integers = [1.5, -1.124, 2 + 5j, 'some text', True]
-    for not_integer in not_integers:
-        assert not utils.is_integer(not_integer)
+            utils_colors.rgb_to_hsl(input)
