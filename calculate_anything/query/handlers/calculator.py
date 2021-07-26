@@ -5,12 +5,13 @@ import operator as op
 try:
     from simpleeval import SimpleEval
 except ImportError:  # pragma: no cover
-    from calculate_anything.utils import StupidEval  # pragma: no cover
+    from calculate_anything.utils.misc import StupidEval  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.calculation.calculation import Calculation, BooleanCalculation
-from calculate_anything.utils import is_types, Singleton
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import is_types
 from calculate_anything.exceptions import (
     MissingSimpleevalException, ZeroDivisionException,
     BooleanComparisonException
@@ -99,7 +100,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         """
         fixed_precisions = []
         for value in values:
-            if is_types(int, float)(value):
+            if isinstance(value, (int, float)):
                 value = complex(value, 0)
             # Do this so if it is the case we have something like 1 + 0.00000000001j
             # We consider it as 1 so it can be comparable with real numbers

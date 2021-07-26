@@ -32,38 +32,6 @@ __authors__ = 'Tilemachos Charalampous'
 __py_deps__ = ['requests', 'requests', 'pint', 'simpleeval', 'parsedatetime']
 
 
-class AlbertLogger:
-    def __init__(self, name):
-        self._name = name
-
-    def _log(self, func, message, *args):
-        message = str(message)
-        if args:
-            message = message % args
-        message = '{}: {}'.format(self._name, message)
-        func(message)
-
-    def debug(self, message, *args):
-        self._log(debug, message, *args)
-
-    def info(self, message, *args):
-        self._log(info, message, *args)
-
-    def warning(self, message, *args):
-        self._log(warning, message, *args)
-
-    def error(self, message, *args):
-        self._log(critical, message, *args)
-
-    def exception(self, message, *args):
-        self._log(critical, message, *args)
-
-
-class AlbertLogging:
-    def getLogger(name=''):
-        return AlbertLogger(name)
-
-
 import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')
 import os  # noqa: E402
@@ -74,8 +42,7 @@ except ImportError as e:
     MAIN_DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(MAIN_DIR)
 
-from calculate_anything import logging  # noqa: E402
-logging.set_logging(AlbertLogging)  # noqa: E402
+import calculate_anything.log as logging  # noqa: E402
 from calculate_anything.preferences import Preferences  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
 from calculate_anything.time.service import TimezoneService  # noqa: E402
@@ -86,7 +53,15 @@ from calculate_anything.query.handlers import (  # noqa: E402
 )
 from calculate_anything.query.multi_handler import MultiHandler  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
-from albert import ClipAction, Item, critical, debug, info, warning, critical  # noqa: E402
+from albert import ClipAction, Item, debug, info, warning, critical  # noqa: E402
+
+# Thanks albert for making me hack the shit out of logging
+handler = logging.CustomHandler(debug, info, warning, critical, critical)
+handler.setFormatter(logging.ColorFormatter(
+    fmt='[{BLUE}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}',
+    use_color=True
+))
+logging.set_stdout_handler(handler)
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
 API_KEY = globals().get('API_KEY') or ''

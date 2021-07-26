@@ -1,18 +1,18 @@
 import re
 import operator
 import ast
-from calculate_anything.utils import StupidEval
+from calculate_anything.utils.misc import StupidEval
 try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = StupidEval
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.calculation.base_n import (
+from calculate_anything.calculation import (
     BaseNCalculation, Base16StringCalculation, Base10Calculation,
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.calculation.calculation import BooleanCalculation
 import calculate_anything.utils.multi_re as multi_re
 from calculate_anything.utils.misc import is_integer

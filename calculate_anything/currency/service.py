@@ -3,16 +3,9 @@ from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
 from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
-from calculate_anything.utils import Singleton, safe_operation
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
-
-
-def lock(func):
-    @wraps(func)
-    def _wrapper(self, *args, **kwargs):
-        with self._lock:
-            return func(self, *args, **kwargs)
-    return _wrapper
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import safe_operation, lock
+import calculate_anything.log as logging
 
 
 class CurrencyService(metaclass=Singleton):

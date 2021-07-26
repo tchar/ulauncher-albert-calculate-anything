@@ -1,6 +1,6 @@
 import os
 import json
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.constants import TIMEZONES_SQL_FILE
 

@@ -12,7 +12,7 @@ from calculate_anything.calculation.units import (
     TemperatureUnitsCalculation
 )
 from calculate_anything.lang import LanguageService
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.utils.misc import is_types
 from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
@@ -252,6 +252,13 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     continue
                 unit_converted = unit_from_ureg.to(unit_to_ureg, 'currency')
                 if math.isnan(unit_converted.magnitude):
+                    self._logger.warning(
+                        'Converted magnitude is NaN'': from={} {}, to={}'.format(
+                            unit_from_ureg.magnitude,
+                            unit_from_ureg.units,
+                            unit_to_ureg
+                        )
+                    )
                     continue
                 try:
                     rate = unit_converted.magnitude / unit_from_ureg.magnitude

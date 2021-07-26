@@ -9,7 +9,7 @@ try:
     import babel.numbers as babel_numbers
 except ImportError:
     babel_numbers = None
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService

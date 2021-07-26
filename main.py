@@ -1,7 +1,7 @@
 import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')  # noqa: E402
-from calculate_anything import logging
-from calculate_anything.utils import safe_operation
+import calculate_anything.log as logging
+from calculate_anything.utils.misc import safe_operation
 from calculate_anything.lang import LanguageService
 from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import (
@@ -20,8 +20,8 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
-logger = logging.getLogger(__name__)
-
+# See what I did for Ulauncher. You won't let use my own formatter, due to duplicate logs
+logging.disable_stdout_handler()
 
 class ConverterExtension(Extension):
 
@@ -135,7 +135,7 @@ class PreferencesEventListener(EventListener):
         with safe_operation('Set default currencies'):
             default_currencies = event.preferences['default_currencies']
             preferences.currency.set_default_currencies(default_currencies)
-        
+
         preferences.commit()
 
 
@@ -151,7 +151,8 @@ class PreferencesUpdateEventListener(EventListener):
             preferences.currency.set_default_currencies(event.new_value)
         elif event.id == 'api_key':
             currency_provider = extension.preferences['currency_provider']
-            preferences.currency.add_provider(currency_provider, event.new_value)
+            preferences.currency.add_provider(
+                currency_provider, event.new_value)
         elif event.id == 'currency_provider':
             old_provider = event.old_value
             preferences.currency.remove_provider(old_provider)

@@ -1,12 +1,12 @@
-from calculate_anything.units.parser import PintDefinitionParser
 import os
 
 try:
     import pint
 except ImportError:
     pint = None
+from calculate_anything.units.parser import PintDefinitionParser
 from calculate_anything.currency.service import CurrencyService
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.utils.singleton import Singleton
 from calculate_anything.constants import MAIN_DIR
 

@@ -1,7 +1,7 @@
 # TODO: For all calculations
 # For now they are tested indirectly through the relevant QueryHandler
 
-from calculate_anything.calculation.base_n import BaseNCalculation
+from calculate_anything.calculation import BaseNCalculation
 
 
 def test_cov():

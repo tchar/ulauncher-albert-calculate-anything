@@ -1,7 +1,8 @@
 import os
 import re
 import calculate_anything
-from calculate_anything.utils import multi_re
+import calculate_anything.utils.multi_re as multi_re
+
 
 MAIN_DIR = os.path.dirname(os.path.dirname(
     os.path.realpath(calculate_anything.__file__)))
@@ -14,6 +15,19 @@ if XDG_FALLBACK is None:
 XDG_FALLBACK = os.path.join(XDG_FALLBACK, '.cache')
 XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
 CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
+LOGS_DIR = os.path.join(CACHE_DIR, 'logs')
+
+if os.path.isfile(CACHE_DIR):
+    os.remove(CACHE_DIR)
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+
+if os.path.isfile(LOGS_DIR):
+    os.remove(LOGS_DIR)
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
+
 CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
 TIMEZONES_SQLITE_FILE_USER = os.path.join(CACHE_DIR, 'timezones_user.sqlite3')
 TIMEZONES_SQLITE_FILE_DEFAULT = os.path.join(CACHE_DIR, 'timezones.sqlite3')

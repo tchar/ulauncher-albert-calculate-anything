@@ -1,17 +1,29 @@
-from calculate_anything.units.service import UnitsService
 import pytest
+import random
+import string
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
-from calculate_anything.time import TimezoneService
-from calculate_anything.currency import CurrencyService
+from calculate_anything.log import _Logging
+from calculate_anything.time.service import TimezoneService
+from calculate_anything.units.service import UnitsService
+from calculate_anything.currency.service import CurrencyService
 import calculate_anything.query.handlers.units as units_handler
 import calculate_anything.query.handlers.calculator as calculator_handler
 import calculate_anything.query.handlers.base_n as base_n_handler
 import calculate_anything.query.handlers.time as time_handler
-from calculate_anything.utils import Singleton, StupidEval
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import StupidEval
+
+
+def random_str(length=None):
+    length = length if length else 100
+    return ''.join(
+        random.choice(string.ascii_letters + string.digits)
+        for _ in range(length)
+    )
 
 
 @contextmanager
@@ -98,6 +110,30 @@ def currency_provider_had_error():
     with no_default_currencies():
         yield
     CurrencyService()._provider.had_error = provider_had_error
+
+
+@contextmanager
+def stdout_handler(hdlr):
+    old_hdlr = _Logging._stdout_hdlr
+    _Logging.set_stdout_handler(hdlr)
+    yield
+    _Logging.set_stdout_handler(old_hdlr)
+
+
+@contextmanager
+def file_handler(hdlr):
+    old_hdlr = _Logging._file_hdlr
+    _Logging.set_file_handler(hdlr)
+    yield
+    _Logging.set_file_handler(old_hdlr)
+
+
+@contextmanager
+def logging_level(level):
+    old_level = _Logging._level
+    _Logging.set_level(level)
+    yield
+    _Logging.set_level(old_level)
 
 
 @contextmanager

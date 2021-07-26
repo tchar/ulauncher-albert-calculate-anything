@@ -6,7 +6,7 @@ from calculate_anything.query.handlers.base_n import (
     Base16QueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-from calculate_anything.logging_wrapper import LoggingWrapper as logging
+import calculate_anything.log as logging
 from calculate_anything.utils.singleton import Singleton
 
 
