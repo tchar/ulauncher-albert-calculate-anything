@@ -3,9 +3,12 @@ try:
     import requests
 except ImportError:
     requests = None
-from calculate_anything.currency.providers.provider import FreeCurrencyProvider
-import calculate_anything.log as logging
+from calculate_anything.currency.providers import FreeCurrencyProvider
+from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
+
+
+__all__ = ['MyCurrencyNetCurrencyProvider']
 
 
 class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):

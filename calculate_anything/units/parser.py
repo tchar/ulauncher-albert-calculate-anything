@@ -3,7 +3,7 @@ try:
 except ImportError:
     pint = None
 from calculate_anything.lang import LanguageService
-import calculate_anything.log as logging
+from calculate_anything import logging
 from calculate_anything.constants import UNIT_ALIASES_RE
 
 

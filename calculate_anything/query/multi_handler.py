@@ -1,13 +1,14 @@
-from calculate_anything.query.handlers.units import UnitsQueryHandler
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.percentages import PercentagesQueryHandler
-from calculate_anything.query.handlers.time import TimeQueryHandler
-from calculate_anything.query.handlers.base_n import (
+from calculate_anything.query.handlers import (
+    UnitsQueryHandler, CalculatorQueryHandler,
+    PercentagesQueryHandler, TimeQueryHandler,
     Base16QueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-import calculate_anything.log as logging
-from calculate_anything.utils.singleton import Singleton
+from calculate_anything import logging
+from calculate_anything.utils import Singleton
+
+
+__all__ = ['MultiHandler']
 
 
 class MultiHandler(metaclass=Singleton):

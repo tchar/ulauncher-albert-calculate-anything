@@ -3,11 +3,9 @@ import json
 import re
 from typing import Callable
 import unicodedata
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import safe_operation
-from calculate_anything.utils import multi_re
+from calculate_anything.utils import Singleton, multi_re, safe_operation
 from calculate_anything.constants import MAIN_DIR
-import calculate_anything.log as logging
+from calculate_anything import logging
 
 
 class LanguageService(metaclass=Singleton):

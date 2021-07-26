@@ -1,6 +1,9 @@
 import re
 from calculate_anything.time.sqlite_cache import SqliteTimezoneCache
-from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils import Singleton
+
+
+__all__ = ['TimezoneService']
 
 
 class TimezoneService(metaclass=Singleton):

@@ -1,4 +1,3 @@
-from calculate_anything.utils.datetime import is_leap_year
 from functools import lru_cache
 from datetime import datetime, timedelta
 import parsedatetime
@@ -11,6 +10,7 @@ from calculate_anything.constants import (
     TIME_DATETIME_FORMAT, TIME_DATE_FORMAT,
     TIME_TIME_FORMAT
 )
+from calculate_anything.utils.datetime import is_leap_year
 from calculate_anything.exceptions import (
     DateOverflowException, MisparsedDateTimeException,
     MissingParsedatetimeException

@@ -1,9 +1,8 @@
 import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')  # noqa: E402
-import calculate_anything.log as logging
-from calculate_anything.utils.misc import safe_operation
+from calculate_anything import logging
 from calculate_anything.lang import LanguageService
-from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query import MultiHandler
 from calculate_anything.query.handlers import (
     PercentagesQueryHandler, UnitsQueryHandler,
     CalculatorQueryHandler, TimeQueryHandler,
@@ -11,7 +10,8 @@ from calculate_anything.query.handlers import (
     Base2QueryHandler, Base8QueryHandler
 )
 from calculate_anything.preferences import Preferences
-from calculate_anything.time.service import TimezoneService
+from calculate_anything.time import TimezoneService
+from calculate_anything.utils import safe_operation
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent

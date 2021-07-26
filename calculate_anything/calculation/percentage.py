@@ -1,6 +1,10 @@
-from calculate_anything.calculation.calculation import Calculation
+from calculate_anything.calculation import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
+
+
+__all__ = ['PercentageCalculation',
+           'NormalPercentageCalculation', 'InversePercentageCalculation']
 
 
 class PercentageCalculation(Calculation):

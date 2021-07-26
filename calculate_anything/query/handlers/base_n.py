@@ -1,26 +1,26 @@
 import re
 import operator
 import ast
-from calculate_anything.utils.misc import StupidEval
+from calculate_anything.utils import multi_re, Singleton, StupidEval, is_integer
 try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = StupidEval
 from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.calculation import (
-    BaseNCalculation, Base16StringCalculation, Base10Calculation,
+    BooleanCalculation, BaseNCalculation, Base16StringCalculation, Base10Calculation,
     Base2Calculation, Base8Calculation, Base16Calculation, ColorBase16Calculation
 )
-from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-import calculate_anything.log as logging
-from calculate_anything.calculation.calculation import BooleanCalculation
-import calculate_anything.utils.multi_re as multi_re
-from calculate_anything.utils.misc import is_integer
-from calculate_anything.utils.singleton import Singleton, singleton
+from calculate_anything import logging
 from calculate_anything.exceptions import (
     BaseFloatingPointException, MissingSimpleevalException,
     WrongBaseException, ZeroDivisionException
 )
+
+
+__all__ = ['Base10QueryHandler', 'Base2QueryHandler',
+           'Base8QueryHandler', 'Base16QueryHandler']
 
 space_in_middle_re = re.compile(r'\S\s+\S')
 
@@ -36,7 +36,7 @@ digits_base16_re = re.compile(r'^\s*([A-Fa-f0-9]+)\s*$')
 digits_base10_re = re.compile(r'^\s*([0-9]+)\s*$')
 
 
-@singleton
+@Singleton.function
 def get_simple_eval():
     simple_eval = SimpleEval()
     if not isinstance(simple_eval, StupidEval):

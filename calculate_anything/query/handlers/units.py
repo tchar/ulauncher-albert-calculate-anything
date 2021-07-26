@@ -5,18 +5,20 @@ try:
 except ImportError:  # pragma: no cover (covered artificially in tests)
     pint = None  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.units.service import UnitsService
-from calculate_anything.currency.service import CurrencyService
-from calculate_anything.calculation.units import (
+from calculate_anything.units import UnitsService
+from calculate_anything.currency import CurrencyService
+from calculate_anything.calculation import (
     UnitsCalculation, CurrencyUnitsCalculation,
     TemperatureUnitsCalculation
 )
 from calculate_anything.lang import LanguageService
-import calculate_anything.log as logging
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import is_types
+from calculate_anything import logging
+from calculate_anything.utils import Singleton, is_types
 from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from calculate_anything.exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
+
+
+__all__ = ['UnitsQueryHandler']
 
 
 class UnitsQueryHandler(QueryHandler, metaclass=Singleton):

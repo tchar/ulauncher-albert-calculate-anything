@@ -9,9 +9,8 @@ try:
 except ImportError:
     sqlite3 = None
 from calculate_anything.time.json_cache import TimezoneJsonCache
-import calculate_anything.log as logging
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import lock
+from calculate_anything import logging
+from calculate_anything.utils import Singleton, lock
 from calculate_anything.constants import (
     MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT,
     TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE

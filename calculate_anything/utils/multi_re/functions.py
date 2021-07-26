@@ -1,6 +1,7 @@
 from typing import Union, Iterable, List, Optional, Match, Callable, Dict, Type
 from calculate_anything.utils.multi_re.multi_re import _MultiRe
 
+
 __all__ = ['findall', 'search', 'match', 'fullmatch', 'split',
            'sub', 'subn', 'sub_dict', 'subn_dict', 'compile']
 

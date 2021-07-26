@@ -1,6 +1,9 @@
-from calculate_anything.currency.providers.provider import _MockCurrencyProvider
-from calculate_anything.currency.providers.fixerio import FixerIOCurrencyProvider
+from calculate_anything.currency.providers import FixerIOCurrencyProvider
+from calculate_anything.currency.providers.base import _MockCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
+
+
+__all__ = ['CurrencyProviderFactory']
 
 
 class CurrencyProviderFactory:

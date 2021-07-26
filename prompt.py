@@ -10,7 +10,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from calculate_anything.preferences import Preferences
 from calculate_anything import logging
 from calculate_anything.lang import LanguageService
-from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query.handlers import MultiHandler
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,

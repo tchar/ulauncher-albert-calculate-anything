@@ -1,8 +1,10 @@
-from typing import Collection, List, Any, Generator, Iterable, Hashable, Optional, Tuple, Union
-from itertools import combinations
+from typing import Collection, Any, Generator, Iterable, Hashable, Optional
 
 
-def partition(l: Collection[Any], max_parts: Optional[int]=None) -> Generator[Collection[Any], None, None]:
+__all__ = ['partition', 'flatten', 'deduplicate']
+
+
+def partition(l: Collection[Any], max_parts: Optional[int] = None) -> Generator[Collection[Any], None, None]:
     yields = 0
     for i in range(len(l), 0, -1):
         if max_parts is not None and yields >= max_parts:
@@ -16,6 +18,8 @@ def partition(l: Collection[Any], max_parts: Optional[int]=None) -> Generator[Co
         yields += 1
 
 # https://stackoverflow.com/a/10824484
+
+
 def flatten(iterable: Iterable[Any]) -> Generator[Any, None, None]:
     iterator, sentinel, stack = iter(iterable), object(), []
     while True:

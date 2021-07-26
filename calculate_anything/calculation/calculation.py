@@ -7,6 +7,9 @@ from calculate_anything.constants import CALCULATOR_ERROR
 from calculate_anything.utils import multi_re
 
 
+__all__ = ['Calculation', 'BooleanCalculation']
+
+
 class Calculation(_Calculation):
     VALUE_UNKNOWN = -1
     VALUE_NONE = 0

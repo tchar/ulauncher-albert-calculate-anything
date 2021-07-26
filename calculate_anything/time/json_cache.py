@@ -1,7 +1,7 @@
 import os
 import json
-import calculate_anything.log as logging
-from calculate_anything.utils.singleton import Singleton
+from calculate_anything import logging
+from calculate_anything.utils import Singleton
 from calculate_anything.constants import TIMEZONES_SQL_FILE
 
 

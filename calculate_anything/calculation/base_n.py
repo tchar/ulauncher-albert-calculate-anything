@@ -1,7 +1,11 @@
-from calculate_anything.calculation.calculation import Calculation
+from calculate_anything.calculation import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils.colors import hex_to_rgb, rgb_to_hsv, rgb_to_cmyk, rgb_to_hsl
+
+
+__all__ = ['BaseNCalculation', 'Base16StringCalculation', 'Base10Calculation',
+           'Base2Calculation', 'Base8Calculation', 'Base16Calculation', 'ColorBase16Calculation']
 
 
 class BaseNCalculation(Calculation):
@@ -28,6 +32,7 @@ class BaseNCalculation(Calculation):
             order=self.order
         )
 
+
 class Base16StringCalculation(BaseNCalculation):
     def __init__(self, value=None, query='', error=None, order=0):
         value = ':'.join('{:02x}'.format(ord(c)) for c in value)
@@ -39,19 +44,22 @@ class Base16StringCalculation(BaseNCalculation):
     def get_description(self):
         return LanguageService().translate('bytes', 'calculator').upper()
 
+
 class Base10Calculation(BaseNCalculation):
     def format(self):
         return str(self.value)
 
     def get_description(self):
         return LanguageService().translate('dec', 'calculator').upper()
-    
+
+
 class Base2Calculation(BaseNCalculation):
     def format(self):
         return bin(int(self.value))[2:]
 
     def get_description(self):
         return LanguageService().translate('bin', 'calculator').upper()
+
 
 class Base8Calculation(BaseNCalculation):
     def format(self):

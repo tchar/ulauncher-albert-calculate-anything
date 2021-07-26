@@ -1,14 +1,19 @@
-from calculate_anything.calculation.calculation import Calculation
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.base import QueryHandler
-import calculate_anything.log as logging
-from calculate_anything.calculation.percentage import InversePercentageCalculation, NormalPercentageCalculation, PercentageCalculation
+from calculate_anything import logging
+from calculate_anything.calculation import (
+    Calculation, InversePercentageCalculation,
+    NormalPercentageCalculation, PercentageCalculation
+)
 from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisionException
-from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils import Singleton
 from calculate_anything.constants import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
     PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REGEX,
 )
+
+
+__all__ = ['PercentagesQueryHandler']
 
 
 class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):

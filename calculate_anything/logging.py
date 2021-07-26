@@ -15,6 +15,7 @@ import copy
 from typing import Callable
 from calculate_anything.constants import LOGS_DIR
 
+
 __all__ = []
 
 
@@ -169,8 +170,10 @@ def disable_file_handler():
 def set_file_handler(hdlr: logging.Handler):
     _Logging.set_file_handler(hdlr)
 
+
 def setLevel(level: int):
     _Logging.set_level(level)
+
 
 def getLogger(name: str) -> logging.Logger:
     return _Logging.get_logger(name)

@@ -9,12 +9,16 @@ try:
     import babel.numbers as babel_numbers
 except ImportError:
     babel_numbers = None
-import calculate_anything.log as logging
+from calculate_anything import logging
 from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import multi_re
 from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
+
+
+__all__ = ['UnitsCalculation', 'CurrencyUnitsCalculation',
+           'TemperatureUnitsCalculation']
 
 
 class UnitsCalculation(_Calculation):

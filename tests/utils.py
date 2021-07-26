@@ -6,16 +6,15 @@ from datetime import datetime, timedelta
 from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
-from calculate_anything.log import _Logging
-from calculate_anything.time.service import TimezoneService
-from calculate_anything.units.service import UnitsService
-from calculate_anything.currency.service import CurrencyService
+from calculate_anything.logging import _Logging
+from calculate_anything.time import TimezoneService
+from calculate_anything.units import UnitsService
+from calculate_anything.currency import CurrencyService
 import calculate_anything.query.handlers.units as units_handler
 import calculate_anything.query.handlers.calculator as calculator_handler
 import calculate_anything.query.handlers.base_n as base_n_handler
 import calculate_anything.query.handlers.time as time_handler
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import StupidEval
+from calculate_anything.utils import Singleton, StupidEval
 
 
 def random_str(length=None):

@@ -1,11 +1,15 @@
+from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+from datetime import datetime
 from calculate_anything.utils import is_types, get_module
 has_requests = get_module('requests') is not None
-from datetime import datetime
-from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+
+__all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider']
+
 
 class _MockCurrencyProvider:
     def __init__(self, *args, **kwargs):
         pass
+
 
 class _CurrencyProvider:
     def __init__(self):
@@ -22,8 +26,10 @@ class _CurrencyProvider:
         self.last_request_timestamp = datetime.now().timestamp()
         return {}
 
+
 class FreeCurrencyProvider(_CurrencyProvider):
     pass
+
 
 class ApiKeyCurrencyProvider(_CurrencyProvider):
     def __init__(self, api_key=''):

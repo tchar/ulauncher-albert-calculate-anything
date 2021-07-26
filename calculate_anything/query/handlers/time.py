@@ -6,24 +6,26 @@ try:
 except ImportError:  # pragma: no cover (tested artificially)
     parsedatetime = None  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.calculation.time import (
+from calculate_anything.calculation import (
     LocationTimeCalculation, TimeCalculation,
     TimedeltaCalculation
 )
-from calculate_anything.time.service import TimezoneService
+from calculate_anything.time import TimezoneService
 from calculate_anything.exceptions import (
     MissingParsedatetimeException, DateOverflowException,
     MisparsedDateTimeException
 )
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.iter import partition, flatten, deduplicate
+from calculate_anything.utils import Singleton, partition, flatten, deduplicate
 from calculate_anything.utils.datetime import parsedatetime_str
-import calculate_anything.log as logging
+from calculate_anything import logging
 from calculate_anything.constants import (
     TIME_AGO_BEFORE_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SPLIT_REGEX, PLUS_MINUS_REGEX,
     TIME_LOCATION_REPLACE_REGEX
 )
+
+
+__all__ = ['TimeQueryHandler']
 
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
@@ -122,7 +124,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if query.strip() == '':
             date, parsed_query, match, overflow = now, '', True, False
             no_query = True
-        else:            
+        else:
             date, _, parsed_query, match, overflow = self._parse_dt(query, now)
             no_query = False
 
@@ -228,7 +230,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 if prev in signs_set:
                     return []
             elif not TIME_SUBQUERY_REGEX.match(subquery):
-                    return []
+                return []
             else:
                 sign = prev
                 virtual_subquery, n = TIME_AGO_BEFORE_REGEX.subn(' ', subquery)
@@ -338,7 +340,6 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order=-1000
             )
             return [result]
-
 
         query = TIME_QUERY_REGEX_SPLIT.split(query, maxsplit=1)
         if len(query) > 1:

@@ -42,16 +42,16 @@ except ImportError as e:
     MAIN_DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(MAIN_DIR)
 
-import calculate_anything.log as logging  # noqa: E402
+from calculate_anything import logging  # noqa: E402
 from calculate_anything.preferences import Preferences  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
-from calculate_anything.time.service import TimezoneService  # noqa: E402
+from calculate_anything.time import TimezoneService  # noqa: E402
+from calculate_anything.query import MultiHandler  # noqa: E402
 from calculate_anything.query.handlers import (  # noqa: E402
     UnitsQueryHandler, CalculatorQueryHandler,
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from calculate_anything.query.multi_handler import MultiHandler  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
 from albert import ClipAction, Item, debug, info, warning, critical  # noqa: E402
 

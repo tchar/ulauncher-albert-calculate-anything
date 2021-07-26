@@ -1,11 +1,12 @@
-from functools import wraps
 from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
 from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import safe_operation, lock
-import calculate_anything.log as logging
+from calculate_anything.utils import Singleton, safe_operation, lock
+from calculate_anything import logging
+
+
+__all__ = ['CurrencyService']
 
 
 class CurrencyService(metaclass=Singleton):

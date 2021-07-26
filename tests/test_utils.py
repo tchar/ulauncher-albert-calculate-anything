@@ -5,7 +5,7 @@ from calculate_anything.utils import misc as utils_misc
 from calculate_anything.utils import iter as utils_iter
 from calculate_anything.utils import multi_re
 from calculate_anything.utils import colors as utils_colors
-from calculate_anything.utils.singleton import Singleton, singleton
+from calculate_anything.utils import Singleton
 from calculate_anything.exceptions import MissingSimpleevalException
 
 
@@ -124,7 +124,7 @@ def test_singleton():
             self.args = args
             self.kwargs = kwargs
 
-    @singleton
+    @Singleton.function
     def singletonfunc(value):
         return value
 

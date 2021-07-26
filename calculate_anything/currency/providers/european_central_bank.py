@@ -4,9 +4,11 @@ except ImportError:
     requests = None
 from datetime import datetime
 from xml.etree import ElementTree
-from calculate_anything.currency.providers.provider import FreeCurrencyProvider
-import calculate_anything.log as logging
+from calculate_anything.currency.providers import FreeCurrencyProvider
+from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderRequestException
+
+__all__ = ['ECBCurrencyProvider']
 
 
 class ECBCurrencyProvider(FreeCurrencyProvider):

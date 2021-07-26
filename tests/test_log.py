@@ -6,7 +6,7 @@ from functools import lru_cache
 import logging as _logging
 from logging.handlers import RotatingFileHandler
 from tests.utils import file_handler, random_str, stdout_handler, logging_level
-import calculate_anything.log as logging
+from calculate_anything import logging
 
 logging.disable_file_handler()
 

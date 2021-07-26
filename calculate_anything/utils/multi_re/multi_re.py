@@ -1,7 +1,7 @@
 from typing import Union, Iterable, List, Optional, Match, Callable, Dict
 import sys
 import re
-from calculate_anything.utils.iter import deduplicate
+from calculate_anything.utils import deduplicate
 
 
 class _MultiRe:

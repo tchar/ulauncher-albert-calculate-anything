@@ -5,13 +5,12 @@ import operator as op
 try:
     from simpleeval import SimpleEval
 except ImportError:  # pragma: no cover
-    from calculate_anything.utils.misc import StupidEval  # pragma: no cover
+    from calculate_anything.utils import StupidEval  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
-import calculate_anything.log as logging
-from calculate_anything.calculation.calculation import Calculation, BooleanCalculation
-from calculate_anything.utils.singleton import Singleton
-from calculate_anything.utils.misc import is_types
+from calculate_anything import logging
+from calculate_anything.calculation import Calculation, BooleanCalculation
+from calculate_anything.utils import Singleton, is_types
 from calculate_anything.exceptions import (
     MissingSimpleevalException, ZeroDivisionException,
     BooleanComparisonException
@@ -20,6 +19,9 @@ from calculate_anything.constants import (
     CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
+
+
+__all__ = ['CalculatorQueryHandler']
 
 
 class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):

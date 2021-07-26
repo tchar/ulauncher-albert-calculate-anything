@@ -3,9 +3,12 @@ try:
     import requests
 except ImportError:
     requests = None
-from calculate_anything.currency.providers.provider import ApiKeyCurrencyProvider
+from calculate_anything.currency.providers import ApiKeyCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderRequestException
-import calculate_anything.log as logging
+from calculate_anything import logging
+
+
+__all__ = ['FixerIOCurrencyProvider']
 
 
 class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):

@@ -1,6 +1,6 @@
 import pytest
 from calculate_anything.lang import LanguageService
-from calculate_anything.utils.misc import StupidEval
+from calculate_anything.utils import StupidEval
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
 from tests.utils import calculator_no_simpleeval, reset_instance, query_test_helper
