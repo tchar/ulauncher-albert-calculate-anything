@@ -3,11 +3,13 @@ import re
 import cmath
 import operator as op
 try:
-    from simpleeval import SimpleEval
+    from simpleeval import SimpleEval, NameNotDefined, FeatureNotAvailable
 except ImportError:  # pragma: no cover
     from calculate_anything.utils import StupidEval  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
-from calculate_anything.query.handlers.base import QueryHandler
+    NameNotDefined = TypeError  # pragma: no cover
+    FeatureNotAvailable = TypeError
+from calculate_anything.query.handlers.base import SingletonQueryHandler
 from calculate_anything import logging
 from calculate_anything.calculation import Calculation, BooleanCalculation
 from calculate_anything.utils import Singleton, is_types
@@ -24,7 +26,7 @@ from calculate_anything.constants import (
 __all__ = ['CalculatorQueryHandler']
 
 
-class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
+class CalculatorQueryHandler(SingletonQueryHandler):
     """Class that handles Calculation expressions for numbers, complex numbers,
     equalities and inequalities.
     """
@@ -146,6 +148,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
 
         return BooleanCalculation(value=result, query=query, order=0)
 
+    @Singleton.method
     def handle_raw(self, query: str) -> Union[List[Calculation], None]:
         """Handles a calculation query
 
@@ -193,11 +196,15 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 order=-70
             )
             return [item]
-        except SyntaxError:  # pragma: no cover (error handling just in case)
-            return None  # pragma: no cover
+        except (SyntaxError, TypeError):
+            return None
+        except(NameNotDefined, FeatureNotAvailable) as e:
+            self._logger.debug('Got simpleval Exception: when calculating {!r}'.format(query, e))
+            return None
         except Exception as e:  # pragma: no cover
-            self._logger.error(  # pragma: no cover
-                'Got exception when trying to calculate {}: {}'.format(query, e))
+            self._logger.error(type(e))
+            self._logger.exception(  # pragma: no cover
+                'Got exception when trying to calculate {!r}: {}'.format(query, e))
             return None  # pragma: no cover
 
         if not any(map(is_types(int, float, complex), results)):
@@ -210,7 +217,3 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             result = Calculation(value=results[0], query=subqueries[0])
 
         return [result]
-
-    @QueryHandler.Decorators.can_handle
-    def handle(self, query):
-        return self.handle_raw(query)

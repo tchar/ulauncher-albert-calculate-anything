@@ -1,10 +1,13 @@
 import math
 import itertools
+import tokenize
+
+from pint.pint_eval import EvalTreeNode
 try:
     import pint
 except ImportError:  # pragma: no cover (covered artificially in tests)
     pint = None  # pragma: no cover
-from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.query.handlers.base import SingletonQueryHandler
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
 from calculate_anything.calculation import (
@@ -21,7 +24,7 @@ from calculate_anything.exceptions import CurrencyProviderException, MissingPint
 __all__ = ['UnitsQueryHandler']
 
 
-class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
+class UnitsQueryHandler(SingletonQueryHandler):
     def __init__(self):
         super().__init__('=')
         self._logger = logging.getLogger(__name__)
@@ -164,15 +167,19 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     not CurrencyUnitsCalculation.is_currency(unit)):
                 return None
             return unit
-        except pint.errors.DimensionalityError:
+        except TypeError:
             pass
-        except pint.errors.UndefinedUnitError:
-            pass
-        except pint.errors.DefinitionSyntaxError:
-            pass
+        except (pint.errors.DimensionalityError,
+                pint.errors.UndefinedUnitError,
+                pint.errors.DefinitionSyntaxError,
+                tokenize.TokenError) as e:
+            self._logger.debug('Got pint exception when trying to parse {!r}: {}'.format(expression, e))
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(type(e))
+            self._logger.exception(
+                'Got exception when trying to parse: {!r}: {}'.format(expression, e))
 
+    @Singleton.method
     def handle_raw(self, query):
         if '%' in query:
             return None
@@ -318,7 +325,3 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 )
             )
         return items
-
-    @QueryHandler.Decorators.can_handle
-    def handle(self, query):
-        return self.handle_raw(query)

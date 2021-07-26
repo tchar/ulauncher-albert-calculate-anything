@@ -13,10 +13,11 @@ class TimezoneService(metaclass=Singleton):
     def get(self, name, *search_terms):
         return SqliteTimezoneCache().get(name, *search_terms)
 
-    @property
+    @Singleton.property
     def default_cities(self):
         return self._default_cities
 
+    @Singleton.method
     def set_default_cities(self, default_cities):
         self._default_cities = default_cities
 
@@ -44,5 +45,6 @@ class TimezoneService(metaclass=Singleton):
 
         return cities_found
 
+    @Singleton.method
     def stop(self):
         SqliteTimezoneCache().close_db()

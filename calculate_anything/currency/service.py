@@ -88,10 +88,12 @@ class CurrencyService(metaclass=Singleton):
         timer_thread.setDaemon(True)
         timer_thread.start()
 
-    @property
+    @Singleton.property
+    @lock
     def provider_had_error(self):
         return self._provider.had_error
 
+    @Singleton.method
     @lock
     def enable_cache(self, update_frequency):
         if not self._enabled:
@@ -102,22 +104,24 @@ class CurrencyService(metaclass=Singleton):
         self._cache.enable(update_frequency)
         return self
 
+    @Singleton.method
     @lock
     def disable_cache(self):
         self._logger.info('Disabling cache')
         self._cache.disable()
         return self
 
-    @property
+    @Singleton.property
     @lock
     def cache_enabled(self):
         return self._cache.enabled
 
-    @property
+    @Singleton.property
     @lock
     def enabled(self):
         return self._enabled
 
+    @Singleton.method
     @lock
     def add_provider(self, provider):
         self._logger.info('Adding provider {}'.format(
@@ -125,6 +129,7 @@ class CurrencyService(metaclass=Singleton):
         self._provider.add_provider(provider)
         return self
 
+    @Singleton.method
     @lock
     def remove_provider(self, provider):
         self._logger.info('Removing provider {}'.format(
@@ -132,6 +137,7 @@ class CurrencyService(metaclass=Singleton):
         self._provider.remove_provider(provider)
         return self
 
+    @Singleton.method
     @lock
     def set_default_currencies(self, default_currencies):
         self._logger.info(
@@ -139,26 +145,29 @@ class CurrencyService(metaclass=Singleton):
         self._default_currencies = default_currencies
         return self
 
-    @property
+    @Singleton.property
     @lock
     def default_currencies(self):
         return self._default_currencies
 
+    @Singleton.method
     @lock
     def add_update_callback(self, callback):
         self._update_callbacks.append(callback)
 
+    @Singleton.method
     @lock
     def remove_update_callback(self, callback):
         callbacks = self._update_callbacks
         callbacks = [cb for cb in callbacks if cb != callback]
         self._update_callbacks = callbacks
 
+    @Singleton.method
     @lock
     def get_rate_timestamp(self, currency):
         return self._cache.get_rate_timestamp(currency)
 
-    @property
+    @Singleton.property
     @lock
     def missing_requests(self):
         return self._missing_requests
@@ -182,6 +191,7 @@ class CurrencyService(metaclass=Singleton):
     #         available_currencies = []
     #     return available_currencies
 
+    @Singleton.method
     @lock
     def run(self, force=False):
         if force:
@@ -196,17 +206,20 @@ class CurrencyService(metaclass=Singleton):
         timer_thread.setDaemon(True)
         timer_thread.start()
 
+    @Singleton.method
     @lock
     def enable(self):
         self._enabled = True
         return self
 
+    @Singleton.method
     @lock
     def disable(self):
         self.disable_cache()
         self._enabled = False
         return self
 
+    @Singleton.method
     @lock
     def stop(self):
         self._is_running = False

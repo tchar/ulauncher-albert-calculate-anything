@@ -2,7 +2,7 @@ import os
 import json
 from calculate_anything import logging
 from calculate_anything.utils import Singleton
-from calculate_anything.constants import TIMEZONES_SQL_FILE
+from calculate_anything.constants import TIMEZONES_JSON_FILE
 
 
 class TimezoneJsonCache(metaclass=Singleton):
@@ -10,11 +10,12 @@ class TimezoneJsonCache(metaclass=Singleton):
         self._data = {}
         self._logger = logging.getLogger(__name__)
         try:
-            with open(TIMEZONES_SQL_FILE, 'r') as f:
+            with open(TIMEZONES_JSON_FILE, 'r') as f:
                 self._data = json.loads(f.read())
         except Exception as e:
             self._logger.error('Could not load timezone data: {}'.format(e))
 
+    @Singleton.method
     def get(self, city_name, *search_terms):
         city_code = city_name.strip().lower()
         if city_code not in self._data:

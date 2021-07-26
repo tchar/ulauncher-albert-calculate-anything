@@ -25,6 +25,7 @@ class MultiHandler(metaclass=Singleton):
         ]
         self._logger = logging.getLogger(__name__)
 
+    @Singleton.method
     def handle(self, query, *handlers, return_raw=False):
         handlers = set(handlers)
         results = []

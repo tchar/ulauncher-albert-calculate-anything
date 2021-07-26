@@ -52,7 +52,6 @@ from calculate_anything.query.handlers import (  # noqa: E402
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from calculate_anything.lang import LanguageService  # noqa: E402
 from albert import ClipAction, Item, debug, info, warning, critical  # noqa: E402
 
 # Thanks albert for making me hack the shit out of logging
@@ -89,7 +88,7 @@ def initialize():
 
 
 def finalize():
-    TimezoneService().stop()
+    TimezoneService.stop()
 
 
 def is_trigger(query, index):
@@ -119,23 +118,23 @@ def handleQuery(query):
     if not TRIGGERS:
         handlers = []
     elif is_time_trigger(query):
-        query_str = TimeQueryHandler().keyword + query_str
+        query_str = TimeQueryHandler.keyword + query_str
         handlers = [TimeQueryHandler]
         mode = 'time'
     elif is_dec_trigger(query):
-        query_str = Base10QueryHandler().keyword + query_str
+        query_str = Base10QueryHandler.keyword + query_str
         handlers = [Base10QueryHandler]
         mode = 'dec'
     elif is_hex_trigger(query):
-        query_str = Base16QueryHandler().keyword + query_str
+        query_str = Base16QueryHandler.keyword + query_str
         handlers = [Base16QueryHandler]
         mode = 'hex'
     elif is_oct_trigger(query):
-        query_str = Base8QueryHandler().keyword + query_str
+        query_str = Base8QueryHandler.keyword + query_str
         handlers = [Base8QueryHandler]
         mode = 'oct'
     elif is_bin_trigger(query):
-        query_str = Base2QueryHandler().keyword + query_str
+        query_str = Base2QueryHandler.keyword + query_str
         handlers = [Base2QueryHandler]
         mode = 'bin'
     else:
@@ -146,7 +145,7 @@ def handleQuery(query):
             UnitsQueryHandler
         ]
 
-    results = MultiHandler().handle(query_str, *handlers)
+    results = MultiHandler.handle(query_str, *handlers)
     for result in results:
 
         errors_num += result.error is not None
@@ -179,8 +178,8 @@ def handleQuery(query):
             Item(
                 id=__title__,
                 icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
-                text=LanguageService().translate('no-result', 'misc'),
-                subtext=LanguageService().translate(
+                text=LanguageService.translate('no-result', 'misc'),
+                subtext=LanguageService.translate(
                     'no-result-{}-description'.format(mode), 'misc')
             )
         )

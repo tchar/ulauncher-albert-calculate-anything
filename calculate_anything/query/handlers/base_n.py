@@ -6,7 +6,7 @@ try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = StupidEval
-from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.query.handlers.base import SingletonQueryHandler
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.calculation import (
     BooleanCalculation, BaseNCalculation, Base16StringCalculation, Base10Calculation,
@@ -46,7 +46,7 @@ def get_simple_eval():
     return simple_eval
 
 
-class BaseNQueryHandler(QueryHandler):
+class BaseNQueryHandler(SingletonQueryHandler):
     def __init__(self, keyword, base, digits_re, base_class, convert_classes=[]):
         super().__init__(keyword)
         self._base = base
@@ -56,7 +56,7 @@ class BaseNQueryHandler(QueryHandler):
         self._simple_eval = get_simple_eval()
         self._logger = logging.getLogger(__name__)
 
-    def parse_expression(self, expression, split_eq=True, sub_kw=True):
+    def _parse_expression(self, expression, split_eq=True, sub_kw=True):
         def convert_to_base_n(m): return str(int(m.group(0), self._base))
 
         if sub_kw:
@@ -74,7 +74,7 @@ class BaseNQueryHandler(QueryHandler):
             exprs_parsed = []
 
             for subexp in expression:
-                expr_dec, _, expr_parsed = self.parse_expression(
+                expr_dec, _, expr_parsed = self._parse_expression(
                     subexp, split_eq=False, sub_kw=False)
                 exprs.append(expr_dec[0])
                 exprs_parsed.append(expr_parsed[0])
@@ -112,7 +112,7 @@ class BaseNQueryHandler(QueryHandler):
         results = []
 
         try:
-            expr_dec, operators, expr_parsed = self.parse_expression(query)
+            expr_dec, operators, expr_parsed = self._parse_expression(query)
         except WrongBaseException:
             item = BaseNCalculation(
                 error=WrongBaseException,
@@ -186,28 +186,25 @@ class BaseNQueryHandler(QueryHandler):
 
         return items
 
-    @QueryHandler.Decorators.can_handle
-    def handle(self, query):
-        return self.handle_raw(query)
 
-
-class Base2QueryHandler(BaseNQueryHandler, metaclass=Singleton):
+class Base2QueryHandler(BaseNQueryHandler):
     def __init__(self):
         super().__init__('bin', 2, digits_base2_re, Base2Calculation,
                          (Base10Calculation, Base16Calculation, Base8Calculation))
 
 
-class Base8QueryHandler(BaseNQueryHandler, metaclass=Singleton):
+class Base8QueryHandler(BaseNQueryHandler):
     def __init__(self):
         super().__init__('oct', 8, digits_base8_re, Base8Calculation,
                          (Base10Calculation, Base2Calculation, Base16Calculation))
 
 
-class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
+class Base16QueryHandler(BaseNQueryHandler):
     def __init__(self):
         super().__init__('hex', 16, digits_base16_re, Base16Calculation,
                          (Base10Calculation, Base2Calculation, Base8Calculation))
 
+    @Singleton.method
     def handle_raw(self, query):
         original_query = query.strip()
         items = []
@@ -236,12 +233,8 @@ class Base16QueryHandler(BaseNQueryHandler, metaclass=Singleton):
 
         return items
 
-    @QueryHandler.Decorators.can_handle
-    def handle(self, query):
-        return self.handle_raw(query)
 
-
-class Base10QueryHandler(BaseNQueryHandler, metaclass=Singleton):
+class Base10QueryHandler(BaseNQueryHandler):
     def __init__(self):
         super().__init__('dec', 10, digits_base10_re, Base10Calculation,
                          (Base16Calculation, Base2Calculation, Base8Calculation))

@@ -17,10 +17,11 @@ from calculate_anything.constants import (
 )
 
 
-class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
+class SqliteTimezoneCache(TimezoneJsonCache):
     def __init__(self):
         self._logger = logging.getLogger(__name__)
         self._db = None
+        self._lock = RLock()
         if sqlite3 is None:
             super().__init__()
             return
@@ -31,7 +32,6 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
             return
 
         self._last_clear_cache_timestamp = datetime.now().timestamp()
-        self._lock = RLock()
         if not self._init_db(TIMEZONES_SQLITE_FILE_USER, load_only=True):
             self._init_db(TIMEZONES_SQLITE_FILE_DEFAULT)
 
@@ -338,6 +338,7 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
         self._last_clear_cache_timestamp = datetime.now().timestamp()
         self._logger.info('Cleared cache')
 
+    @Singleton.method
     def get(self, city_name_search, *search_terms, exact=False):
         if self._db is None:
             return super().get(city_name_search, *search_terms)
@@ -377,6 +378,7 @@ class SqliteTimezoneCache(TimezoneJsonCache, metaclass=Singleton):
 
         return cities
 
+    @Singleton.method
     @lock
     def close_db(self):
         if self._db is None:

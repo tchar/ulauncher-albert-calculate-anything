@@ -197,6 +197,7 @@ class Preferences(metaclass=Singleton):
         self.units = UnitsPreferences()
         self.currency = CurrencyPreferences()
 
+    @Singleton.method
     def commit(self):
         """Commits preference changes in proper order"""
         self.language.commit()

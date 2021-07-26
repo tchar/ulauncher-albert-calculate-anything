@@ -23,12 +23,12 @@ from tests.utils import (
 )
 
 
-LanguageService().set('en_US')
-tr_time = LanguageService().get_translator('time')
-tr_err = LanguageService().get_translator('errors')
-default_cities = TimezoneService().parse_default_cities(
+LanguageService.set('en_US')
+tr_time = LanguageService.get_translator('time')
+tr_err = LanguageService.get_translator('errors')
+default_cities = TimezoneService.parse_default_cities(
     'Athens GR,New York City US')
-TimezoneService().set_default_cities(default_cities)
+TimezoneService.set_default_cities(default_cities)
 cal = parsedatetime.Calendar(version=parsedatetime.VERSION_CONTEXT_STYLE)
 dt_now = TimeQueryHandler.now()
 time_reference = datetime(2021, 7, 15, 14, 0, 0)

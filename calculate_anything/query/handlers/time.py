@@ -5,7 +5,7 @@ try:
     import parsedatetime
 except ImportError:  # pragma: no cover (tested artificially)
     parsedatetime = None  # pragma: no cover
-from calculate_anything.query.handlers.base import QueryHandler
+from calculate_anything.query.handlers.base import SingletonQueryHandler
 from calculate_anything.calculation import (
     LocationTimeCalculation, TimeCalculation,
     TimedeltaCalculation
@@ -28,7 +28,7 @@ from calculate_anything.constants import (
 __all__ = ['TimeQueryHandler']
 
 
-class TimeQueryHandler(QueryHandler, metaclass=Singleton):
+class TimeQueryHandler(SingletonQueryHandler):
 
     def __init__(self):
         super().__init__('time')
@@ -333,6 +333,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         items.append(item)
         return items_pre + items
 
+    @Singleton.method
     def handle_raw(self, query):
         if self._cal is None:
             result = TimeCalculation(
@@ -355,7 +356,3 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             items = self._calculate(query, keyword, suffix)
 
         return items
-
-    @QueryHandler.Decorators.can_handle
-    def handle(self, query):
-        return self.handle_raw(query)

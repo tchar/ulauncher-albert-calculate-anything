@@ -1,5 +1,5 @@
 from functools import wraps
-from abc import abstractmethod
+from calculate_anything.utils.singleton import Singleton
 
 
 class QueryHandler:
@@ -30,11 +30,35 @@ class QueryHandler:
             return False
         return True
 
-    @abstractmethod
     def handle_raw(self, query, *args, **kwargs):
         pass  # pragma: no cover
 
-    @abstractmethod
     @Decorators.can_handle
     def handle(self, query, *args, **kwargs):
-        pass  # pragma: no cover
+        return self.handle_raw(query, *args, **kwargs)
+
+
+class SingletonQueryHandler(QueryHandler, metaclass=Singleton):
+    @Singleton.property
+    def keyword(self):
+        return super().keyword
+
+    @Singleton.method
+    def query_without_keyword(self, query, check=False):
+        if check and not self.can_handle(query):
+            return ''
+        return query[len(self.keyword):]
+
+    @Singleton.method
+    def can_handle(self, query):
+        if not query.startswith(self.keyword):
+            return False
+        return True
+
+    @Singleton.method
+    def handle_raw(self, query, *args, **kwargs):
+        return super().handle_raw(query, *args, **kwargs)
+
+    @Singleton.method
+    def handle(self, query, *args, **kwargs):
+        return super().handle(query, *args, **kwargs)

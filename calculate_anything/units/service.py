@@ -21,6 +21,7 @@ class UnitsService(metaclass=Singleton):
         self._logger = logging.getLogger(__name__)
         self._unit_registry = None
         self._ctx = None
+        self._currencies_in_registry = set()
         self._base_currency = None
         self._enabled = False
         self._running = False
@@ -56,43 +57,48 @@ class UnitsService(metaclass=Singleton):
         self._logger.info(
             'Updated currency registry with {} currencies'.format(len(data)))
 
+    @Singleton.method
     def get_rate_timestamp(self, unit):
         if isinstance(unit, pint.Quantity):
             unit = unit.units
         unit_name = str(unit).replace('currency_', '')
         return CurrencyService().get_rate_timestamp(unit_name)
 
+    @Singleton.method
     def set_conversion_mode(self, mode):
         self._conversion_mode = mode
 
-    @property
+    @Singleton.property
     def conversion_mode(self):
         return self._conversion_mode
 
-    @property
+    @Singleton.property
     def base_currency(self):
         return self._base_currency
 
-    @property
+    @Singleton.property
     def unit_registry(self):
         return self._unit_registry
 
-    @property
+    @Singleton.property
     def enabled(self):
         return self._enabled
 
-    @property
+    @Singleton.property
     def running(self):
         return self._running
 
+    @Singleton.method
     def enable(self):
         self._enabled = True
         return self
 
+    @Singleton.method
     def disable(self):
         self._enabled = False
         return self
 
+    @Singleton.method
     def stop(self):
         self._running = False
         self._unit_registry = None
@@ -100,6 +106,7 @@ class UnitsService(metaclass=Singleton):
         CurrencyService().remove_update_callback(self._update_callback)
         return self
 
+    @Singleton.method
     def run(self, force=False):
         if pint is None:
             return

@@ -2,6 +2,7 @@ import locale  # noqa: E402
 locale.setlocale(locale.LC_ALL, '')  # noqa: E402
 from calculate_anything import logging
 from calculate_anything.lang import LanguageService
+from calculate_anything.time import TimezoneService
 from calculate_anything.query import MultiHandler
 from calculate_anything.query.handlers import (
     PercentagesQueryHandler, UnitsQueryHandler,
@@ -10,7 +11,6 @@ from calculate_anything.query.handlers import (
     Base2QueryHandler, Base8QueryHandler
 )
 from calculate_anything.preferences import Preferences
-from calculate_anything.time import TimezoneService
 from calculate_anything.utils import safe_operation
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
@@ -70,7 +70,7 @@ class KeywordQueryEventListener(EventListener):
                 UnitsQueryHandler,
             ]
 
-        results = MultiHandler().handle(query, *handlers)
+        results = MultiHandler.handle(query, *handlers)
         for result in results:
             error_num += result.error is not None
             if result.clipboard is not None:
@@ -96,8 +96,8 @@ class KeywordQueryEventListener(EventListener):
         if should_show_placeholder and len(items) == error_num:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
-                name=LanguageService().translate('no-result', 'misc'),
-                description=LanguageService().translate(
+                name=LanguageService.translate('no-result', 'misc'),
+                description=LanguageService.translate(
                     'no-result-{}-description'.format(mode), 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
@@ -168,7 +168,7 @@ class PreferencesUpdateEventListener(EventListener):
 
 class SystemExitEventListener(EventListener):
     def on_event(self, event, extension):
-        TimezoneService().stop()
+        TimezoneService.stop()
         return super().on_event(event, extension)
 
 

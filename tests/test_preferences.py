@@ -21,18 +21,18 @@ def test_defaults():
         assert preferences.language.lang == LanguageService()._lang == 'en_US'
 
         assert preferences.time.default_cities == \
-            TimezoneService().default_cities
+            TimezoneService.default_cities
 
         assert preferences.units.conversion_mode == \
             UnitsService()._conversion_mode == \
             UnitsService.CONVERSION_MODE_NORMAL
 
         assert preferences.currency.cache_enabled == \
-            CurrencyService().cache_enabled == False
+            CurrencyService.cache_enabled == False
         assert preferences.currency.cache_update_frequency == \
             CurrencyService()._cache._update_frequency == 0
         assert preferences.currency.default_currencies == \
-            CurrencyService().default_currencies == []
+            CurrencyService.default_currencies == []
         assert sorted(map(str, preferences.currency.providers )) == \
             sorted(map(str, (
                 ECBCurrencyProvider,
@@ -145,11 +145,11 @@ def test_normal(test_spec):
             UnitsService.CONVERSION_MODE_CRAZY
 
         assert preferences.currency.cache_enabled == \
-            CurrencyService().cache_enabled == True
+            CurrencyService.cache_enabled == True
         assert preferences.currency.cache_update_frequency == \
             CurrencyService()._cache._update_frequency == 100000
         assert preferences.currency.default_currencies == \
-            CurrencyService().default_currencies == [
+            CurrencyService.default_currencies == [
                 'EUR', 'BTC', 'USD', 'RON']
         assert sorted(map(str, preferences.currency.providers)) == \
             sorted(map(str, (
