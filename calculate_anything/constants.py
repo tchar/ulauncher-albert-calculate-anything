@@ -1,3 +1,9 @@
+'''Constants used by Calculate Anything
+
+Constants consist of directories, global regexes etc.
+If important directories do not exist, they are created here
+'''
+
 import os
 import re
 import calculate_anything
