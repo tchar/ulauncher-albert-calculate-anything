@@ -3,14 +3,14 @@
 For modules/launchers that support python's logging a RotatingFileHandler
 and a StreamHandler with a color formatter is used.
 
-For other launchers (i.e Albert) that doesn't let us use logging we use a 
+For other launchers (i.e Albert) that doesn't let us use logging we use a
 CustomHandler instead of a StreamHandler. It is a fucking dirty hack, but
 what can we do about it?
 '''
 import os
 import sys
-import logging
-from logging.handlers import RotatingFileHandler
+import logging as _logging
+import logging.handlers as _handlers
 import copy
 from typing import Callable
 from calculate_anything.utils import Singleton
@@ -20,7 +20,7 @@ from calculate_anything.constants import LOGS_DIR
 __all__ = []
 
 
-class ColorFormatter(logging.Formatter):
+class ColorFormatter(_logging.Formatter):
     # Just leave this here to remember color numbers
     # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
     SEQS = {
@@ -45,21 +45,33 @@ class ColorFormatter(logging.Formatter):
         'CRITICAL': 35,
     }
 
-    def __init__(self, fmt=None, date_fmt=None, use_color: bool = True):
+    def __init__(self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S', use_color: bool = True):
+        '''Args:
+            fmt (str): A '{' style format with the extra codes provided in
+                ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
+                should be put in single '{' formatting. Others should be put in '{{'
+                e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
+            date_fmt (str): A date format
+            use_color (bool): Wether to use colors or not
+        '''
         if use_color:
             seqs = ColorFormatter.SEQS
         else:
             seqs = {k: '' for k in ColorFormatter.SEQS}
         if not fmt:
             fmt = '{{asctime}}.{{msecs:03.0f}} | {{levelname}} | [{BOLD}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}'
-        if not date_fmt:
-            date_fmt = '%Y-%m-%d:%H:%M:%S'
 
         fmt = fmt.format(**seqs)
-        logging.Formatter.__init__(self, fmt, date_fmt, style='{')
+        _logging.Formatter.__init__(self, fmt, date_fmt, style='{')
         self._use_color = use_color
 
-    def format(self, record):
+    def format(self, record: _logging.LogRecord) -> str:
+        '''Formats the record. If coloring is used record is copied and levelname
+        is changed to use colors
+
+        Returns:
+            str: A formatted string
+        '''
         if self._use_color and record.levelname in ColorFormatter.COLORS:
             # Copy record as we are changhing the levelname
             record = copy.copy(record)
@@ -68,10 +80,10 @@ class ColorFormatter(logging.Formatter):
                 ColorFormatter.COLORS[levelname] + \
                 levelname + ColorFormatter.SEQS['RESET']
             record.levelname = levelname
-        return logging.Formatter.format(self, record)
+        return _logging.Formatter.format(self, record)
 
 
-class CustomHandler(logging.Handler):
+class CustomHandler(_logging.Handler):
     '''A super special handler for fucking Albert'''
 
     def __init__(self, debug: Callable[[str], None],
@@ -79,25 +91,35 @@ class CustomHandler(logging.Handler):
                  warning: Callable[[str], None],
                  error: Callable[[str], None],
                  critical: Callable[[str], None],
-                 level=logging.NOTSET) -> None:
+                 level=_logging.NOTSET) -> None:
+        '''Args:
+            debug (callable): Called when debug log is received.
+            info (callable): Called when info log is received.
+            warning (callable): Called when warning log is received.
+            error (callable): Called when error log is received.
+            critical (callable): Called when critical log is received.
+            level (int): Same as logging module's values.
+        '''
         super().__init__(level=level)
         self._debug = debug
         self._info = info
         self._warning = warning
         self._error = error
         self._critical = critical
-        self.setFormatter(logging.Formatter())
+        self.setFormatter(_logging.Formatter())
 
-    def emit(self, record) -> None:
-        if record.levelno == logging.DEBUG:
+    def emit(self, record: _logging.LogRecord) -> None:
+        '''Emits the LogRecord using the provided callables when instantiated'''
+
+        if record.levelno == _logging.DEBUG:
             log = self._debug
-        elif record.levelno == logging.INFO:
+        elif record.levelno == _logging.INFO:
             log = self._info
-        elif record.levelno == logging.WARNING:
+        elif record.levelno == _logging.WARNING:
             log = self._warning
-        elif record.levelno == logging.ERROR:
+        elif record.levelno == _logging.ERROR:
             log = self._error
-        elif record.levelno == logging.CRITICAL:
+        elif record.levelno == _logging.CRITICAL:
             log = self._critical
         else:
             return
@@ -106,15 +128,19 @@ class CustomHandler(logging.Handler):
 
 
 class Logging(metaclass=Singleton):
+    '''Holds the logging information such as handlers to use.
+    Prefer to use the functons provided in this module.
+    '''
+
     def __init__(self):
         level = os.environ.get('CALCULATE_ANYTHING_VERBOSE', '').upper()
-        level = logging.getLevelName(level)
-        level = level if isinstance(level, int) else logging.INFO
+        level = _logging.getLevelName(level)
+        level = level if isinstance(level, int) else _logging.INFO
 
-        stdout_hdlr = logging.StreamHandler(sys.stderr)
+        stdout_hdlr = _logging.StreamHandler(sys.stderr)
         stdout_hdlr.setFormatter(ColorFormatter(use_color=True))
 
-        file_hdlr = RotatingFileHandler(
+        file_hdlr = _handlers.RotatingFileHandler(
             os.path.join(LOGS_DIR, 'runtime.log'),
             maxBytes=1000000, backupCount=10, encoding='utf-8',
             delay=True
@@ -127,30 +153,51 @@ class Logging(metaclass=Singleton):
         self._prev_hdlrs = set()
         self._got_logger = False
 
-    def set_level(self, level: int):
+    def set_level(self, level: int) -> None:
+        '''Sets the level for all loggers'''
         self.level = level
 
-    def disable_stdout_handler(self):
-        self.stdout_hdlr = None
-
-    def set_stdout_handler(self, hdlr: logging.Handler):
+    def disable_file_handler(self) -> None:
+        '''Disables file handler provided from this class'''
         if self.stdout_hdlr and self._got_logger:
-            print(self._got_logger)
             self._prev_hdlrs.add(self.stdout_hdlr)
-        self.stdout_hdlr = hdlr
-
-    def disable_file_handler(self):
         self.file_hdlr = None
 
-    def set_file_handler(self, hdlr: logging.FileHandler):
+    def set_file_handler(self, hdlr: _logging.FileHandler) -> None:
+        '''Sets file handler to be used
+
+        Args:
+            hdlr (logging.FileHandler): The file handler to set
+        '''
         if self.file_hdlr and self._got_logger:
-            print(self._got_logger)
             self._prev_hdlrs.add(self.file_hdlr)
         self.file_hdlr = hdlr
 
-    def get_logger(self, name):
+    def disable_stdout_handler(self) -> None:
+        '''Disables stdout handler provided from this class'''
+        if self.stdout_hdlr and self._got_logger:
+            self._prev_hdlrs.add(self.stdout_hdlr)
+        self.stdout_hdlr = None
+
+    def set_stdout_handler(self, hdlr: _logging.Handler) -> None:
+        '''Sets stdout handler to be used
+
+        Args:
+            hdlr (logging.FileHandler): The stdout handler to set
+        '''
+        if self.stdout_hdlr and self._got_logger:
+            self._prev_hdlrs.add(self.stdout_hdlr)
+        self.stdout_hdlr = hdlr
+
+    def get_logger(self, name: str) -> _logging.Logger:
+        '''Returns a logger with file handler and stdout handler
+        provided from this class.
+
+        Args:
+            name (str): The name of the logger as in logging.getLogger(name)
+        '''
         self._got_logger = True
-        logger = logging.getLogger(name)
+        logger = _logging.getLogger(name)
         logger.setLevel(self.level)
 
         for hdlr in self._prev_hdlrs:
@@ -163,25 +210,44 @@ class Logging(metaclass=Singleton):
         return logger
 
 
-def disable_stdout_handler():
-    Logging().disable_stdout_handler()
-
-
-def set_stdout_handler(hdlr: logging.Handler):
-    Logging().set_stdout_handler(hdlr)
-
-
-def disable_file_handler():
-    Logging().disable_file_handler()
-
-
-def set_file_handler(hdlr: logging.Handler):
-    Logging().set_file_handler(hdlr)
-
-
-def setLevel(level: int):
+def setLevel(level: int) -> None:
+    '''Sets the level for all loggers'''
     Logging().set_level(level)
 
 
-def getLogger(name: str) -> logging.Logger:
+def disable_file_handler() -> None:
+    '''Disables file handler provided from this class'''
+    Logging().disable_file_handler()
+
+
+def set_file_handler(hdlr: _logging.Handler) -> None:
+    '''Sets file handler to be used
+
+    Args:
+        hdlr (logging.FileHandler): The file handler to set
+    '''
+    Logging().set_file_handler(hdlr)
+
+
+def disable_stdout_handler() -> None:
+    '''Disables stdout handler provided from this class'''
+    Logging().disable_stdout_handler()
+
+
+def set_stdout_handler(hdlr: _logging.Handler) -> None:
+    '''Sets stdout handler to be used
+
+    Args:
+        hdlr (logging.FileHandler): The stdout handler to set
+    '''
+    Logging().set_stdout_handler(hdlr)
+
+
+def getLogger(name: str) -> _logging.Logger:
+    '''Returns a logger with file handler and stdout handler
+    provided from this class.
+
+    Args:
+        name (str): The name of the logger as in logging.getLogger(name)
+    '''
     return Logging().get_logger(name)
