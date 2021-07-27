@@ -7,7 +7,7 @@ try:
     import pint
 except ImportError:  # pragma: no cover (covered artificially in tests)
     pint = None  # pragma: no cover
-from calculate_anything.query.handlers.base import SingletonQueryHandler
+from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
 from calculate_anything.calculation import (
@@ -16,7 +16,7 @@ from calculate_anything.calculation import (
 )
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
-from calculate_anything.utils import Singleton, is_types
+from calculate_anything.utils import is_types, Singleton
 from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from calculate_anything.exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
 
@@ -24,7 +24,7 @@ from calculate_anything.exceptions import CurrencyProviderException, MissingPint
 __all__ = ['UnitsQueryHandler']
 
 
-class UnitsQueryHandler(SingletonQueryHandler):
+class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__('=')
         self._logger = logging.getLogger(__name__)
@@ -179,7 +179,6 @@ class UnitsQueryHandler(SingletonQueryHandler):
             self._logger.exception(
                 'Got exception when trying to parse: {!r}: {}'.format(expression, e))
 
-    @Singleton.method
     def handle_raw(self, query):
         if '%' in query:
             return None

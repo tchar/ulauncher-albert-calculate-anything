@@ -52,7 +52,7 @@ from calculate_anything.query.handlers import (  # noqa: E402
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from albert import ClipAction, Item, debug, info, warning, critical  # noqa: E402
+from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402
 
 # Thanks albert for making me hack the shit out of logging
 handler = logging.CustomHandler(debug, info, warning, critical, critical)
@@ -93,7 +93,7 @@ def initialize():
 
 
 def finalize():
-    TimezoneService.stop()
+    TimezoneService().stop()
 
 
 def is_trigger(query, index):
@@ -122,36 +122,36 @@ def handleQuery(query):
         handlers = []
         query_str = query_nokw
     elif is_time_trigger(query):
-        query_str = TimeQueryHandler.keyword + query_nokw
+        query_str = TimeQueryHandler().keyword + query_nokw
         handlers = [TimeQueryHandler]
         mode = 'time'
     elif is_dec_trigger(query):
-        query_str = Base10QueryHandler.keyword + query_nokw
+        query_str = Base10QueryHandler().keyword + query_nokw
         handlers = [Base10QueryHandler]
         mode = 'dec'
     elif is_hex_trigger(query):
-        query_str = Base16QueryHandler.keyword + query_nokw
+        query_str = Base16QueryHandler().keyword + query_nokw
         handlers = [Base16QueryHandler]
         mode = 'hex'
     elif is_oct_trigger(query):
-        query_str = Base8QueryHandler.keyword + query_nokw
+        query_str = Base8QueryHandler().keyword + query_nokw
         handlers = [Base8QueryHandler]
         mode = 'oct'
     elif is_bin_trigger(query):
-        query_str = Base2QueryHandler.keyword + query_nokw
+        query_str = Base2QueryHandler().keyword + query_nokw
         handlers = [Base2QueryHandler]
         mode = 'bin'
     else:
         query_str = CalculatorQueryHandler().keyword + ' ' + query_nokw
         handlers = [
+            UnitsQueryHandler,
             CalculatorQueryHandler,
             PercentagesQueryHandler,
-            UnitsQueryHandler
         ]
 
     items = []
     had_any_non_error = False
-    results = MultiHandler.handle(query_str, *handlers)
+    results = MultiHandler().handle(query_str, *handlers)
     for result in results:
         had_any_non_error = had_any_non_error or result.error is not None
         icon = result.icon or 'images/icon.svg'
@@ -172,16 +172,16 @@ def handleQuery(query):
         ))
 
     should_show_placeholder = query_nokw.strip() == '' and TRIGGERS or (
-            not had_any_non_error and
-            SHOW_EMPTY_PLACEHOLDER)
+        not had_any_non_error and
+        SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
         items.append(
             Item(
                 id=__title__,
                 icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
-                text=LanguageService.translate('no-result', 'misc'),
-                subtext=LanguageService.translate(
+                text=LanguageService().translate('no-result', 'misc'),
+                subtext=LanguageService().translate(
                     'no-result-{}-description'.format(mode), 'misc')
             )
         )

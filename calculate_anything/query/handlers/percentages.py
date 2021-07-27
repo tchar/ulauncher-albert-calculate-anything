@@ -1,5 +1,5 @@
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
-from calculate_anything.query.handlers.base import SingletonQueryHandler
+from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything import logging
 from calculate_anything.calculation import (
     Calculation, InversePercentageCalculation,
@@ -16,7 +16,7 @@ from calculate_anything.constants import (
 __all__ = ['PercentagesQueryHandler']
 
 
-class PercentagesQueryHandler(SingletonQueryHandler, metaclass=Singleton):
+class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__('=')
         self._logger = logging.getLogger(__name__)
@@ -188,7 +188,6 @@ class PercentagesQueryHandler(SingletonQueryHandler, metaclass=Singleton):
                     amount.value, percentage.value, e))
             return None  # pragma: no cover
 
-    @Singleton.method
     def handle_raw(self, query):
         if '%' not in query:
             return None

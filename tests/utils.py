@@ -14,7 +14,8 @@ import calculate_anything.query.handlers.units as units_handler
 import calculate_anything.query.handlers.calculator as calculator_handler
 import calculate_anything.query.handlers.base_n as base_n_handler
 import calculate_anything.query.handlers.time as time_handler
-from calculate_anything.utils import Singleton, StupidEval
+from calculate_anything.utils import StupidEval
+from calculate_anything.utils.singleton import Singleton
 
 
 def random_str(length=None):

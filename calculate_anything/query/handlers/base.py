@@ -40,33 +40,3 @@ class QueryHandler:
     @Decorators.can_handle
     def handle(self, query, *args, **kwargs):
         return self.handle_raw(query, *args, **kwargs)
-
-
-class SingletonQueryHandler(QueryHandler, metaclass=Singleton):
-    @Singleton.property
-    def keyword(self):
-        return super().keyword
-
-    @keyword.setter
-    def keyword(self, kw):
-        self._keyword = kw
-
-    @Singleton.method
-    def query_without_keyword(self, query, check=False):
-        if check and not self.can_handle(query):
-            return ''
-        return query[len(self.keyword):]
-
-    @Singleton.method
-    def can_handle(self, query):
-        if not query.startswith(self.keyword):
-            return False
-        return True
-
-    @Singleton.method
-    def handle_raw(self, query, *args, **kwargs):
-        return super().handle_raw(query, *args, **kwargs)
-
-    @Singleton.method
-    def handle(self, query, *args, **kwargs):
-        return super().handle(query, *args, **kwargs)

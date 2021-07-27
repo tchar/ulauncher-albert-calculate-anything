@@ -22,7 +22,6 @@ class LanguageService(metaclass=Singleton):
             if unicodedata.category(c) != 'Mn'
         )
 
-    @Singleton.method
     def set(self, lang):
         if lang == self._lang:
             return
@@ -54,30 +53,25 @@ class LanguageService(metaclass=Singleton):
             with safe_operation():
                 callback(lang)
 
-    @Singleton.method
     def translate(self, word, mode):
         word = str(word)
         return self._data.get(mode, {}).get(word, word)
 
-    @Singleton.method
     def get_translator(self, mode):
         def _translator(word):
             return self.translate(word, mode)
         return _translator
 
-    @Singleton.method
     def add_translation(self, word, translated_word, mode):
         if mode not in self._data:
             self._data[mode] = {}
         self._data[mode][word] = translated_word
 
-    @Singleton.method
     def get_translation_adder(self, mode):
         def _translation_adder(word, translated_word):
             self.add_translation(word, translated_word, mode)
         return _translation_adder
 
-    @Singleton.method
     def replace_all(self, string, mode, ignorecase=True):
         if mode not in self._data:
             return string
@@ -89,12 +83,10 @@ class LanguageService(metaclass=Singleton):
             sort=True
         )
 
-    @Singleton.method
     def get_replacer(self, mode, ignorecase=True):
         def _replacer(string):
             return self.replace_all(string, mode, ignorecase)
         return _replacer
 
-    @Singleton.method
     def add_update_callback(self, callback: Callable[[str], None]) -> None:
         self._update_callbacks.append(callback)

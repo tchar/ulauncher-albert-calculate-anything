@@ -5,9 +5,9 @@ from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisionException
 
 
-LanguageService.set('en_US')
-tr_calc = LanguageService.get_translator('calculator')
-tr_err = LanguageService.get_translator('errors')
+LanguageService().set('en_US')
+tr_calc = LanguageService().get_translator('calculator')
+tr_err = LanguageService().get_translator('errors')
 
 
 # Test Normal

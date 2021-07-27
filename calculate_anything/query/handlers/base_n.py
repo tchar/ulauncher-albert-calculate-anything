@@ -6,7 +6,7 @@ try:
     from simpleeval import SimpleEval
 except ImportError:
     SimpleEval = StupidEval
-from calculate_anything.query.handlers.base import SingletonQueryHandler
+from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.calculation import (
     BooleanCalculation, BaseNCalculation, Base16StringCalculation, Base10Calculation,
@@ -46,7 +46,7 @@ def get_simple_eval():
     return simple_eval
 
 
-class BaseNQueryHandler(SingletonQueryHandler):
+class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self, keyword, base, digits_re, base_class, convert_classes=[]):
         super().__init__(keyword)
         self._base = base
@@ -209,7 +209,6 @@ class Base16QueryHandler(BaseNQueryHandler):
         super().__init__('hex', 16, digits_base16_re, Base16Calculation,
                          (Base10Calculation, Base2Calculation, Base8Calculation))
 
-    @Singleton.method
     def handle_raw(self, query):
         original_query = query.strip()
         items = []

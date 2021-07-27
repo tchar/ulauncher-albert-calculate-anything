@@ -1,3 +1,4 @@
+import inspect
 from calculate_anything.query.handlers import (
     UnitsQueryHandler, CalculatorQueryHandler,
     PercentagesQueryHandler, TimeQueryHandler,
@@ -5,33 +6,34 @@ from calculate_anything.query.handlers import (
     Base2QueryHandler, Base8QueryHandler
 )
 from calculate_anything import logging
-from calculate_anything.utils import Singleton
 
 
 __all__ = ['MultiHandler']
 
 
-class MultiHandler(metaclass=Singleton):
+class MultiHandler:
     def __init__(self):
         self._handlers = [
-            UnitsQueryHandler(),
-            CalculatorQueryHandler(),
-            PercentagesQueryHandler(),
-            TimeQueryHandler(),
-            Base10QueryHandler(),
-            Base16QueryHandler(),
-            Base8QueryHandler(),
-            Base2QueryHandler()
+            UnitsQueryHandler,
+            CalculatorQueryHandler,
+            PercentagesQueryHandler,
+            TimeQueryHandler,
+            Base10QueryHandler,
+            Base16QueryHandler,
+            Base2QueryHandler,
+            Base8QueryHandler,
         ]
         self._logger = logging.getLogger(__name__)
 
-    @Singleton.method
-    def handle(self, query, *handlers, return_raw=False):
-        handlers = set(handlers)
+    def _handle(self, query, *handlers, return_raw):
         results = []
-        for handler in self._handlers:
-            if handlers and not handler.__class__ in handlers:
-                continue
+
+        if not handlers:
+            handlers = self._handlers
+
+        for handler in handlers:
+            if inspect.isclass(handler):
+                handler = handler()
             try:
                 result = handler.handle(query)
             except Exception as e:
@@ -46,3 +48,9 @@ class MultiHandler(metaclass=Singleton):
             results.extend(result)
 
         return sorted(results, key=lambda result: result.order)
+
+    def handle_raw(self, query, *handlers):
+        return self._handle(query, *handlers, return_raw=True)
+
+    def handle(self, query, *handlers):
+        return self._handle(query, *handlers, return_raw=False)

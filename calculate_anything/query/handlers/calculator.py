@@ -1,3 +1,4 @@
+from calculate_anything.utils.singleton import Singleton
 from typing import List, Tuple, Union
 import re
 import cmath
@@ -9,10 +10,10 @@ except ImportError:  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
     NameNotDefined = TypeError  # pragma: no cover
     FeatureNotAvailable = TypeError
-from calculate_anything.query.handlers.base import SingletonQueryHandler
+from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything import logging
 from calculate_anything.calculation import Calculation, BooleanCalculation
-from calculate_anything.utils import Singleton, is_types
+from calculate_anything.utils import is_types
 from calculate_anything.exceptions import (
     MissingSimpleevalException, ZeroDivisionException,
     BooleanComparisonException
@@ -26,7 +27,7 @@ from calculate_anything.constants import (
 __all__ = ['CalculatorQueryHandler']
 
 
-class CalculatorQueryHandler(SingletonQueryHandler):
+class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     """Class that handles Calculation expressions for numbers, complex numbers,
     equalities and inequalities.
     """
@@ -148,7 +149,6 @@ class CalculatorQueryHandler(SingletonQueryHandler):
 
         return BooleanCalculation(value=result, query=query, order=0)
 
-    @Singleton.method
     def handle_raw(self, query: str) -> Union[List[Calculation], None]:
         """Handles a calculation query
 

@@ -28,7 +28,7 @@ from calculate_anything.currency.service import CurrencyService
 CurrencyService().enable()
 
 # To enable but disable cache
-CurrencyService.enable().disable_cache()
+CurrencyService().enable().disable_cache()
 
 # To enable the service and cache and run every 1 day = 86400 seconds
 CurrencyService().enable().enable_cache(86400).run()

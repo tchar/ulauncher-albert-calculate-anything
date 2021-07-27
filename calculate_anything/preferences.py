@@ -59,7 +59,7 @@ class LanguagePreferences(_Preferences):
             LanguageService().set(value)
 
     def _pre_commit(self):
-        # Set en_US if no lang has been specified and its first run
+        # Set en_US if no lang has been specified and its first start
         if self._commits == 0 and 'lang' not in self._uncomitted_keys:
             LanguageService().set('en_US')
 
@@ -72,12 +72,16 @@ class TimezonePreferences(_Preferences):
     def set_default_cities(self, default_cities):
         if not isinstance(default_cities, str):
             default_cities = ','.join(default_cities)
-        default_cities = TimezoneService.parse_default_cities(default_cities)
+        default_cities = TimezoneService().parse_default_cities_str(default_cities, save=False)
         super()._to_commit('default_cities', default_cities)
 
     def _commit_one(self, key, value):
         if key == 'default_cities':
             TimezoneService().set_default_cities(value)
+
+    def _pre_commit(self):
+        if self._commits == 0:
+            TimezoneService().start()
 
 
 class CurrencyPreferences(_Preferences):
@@ -151,12 +155,12 @@ class CurrencyPreferences(_Preferences):
             CurrencyService().remove_provider(value)
 
     def _pre_commit(self):
-        # If first run, run service
+        # If first start, start service
         if self._commits == 0:
-            CurrencyService().run()
-        # Else if currency_provider has been provided run with force
+            CurrencyService().start()
+        # Else if currency_provider has been provided start with force
         elif 'add_provider' in self._uncomitted_keys:
-            CurrencyService().run(force=True)
+            CurrencyService().start(force=True)
 
 
 class UnitsPreferences(_Preferences):
@@ -187,7 +191,7 @@ class UnitsPreferences(_Preferences):
 
     def _pre_commit(self):
         if self._commits == 0:
-            UnitsService().run()
+            UnitsService().start()
 
 
 class Preferences(metaclass=Singleton):
@@ -197,7 +201,6 @@ class Preferences(metaclass=Singleton):
         self.units = UnitsPreferences()
         self.currency = CurrencyPreferences()
 
-    @Singleton.method
     def commit(self):
         """Commits preference changes in proper order"""
         self.language.commit()

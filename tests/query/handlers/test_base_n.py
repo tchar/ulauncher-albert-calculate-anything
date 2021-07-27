@@ -15,9 +15,9 @@ from calculate_anything.exceptions import (
 from tests.utils import base_n_no_simpleeval, query_test_helper, reset_instance
 
 
-LanguageService.set('en_US')
-tr_calc = LanguageService.get_translator('calculator')
-tr_err = LanguageService.get_translator('errors')
+LanguageService().set('en_US')
+tr_calc = LanguageService().get_translator('calculator')
+tr_err = LanguageService().get_translator('errors')
 
 
 def result_for_base_n(base, value, query, order):

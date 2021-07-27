@@ -2,34 +2,34 @@ import os
 import shutil
 from datetime import datetime
 import json
-from functools import wraps
 from threading import RLock
 try:
     import sqlite3
 except ImportError:
     sqlite3 = None
-from calculate_anything.time.json_cache import TimezoneJsonCache
 from calculate_anything import logging
-from calculate_anything.utils import Singleton, lock
+from calculate_anything.utils import lock
 from calculate_anything.constants import (
     MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT,
     TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE
 )
 
 
-class SqliteTimezoneCache(TimezoneJsonCache):
+class TimezoneSqliteCache:
     def __init__(self):
+        super().__init__()
         self._logger = logging.getLogger(__name__)
         self._db = None
         self._lock = RLock()
+
+    @lock
+    def load(self):
         if sqlite3 is None:
-            super().__init__()
-            return
+            return False
 
         sql_filepath = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
         if not os.path.isfile(sql_filepath):
-            super().__init__()
-            return
+            return False
 
         self._last_clear_cache_timestamp = datetime.now().timestamp()
         if not self._init_db(TIMEZONES_SQLITE_FILE_USER, load_only=True):
@@ -37,8 +37,8 @@ class SqliteTimezoneCache(TimezoneJsonCache):
 
         self._init_cache()
         self._post_init()
+        return True
 
-    @lock
     def _init_db(self, file_path, load_only=False):
         MODE_LOAD_ONLY = 1
         MODE_LOAD = MODE_LOAD_ONLY << 1
@@ -136,8 +136,7 @@ class SqliteTimezoneCache(TimezoneJsonCache):
                     timestamp DATETIME DEFAULT (DATETIME('now', 'localtime')))''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS results (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data_id INTEGER UNIQUE,
+                    id INTEGER UNIQUE,
                     data JSON)''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS queries_results (
@@ -145,7 +144,7 @@ class SqliteTimezoneCache(TimezoneJsonCache):
                     result_id INTEGER,
                     result_order INTEGER,
                     FOREIGN KEY(query_id) REFERENCES queries(id) ON DELETE CASCADE,
-                    FOREIGN KEY(result_id) REFERENCES results(data_id) ON DELETE CASCADE)''')
+                    FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE)''')
 
         cur.execute(
             '''CREATE INDEX queries_timestamp_idx ON queries(timestamp)''')
@@ -286,7 +285,7 @@ class SqliteTimezoneCache(TimezoneJsonCache):
             qid = cursor.lastrowid
             for i, city in enumerate(cities):
                 cursor.execute('''INSERT OR IGNORE INTO
-                            results (data_id, data)
+                            results (id, data)
                             VALUES (?, ?)''', (city['id'], json.dumps(city),))
                 cursor.execute('''INSERT OR IGNORE INTO
                             queries_results (query_id, result_id, result_order)
@@ -297,38 +296,68 @@ class SqliteTimezoneCache(TimezoneJsonCache):
     @lock
     def _get_from_cached(self, city_name_search, search_terms):
         city_name_search = city_name_search.replace('::', '')
-        result_keys = []
+        query_keys = []
         if search_terms:
             for search_term in search_terms:
                 result_key = city_name_search + '::' + \
                     search_term.replace('::', '')
-                result_keys.append(result_key)
+                query_keys.append(result_key)
         else:
-            result_keys = [city_name_search]
+            query_keys = [city_name_search]
 
-        query = ['?'] * len(result_keys)
+        alt_query = ['? LIKE q.key || \'%\''] * len(query_keys)
+        alt_query = ' OR '.join(alt_query)
+        query = ['?'] * len(query_keys)
         query = ','.join(query)
 
         db_cache = self._db_cache
         cursor = db_cache.cursor()
-        cities = []
-        for row in cursor.execute('''SELECT r.data FROM
-            queries q
-            INNER JOIN queries_results qr ON qr.query_id = q.id
-            INNER JOIN results r ON qr.result_id = r.data_id
-            WHERE q.key IN ({})
-            GROUP BY r.data_id
-            ORDER BY qr.result_order ASC'''.format(query), result_keys):
-            city = json.loads(row[0])
-            cities.append(city)
-        cursor.close()
-        return cities
+        qid = None
+        qkey = None
+        cursor.execute('''SELECT q.id, q.key FROM queries q
+            WHERE {} ORDER BY length(q.key) DESC LIMIT 1
+            '''.format(alt_query), query_keys)
+
+        row = cursor.fetchone()
+        if row is None:
+            return [], False
+
+        qid, qkey = row
+        # If not found in cache, return empty and found=False
+        if qid is None:
+            return [], False
+
+        exact_key = any(map(lambda k: k == qkey, query_keys))
+
+        cursor.execute('''SELECT r.data FROM results r
+            INNER JOIN queries_results qr ON qr.result_id = r.id AND qr.query_id = ?
+            ORDER BY qr.result_order ASC''', (qid, ))
+
+        cities = cursor.fetchmany()
+
+        # If key matches, return cities, and found=True
+        if exact_key:
+            # Load it here for better performance
+            cities = map(lambda c: c[0], cities)
+            cities = map(json.loads, cities)
+            return list(cities), True
+
+        # If exact_key = False and no cities found with the key
+        # save it to cache for future, and return empty and found=True
+        if not cities:
+            self._cache_results(city_name_search, search_terms, [])
+            return [], True
+
+        # Last resort, exact_key = False, undetermined situation
+        # Return empty and found=False
+        return [], False
 
     @lock
     def _clear_cache(self):
         time_diff = datetime.now().timestamp() - self._last_clear_cache_timestamp
-        if time_diff <= 7200:
+        if time_diff <= 86400:
             return
+        self._logger.info('Clearing in-memory cache')
         db_cache = self._db_cache
         cursor = db_cache.cursor()
         cursor.execute('''DELETE FROM queries
@@ -338,18 +367,15 @@ class SqliteTimezoneCache(TimezoneJsonCache):
         self._last_clear_cache_timestamp = datetime.now().timestamp()
         self._logger.info('Cleared cache')
 
-    @Singleton.method
     def get(self, city_name_search, *search_terms, exact=False):
-        if self._db is None:
-            return super().get(city_name_search, *search_terms)
-
         city_name_search = city_name_search.replace('?', '')
         search_terms = map(lambda s: s.replace('?', ''), search_terms)
         search_terms = list(search_terms)
 
         if not exact:
-            cities = self._get_from_cached(city_name_search, search_terms)
-            if cities:
+            cities, found = self._get_from_cached(
+                city_name_search, search_terms)
+            if found:
                 self._clear_cache()
                 self._logger.info('Returning cached city results')
                 return cities
@@ -378,7 +404,6 @@ class SqliteTimezoneCache(TimezoneJsonCache):
 
         return cities
 
-    @Singleton.method
     @lock
     def close_db(self):
         if self._db is None:

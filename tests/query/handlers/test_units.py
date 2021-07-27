@@ -10,15 +10,15 @@ from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.exceptions import *
 from tests.utils import approxunits, currency_provider_had_error, no_pint, no_requests, query_test_helper
 
-LanguageService.set('en_US')
-UnitsService.run()
-CurrencyService.set_default_currencies(
-    ['EUR', 'USD', 'BTC', 'CAD']).enable_cache(86400).run()
+LanguageService().set('en_US')
+UnitsService().start()
+CurrencyService().set_default_currencies(
+    ['EUR', 'USD', 'BTC', 'CAD']).enable_cache(86400).start()
 while CurrencyService()._cache._data['exchange_rates'] == {}:
     time.sleep(0.1)
     cache_data = CurrencyService()._cache._data['exchange_rates']
-tr_err = LanguageService.get_translator('errors')
-Quantity = UnitsService.unit_registry.Quantity
+tr_err = LanguageService().get_translator('errors')
+Quantity = UnitsService().unit_registry.Quantity
 
 
 def get_unit_result(parsed_query, value, name, description, order=0, icon='images/convert.svg', error=None):

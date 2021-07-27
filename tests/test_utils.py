@@ -120,9 +120,16 @@ def test_singleton():
         pass
 
     class SingletonClassWithArgs(SingletonClass):
-        def __init__(self, *args, **kwargs):
-            self.args = args
-            self.kwargs = kwargs
+        def __init__(self, v):
+            self._v = v
+        
+        @property
+        def v(self):
+            return self._v
+
+        @v.setter
+        def v(self, v):
+            self._v = v
 
     @Singleton.function
     def singletonfunc(value):
@@ -134,15 +141,28 @@ def test_singleton():
     assert t1 == t2
     assert id(t1) == id(t2)
 
-    t1 = SingletonClassWithArgs(1, 2, a='a', b='b')
-    t2 = SingletonClassWithArgs(3, 4, c='c', d='d')
+    t1 = SingletonClassWithArgs(1)
+    t2 = SingletonClassWithArgs(2)
 
-    assert t1.args == t2.args
-    assert id(t1.args) == id(t2.args)
-    assert t1.kwargs == t2.kwargs
-    assert id(t1.kwargs) == id(t2.kwargs)
     assert t1 == t2
-    assert id(t1) == id(t2)
+    assert id(t1._v) == id(t2._v)
+
+    assert t1._v == t2._v == 1
+    assert t1.v == t2.v == 1
+
+    t1.v = 2
+    assert t1._v == t2._v == 2
+    assert t1.v == t2.v == 2
+
+    t2.v = 4
+    assert t1._v == t2._v == 4
+    assert t1.v == t2.v == 4
+    
+    t2._v = 16
+    assert t1._v == t2._v == 16
+    assert t1.v == t2.v == 16
+
+    assert t1 == t2
 
     v1 = singletonfunc(1)
     v2 = singletonfunc(2)

@@ -23,10 +23,11 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 # See what I did for Ulauncher. You won't let use my own formatter, due to duplicate logs
 logging.disable_stdout_handler()
 
-class ConverterExtension(Extension):
+
+class CalculateAnythingExtension(Extension):
 
     def __init__(self):
-        super(ConverterExtension, self).__init__()
+        super(CalculateAnythingExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(PreferencesEvent, PreferencesEventListener())
         self.subscribe(PreferencesUpdateEvent,
@@ -63,14 +64,14 @@ class KeywordQueryEventListener(EventListener):
         else:
             query = CalculatorQueryHandler().keyword + query
             handlers = [
+                UnitsQueryHandler,
                 CalculatorQueryHandler,
                 PercentagesQueryHandler,
-                UnitsQueryHandler,
             ]
 
         items = []
         had_any_non_error = False
-        results = MultiHandler.handle(query, *handlers)
+        results = MultiHandler().handle(query, *handlers)
         for result in results:
             had_any_non_error = had_any_non_error or result.error is not None
             if result.clipboard is not None:
@@ -85,16 +86,16 @@ class KeywordQueryEventListener(EventListener):
                 highlightable=False,
                 on_enter=on_enter
             ))
-        
+
         should_show_placeholder = query_nokw.strip() == '' or (
-                not had_any_non_error and
-                extension.preferences['show_empty_placeholder'] == 'y')
+            not had_any_non_error and
+            extension.preferences['show_empty_placeholder'] == 'y')
 
         if should_show_placeholder:
             items.append(ExtensionResultItem(
                 icon='images/icon.svg',
-                name=LanguageService.translate('no-result', 'misc'),
-                description=LanguageService.translate(
+                name=LanguageService().translate('no-result', 'misc'),
+                description=LanguageService().translate(
                     'no-result-{}-description'.format(mode), 'misc'),
                 highlightable=False,
                 on_enter=HideWindowAction()
@@ -142,6 +143,7 @@ class PreferencesUpdateEventListener(EventListener):
         super().on_event(event, extension)
 
         preferences = Preferences()
+
         if event.id == 'cache':
             preferences.currency.set_cache_update_frequency(event.new_value)
         elif event.id == 'default_currencies':
@@ -165,9 +167,9 @@ class PreferencesUpdateEventListener(EventListener):
 
 class SystemExitEventListener(EventListener):
     def on_event(self, event, extension):
-        TimezoneService.stop()
+        TimezoneService().stop()
         return super().on_event(event, extension)
 
 
 if __name__ == '__main__':
-    ConverterExtension().run()
+    CalculateAnythingExtension().run()

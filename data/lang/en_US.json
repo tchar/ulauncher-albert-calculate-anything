@@ -65,7 +65,7 @@
     "misc": {
         "no-result": "Keep typing your query ...",
         "no-result-calculator-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\"",
-        "no-result-time-description": "Try expressions like \"time at Prague\", \"time + 2 hours at Berlin\"",
+        "no-result-time-description": "Try expressions like \"time +2 hours at Prague\", \"time until December\"",
         "no-result-dec-description": "Try expressions like \"159 mod 2 + 1\"",
         "no-result-bin-description": "Try expressions like \"101010 and xor 110111\"",
         "no-result-oct-description": "Try expressions like \"157517 + 123\"",
