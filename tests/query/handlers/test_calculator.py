@@ -2,8 +2,13 @@ import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import StupidEval
 from calculate_anything.query.handlers import CalculatorQueryHandler
-from calculate_anything.exceptions import BooleanComparisonException, MissingSimpleevalException, ZeroDivisionException
-from tests.utils import calculator_no_simpleeval, reset_instance, query_test_helper
+from calculate_anything.exceptions import (
+    BooleanComparisonException, MissingSimpleevalException,
+    ZeroDivisionException
+)
+from tests.utils import (
+    calculator_no_simpleeval, reset_instance, query_test_helper
+)
 
 LanguageService().set('en_US')
 tr_calc = LanguageService().get_translator('calculator')
@@ -64,7 +69,8 @@ test_spec_calculator = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '4 + i',
-            'description': '(1 + 7 + 5i + 4i - 7i) / 2 ({})'.format(tr_calc('result-complex').capitalize()),
+            'description': '(1 + 7 + 5i + 4i - 7i) / 2 ({})'.format(
+                tr_calc('result-complex').capitalize()),
             'clipboard': '4 + i',
             'error': None,
             'order': 0,
@@ -85,7 +91,8 @@ test_spec_calculator = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '4 - 2i',
-            'description': '(1 + 7 + 2i + 5i - 11i) / 2 ({})'.format(tr_calc('result-complex').capitalize()),
+            'description': '(1 + 7 + 2i + 5i - 11i) / 2 ({})'
+            .format(tr_calc('result-complex').capitalize()),
             'clipboard': '4 - 2i',
             'error': None,
             'order': 0,
@@ -148,7 +155,8 @@ test_spec_calculator = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': 'true',
-            'description': 'e ^ (π × i) + 1 = 0 ({})'.format(tr_calc('result-boolean').capitalize()),
+            'description': 'e ^ (π × i) + 1 = 0 ({})'.format(
+                tr_calc('result-boolean').capitalize()),
             'clipboard': 'true',
             'error': None,
             'order': 0,
@@ -259,7 +267,8 @@ test_spec_missing_simpleeval = [{
 def test_missing_simpleeval(test_spec):
     # Allow CalculatorQueryHandler to be reinstantiated
 
-    with reset_instance(CalculatorQueryHandler, context=calculator_no_simpleeval):
+    with reset_instance(CalculatorQueryHandler,
+                        context=calculator_no_simpleeval):
         # Set stupid StupidEval as SimpleEval
         assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
         query_test_helper(CalculatorQueryHandler, test_spec)

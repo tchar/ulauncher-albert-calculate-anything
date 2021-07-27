@@ -66,7 +66,8 @@ class NormalPercentageCalculation(PercentageCalculation):
         name = result_formatted
 
         amount1 = self.amounts[0]
-        if amount1.value_type == Calculation.VALUE_IMAGINARY or amount1.value_type == Calculation.VALUE_COMPLEX:
+        if amount1.value_type == Calculation.VALUE_IMAGINARY or \
+                amount1.value_type == Calculation.VALUE_COMPLEX:
             amount1 = '({})'.format(amount1.format())
         else:
             amount1 = amount1.format()
@@ -97,7 +98,8 @@ class InversePercentageCalculation(PercentageCalculation):
         translator = LanguageService().get_translator('calculator')
         result_formatted = self.format()
 
-        if self.value_type == Calculation.VALUE_IMAGINARY or self.value_type == Calculation.VALUE_COMPLEX:
+        if self.value_type == Calculation.VALUE_IMAGINARY or \
+                self.value_type == Calculation.VALUE_COMPLEX:
             result_formatted = '({})'.format(result_formatted)
 
         name = '{}%'.format(result_formatted)

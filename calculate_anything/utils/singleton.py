@@ -15,10 +15,10 @@ class Singleton(type):
     @classmethod
     def function(cls, func: Callable[[Any], Any]) -> Callable[[Any], Any]:
         '''Singleton function decorator.
-        
+
         Args:
             func (Callable): The function to decorate/
-        
+
         Returns:
             Callable: The function decorated as singleton.
         '''

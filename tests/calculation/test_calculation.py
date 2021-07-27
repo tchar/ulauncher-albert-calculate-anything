@@ -87,8 +87,8 @@ def test_format():
     assert Calculation(121.77j).format() == '{:g}i'.format(121.77)
     assert Calculation(11.125 + 0j).format() == '{:g}'.format(11.125)
     assert Calculation(12 - 1j).format() == '{:g} - i'.format(12)
-    assert Calculation(
-        15.77555121551 - 11j).format() == '{:g} - {:g}i'.format(15.77555121551, 11)
+    assert Calculation(15.77555121551 - 11j).format() == \
+        '{:g} - {:g}i'.format(15.77555121551, 11)
     assert Calculation(77.95 + 1j).format() == '{:g} + i'.format(77.95)
-    assert Calculation(
-        2 + 0.4555754554j).format() == '{:g} + {:g}i'.format(2, 0.4555754554)
+    assert Calculation(2 + 0.4555754554j).format() == \
+        '{:g} + {:g}i'.format(2, 0.4555754554)

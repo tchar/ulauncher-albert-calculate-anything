@@ -3,7 +3,7 @@ import os
 from functools import lru_cache
 import logging as _logging
 from logging.handlers import RotatingFileHandler
-from tests.utils import random_str, reset_instance
+from tests.utils import random_str
 from calculate_anything import logging
 
 logging.disable_file_handler()

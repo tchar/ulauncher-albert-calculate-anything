@@ -8,7 +8,9 @@ from calculate_anything.currency.providers.base import CurrencyProvider
 from calculate_anything.currency import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.time import TimezoneService
-from calculate_anything.utils import Singleton, get_or_default, is_not_types, safe_operation
+from calculate_anything.utils import (
+    Singleton, get_or_default, is_not_types, safe_operation
+)
 
 
 __all__ = ['Preferences']
@@ -59,8 +61,8 @@ class LanguagePreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            lang (str): The language to set. The name must be a file from data/lang
-                without the extension.
+            lang (str): The language to set. The name must be a file from
+                data/lang without the extension.
         '''
         super()._to_commit('lang', lang)
 
@@ -84,14 +86,16 @@ class TimePreferences(_Preferences):
     def default_cities(self) -> str:
         return TimezoneService().default_cities
 
-    def set_default_cities(self, default_cities: Union[str, Iterable[str]]) -> None:
+    def set_default_cities(self,
+                           default_cities: Union[str, Iterable[str]]) -> None:
         '''Default cities to be set. The cities are not set immediately,
         but only after 'commit()' is called
 
         Args:
-            default_cities (Union[str, Iterable[str]]): The default cities to set.
-                If str is provided it must be comma separated cities.
-                (i.e 'Athens GR,New York City US', ['Athens GR', 'New York City US'])
+            default_cities (Union[str, Iterable[str]]): The default cities to
+                set. If str is provided it must be comma separated cities.
+                (i.e 'Athens GR,New York City US')
+                (i.e ['Athens GR', 'New York City US'])
         '''
         if not isinstance(default_cities, str):
             default_cities = ','.join(default_cities)
@@ -112,11 +116,13 @@ class CurrencyPreferences(_Preferences):
     '''The currency preferences class
 
     Attributes:
-        default_currencies (list of str): The default currencies currently in use
-        cache_update_frequency (int): An integer representing the current interval
-            of cache update in seconds
+        default_currencies (list of str): The default currencies currently in
+            use
+        cache_update_frequency (int): An integer representing the current
+            interval of cache update in seconds
         cache_enabled (bool): Wether cache is currently enabled or not
-        providers (tuple of str): A tuple of currently enabled currency providers.
+        providers (tuple of str): A tuple of currently enabled currency
+            providers.
     '''
     @property
     def default_currencies(self) -> List[str]:
@@ -136,14 +142,17 @@ class CurrencyPreferences(_Preferences):
         api_providers = CurrencyService()._provider._api_providers
         return tuple([*free_providers, *api_providers])
 
-    def set_default_currencies(self, default_currencies: Union[str, Iterable[str]]) -> None:
+    def set_default_currencies(self,
+                               default_currencies: Union[str, Iterable[str]]) \
+            -> None:
         '''Default currencies to set. The currencies are not set immediately,
         but only after 'commit()' is called
 
         Args:
-            default_currencies (Union[str, Iterable[str]]): The default currencies to set
-                in iso3 format. Ff str is provided it must be comma separated currencies.
-                (i.e 'EUR,CAD,BTC,USD', ['EUR', 'CAD', 'BTC', 'USD])
+            default_currencies (Union[str, Iterable[str]]): The default
+                currencies to set in iso3 format. If str is provided it must
+                be comma separated currencies. (i.e 'EUR,CAD,BTC,USD'),
+                (i.e ['EUR', 'CAD', 'BTC', 'USD])
         '''
         if isinstance(default_currencies, str):
             default_currencies = default_currencies.split(',')
@@ -182,14 +191,17 @@ class CurrencyPreferences(_Preferences):
             provider = CurrencyProviderFactory.get_provider(provider, api_key)
         return provider
 
-    def add_provider(self, provider: Union[str, CurrencyProvider], api_key: str = '') -> None:
+    def add_provider(self, provider: Union[str, CurrencyProvider],
+                     api_key: str = '') -> None:
         '''A currency provider to be added with an asociated api_key.
-        The provider is not set immediately, but only after 'commit()' is called
+        The provider is not set immediately, but only after 'commit()' is
+        called
 
         Args:
-            provider (Union[str, CurrencyProvider]): If str is provided it must represent
-                a provider name str as returned by 'CurrencyProviderFactory.get_available_providers()'.
-                if a CurrencyProvider is provided, api_key is ignored
+            provider (Union[str, CurrencyProvider]): If str is provided it
+                must represent a provider name str as returned by
+                'CurrencyProviderFactory.get_available_providers()'. if a
+                CurrencyProvider is provided, api_key is ignored
             api_key (str): The api_key to set if provider is a str.
         '''
         provider = self._get_provider(provider, api_key)
@@ -200,9 +212,10 @@ class CurrencyPreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            provider (Union[str, CurrencyProvider]): If str is provided it must represent
-                a provider name str as returned by 'CurrencyProviderFactory.get_available_providers()'.
-                if a CurrencyProvider is provided, api_key is ignored
+            provider (Union[str, CurrencyProvider]): If str is provided it
+                must represent a provider name str as returned by
+                'CurrencyProviderFactory.get_available_providers()'. if a
+                CurrencyProvider is provided, api_key is ignored
         '''
         provider = self._get_provider(provider, '')
         super()._to_commit('remove_provider', provider)
@@ -241,14 +254,17 @@ class UnitsPreferences(_Preferences):
     def conversion_mode(self) -> UnitsService.ConversionMode:
         return UnitsService().conversion_mode
 
-    def set_conversion_mode(self, mode: Union[str, UnitsService.ConversionMode]) -> None:
+    def set_conversion_mode(self,
+                            mode: Union[str, UnitsService.ConversionMode]) \
+            -> None:
         '''A conversion mode to be set. The mode is not removed immediately,
         but only after 'commit()' is called
 
         Args:
-            mode (Union[str, UnitsService.ConversionMode]): If str is provided i
-                must represent a conversion mode (i.e 'normal', 'crazy').
-                If int is provided it must be one of UnitsService.ConversionMode.
+            mode (Union[str, UnitsService.ConversionMode]): If str is provided
+                it must represent a conversion mode (i.e 'normal', 'crazy').
+                If int is provided it must be one of
+                UnitsService.ConversionMode.
         '''
         if isinstance(mode, str):
             mode = mode.lower()
@@ -261,7 +277,8 @@ class UnitsPreferences(_Preferences):
         mode = get_or_default(
             mode, UnitsService.ConversionMode,
             UnitsService.ConversionMode.NORMAL,
-            [UnitsService.ConversionMode.NORMAL, UnitsService.ConversionMode.CRAZY]
+            [UnitsService.ConversionMode.NORMAL,
+             UnitsService.ConversionMode.CRAZY]
         )
         super()._to_commit('units_conversion_mode', mode)
 
@@ -276,14 +293,15 @@ class UnitsPreferences(_Preferences):
 
 class Preferences(metaclass=Singleton):
     '''The Preferences class is a Singleton class which holds all other
-    preferences, like language, timezone, units and currency.    
-    
+    preferences, like language, timezone, units and currency.
+
     Attributes:
         language (LanguagePreferences): The language preferences reference.
         time (TimePreferences): The time preferences reference.
         units (UnitsPreferences): The units preferences reference.
         currency (CurrencyPreferences): The currency preferences reference.
     '''
+
     def __init__(self):
         self.language = LanguagePreferences()
         self.time = TimePreferences()

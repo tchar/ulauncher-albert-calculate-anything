@@ -5,7 +5,9 @@ except ImportError:
     requests = None
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
-from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.exceptions import (
+    CurrencyProviderException, CurrencyProviderRequestException
+)
 
 
 __all__ = ['MyCurrencyNetCurrencyProvider']
@@ -67,7 +69,8 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
             return MyCurrencyNetCurrencyProvider._convert_rates_to_dict(rates)
 
         rates = map(
-            lambda r: {**r, 'rate': r['rate'] * request_base_rate / base_rate}, rates)
+            lambda r: {**r, 'rate': r['rate'] * request_base_rate / base_rate},
+            rates)
         return MyCurrencyNetCurrencyProvider._convert_rates_to_dict(rates)
 
     def request_currencies(self, *currencies, force=False):
@@ -83,7 +86,8 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         if not str(response.status_code).startswith('2'):
             self.had_error = True
             raise CurrencyProviderRequestException(
-                'mycurrency.net response code was {}'.format(response.status_code))
+                'mycurrency.net response code was {}'
+                .format(response.status_code))
 
         data = response.json()
         currencies = MyCurrencyNetCurrencyProvider._convert_rates(data)

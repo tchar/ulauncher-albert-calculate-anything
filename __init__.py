@@ -3,9 +3,10 @@
 
 Current backends: fixer.io.
 
-Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)" "cos(pi + 3i)"'''
+Synopsis: "10 dollars to eur, cad" "10 meters to inches" "10 + sqrt(2)"
+"cos(pi + 3i)"'''
 
-################################### SETTINGS #######################################
+################################### SETTINGS ####################################### noqa: E266, E501
 # Below are the settings for this extension
 # Currency provider: One of "internal", "fixerio")
 CURRENCY_PROVIDER = 'internal'
@@ -16,15 +17,15 @@ CACHE = 86400
 # Default currencies to show when no target currency is provided
 DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
 # Default cities to show when converting timezones
-DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'
+DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'  # noqa: E501
 # Units conversion mode (normal or crazy)
 UNITS_CONVERSION_MODE = 'normal'
 # Set the following to True if you want to enable placeholder for empty results
 SHOW_EMPTY_PLACEHOLDER = False
-# Below line is the trigger keywords to your choice (put a space after your keyword)
+# Below line is the trigger keywords to your choice (put a space after your keyword) # noqa: E501
 # Order of triggers: 'Calculator, Time, Decimal, Hexadecimal, Binary, Octal
 __triggers__ = ['=', 'time', 'dec', 'bin', 'hex', 'oct']
-####################################################################################
+#################################################################################### noqa: E266, E501
 
 __title__ = 'Calculate Anything'
 __version__ = '0.0.1'
@@ -33,12 +34,11 @@ __py_deps__ = ['requests', 'requests', 'pint', 'simpleeval', 'parsedatetime']
 
 
 import locale  # noqa: E402
-locale.setlocale(locale.LC_ALL, '')
 import os  # noqa: E402
 import sys  # noqa: E402
 try:
     from calculate_anything.constants import MAIN_DIR  # noqa: E402
-except ImportError as e:
+except ImportError:
     MAIN_DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(MAIN_DIR)
 
@@ -52,7 +52,8 @@ from calculate_anything.query.handlers import (  # noqa: E402
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
-from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402
+from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402, E501
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Thanks albert for making me hack the shit out of logging
 handler = logging.CustomHandler(debug, info, warning, critical, critical)
@@ -169,8 +170,9 @@ def handleQuery(query):
             actions=actions
         ))
 
-    should_show_placeholder = (query_nokw.strip() == '' and TRIGGERS and len(items) == 0) or \
-        (len(items) == 0 and SHOW_EMPTY_PLACEHOLDER)
+    should_show_placeholder = (query_nokw.strip() == '' and TRIGGERS and
+                               len(items) == 0) or (len(items) == 0 and
+                                                    SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
         items.append(

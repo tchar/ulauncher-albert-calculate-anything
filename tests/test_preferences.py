@@ -28,19 +28,19 @@ def test_defaults():
             UnitsService.ConversionMode.NORMAL
 
         assert preferences.currency.cache_enabled == \
-            CurrencyService().cache_enabled == False
+            CurrencyService().cache_enabled is False
         assert preferences.currency.cache_update_frequency == \
             CurrencyService()._cache._update_frequency == 0
         assert preferences.currency.default_currencies == \
             CurrencyService().default_currencies == []
-        assert sorted(map(str, preferences.currency.providers )) == \
+        assert sorted(map(str, preferences.currency.providers)) == \
             sorted(map(str, (
                 ECBCurrencyProvider,
                 MyCurrencyNetCurrencyProvider,
                 CoinbaseCurrencyProvider
             )
-        ))
-        assert CurrencyService()._is_running == False
+            ))
+        assert CurrencyService()._is_running is False
 
 
 test_spec_normal_alts = [{
@@ -54,7 +54,7 @@ test_spec_normal_alts = [{
         'conversion_mode': 'crazy',
     },
     'currency': {
-        'cache_update_frequency': 100000,
+        'cache_frequency': 100000,
         'providers': [
             ('fixerIO', '01010'),
             ('fixerIO', 'asasd'),
@@ -75,7 +75,7 @@ test_spec_normal_alts = [{
         'conversion_mode': UnitsService.ConversionMode.CRAZY,
     },
     'currency': {
-        'cache_update_frequency': '100000',
+        'cache_frequency': '100000',
         'providers': [
             (FixerIOCurrencyProvider(api_key='00001'), ''),
             (FixerIOCurrencyProvider(api_key='00002'), ''),
@@ -95,7 +95,7 @@ def test_normal(test_spec):
         lang = test_spec['language']['lang']
         default_cities = test_spec['time']['default_cities']
         units_conversion_mode = test_spec['units']['conversion_mode']
-        currency_cache_update_frequency = test_spec['currency']['cache_update_frequency']
+        cache_frequency = test_spec['currency']['cache_frequency']
         currency_providers = test_spec['currency']['providers']
         default_currencies = test_spec['currency']['default_currencies']
 
@@ -104,7 +104,7 @@ def test_normal(test_spec):
         preferences.time.set_default_cities(default_cities)
         preferences.units.set_conversion_mode(units_conversion_mode)
 
-        preferences.currency.enable_cache(currency_cache_update_frequency)
+        preferences.currency.enable_cache(cache_frequency)
         for provider, api_key in currency_providers:
             preferences.currency.add_provider(provider, api_key)
         preferences.currency.set_default_currencies(default_currencies)
@@ -146,7 +146,7 @@ def test_normal(test_spec):
             UnitsService.ConversionMode.CRAZY
 
         assert preferences.currency.cache_enabled == \
-            CurrencyService().cache_enabled == True
+            CurrencyService().cache_enabled is True
         assert preferences.currency.cache_update_frequency == \
             CurrencyService()._cache._update_frequency == 100000
         assert preferences.currency.default_currencies == \
@@ -159,6 +159,7 @@ def test_normal(test_spec):
                 CoinbaseCurrencyProvider,
                 FixerIOCurrencyProvider
             )
-        ))
-        assert CurrencyService()._provider._api_providers[FixerIOCurrencyProvider]._api_key == '12345'
-        assert CurrencyService()._is_running == True
+            ))
+        assert CurrencyService(
+        )._provider._api_providers[FixerIOCurrencyProvider]._api_key == '12345'
+        assert CurrencyService()._is_running is True

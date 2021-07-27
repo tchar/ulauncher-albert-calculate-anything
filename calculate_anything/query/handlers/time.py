@@ -46,7 +46,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
     def _parse_dt(self, query, reference_datetime):
         try:
             date = self._cal.nlp(query, sourceTime=reference_datetime)
-        except Exception as e:  # pragma: no cover (catching unexpected exception)
+        except Exception as e:  # pragma: no cover (catch unexpected exception)
             self._logger.exception(  # pragma: no cover
                 'Got unexpected exception when parsing datetime: '
                 '{} with reference time {}: {}'
@@ -97,13 +97,14 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
         return [], True
 
-    def _get_time_location(self, date, locations, parsed_query, order_offset=0):
+    def _get_time_location(self, date, locations,
+                           parsed_query, order_offset=0):
         items = []
         order = 0
         for location in locations:
             try:
                 tz = pytz.timezone(location['timezone'])
-            except pytz.UnknownTimeZoneError as e:  # pragma: no cover (just in case)
+            except pytz.UnknownTimeZoneError as e:  # pragma: no cover
                 self._logger.exception(  # pragma: no cover
                     'Could not find time zone: {}: {}'.format(location, e))
                 continue  # pragma: no cover
@@ -164,8 +165,12 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             )
             return [item]
 
-        # Adjust midnights because they refer to same day whereas it should be "tomorrow"
-        is_currently_midnight = now.hour | now.minute | now.second | now.microsecond == 0
+        # Adjust midnights because they refer to same day
+        # whereas it should be "tomorrow"
+        is_currently_midnight = now.hour | \
+            now.minute | \
+            now.second | \
+            now.microsecond == 0
         if not is_currently_midnight and 'midnight' in parsed_query:
             date += timedelta(days=1)
 
@@ -292,9 +297,10 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             date = self._cal.nlp(query_str, sourceTime=now)
             if date is None:
-                self._logger.error(  # pragma: no cover (Should not enter, here, logging just in case)
+                self._logger.error(  # pragma: no cover
                     'Something went wrong when trying to calculate '
-                    'date from date chunks: dates={}, query={}'.format(dates, query_str))
+                    'date from date chunks: dates={}, query={}'
+                    .format(dates, query_str))
                 return items_pre + items  # pragma: no cover
             date, context, _, _, _ = date[0]
             if context == parsedatetime.pdtContext(0):

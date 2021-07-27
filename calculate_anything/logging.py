@@ -45,12 +45,13 @@ class ColorFormatter(_logging.Formatter):
         'CRITICAL': 35,
     }
 
-    def __init__(self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S', use_color: bool = True):
+    def __init__(self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S',
+                 use_color: bool = True):
         '''Args:
             fmt (str): A '{' style format with the extra codes provided in
                 ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
-                should be put in single '{' formatting. Others should be put in '{{'
-                e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
+                should be put in single '{' formatting. Others should be put
+                in '{{' e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
             date_fmt (str): A date format
             use_color (bool): Wether to use colors or not
         '''
@@ -59,7 +60,8 @@ class ColorFormatter(_logging.Formatter):
         else:
             seqs = {k: '' for k in ColorFormatter.SEQS}
         if not fmt:
-            fmt = '{{asctime}}.{{msecs:03.0f}} | {{levelname}} | [{BOLD}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}'
+            fmt = '{{asctime}}.{{msecs:03.0f}} | {{levelname}} | ' \
+                '[{BOLD}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}'
 
         fmt = fmt.format(**seqs)
         _logging.Formatter.__init__(self, fmt, date_fmt, style='{')
@@ -109,7 +111,8 @@ class CustomHandler(_logging.Handler):
         self.setFormatter(_logging.Formatter())
 
     def emit(self, record: _logging.LogRecord) -> None:
-        '''Emits the LogRecord using the provided callables when instantiated'''
+        '''Emits the LogRecord using the provided callables when
+        instantiated'''
 
         if record.levelno == _logging.DEBUG:
             log = self._debug

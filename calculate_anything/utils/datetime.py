@@ -28,13 +28,14 @@ def merge_dates(reference_date: datetime, dates: Iterable[datetime],
     returns a tuple in the format of (year, month, day, hour, minute, second).
 
     Args:
-        referene_date (datetime): A reference datetime to subtract all dates from
-        dates (Iterable[datetime]): The datetimes to merge.
+        referene_date (datetime): A reference datetime to subtract all dates
+        from dates (Iterable[datetime]): The datetimes to merge.
         signs (Iterable[int]): Each sign must be either -1 or 1 and will act as
             a multiplier on each date info.
 
     Returns:
-        Tuple[int]: A tuple in the format of (year, month, day, hour, minute, second).
+        Tuple[int]: A tuple in the format of(year, month, day, hour, minute,
+        second).
     '''
     if not dates:
         return 0, 0, 0, 0, 0, 0
@@ -55,14 +56,18 @@ def merge_dates(reference_date: datetime, dates: Iterable[datetime],
     return tuple(dates_stats)
 
 
-def parsedatetime_str(reference_date: datetime, dates: Iterable[datetime],
-                      signs: Iterable[int]) -> Tuple[int, int, int, int, int, int]:
+def parsedatetime_str(reference_date: datetime,
+                      dates: Iterable[datetime],
+                      signs: Iterable[int]) \
+        -> Tuple[int, int, int, int, int, int]:
     '''Merges dates together along with signs based on a reference date and returns
-    a string to be parsed from parsedatetime. If a sign is negative for a datetime
-    the equivalent string for that datetime will be 'x years ago y months ago...'  
+    a string to be parsed from parsedatetime. If a sign is negative for a
+    datetime the equivalent string for that datetime will be 'x years ago y
+    months ago...'
 
     Args:
-        referene_date (datetime): A reference datetime to subtract all dates from
+        referene_date (datetime): A reference datetime to subtract all dates
+            from
         dates (Iterable[datetime]): The datetimes to merge.
         signs (Iterable[int]): Each sign must be either -1 or 1 and will act as
             a multiplier on each date info.

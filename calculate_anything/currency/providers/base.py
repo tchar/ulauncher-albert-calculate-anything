@@ -1,6 +1,8 @@
-from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+from calculate_anything.exceptions import (
+    CurrencyProviderRequestException, MissingRequestsException
+)
 from datetime import datetime
-from calculate_anything.utils import is_types, get_module
+from calculate_anything.utils import get_module
 has_requests = get_module('requests') is not None
 
 __all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider']
@@ -20,7 +22,8 @@ class CurrencyProvider:
         if not has_requests:
             self.had_error = True
             raise MissingRequestsException('requests is not installed')
-        if not force and self.had_error and datetime.now().timestamp() - 60 <= self.last_request_timestamp:
+        if not force and self.had_error and \
+                datetime.now().timestamp() - 60 <= self.last_request_timestamp:
             self.had_error = True
             raise CurrencyProviderRequestException('Could not make request')
         self.last_request_timestamp = datetime.now().timestamp()
@@ -38,7 +41,7 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
 
     @property
     def api_key_valid(self):
-        return is_types(self._api_key, str) and self._api_key.strip() != ''
+        return isinstance(self._api_key, str) and self._api_key.strip() != ''
 
     def set_api_key(self, api_key):
         self._api_key = api_key

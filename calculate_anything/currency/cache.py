@@ -3,7 +3,6 @@ import shutil
 import json
 from datetime import datetime
 from functools import wraps
-from calculate_anything.utils import is_types
 from calculate_anything.constants import CACHE_DIR, CURRENCY_DATA_FILE
 from calculate_anything import logging
 
@@ -37,7 +36,8 @@ class CurrencyCache:
                 os.makedirs(CACHE_DIR)
             except Exception as e:
                 self._logger.exception(
-                    'Could not create cache directory {}: {}'.format(CACHE_DIR, e))
+                    'Could not create cache directory {}: {}'
+                    .format(CACHE_DIR, e))
                 return False
 
         if os.path.isdir(CURRENCY_DATA_FILE):
@@ -45,35 +45,41 @@ class CurrencyCache:
                 shutil.rmtree(CURRENCY_DATA_FILE)
             except Exception as e:
                 self._logger.exception(
-                    'Could not remove data directory {}: {}'.format(CURRENCY_DATA_FILE, e))
+                    'Could not remove data directory {}: {}'
+                    .format(CURRENCY_DATA_FILE, e))
                 return False
 
         if os.path.exists(CURRENCY_DATA_FILE):
             try:
                 with open(CURRENCY_DATA_FILE, 'r') as f:
                     data = json.loads(f.read())
-                    if not is_types(data.get('exchange_rates'), dict):
+                    if not isinstance(data.get('exchange_rates'), dict):
                         raise Exception('exchange rates is not a dict')
                     for k, v in data['exchange_rates'].items():
-                        if not is_types(v, dict):
+                        if not isinstance(v, dict):
                             raise Exception(
-                                'Currency {} rate is not a dict {}'.format(k, v))
-                        if not is_types(v.get('rate'), int, float):
+                                'Currency {} rate is not a dict {}'
+                                .format(k, v))
+                        if not isinstance(v.get('rate'), (int, float)):
                             raise Exception('Currency rate is not a number')
-                        if not is_types(v.get('timestamp_refresh'), int, float, type(None)):
+                        if not isinstance(v.get('timestamp_refresh'),
+                                          (int, float, type(None))):
                             raise Exception(
                                 'timestamp_refresh is not a number or None')
-                    if not is_types(data.get('last_update_timestamp'), int, float):
+                    if not isinstance(data.get('last_update_timestamp'),
+                                      (int, float)):
                         raise Exception(
                             'last_update_timestamp is not a number')
             except Exception as e:
-                self._logger.exception('Data file {} is possibly corrupted, will try to remove it: {}'.format(
-                    CURRENCY_DATA_FILE, e))
+                self._logger.exception('Data file {} is possibly '
+                                       'corrupted, will try to remove it: {}'
+                                       .format(CURRENCY_DATA_FILE, e))
                 try:
                     os.remove(CURRENCY_DATA_FILE)
                 except Exception as e:
                     self._logger.exception(
-                        'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                        'Could not remove data file {}: {}'
+                        .format(CURRENCY_DATA_FILE, e))
                     return False
 
         if not os.path.exists(CURRENCY_DATA_FILE):
@@ -83,7 +89,8 @@ class CurrencyCache:
                     f.write(json.dumps(data))
             except Exception as e:
                 self._logger.exception(
-                    'Could not write default data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                    'Could not write default data file {}: {}'
+                    .format(CURRENCY_DATA_FILE, e))
                 return False
         return True
 
@@ -139,10 +146,12 @@ class CurrencyCache:
         return self._update_frequency > 0
 
     def next_update_seconds(self):
-        return max(0.0, self._data['last_update_timestamp'] + self._update_frequency - datetime.now().timestamp())
+        return max(0.0, self._data['last_update_timestamp'] +
+                   self._update_frequency - datetime.now().timestamp())
 
     def should_update(self):
-        return datetime.now().timestamp() - self.last_update_timestamp > self._update_frequency
+        return datetime.now().timestamp() - self.last_update_timestamp > \
+            self._update_frequency
 
     def clear(self):
         self._data = {
@@ -154,7 +163,8 @@ class CurrencyCache:
                 os.remove(CURRENCY_DATA_FILE)
             except Exception as e:
                 self._logger.exception(
-                    'Could not remove data file {}: {}'.format(CURRENCY_DATA_FILE, e))
+                    'Could not remove data file {}: {}'
+                    .format(CURRENCY_DATA_FILE, e))
 
     def save(self, exchange_rates, provider):
         if not self.enabled:
@@ -174,4 +184,5 @@ class CurrencyCache:
                 f.write(json.dumps(self._data))
         except Exception as e:
             self._logger.exception(
-                'Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e))
+                'Could not save cache data {}: {}'
+                .format(CURRENCY_DATA_FILE, e))
