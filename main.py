@@ -25,7 +25,7 @@ from calculate_anything.query import MultiHandler
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
 import locale
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # See what I did for Ulauncher.
 # You won't let use my own formatter, due to duplicate logs

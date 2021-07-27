@@ -15,7 +15,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit import HTML, PromptSession
 from prompt_toolkit.styles import Style
 import locale
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
 class SilentLogger:

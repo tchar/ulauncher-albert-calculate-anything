@@ -13,7 +13,7 @@ from tests.utils import (
     approxunits, currency_provider_had_error,
     no_pint, no_requests, query_test_helper
 )
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 LanguageService().set('en_US')
 UnitsService().start()
