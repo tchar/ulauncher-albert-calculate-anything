@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 try:
     import pint
@@ -14,8 +15,9 @@ __all__ = ['UnitsService']
 
 
 class UnitsService(metaclass=Singleton):
-    CONVERSION_MODE_NORMAL = 0
-    CONVERSION_MODE_CRAZY = 1
+    class ConversionMode(Enum):
+        NORMAL = 0
+        CRAZY = 1
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
@@ -25,7 +27,7 @@ class UnitsService(metaclass=Singleton):
         self._base_currency = None
         self._enabled = False
         self._running = False
-        self._conversion_mode = UnitsService.CONVERSION_MODE_NORMAL
+        self._conversion_mode = UnitsService.ConversionMode.NORMAL
 
     def _update_callback(self, data):
         self._logger.info('Updating currency registry')

@@ -17,13 +17,21 @@ from calculate_anything import logging
 
 
 class LanguageService(metaclass=Singleton):
-    '''A language service class which acts like a Singleton.'''
+    '''A language service class which acts like a Singleton.
+    
+    Attributes:
+        lang (str): The language currently in use
+    '''
 
     def __init__(self):
         self._lang = None
         self._data = {}
         self._update_callbacks = []
         self._logger = logging.getLogger(__name__)
+
+    @property
+    def lang(self) -> str:
+        return self._lang
 
     @staticmethod
     def strip_accents(s: str) -> str:

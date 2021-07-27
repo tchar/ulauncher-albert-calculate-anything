@@ -18,14 +18,14 @@ def test_defaults():
 
         preferences = Preferences()
         preferences.commit()
-        assert preferences.language.lang == LanguageService()._lang == 'en_US'
+        assert preferences.language.lang == LanguageService().lang == 'en_US'
 
         assert preferences.time.default_cities == \
             TimezoneService().default_cities
 
         assert preferences.units.conversion_mode == \
             UnitsService()._conversion_mode == \
-            UnitsService.CONVERSION_MODE_NORMAL
+            UnitsService.ConversionMode.NORMAL
 
         assert preferences.currency.cache_enabled == \
             CurrencyService().cache_enabled == False
@@ -72,7 +72,7 @@ test_spec_normal_alts = [{
         'default_cities': ['Athens GR', 'New York City US'],
     },
     'units': {
-        'conversion_mode': UnitsService.CONVERSION_MODE_CRAZY,
+        'conversion_mode': UnitsService.ConversionMode.CRAZY,
     },
     'currency': {
         'cache_update_frequency': '100000',
@@ -100,17 +100,17 @@ def test_normal(test_spec):
         default_currencies = test_spec['currency']['default_currencies']
 
         preferences = Preferences()
-        # preferences.language.set(lang)
+        preferences.language.set(lang)
         preferences.time.set_default_cities(default_cities)
-        return
         preferences.units.set_conversion_mode(units_conversion_mode)
+
         preferences.currency.enable_cache(currency_cache_update_frequency)
         for provider, api_key in currency_providers:
             preferences.currency.add_provider(provider, api_key)
         preferences.currency.set_default_currencies(default_currencies)
         preferences.commit()
 
-        assert preferences.language.lang == LanguageService()._lang == 'en_US'
+        assert preferences.language.lang == LanguageService().lang == 'en_US'
 
         assert preferences.time.default_cities == \
             TimezoneService().default_cities
@@ -143,7 +143,7 @@ def test_normal(test_spec):
 
         assert preferences.units.conversion_mode == \
             UnitsService()._conversion_mode == \
-            UnitsService.CONVERSION_MODE_CRAZY
+            UnitsService.ConversionMode.CRAZY
 
         assert preferences.currency.cache_enabled == \
             CurrencyService().cache_enabled == True

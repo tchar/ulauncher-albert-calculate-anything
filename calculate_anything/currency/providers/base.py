@@ -11,7 +11,7 @@ class _MockCurrencyProvider:
         pass
 
 
-class _CurrencyProvider:
+class CurrencyProvider:
     def __init__(self):
         self.last_request_timestamp = 0
         self.had_error = False
@@ -27,11 +27,11 @@ class _CurrencyProvider:
         return {}
 
 
-class FreeCurrencyProvider(_CurrencyProvider):
+class FreeCurrencyProvider(CurrencyProvider):
     pass
 
 
-class ApiKeyCurrencyProvider(_CurrencyProvider):
+class ApiKeyCurrencyProvider(CurrencyProvider):
     def __init__(self, api_key=''):
         super().__init__()
         self._api_key = api_key
