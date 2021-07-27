@@ -1,16 +1,34 @@
-from typing import Tuple, Collection
+'''Utility functions for color conversion related operations'''
+
+from typing import Tuple
 
 
 __all__ = ['hex_to_rgb', 'rgb_to_cmyk', 'rgb_to_hsv', 'rgb_to_hsl']
 
 
 def hex_to_rgb(hex: str) -> Tuple[int, int, int]:
+    '''Converts hex to rgb
+
+    Args:
+        hex (str): A string of length 6 representing a color
+
+    Returns:
+        Tuple[int]: A tuple representing the rgb color
+    '''
     r, g, b = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
     return r, g, b
 
 
 # https://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html
-def rgb_to_cmyk(rgb: Collection[int]) -> Tuple[float, float, float]:
+def rgb_to_cmyk(rgb: Tuple[int, int, int]) -> Tuple[float, float, float, float]:
+    '''Converts rbg to cmyk
+
+    Args:
+        rgb (Tuple[int]): A tuple representing the rgb color
+
+    Returns:
+        Tuple[float]: A tuple representing the cmyk color
+    '''
     r, g, b = map(lambda v: v / 255., rgb)
     k = 1 - max(r, g, b)
     c = (1 - r - k) / (1 - k) if k != 1 else 0
@@ -20,7 +38,15 @@ def rgb_to_cmyk(rgb: Collection[int]) -> Tuple[float, float, float]:
 
 
 # https://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html
-def rgb_to_hsv(rgb: Collection[int]) -> Tuple[float, float, float]:
+def rgb_to_hsv(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
+    '''Converts rbg to hsv
+
+    Args:
+        rgb (Tuple[int]): A tuple representing the rgb color
+
+    Returns:
+        Tuple[float]: A tuple representing the hsv color
+    '''
     r, g, b = map(lambda v: v / 255., rgb)
     cmax, cmin = max(r, g, b), min(r, g, b)
     delta = cmax - cmin
@@ -39,7 +65,15 @@ def rgb_to_hsv(rgb: Collection[int]) -> Tuple[float, float, float]:
 
 
 # https://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html
-def rgb_to_hsl(rgb: Collection[int]) -> Tuple[float, float, float]:
+def rgb_to_hsl(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
+    '''Converts rbg to hsl
+
+    Args:
+        rgb (Tuple[int]): A tuple representing the rgb color
+
+    Returns:
+        Tuple[float]: A tuple representing the hsl color
+    '''
     r, g, b = map(lambda v: v / 255., rgb)
     cmax, cmin = max(r, g, b), min(r, g, b)
     delta = cmax - cmin

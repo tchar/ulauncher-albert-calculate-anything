@@ -89,7 +89,7 @@ class TimePreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            default_cities (str or iterable of str): The default cities to set.
+            default_cities (Union[str, Iterable[str]]): The default cities to set.
                 If str is provided it must be comma separated cities.
                 (i.e 'Athens GR,New York City US', ['Athens GR', 'New York City US'])
         '''
@@ -141,7 +141,7 @@ class CurrencyPreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            default_currencies (str or iterable of str): The default currencies to set
+            default_currencies (Union[str, Iterable[str]]): The default currencies to set
                 in iso3 format. Ff str is provided it must be comma separated currencies.
                 (i.e 'EUR,CAD,BTC,USD', ['EUR', 'CAD', 'BTC', 'USD])
         '''
@@ -187,7 +187,7 @@ class CurrencyPreferences(_Preferences):
         The provider is not set immediately, but only after 'commit()' is called
 
         Args:
-            provider (str or CurrencyProvider): If str is provided it must represent
+            provider (Union[str, CurrencyProvider]): If str is provided it must represent
                 a provider name str as returned by 'CurrencyProviderFactory.get_available_providers()'.
                 if a CurrencyProvider is provided, api_key is ignored
             api_key (str): The api_key to set if provider is a str.
@@ -200,7 +200,7 @@ class CurrencyPreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            provider (str or CurrencyProvider): If str is provided it must represent
+            provider (Union[str, CurrencyProvider]): If str is provided it must represent
                 a provider name str as returned by 'CurrencyProviderFactory.get_available_providers()'.
                 if a CurrencyProvider is provided, api_key is ignored
         '''
@@ -246,7 +246,7 @@ class UnitsPreferences(_Preferences):
         but only after 'commit()' is called
 
         Args:
-            mode (str or UnitsService.ConversionMode): If str is provided i
+            mode (Union[str, UnitsService.ConversionMode]): If str is provided i
                 must represent a conversion mode (i.e 'normal', 'crazy').
                 If int is provided it must be one of UnitsService.ConversionMode.
         '''

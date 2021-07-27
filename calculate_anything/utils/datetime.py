@@ -1,3 +1,7 @@
+'''Utility functions for datetime related operations'''
+
+from typing import Iterable, Tuple
+from datetime import datetime
 from operator import sub
 from itertools import zip_longest
 
@@ -6,12 +10,32 @@ __all__ = ['is_leap_year', 'merge_dates', 'parsedatetime_str']
 
 
 # https://stackoverflow.com/a/30714165
-def is_leap_year(year):
-    """Determine whether a year is a leap year."""
+def is_leap_year(year: int) -> bool:
+    '''Determine whether a year is a leap year.
+
+    Args:
+        year (int): The year to check if is leap.
+
+    Returns:
+        bool: If the year is leap or not.
+    '''
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 
-def merge_dates(reference_date, dates, signs):
+def merge_dates(reference_date: datetime, dates: Iterable[datetime],
+                signs: Iterable[int]) -> Tuple[int, int, int, int, int, int]:
+    '''Merges dates together along with signs based on a reference date and
+    returns a tuple in the format of (year, month, day, hour, minute, second).
+
+    Args:
+        referene_date (datetime): A reference datetime to subtract all dates from
+        dates (Iterable[datetime]): The datetimes to merge.
+        signs (Iterable[int]): Each sign must be either -1 or 1 and will act as
+            a multiplier on each date info.
+
+    Returns:
+        Tuple[int]: A tuple in the format of (year, month, day, hour, minute, second).
+    '''
     if not dates:
         return 0, 0, 0, 0, 0, 0
 
@@ -31,7 +55,21 @@ def merge_dates(reference_date, dates, signs):
     return tuple(dates_stats)
 
 
-def parsedatetime_str(reference_date, dates, signs):
+def parsedatetime_str(reference_date: datetime, dates: Iterable[datetime],
+                      signs: Iterable[int]) -> Tuple[int, int, int, int, int, int]:
+    '''Merges dates together along with signs based on a reference date and returns
+    a string to be parsed from parsedatetime. If a sign is negative for a datetime
+    the equivalent string for that datetime will be 'x years ago y months ago...'  
+
+    Args:
+        referene_date (datetime): A reference datetime to subtract all dates from
+        dates (Iterable[datetime]): The datetimes to merge.
+        signs (Iterable[int]): Each sign must be either -1 or 1 and will act as
+            a multiplier on each date info.
+
+    Returns:
+        str: A string to be parsed by datetime
+    '''
     vals = merge_dates(reference_date, dates, signs)
     info = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
 

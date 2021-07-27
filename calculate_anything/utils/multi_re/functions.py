@@ -1,3 +1,5 @@
+'''Functions for multi_re module'''
+
 from typing import Union, Iterable, List, Optional, Match, Callable, Dict, Type
 from calculate_anything.utils.multi_re.multi_re import _MultiRe
 
