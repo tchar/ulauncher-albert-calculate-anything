@@ -13,6 +13,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import copy
 from typing import Callable
+from calculate_anything.utils import Singleton
 from calculate_anything.constants import LOGS_DIR
 
 
@@ -104,76 +105,83 @@ class CustomHandler(logging.Handler):
         log(message)
 
 
-class _Logging:
-    _level = os.environ.get('CALCULATE_ANYTHING_VERBOSE', '').upper()
-    _level = logging.getLevelName(_level)
-    _level = _level if isinstance(_level, int) else logging.INFO
+class Logging(metaclass=Singleton):
+    def __init__(self):
+        level = os.environ.get('CALCULATE_ANYTHING_VERBOSE', '').upper()
+        level = logging.getLevelName(level)
+        level = level if isinstance(level, int) else logging.INFO
 
-    _stdout_hdlr = logging.StreamHandler(sys.stderr)
-    _stdout_hdlr.setFormatter(ColorFormatter(use_color=True))
+        stdout_hdlr = logging.StreamHandler(sys.stderr)
+        stdout_hdlr.setFormatter(ColorFormatter(use_color=True))
 
-    _file_hdlr = RotatingFileHandler(
-        os.path.join(LOGS_DIR, 'runtime.log'),
-        maxBytes=1000000, backupCount=10, encoding='utf-8',
-        delay=True
-    )
-    _file_hdlr.setFormatter(ColorFormatter(use_color=False))
+        file_hdlr = RotatingFileHandler(
+            os.path.join(LOGS_DIR, 'runtime.log'),
+            maxBytes=1000000, backupCount=10, encoding='utf-8',
+            delay=True
+        )
+        file_hdlr.setFormatter(ColorFormatter(use_color=False))
 
-    @classmethod
-    def set_level(cls, level: int):
-        cls._level = level
+        self.level = level
+        self.file_hdlr = file_hdlr
+        self.stdout_hdlr = stdout_hdlr
+        self._prev_hdlrs = set()
+        self._got_logger = False
 
-    @classmethod
-    def disable_stdout_handler(cls):
-        cls._stdout_hdlr = None
+    def set_level(self, level: int):
+        self.level = level
 
-    @classmethod
-    def set_stdout_handler(cls, hdlr: logging.Handler):
-        cls._stdout_hdlr = hdlr
+    def disable_stdout_handler(self):
+        self.stdout_hdlr = None
 
-    @classmethod
-    def disable_file_handler(cls):
-        cls._file_hdlr = None
+    def set_stdout_handler(self, hdlr: logging.Handler):
+        if self.stdout_hdlr and self._got_logger:
+            print(self._got_logger)
+            self._prev_hdlrs.add(self.stdout_hdlr)
+        self.stdout_hdlr = hdlr
 
-    @classmethod
-    def set_file_handler(cls, hdlr: logging.FileHandler):
-        cls._file_hdlr = hdlr
+    def disable_file_handler(self):
+        self.file_hdlr = None
 
-    @classmethod
-    def get_logger(cls, name):
+    def set_file_handler(self, hdlr: logging.FileHandler):
+        if self.file_hdlr and self._got_logger:
+            print(self._got_logger)
+            self._prev_hdlrs.add(self.file_hdlr)
+        self.file_hdlr = hdlr
+
+    def get_logger(self, name):
+        self._got_logger = True
         logger = logging.getLogger(name)
-        logger.setLevel(cls._level)
+        logger.setLevel(self.level)
 
-        if cls._file_hdlr:
-            logger.removeHandler(cls._file_hdlr)
-            logger.addHandler(cls._file_hdlr)
-        if cls._stdout_hdlr:
-            # Remove the handler because logging caches loggers
-            logger.removeHandler(cls._stdout_hdlr)
-            logger.addHandler(cls._stdout_hdlr)
+        for hdlr in self._prev_hdlrs:
+            logger.removeHandler(hdlr)
+        if self.file_hdlr:
+            logger.addHandler(self.file_hdlr)
+        if self.stdout_hdlr:
+            logger.addHandler(self.stdout_hdlr)
 
         return logger
 
 
 def disable_stdout_handler():
-    _Logging.disable_stdout_handler()
+    Logging().disable_stdout_handler()
 
 
 def set_stdout_handler(hdlr: logging.Handler):
-    _Logging.set_stdout_handler(hdlr)
+    Logging().set_stdout_handler(hdlr)
 
 
 def disable_file_handler():
-    _Logging.disable_file_handler()
+    Logging().disable_file_handler()
 
 
 def set_file_handler(hdlr: logging.Handler):
-    _Logging.set_file_handler(hdlr)
+    Logging().set_file_handler(hdlr)
 
 
 def setLevel(level: int):
-    _Logging.set_level(level)
+    Logging().set_level(level)
 
 
 def getLogger(name: str) -> logging.Logger:
-    return _Logging.get_logger(name)
+    return Logging().get_logger(name)

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
-from calculate_anything.logging import _Logging
+from calculate_anything.logging import Logging
 from calculate_anything.time import TimezoneService
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
@@ -110,30 +110,6 @@ def currency_provider_had_error():
     with no_default_currencies():
         yield
     CurrencyService()._provider.had_error = provider_had_error
-
-
-@contextmanager
-def stdout_handler(hdlr):
-    old_hdlr = _Logging._stdout_hdlr
-    _Logging.set_stdout_handler(hdlr)
-    yield
-    _Logging.set_stdout_handler(old_hdlr)
-
-
-@contextmanager
-def file_handler(hdlr):
-    old_hdlr = _Logging._file_hdlr
-    _Logging.set_file_handler(hdlr)
-    yield
-    _Logging.set_file_handler(old_hdlr)
-
-
-@contextmanager
-def logging_level(level):
-    old_level = _Logging._level
-    _Logging.set_level(level)
-    yield
-    _Logging.set_level(old_level)
 
 
 @contextmanager

@@ -1,11 +1,9 @@
 import pytest
 import os
-import random
-import string
 from functools import lru_cache
 import logging as _logging
 from logging.handlers import RotatingFileHandler
-from tests.utils import file_handler, random_str, stdout_handler, logging_level
+from tests.utils import random_str, reset_instance
 from calculate_anything import logging
 
 logging.disable_file_handler()
@@ -36,9 +34,12 @@ def get_stdout_handler():
     _logging.ERROR,
     _logging.CRITICAL,
 ])
-def test_log_logging(caplog, level):
-    with caplog.at_level(level), logging_level(level):
-        logger = logging.getLogger('test_log_logging')
+def test_logging(caplog, level):
+    with caplog.at_level(level):
+        logging.Logging().set_level(level)
+        logging.Logging().set_file_handler(None)
+
+        logger = logging.getLogger('test_logging_logging')
         assert len(logger.handlers) == 1
         assert isinstance(logger.handlers[0], _logging.StreamHandler)
 
@@ -70,10 +71,14 @@ def test_log_logging(caplog, level):
     _logging.ERROR,
     _logging.CRITICAL,
 ])
-def test_log_custom_stdout_hannler(caplog, level):
+def test_logging_custom_stdout_hannler(caplog, level):
     hdlr = get_stdout_handler()
-    with stdout_handler(hdlr), logging_level(level), caplog.at_level(level):
-        logger = logging.getLogger('test_log_custom_stdout_hannler')
+    with caplog.at_level(level):
+        logging.Logging().set_level(level)
+        logging.Logging().set_file_handler(None)
+        logging.Logging().set_stdout_handler(hdlr)
+
+        logger = logging.getLogger('test_logging_custom_stdout_hannler')
         assert len(logger.handlers) == 1
         assert isinstance(logger.handlers[0], logging.CustomHandler)
 
@@ -105,9 +110,13 @@ def test_log_custom_stdout_hannler(caplog, level):
     _logging.ERROR,
     _logging.CRITICAL,
 ])
-def test_log_no_stdout_handler(caplog, level):
-    with stdout_handler(None), logging_level(level), caplog.at_level(level):
-        logger = logging.getLogger('test_log_no_stdout_handler')
+def test_logging_no_stdout_handler(caplog, level):
+    with caplog.at_level(level):
+        logging.Logging().set_level(level)
+        logging.Logging().set_file_handler(None)
+        logging.Logging().set_stdout_handler(None)
+
+        logger = logging.getLogger('test_logging_no_stdout_handler')
         assert not logger.handlers
 
 
@@ -119,38 +128,43 @@ def test_log_no_stdout_handler(caplog, level):
     _logging.CRITICAL,
 
 ])
-def test_log_file(log_filepath, level):
+def test_logging_file(log_filepath, level):
     hdlr = get_file_handler(log_filepath)
     print('Saving logs to {}'.format(log_filepath))
-    with file_handler(hdlr), stdout_handler(None), logging_level(level):
-        logger = logging.getLogger('test_log_file')
-        assert len(logger.handlers) == 1
-        assert isinstance(logger.handlers[0], RotatingFileHandler)
 
-        msgs = []
-        msg = random_str()
-        logger.debug(msg)
-        msgs.append((msg, _logging.DEBUG))
+    logging.Logging().set_level(level)
+    logging.Logging().set_file_handler(hdlr)
+    logging.Logging().set_stdout_handler(None)
 
-        msg = random_str()
-        logger.info(msg)
-        msgs.append((msg, _logging.INFO))
+    logger = logging.getLogger('test_logging_file')
 
-        msg = random_str()
-        logger.warning(msg)
-        msgs.append((msg, _logging.WARNING))
+    assert len(logger.handlers) == 1
+    assert isinstance(logger.handlers[0], RotatingFileHandler)
 
-        msg = random_str()
-        logger.error(msg)
-        msgs.append((msg, _logging.ERROR))
+    msgs = []
+    msg = random_str()
+    logger.debug(msg)
+    msgs.append((msg, _logging.DEBUG))
 
-        msg = random_str()
-        logger.critical(msg)
-        msgs.append((msg, _logging.CRITICAL))
+    msg = random_str()
+    logger.info(msg)
+    msgs.append((msg, _logging.INFO))
 
-        assert os.path.exists(log_filepath)
-        with open(log_filepath, 'r') as f:
-            log = f.read()
+    msg = random_str()
+    logger.warning(msg)
+    msgs.append((msg, _logging.WARNING))
 
-        for msg, mlevel in msgs:
-            assert (msg in log) == (level <= mlevel )
+    msg = random_str()
+    logger.error(msg)
+    msgs.append((msg, _logging.ERROR))
+
+    msg = random_str()
+    logger.critical(msg)
+    msgs.append((msg, _logging.CRITICAL))
+
+    assert os.path.exists(log_filepath)
+    with open(log_filepath, 'r') as f:
+        log = f.read()
+
+    for msg, mlevel in msgs:
+        assert (msg in log) == (level <= mlevel)
