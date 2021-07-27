@@ -70,10 +70,8 @@ class KeywordQueryEventListener(EventListener):
             ]
 
         items = []
-        had_any_non_error = False
         results = MultiHandler().handle(query, *handlers)
         for result in results:
-            had_any_non_error = had_any_non_error or result.error is not None
             if result.clipboard is not None:
                 on_enter = CopyToClipboardAction(result.clipboard)
             else:
@@ -87,9 +85,9 @@ class KeywordQueryEventListener(EventListener):
                 on_enter=on_enter
             ))
 
-        should_show_placeholder = query_nokw.strip() == '' or (
-            not had_any_non_error and
-            extension.preferences['show_empty_placeholder'] == 'y')
+        should_show_placeholder = (query_nokw.strip() == '' and len(items) == 0) or \
+            (len(items) == 0 and
+             extension.preferences['show_empty_placeholder'] == 'y')
 
         if should_show_placeholder:
             items.append(ExtensionResultItem(

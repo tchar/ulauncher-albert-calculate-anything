@@ -150,10 +150,8 @@ def handleQuery(query):
         ]
 
     items = []
-    had_any_non_error = False
     results = MultiHandler().handle(query_str, *handlers)
     for result in results:
-        had_any_non_error = had_any_non_error or result.error is not None
         icon = result.icon or 'images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)
 
@@ -171,9 +169,8 @@ def handleQuery(query):
             actions=actions
         ))
 
-    should_show_placeholder = query_nokw.strip() == '' and TRIGGERS or (
-        not had_any_non_error and
-        SHOW_EMPTY_PLACEHOLDER)
+    should_show_placeholder = (query_nokw.strip() == '' and TRIGGERS and len(items) == 0) or \
+        (len(items) == 0 and SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
         items.append(
