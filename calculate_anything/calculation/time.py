@@ -47,7 +47,7 @@ class TimeCalculation(_Calculation):
             if self.value.month > now.month:
                 description = translator('months-from-now')
             else:
-                description = translator('months ago')
+                description = translator('months-ago')
             description = '{} {}'.format(
                 abs(now.month - self.value.month), description)
         elif now_week - 1 == date_week:

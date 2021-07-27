@@ -3,7 +3,7 @@ import shutil
 import json
 from datetime import datetime
 from functools import wraps
-from calculate_anything.constants import CACHE_DIR, CURRENCY_DATA_FILE
+from calculate_anything.constants import CURRENCY_DATA_FILE
 from calculate_anything import logging
 
 
@@ -31,15 +31,6 @@ class CurrencyCache:
         self._logger = logging.getLogger(__name__)
 
     def _check_structure(self):
-        if not os.path.exists(CACHE_DIR):
-            try:
-                os.makedirs(CACHE_DIR)
-            except Exception as e:
-                self._logger.exception(
-                    'Could not create cache directory {}: {}'
-                    .format(CACHE_DIR, e))
-                return False
-
         if os.path.isdir(CURRENCY_DATA_FILE):
             try:
                 shutil.rmtree(CURRENCY_DATA_FILE)
