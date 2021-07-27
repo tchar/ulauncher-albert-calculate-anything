@@ -1,5 +1,4 @@
-import locale  # noqa: E402
-locale.setlocale(locale.LC_ALL, '')  # noqa: E402
+import locale
 import time
 from datetime import datetime
 from calculate_anything.currency import CurrencyService
@@ -7,8 +6,14 @@ import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
 from calculate_anything.query.handlers.units import UnitsQueryHandler
-from calculate_anything.exceptions import *
-from tests.utils import approxunits, currency_provider_had_error, no_pint, no_requests, query_test_helper
+from calculate_anything.exceptions import (
+    MissingPintException, MissingRequestsException, CurrencyProviderException
+)
+from tests.utils import (
+    approxunits, currency_provider_had_error,
+    no_pint, no_requests, query_test_helper
+)
+locale.setlocale(locale.LC_ALL, '')
 
 LanguageService().set('en_US')
 UnitsService().start()
@@ -21,7 +26,8 @@ tr_err = LanguageService().get_translator('errors')
 Quantity = UnitsService().unit_registry.Quantity
 
 
-def get_unit_result(parsed_query, value, name, description, order=0, icon='images/convert.svg', error=None):
+def get_unit_result(parsed_query, value, name, description,
+                    order=0, icon='images/convert.svg', error=None):
     return {
         'result': {
             'query': parsed_query,
@@ -41,20 +47,23 @@ def get_unit_result(parsed_query, value, name, description, order=0, icon='image
         }
     }
 
+
 def currency_amount(amount, currency_from, currency_to, quantity):
     amount_from = cache_data[currency_from]['rate']
     amount_to = cache_data[currency_to]['rate']
-    amount *=  amount_to / amount_from
+    amount *= amount_to / amount_from
     if quantity:
         return Quantity(amount, 'currency_{}'.format(currency_to))
     amount = locale.currency(amount, symbol='', grouping=True)
     return '{} {}'.format(amount, currency_to)
 
+
 def currency_description(currency_from, currency_to):
     dt = datetime.fromtimestamp(cache_data[currency_to]['timestamp_refresh'])
     dt = dt.strftime('%Y-%m-%d %H:%M')
     amount = currency_amount(1, currency_from, currency_to, True)
-    return '1 {} = {:.6f} {} as of {}'.format(currency_from, amount.magnitude, currency_to, dt)
+    return '1 {} = {:.6f} {} as of {}'.format(currency_from, amount.magnitude,
+                                              currency_to, dt)
 
 
 test_spec_units_simple = [{
@@ -126,12 +135,14 @@ test_spec_units_multi = [{
         ),
         get_unit_result(
             '10 centimeter to foot', approxunits(Quantity(0.3281, 'foot')),
-            '0.328084 foot', '1 centimeter = 0.0328084 foot • [length]', order=2
+            '0.328084 foot', '1 centimeter = 0.0328084 foot • [length]',
+            order=2
         ),
         get_unit_result(
             '10 centimeter to kilometer', approxunits(
                 Quantity(0.0001, 'kilometer')),
-            '0.0001 kilometer', '1 centimeter = 1e-05 kilometer • [length]', order=3
+            '0.0001 kilometer', '1 centimeter = 1e-05 kilometer • [length]',
+            order=3
         ),
     ]
 }, {
@@ -141,7 +152,8 @@ test_spec_units_multi = [{
         get_unit_result(
             '0.547 kilometer / hour to inch / minute',
             approxunits(Quantity(358.92, 'inch / minute')),
-            '358.924 inch / minute', '1 kilometer / hour = 656.168 inch / minute • [length / time]'
+            '358.924 inch / minute', '1 kilometer / hour = '
+            '656.168 inch / minute • [length / time]'
         ),
         get_unit_result(
             '0.547 kilometer / hour to mile / second',
@@ -154,7 +166,8 @@ test_spec_units_multi = [{
             '0.547 kilometer / hour to centimeter / minute',
             approxunits(Quantity(911.67, 'centimetre / minute')),
             '911.667 centimeter / minute',
-            '1 kilometer / hour = 1666.67 centimeter / minute • [length / time]',
+            '1 kilometer / hour = '
+            '1666.67 centimeter / minute • [length / time]',
             order=2
         ),
         get_unit_result(
@@ -173,20 +186,23 @@ test_spec_units_multi = [{
             '100.0 megabyte * meter / second to byte * centimeter / minute',
             approxunits(Quantity(6e+11, 'byte * centimeter / minute')),
             '6e+11 byte * centimeter / minute',
-            '1 megabyte * meter / second = 6e+09 byte * centimeter / minute • [length / time]',
+            '1 megabyte * meter / second = '
+            '6e+09 byte * centimeter / minute • [length / time]',
         ),
         get_unit_result(
             '100.0 megabyte * meter / second to gigabyte * kilometer / hour',
             approxunits(Quantity(0.36, 'gigabyte * kilometer / hour')),
             '0.36 gigabyte * kilometer / hour',
-            '1 megabyte * meter / second = 0.0036 gigabyte * kilometer / hour • [length / time]',
+            '1 megabyte * meter / second = '
+            '0.0036 gigabyte * kilometer / hour • [length / time]',
             order=1
         ),
         get_unit_result(
             '100.0 megabyte * meter / second to inch * petabyte / day',
             approxunits(Quantity(0.34015748, 'inch * petabyte / day')),
             '0.340157 inch * petabyte / day',
-            '1 megabyte * meter / second = 0.00340157 inch * petabyte / day • [length / time]',
+            '1 megabyte * meter / second = '
+            '0.00340157 inch * petabyte / day • [length / time]',
             order=2
         ),
     ]
@@ -330,11 +346,12 @@ test_spec_missing_pint = [{
     }]
 }]
 
+
 @pytest.mark.parametrize('test_spec', test_spec_missing_pint)
 def test_missing_pint(test_spec):
     with no_pint(units_service=True):
         query_test_helper(UnitsQueryHandler, test_spec)
-    
+
     with no_pint(units_service=False):
         query_test_helper(UnitsQueryHandler, test_spec)
 
@@ -360,6 +377,7 @@ test_spec_missing_requests = [{
         }
     }]
 }]
+
 
 @pytest.mark.parametrize('test_spec', test_spec_missing_requests)
 def test_missing_requests(test_spec):
@@ -388,6 +406,7 @@ test_spec_provider_had_error = [{
         }
     }]
 }]
+
 
 @pytest.mark.parametrize('test_spec', test_spec_provider_had_error)
 def test_provider_had_error(test_spec):

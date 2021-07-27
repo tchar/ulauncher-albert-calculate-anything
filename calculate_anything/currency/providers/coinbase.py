@@ -6,7 +6,9 @@ except ImportError:
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default
-from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.exceptions import (
+    CurrencyProviderException, CurrencyProviderRequestException
+)
 
 
 __all__ = ['CoinbaseCurrencyProvider']
@@ -46,7 +48,8 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
 
         rates = {currency: rate for currency, rate in rates}
 
-        if base_currency != 'EUR' and ('EUR' not in rates or base_currency not in rates):
+        if base_currency != 'EUR' and ('EUR' not in rates or
+                                       base_currency not in rates):
             raise CurrencyProviderException(
                 'Could not convert to base currency')
 

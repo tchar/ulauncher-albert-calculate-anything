@@ -1,8 +1,6 @@
 import math
-import itertools
+from itertools import product, chain
 import tokenize
-
-from pint.pint_eval import EvalTreeNode
 try:
     import pint
 except ImportError:  # pragma: no cover (covered artificially in tests)
@@ -18,7 +16,9 @@ from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.utils import is_types, Singleton
 from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
-from calculate_anything.exceptions import CurrencyProviderException, MissingPintException, MissingRequestsException
+from calculate_anything.exceptions import (
+    CurrencyProviderException, MissingPintException, MissingRequestsException
+)
 
 
 __all__ = ['UnitsQueryHandler']
@@ -31,12 +31,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _items_for_currency_errors(self, unit_dimensionalities):
         currency_service = CurrencyService()
-        missing_requests = currency_service.enabled and currency_service.missing_requests
-        currency_provider_had_error = currency_service.enabled and currency_service.provider_had_error
+        missing_requests = currency_service.enabled and \
+            currency_service.missing_requests
+        currency_provider_had_error = currency_service.enabled and \
+            currency_service.provider_had_error
 
-        missing_requests = currency_service.enabled and currency_service.missing_requests
+        missing_requests = currency_service.enabled and \
+            currency_service.missing_requests
         currency_provider_had_error = (
-            currency_service.enabled and currency_service.provider_had_error and
+            currency_service.enabled and
+            currency_service.provider_had_error and
             any(map(lambda d: '[currency]' in d, unit_dimensionalities))
         )
         if missing_requests:
@@ -106,7 +110,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             if group:
                 disjoint_groups.append(sorted(group))
 
-        for g in itertools.product(*disjoint_groups):
+        for g in product(*disjoint_groups):
             g_set = set(g)
             expression = []
             for m in matches[1::2]:
@@ -151,7 +155,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         yield unit_from
 
     def _get_possible_units(self, unit_from):
-        if UnitsService().conversion_mode == UnitsService.ConversionMode.NORMAL:
+        if UnitsService().conversion_mode == \
+                UnitsService.ConversionMode.NORMAL:
             return self._get_only_one_unit(unit_from)
         if UnitsService().conversion_mode == UnitsService.ConversionMode.CRAZY:
             return self._get_all_possible_units(unit_from)
@@ -162,7 +167,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             unit = UnitsService().unit_registry.parse_expression(expression)
             if not isinstance(unit, pint.Quantity):
                 return None
-            if (UnitsService().conversion_mode == UnitsService.ConversionMode.NORMAL and
+            if (UnitsService().conversion_mode ==
+                UnitsService.ConversionMode.NORMAL and
                 CurrencyUnitsCalculation.has_currency(unit) and
                     not CurrencyUnitsCalculation.is_currency(unit)):
                 return None
@@ -174,10 +180,12 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 pint.errors.DefinitionSyntaxError,
                 tokenize.TokenError) as e:
             self._logger.debug(
-                'Got pint exception when trying to parse {!r}: {}'.format(expression, e))
+                'Got pint exception when trying to parse {!r}: {}'
+                .format(expression, e))
         except Exception as e:
             self._logger.exception(
-                'Got exception when trying to parse: {!r}: {}'.format(expression, e))
+                'Got exception when trying to parse: {!r}: {}'
+                .format(expression, e))
 
     def handle_raw(self, query):
         if '%' in query:
@@ -220,7 +228,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         items.extend(self._items_for_currency_errors(unit_dimensionalities))
 
         if not units_to:
-            # Add currency units if compattible with units from and map them to units
+            # Add currency units if compattible with units from
+            # and map them to units
             if unit_from_ureg_currency:
                 unit_from_ureg_currency_str = str(
                     unit_from_ureg_currency.units)
@@ -241,28 +250,30 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
             # Add all units from
             units_to_rest = filter(
-                lambda u: not base_currency.is_compatible_with(u), units_from_ureg)
+                lambda u: not base_currency.is_compatible_with(u),
+                units_from_ureg)
             units_to_rest = map(lambda u: u.units, units_to_rest)
-            units_to_ureg = itertools.chain(units_to_curr, units_to_rest)
+            units_to_ureg = chain(units_to_curr, units_to_rest)
         else:
             # Map to units and filter out if not compatible
             units_to_ureg = map(self._get_possible_units, units_to)
-            units_to_ureg = itertools.chain.from_iterable(units_to_ureg)
+            units_to_ureg = chain.from_iterable(units_to_ureg)
             units_to_ureg = map(self._parse_safe, units_to_ureg)
             units_to_ureg = filter(is_types(pint.Quantity), units_to_ureg)
-            # units_to_ureg = filter(lambda u: not u.units.unitless, units_to_ureg)
             units_to_ureg = filter(lambda u: u.magnitude == 1, units_to_ureg)
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
 
         added_currency = False
-        for unit_from_ureg, unit_to_ureg in itertools.product(units_from_ureg, units_to_ureg):
+        for unit_from_ureg, unit_to_ureg in product(units_from_ureg,
+                                                    units_to_ureg):
             try:
                 if not unit_from_ureg.is_compatible_with(unit_to_ureg):
                     continue
                 unit_converted = unit_from_ureg.to(unit_to_ureg, 'currency')
                 if math.isnan(unit_converted.magnitude):
                     self._logger.warning(
-                        'Converted magnitude is NaN'': from={} {}, to={}'.format(
+                        'Converted magnitude is NaN'': from={} {}, to={}'
+                        .format(
                             unit_from_ureg.magnitude,
                             unit_from_ureg.units,
                             unit_to_ureg
@@ -276,7 +287,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     rate = None
             except Exception as e:
                 self._logger.exception(
-                    'Unexpected exception uni units conversion: {!r}: {}'.format(original_query, e))
+                    'Unexpected exception uni units conversion: {!r}: {}'
+                    .format(original_query, e))
                 continue
 
             kwargs = {}
@@ -287,7 +299,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     continue
                 UnitClass = CurrencyUnitsCalculation
                 kwargs = {
-                    'update_timestamp': UnitsService().get_rate_timestamp(unit_to_ureg)
+                    'update_timestamp': (UnitsService()
+                                         .get_rate_timestamp(unit_to_ureg))
                 }
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation

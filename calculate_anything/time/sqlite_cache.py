@@ -62,9 +62,11 @@ class TimezoneSqliteCache:
 
         if load_only:
             mode = MODE_LOAD_ONLY
-        elif sqlite_file_exists and sqlite_file_exists and sqlite_file_mtime >= sql_file_mtime:
+        elif sqlite_file_exists and sqlite_file_exists and \
+                sqlite_file_mtime >= sql_file_mtime:
             mode = MODE_LOAD
-        elif sqlite_file_exists and sql_file_exists and sqlite_file_mtime < sql_file_mtime:
+        elif sqlite_file_exists and sql_file_exists and \
+                sqlite_file_mtime < sql_file_mtime:
             mode = MODE_DELETE | MODE_CREATE
         elif not sqlite_file_exists:
             mode = MODE_CREATE
@@ -84,7 +86,8 @@ class TimezoneSqliteCache:
                 mode |= MODE_DELETE
             except Exception as e:
                 self._logger.exception(
-                    'Got unexpected error when reading database file: {}'.format(e))
+                    'Got unexpected error when reading database file: {}'
+                    .format(e))
                 mode |= MODE_DELETE
 
         if mode & MODE_LOAD_ONLY:
@@ -100,7 +103,8 @@ class TimezoneSqliteCache:
                 self._logger.info('Found new timezones, cleared database')
             except Exception as e:
                 self._logger.exception(
-                    'Got unexpected exception when trying to remove the database: {}'.format(e))
+                    'Got unexpected exception when trying to remove the '
+                    'database: {}'.format(e))
                 mode = MODE_MEMORY
 
         if mode & (MODE_CREATE | MODE_MEMORY):
@@ -111,10 +115,12 @@ class TimezoneSqliteCache:
                     self._db = db = sqlite3.connect(
                         file_path, check_same_thread=False)
                     self._logger.info(
-                        'Did not find {}, created from scratch'.format(file_path))
+                        'Did not find {}, created from scratch'
+                        .format(file_path))
                 except Exception as e:
                     self._logger.exception(
-                        'Got unexpected exception when trying to create the database: {}'.format(e))
+                        'Got unexpected exception when trying to create the '
+                        'database: {}'.format(e))
                     mode |= MODE_MEMORY
             if mode & MODE_MEMORY:
                 self._db = db = sqlite3.connect(
@@ -131,27 +137,29 @@ class TimezoneSqliteCache:
         cur = db.cursor()
         cur.execute('PRAGMA foreign_keys = ON;')
         cur.execute('''CREATE TABLE IF NOT EXISTS queries (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    key STRING UNIQUE COLLATE NOCASE,
-                    timestamp DATETIME DEFAULT (DATETIME('now', 'localtime')))''')
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key STRING UNIQUE COLLATE NOCASE,
+            timestamp DATETIME DEFAULT (DATETIME('now', 'localtime')))''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS results (
                     id INTEGER UNIQUE,
                     data JSON)''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS queries_results (
-                    query_id INTEGER,
-                    result_id INTEGER,
-                    result_order INTEGER,
-                    FOREIGN KEY(query_id) REFERENCES queries(id) ON DELETE CASCADE,
-                    FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE)''')
+            query_id INTEGER,
+            result_id INTEGER,
+            result_order INTEGER,
+            FOREIGN KEY(query_id) REFERENCES queries(id) ON DELETE CASCADE,
+            FOREIGN KEY(result_id) REFERENCES results(id)
+                ON DELETE CASCADE)''')
 
         cur.execute(
             '''CREATE INDEX queries_timestamp_idx ON queries(timestamp)''')
         cur.execute(
             '''CREATE INDEX queries_key_idx ON queries(key COLLATE NOCASE)''')
         cur.execute(
-            '''CREATE INDEX queries_results_result_order_idx ON queries_results(result_order)''')
+            '''CREATE INDEX queries_results_result_order_idx ON
+            queries_results(result_order)''')
         db.commit()
         cur.close()
         self._db_cache = db
@@ -165,22 +173,24 @@ class TimezoneSqliteCache:
         except Exception as e:
             self._city_name_chunks_max = None
             self._logger.exception(
-                'Got exception when trying to fetch city_name_chunks_max: {}'.format(e))
+                'Got exception when trying to fetch city_name_chunks_max: {}'
+                .format(e))
         finally:
             cur.close()
 
     def _query_no_search_terms(self, city_name_search, exact):
         # Allow user to use underscore
         if not exact:
-            primary_query = 'city_name_alias LIKE ?'
+            primary_query = 'name_alias LIKE ?'
             param = city_name_search + '%'
         else:
-            primary_query = 'city_name_alias = ?'
+            primary_query = 'name_alias = ?'
             param = city_name_search
 
-        query = '''SELECT id city_id, name city_name, state_name, country_name, country_iso2, timezone
+        query = '''SELECT id city_id, name city_name, state_name, country_name,
+                country_iso2, timezone
             FROM view_search_by_city_name
-            WHERE name_alias LIKE ?
+            WHERE {}
             GROUP BY id
             ORDER BY (name_alias = ?) DESC, population DESC
             LIMIT 10
@@ -256,9 +266,11 @@ class TimezoneSqliteCache:
                 INNER JOIN timezones t ON t.id = ct.timezone_id
                 WHERE {}
             ) tz ON tz.city_id = city.id
-            WHERE country.id IS NOT NULL OR state.id IS NOT NULL or tz.city_id IS NOT NULL
+            WHERE country.id IS NOT NULL OR state.id IS NOT NULL OR
+                tz.city_id IS NOT NULL
             ORDER BY (city.name_alias = ?) DESC, city.population DESC
-            '''.format(cities_query, countries_query, states_query, timezones_query)
+            '''.format(cities_query, countries_query,
+                       states_query, timezones_query)
 
         cur = self._db.cursor()
         for row in cur.execute(query, params):
@@ -281,7 +293,8 @@ class TimezoneSqliteCache:
         cursor = db_cache.cursor()
         for result_key in result_keys:
             cursor.execute('''INSERT OR REPLACE INTO queries (key, timestamp)
-                            VALUES (?, datetime('now', 'localtime'))''', (result_key,))
+                            VALUES (?, datetime('now', 'localtime'))''',
+                           (result_key,))
             qid = cursor.lastrowid
             for i, city in enumerate(cities):
                 cursor.execute('''INSERT OR IGNORE INTO
@@ -330,7 +343,8 @@ class TimezoneSqliteCache:
         exact_key = any(map(lambda k: k == qkey, query_keys))
 
         cursor.execute('''SELECT r.data FROM results r
-            INNER JOIN queries_results qr ON qr.result_id = r.id AND qr.query_id = ?
+            INNER JOIN queries_results qr ON qr.result_id = r.id AND
+            qr.query_id = ?
             ORDER BY qr.result_order ASC''', (qid, ))
 
         cities = cursor.fetchmany()
@@ -354,17 +368,19 @@ class TimezoneSqliteCache:
 
     @lock
     def _clear_cache(self):
-        time_diff = datetime.now().timestamp() - self._last_clear_cache_timestamp
+        now = datetime.now().timestamp()
+        time_diff = now - self._last_clear_cache_timestamp
         if time_diff <= 86400:
             return
         self._logger.info('Clearing in-memory cache')
         db_cache = self._db_cache
         cursor = db_cache.cursor()
         cursor.execute('''DELETE FROM queries
-                        WHERE datetime(timestamp, '+2 hour') < datetime('now', 'localtime')''')
+                        WHERE datetime(timestamp, '+2 hour') <
+                            datetime('now', 'localtime')''')
         db_cache.commit()
         cursor.close()
-        self._last_clear_cache_timestamp = datetime.now().timestamp()
+        self._last_clear_cache_timestamp = now
         self._logger.info('Cleared cache')
 
     def get(self, city_name_search, *search_terms, exact=False):
@@ -388,14 +404,14 @@ class TimezoneSqliteCache:
 
         cities = []
         for row in gen:
-            _id, city_name, state_name, country_name, country_iso, timezone_name = row
+            _id, name, state_name, country_name, country_iso, tz_name = row
             cities.append({
                 'id': _id,
-                'name': city_name,
+                'name': name,
                 'country': country_name,
                 'cc': country_iso,
                 'state': state_name,
-                'timezone': timezone_name
+                'timezone': tz_name
             })
 
         self._clear_cache()

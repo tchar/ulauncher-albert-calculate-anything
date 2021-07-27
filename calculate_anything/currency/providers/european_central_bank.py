@@ -32,7 +32,8 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         if not str(response.status_code).startswith('2'):
             self.had_error = True
             raise CurrencyProviderRequestException(
-                'European Central Bank response code was {}'.format(response.status_code))
+                'European Central Bank response code was {}'
+                .format(response.status_code))
 
         data = response.text
         try:
@@ -40,11 +41,13 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             timestamp = tree[2][0].attrib['time']
             timestamp = datetime.strptime(timestamp, '%Y-%m-%d').timestamp()
         except (IndexError, KeyError) as e:
-            self._logger.exception('Could not read update timestamp: {}'.format(e))
+            self._logger.exception('Could not read update timestamp: {}'
+                                   .format(e))
             timestamp = datetime.now().timestamp()
         except Exception as e:
             self._logger.exception(
-                'An unexpected exception occured when reading update timestamp: {}'.format(e))
+                'An unexpected exception occured when reading '
+                'update timestamp: {}'.format(e))
             timestamp = datetime.now().timestamp()
 
         try:
@@ -54,7 +57,8 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             raise CurrencyProviderRequestException(e)
         except Exception as e:
             self._logger.exception(
-                'An unexpected exception occured when reading currencies: {}'.format(e))
+                'An unexpected exception occured when reading currencies: {}'
+                .format(e))
             raise CurrencyProviderRequestException(e)
 
         currency_data = {}
@@ -64,12 +68,14 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
                 rate = float(child.attrib['rate'])
                 currency_data[curr] = {'rate': rate,
                                        'timestamp_refresh': timestamp}
-            except (TypeError, ValueError):
+            except (TypeError, ValueError) as e:
                 self._logger.exception(
-                    'Could not read rate for currency at line {}: {}'.format(i, e))
+                    'Could not read rate for currency at line {}: {}'
+                    .format(i, e))
             except Exception as e:
                 self._logger.exception(
-                    'An unexpected exception occured when reading rate for currency at line {}: {}'.format(i, e))
+                    'An unexpected exception occured when reading rate '
+                    'for currency at line {}: {}'.format(i, e))
 
         self.had_error = False
         return currency_data

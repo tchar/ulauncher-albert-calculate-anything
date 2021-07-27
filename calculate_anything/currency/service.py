@@ -1,7 +1,9 @@
 from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
-from calculate_anything.exceptions import CurrencyProviderRequestException, MissingRequestsException
+from calculate_anything.exceptions import (
+    CurrencyProviderRequestException, MissingRequestsException
+)
 from calculate_anything.utils import Singleton, safe_operation, lock
 from calculate_anything import logging
 
@@ -48,8 +50,9 @@ class CurrencyService(metaclass=Singleton):
                 'Stopping thread (id={}). Service stopped'.format(thread_id))
             return
         elif thread_id != self._thread_id:
-            self._logger.info('Stopping thread (id={}). Another thread is running (id={})'.format(
-                thread_id, self._thread_id))
+            self._logger.info('Stopping thread (id={}). Another thread is '
+                              'running (id={})'.format(thread_id,
+                                                       self._thread_id))
             return
         elif not self._cache.enabled:
             self._logger.info(
@@ -62,7 +65,8 @@ class CurrencyService(metaclass=Singleton):
                 with safe_operation():
                     callback(currency_rates)
         except CurrencyProviderRequestException as e:
-            self._logger.exception('Error when contacting provider: {}'.format(e))
+            self._logger.exception(
+                'Error when contacting provider: {}'.format(e))
         except MissingRequestsException as e:
             self._logger.exception('Missing requests: {}'.format(e))
             self._missing_requests = True
@@ -99,7 +103,8 @@ class CurrencyService(metaclass=Singleton):
             self._logger.warning('Service is disabled, cannot enable cache')
             return
         self._logger.info(
-            'Enabling cache with update frequence = {}'.format(update_frequency))
+            'Enabling cache with update frequence = {}'
+            .format(update_frequency))
         self._cache.enable(update_frequency)
         return self
 
@@ -179,7 +184,8 @@ class CurrencyService(metaclass=Singleton):
     #     try:
     #         available_currencies = list(self.__get_currencies().keys())
     #     except CurrencyProviderRequestException as e:
-    #         self._logger.error('Error when contacting provider: {}'.format(e))
+    #         self._logger.error('Error when contacting provider: {}'
+    #                            .format(e))
     #         available_currencies = []
     #     return available_currencies
 

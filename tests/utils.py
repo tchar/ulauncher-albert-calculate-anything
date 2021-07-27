@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
-from calculate_anything.logging import Logging
 from calculate_anything.time import TimezoneService
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
@@ -221,7 +220,8 @@ def query_test_helper(cls, test_spec):
         )
         assert item['query_result']['order'] == query_result.order
         assert item['query_result']['value'] == query_result.value
-        # Although seems stupid we use this to distinguish between equalities in floats and ints
-        # For example 3.0 is not equal to 3 we want the type to be correct
+        # Although seems stupid we use this to distinguish between equalities
+        # in floats and ints. For example 3.0 is not equal to 3 we want the
+        # type to be correct
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])

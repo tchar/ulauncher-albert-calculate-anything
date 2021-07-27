@@ -4,10 +4,11 @@ from calculate_anything import logging
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import (
-    BaseFloatingPointException, BooleanComparisonException, CurrencyProviderException,
-    DateOverflowException, MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
-    MissingSimpleevalException, MissingParsedatetimeException, MissingRequestsException,
-    BooleanPercetageException, MissingPintException
+    BaseFloatingPointException, BooleanComparisonException,
+    CurrencyProviderException, DateOverflowException,
+    MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
+    MissingSimpleevalException, MissingParsedatetimeException,
+    MissingRequestsException, BooleanPercetageException, MissingPintException
 )
 
 # TODO: Fix this mess

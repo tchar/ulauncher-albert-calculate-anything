@@ -1,26 +1,34 @@
-import locale  # noqa: E402
-locale.setlocale(locale.LC_ALL, '')  # noqa: E402
 from calculate_anything import logging
-from calculate_anything.lang import LanguageService
-from calculate_anything.time import TimezoneService
-from calculate_anything.query import MultiHandler
+from ulauncher.api.shared.action.CopyToClipboardAction import (
+    CopyToClipboardAction
+)
+from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.RenderResultListAction import (
+    RenderResultListAction
+)
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.event import (
+    KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent,
+    SystemExitEvent
+)
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.client.Extension import Extension
+from calculate_anything.utils import safe_operation
+from calculate_anything.preferences import Preferences
 from calculate_anything.query.handlers import (
     PercentagesQueryHandler, UnitsQueryHandler,
     CalculatorQueryHandler, TimeQueryHandler,
     Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler
 )
-from calculate_anything.preferences import Preferences
-from calculate_anything.utils import safe_operation
-from ulauncher.api.client.Extension import Extension
-from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from calculate_anything.query import MultiHandler
+from calculate_anything.time import TimezoneService
+from calculate_anything.lang import LanguageService
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
-# See what I did for Ulauncher. You won't let use my own formatter, due to duplicate logs
+# See what I did for Ulauncher.
+# You won't let use my own formatter, due to duplicate logs
 logging.disable_stdout_handler()
 
 
@@ -85,7 +93,8 @@ class KeywordQueryEventListener(EventListener):
                 on_enter=on_enter
             ))
 
-        should_show_placeholder = (query_nokw.strip() == '' and len(items) == 0) or \
+        should_show_placeholder = (
+            query_nokw.strip() == '' and len(items) == 0) or \
             (len(items) == 0 and
              extension.preferences['show_empty_placeholder'] == 'y')
 

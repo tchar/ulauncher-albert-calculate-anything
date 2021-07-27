@@ -18,8 +18,7 @@ from calculate_anything.exceptions import (
 from tests.utils import (
     no_default_cities, no_parsedatetime,
     reset_instance, approxdt, approxstr,
-    query_test_helper, no_parsedatetime,
-    set_time_reference
+    query_test_helper, set_time_reference
 )
 
 
@@ -27,7 +26,8 @@ LanguageService().set('en_US')
 tr_time = LanguageService().get_translator('time')
 tr_err = LanguageService().get_translator('errors')
 TimezoneService().start()
-TimezoneService().parse_default_cities_str('Athens GR,New York City US', save=True)
+TimezoneService().parse_default_cities_str(
+    'Athens GR,New York City US', save=True)
 cal = parsedatetime.Calendar(version=parsedatetime.VERSION_CONTEXT_STYLE)
 dt_now = TimeQueryHandler.now()
 time_reference = datetime(2021, 7, 15, 14, 0, 0)
@@ -102,9 +102,11 @@ def get_result(description, query, order, td=timedelta()):
         },
         'query_result': {
             'icon': 'images/time.svg',
-            'name': approxstr((now() + td).strftime(TIME_DATETIME_FORMAT)),
+            'name': approxstr((now() + td)
+                              .strftime(TIME_DATETIME_FORMAT)),
             'description': approxstr(description),
-            'clipboard': approxstr((now() + td).strftime(TIME_DATETIME_FORMAT)),
+            'clipboard': approxstr((now() + td)
+                                   .strftime(TIME_DATETIME_FORMAT)),
             'error': None,
             'value': approxdt(now() + td),
             'value_type': datetime,
@@ -114,7 +116,8 @@ def get_result(description, query, order, td=timedelta()):
 
 
 @lru_cache
-def get_resulttz(city_name, country_name, iso2, query, order, tz, td=timedelta()):
+def get_resulttz(city_name, country_name,
+                 iso2, query, order, tz, td=timedelta()):
     return {
         'result': {
             'value': approxdt(now(tz=timezone(tz)) + td),
@@ -135,8 +138,8 @@ def get_resulttz(city_name, country_name, iso2, query, order, tz, td=timedelta()
                         TIME_DATE_FORMAT),
                     country_name,
                     now(tz=timezone(tz)).tzname(),
-                    'UTC{:+.0f}'.format((now(tz=timezone(tz)) +
-                                        td).utcoffset().total_seconds() / 60 / 60)
+                    'UTC{:+.0f}'.format((now(tz=timezone(tz)) + td)
+                                        .utcoffset().total_seconds() / 60 / 60)
                 )
             ),
             'clipboard': approxstr(
@@ -240,7 +243,8 @@ test_spec_simple = [{
 }, {
     # Overflow with multiple chunks
     'query': 'time + 4000 years + 4000 years',
-    'results': [get_resultexc('+ 4000 years + 4000 years', DateOverflowException)]
+    'results': [get_resultexc('+ 4000 years + 4000 years',
+                              DateOverflowException)]
 }, {
     # Not parsed
     'query': 'time + 1 microsecond',
@@ -258,7 +262,8 @@ test_spec_simple = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_simple)
 def test_simple(test_spec):
-    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+    with reset_instance(TimeQueryHandler,
+                        context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
@@ -289,23 +294,28 @@ test_spec_target_city = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_target_city)
 def test_target_city(test_spec):
-    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+    with reset_instance(TimeQueryHandler,
+                        context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
 test_spec_time = [{
     # Normal test with time calculation
-    'query': 'time + 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
+    'query': 'time + 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
+    '2 months 26 hour 30 minutes 2 SeCond',
     'results': [
         get_result('Tomorrow',
-                   query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
+                   query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
+                   '2 months 26 hour 30 minutes 2 SeCond',
                    order=0, td=td_pdt(day=1)),
         get_resulttz('Athens', 'Greece', 'GR',
-                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
+                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
+                     '2 months 26 hour 30 minutes 2 SeCond',
                      order=1, tz='Europe/Athens',
                      td=td_pdt(day=1)),
         get_resulttz('New York City', 'NY United States', 'US',
-                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - 2 months 26 hour 30 minutes 2 SeCond',
+                     query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
+                     '2 months 26 hour 30 minutes 2 SeCond',
                      order=2, tz='America/New_York',
                      td=td_pdt(day=1))
     ]
@@ -351,7 +361,8 @@ test_spec_time = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_time)
 def test_time(test_spec):
-    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+    with reset_instance(TimeQueryHandler,
+                        context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
@@ -374,7 +385,8 @@ test_spec_time_target_city = [{
 }, {
     'query': 'time + 1 month at Prague CzEcHia',
     'results': [
-        get_resulttz('Prague', 'Czechia', 'CZ', query='+ 1 month at Prague CzEcHia',
+        get_resulttz('Prague', 'Czechia', 'CZ',
+                     query='+ 1 month at Prague CzEcHia',
                      order=0, tz='Europe/Prague',
                      td=td_pdt(month=1)),
         get_result(tr_time('next-month').capitalize(),
@@ -385,7 +397,8 @@ test_spec_time_target_city = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_time_target_city)
 def test_time_target_city(test_spec):
-    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+    with reset_instance(TimeQueryHandler,
+                        context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
@@ -457,7 +470,8 @@ test_spec_until = [{
 
 @ pytest.mark.parametrize('test_spec', test_spec_until)
 def test_until(test_spec):
-    with reset_instance(TimeQueryHandler, context=set_time_reference(time_reference)):
+    with reset_instance(TimeQueryHandler,
+                        context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
@@ -649,5 +663,6 @@ test_spec_cov = [{
 @ pytest.mark.parametrize('test_spec', test_spec_cov)
 def test_coverage(test_spec):
     with reset_instance(TimezoneService, context=no_default_cities):
-        with reset_instance(TimezoneService, context=set_time_reference(time_reference)):
+        with reset_instance(TimezoneService,
+                            context=set_time_reference(time_reference)):
             query_test_helper(TimeQueryHandler, test_spec)

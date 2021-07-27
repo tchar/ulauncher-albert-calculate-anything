@@ -5,7 +5,9 @@ from calculate_anything.calculation import (
     Calculation, InversePercentageCalculation,
     NormalPercentageCalculation, PercentageCalculation
 )
-from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisionException
+from calculate_anything.exceptions import (
+    BooleanPercetageException, ZeroDivisionException
+)
 from calculate_anything.utils import Singleton
 from calculate_anything.constants import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
@@ -89,8 +91,9 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover
-                'Got exception when calculating inverse percentage with values {}, {}: {}'.format(
-                    percentage_from.value, percentage_to.value, e))
+                'Got exception when calculating inverse percentage '
+                'with values {}, {}: {}'.format(percentage_from.value,
+                                                percentage_to.value, e))
             return None  # pragma: no cover
 
     def _calculate_convert_inverse(self, query):
@@ -129,8 +132,9 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover
-                'Got exception when calculating inverse percentage with values {}, {}: {}'.format(
-                    percentage_from.value, percentage_to.value, e))
+                'Got exception when calculating inverse percentage '
+                'with values {}, {}: {}'.format(percentage_from.value,
+                                                percentage_to.value, e))
             return None  # pragma: no cover
 
     def _calculate_calc(self, query):
@@ -140,7 +144,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         if not PERCENTAGES_REGEX_CALC_MATCH.findall(query):
             return None
 
-        # Parse expression because it is ambiguous and difficult to match with regex
+        # Parse expression because it is ambiguous to match with regex
         signs = set(['+', '-'])
         parens = 0
         for i, c in enumerate(reversed(query)):
@@ -173,7 +177,10 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         amount, percentage = result
         try:
             amount2 = percentage.value * amount.value / 100
-            result = amount.value + amount2 if sign == '+' else amount.value - amount2
+            if sign == '+':
+                result = amount.value + amount2
+            else:
+                result = amount.value - amount2
             query_amount = amount.query
             query_percentage = percentage.query
             query = '({}) + ({})%'.format(query_amount, query_percentage)
@@ -184,8 +191,9 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover
-                'Got exception when calculating inverse percentage with values {}, {}: {}'.format(
-                    amount.value, percentage.value, e))
+                'Got exception when calculating inverse percentage '
+                'with values {}, {}: {}'.format(amount.value,
+                                                percentage.value, e))
             return None  # pragma: no cover
 
     def handle_raw(self, query):

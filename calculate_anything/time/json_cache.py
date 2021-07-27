@@ -1,4 +1,3 @@
-import os
 import json
 from calculate_anything import logging
 from calculate_anything.constants import TIMEZONES_JSON_FILE
@@ -15,7 +14,8 @@ class TimezoneJsonCache:
                 self._data = json.loads(f.read())
         except Exception as e:
             self._logger.exception(
-                'Could not load timezone data: {}: {}'.format(TIMEZONES_JSON_FILE, e))
+                'Could not load timezone data: {}: {}'
+                .format(TIMEZONES_JSON_FILE, e))
             return False
         return True
 

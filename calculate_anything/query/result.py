@@ -4,7 +4,8 @@ __all__ = ['QueryResult']
 
 
 class QueryResult:
-    def __init__(self, icon='', name='', description='', clipboard=None, value=None, error=None, order=0):
+    def __init__(self, icon='', name='', description='',
+                 clipboard=None, value=None, error=None, order=0):
         self.icon = icon
         self.name = name
         self.description = description

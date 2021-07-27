@@ -52,9 +52,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         self._keywords_regex = re.compile(keywords_regex)
         self._keywords_set = set(keywords)
 
-    def _parse_expression(self, expression: str) -> Tuple[Union[None, str], int]:
+    def _parse_expression(self, expression: str) \
+            -> Tuple[Union[None, str], int]:
         """Parses the expression and changes i(imaginary unit) to j.
-        Returns str or None (parsed expression), int if it has imaginary number 
+        Returns str or None (parsed expression), int if it has imaginary
+        number.
 
         """
         expression = expression.strip().lower()
@@ -98,7 +100,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         return expr, has_imaginary
 
     def _calculate_boolean_result(values: Union[int, float, complex],
-                                  operators: List[str], subqueries: List[str]) -> BooleanCalculation:
+                                  operators: List[str],
+                                  subqueries: List[str]) -> BooleanCalculation:
         """Calculates result form expression with equality/inequality
         and returns a BooleanCalculation
 
@@ -107,7 +110,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         for value in values:
             if isinstance(value, (int, float)):
                 value = complex(value, 0)
-            # Do this so if it is the case we have something like 1 + 0.00000000001j
+            # Do this so if it is the case we have something
+            # like 1 + 0.00000000001j
             # We consider it as 1 so it can be comparable with real numbers
             fixed_precision = complex(
                 Calculation.fix_number_precision(value.real),
@@ -128,9 +132,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         inequality_error = False
         query = ''
         result = True
-        for i, [value1, value2, operator] in enumerate(zip(values, values[1:], operators)):
-            # If it is an inequality and either of the results have imaginary part
-            # Then mark it as error, let query be constructed and return a BooleanComparisonException
+        zipped_values = zip(values, values[1:], operators)
+        for i, [value1, value2, operator] in enumerate(zipped_values):
+            # If it is an inequality and either of the results have imaginary
+            # part. Then mark it as error, let query be constructed and return
+            # a BooleanComparisonException
             if operator in inequalities:
                 if value1.imag != 0 or value2.imag != 0:
                     inequality_error = True
@@ -199,15 +205,19 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         except (SyntaxError, TypeError):
             return None
         except(NameNotDefined, FeatureNotAvailable) as e:
-            self._logger.debug('Got simpleval Exception: when calculating {!r}'.format(query, e))
+            self._logger.debug(
+                'Got simpleval Exception: when calculating {!r}: {}'
+                .format(query, e))
             return None
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover
-                'Got exception when trying to calculate {!r}: {}'.format(query, e))
+                'Got exception when trying to calculate {!r}: {}'
+                .format(query, e))
             return None  # pragma: no cover
 
         if not any(map(is_types(int, float, complex), results)):
-            return None  # pragma: no cover (result must be one of int float complex, just in case)
+            # (result must be one of int float complex, just in case)
+            return None  # pragma: no cover
 
         if len(results) != 1:
             result = CalculatorQueryHandler._calculate_boolean_result(
