@@ -20,7 +20,8 @@ def hex_to_rgb(hex: str) -> Tuple[int, int, int]:
 
 
 # https://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html
-def rgb_to_cmyk(rgb: Tuple[int, int, int]) -> Tuple[float, float, float, float]:
+def rgb_to_cmyk(rgb: Tuple[int, int, int]) \
+        -> Tuple[float, float, float, float]:
     '''Converts rbg to cmyk
 
     Args:
@@ -86,6 +87,6 @@ def rgb_to_hsl(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
     elif cmax == b:
         h = ((r - g) / delta) + 4
     h *= 60
-    l = (cmax + cmin) / 2.
+    l = (cmax + cmin) / 2.  # noqa: E741
     s = 0 if delta == 0 else delta / (1 - abs(2 * l - 1))
     return h, s, l

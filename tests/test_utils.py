@@ -122,7 +122,7 @@ def test_singleton():
     class SingletonClassWithArgs(SingletonClass):
         def __init__(self, v):
             self._v = v
-        
+
         @property
         def v(self):
             return self._v
@@ -157,7 +157,7 @@ def test_singleton():
     t2.v = 4
     assert t1._v == t2._v == 4
     assert t1.v == t2.v == 4
-    
+
     t2._v = 16
     assert t1._v == t2._v == 16
     assert t1.v == t2.v == 16
@@ -290,11 +290,11 @@ test_spec = [{
     'pattern':  '=*/+-><^',
     'func': multi_re.split,
     'args': ('x^2+5x-21*2=0',),
-    'assert_func': lambda r: r == ['x', '^', '2', '+', '5x', '-', '21', '*', '2', '=', '0']
+    'assert_func': lambda r: r == ['x', '^', '2', '+', '5x',
+                                   '-', '21', '*', '2', '=', '0']
 }, {
     # Test findall
     'pattern':  '1=2',
-    'args': (),
     'func': multi_re.findall,
     'args': ('=$#=123',),
     'assert_func': lambda r: r == ['=', '=', '1', '2']
@@ -314,9 +314,11 @@ test_spec = [{
     # Test subn
     'pattern':  ['Harry potter', 'Hermione'],
     'func': multi_re.subn,
-    'args': ('Lord Voldermort', 'My name is harry potter, HeRmiOnE is awesome'),
+    'args': ('Lord Voldermort',
+             'My name is harry potter, HeRmiOnE is awesome'),
     'kwargs': {'flags': re.IGNORECASE},
-    'assert_func': lambda r: r == ('My name is Lord Voldermort, Lord Voldermort is awesome', 2)
+    'assert_func': lambda r: r == (
+        'My name is Lord Voldermort, Lord Voldermort is awesome', 2)
 }]
 
 

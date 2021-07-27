@@ -198,16 +198,21 @@ test_spec_base10 = [{
     ],
 }, {
     # More complex test
-    'query': 'dec (11 * 11) mod 2 + 10 div 2 + 8 xor 11 + 9 and 1 + (15 or 16)',
+    'query': 'dec (11 * 11) mod 2 + 10 div 2 + '
+    '8 xor 11 + 9 and 1 + (15 or 16)',
     'results': [
         result_for_base_n(
-            10, 14, '(11 * 11) mod 2 + 10 div 2 + 8 xor 11 + 9 and 1 + (15 or 16)', 0),
+            10, 14, '(11 * 11) mod 2 + 10 div 2 + '
+            '8 xor 11 + 9 and 1 + (15 or 16)', 0),
         result_for_base_n(
-            16, 14, '(11 * 11) mod 2 + 10 div 2 + 8 xor 11 + 9 and 1 + (15 or 16)', 1),
+            16, 14, '(11 * 11) mod 2 + 10 div 2 + '
+            '8 xor 11 + 9 and 1 + (15 or 16)', 1),
         result_for_base_n(
-            2, 14, '(11 * 11) mod 2 + 10 div 2 + 8 xor 11 + 9 and 1 + (15 or 16)', 2),
+            2, 14, '(11 * 11) mod 2 + 10 div 2 + '
+            '8 xor 11 + 9 and 1 + (15 or 16)', 2),
         result_for_base_n(
-            8, 14, '(11 * 11) mod 2 + 10 div 2 + 8 xor 11 + 9 and 1 + (15 or 16)', 3),
+            8, 14, '(11 * 11) mod 2 + 10 div 2 + '
+            '8 xor 11 + 9 and 1 + (15 or 16)', 3),
     ],
 }, {
     # Division by zero
@@ -239,21 +244,28 @@ test_spec_base16 = [{
         result_for_base16_string('20:31:30', '10', 3)],
 }, {
     # More complex test
-    'query': 'hex (ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)',
+    'query': 'hex (ffab * 10) mod ffa + 10 div f + '
+    '8 xor 2 + 3fad * ff + (15 or ff)',
     'results': [
         result_for_base_n(
-            16, 4157165, '(ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)', 0),
+            16, 4157165, '(ffab * 10) mod ffa + 10 div f + '
+            '8 xor 2 + 3fad * ff + (15 or ff)', 0),
         result_for_base_n(
-            10, 4157165,  '(ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)', 1),
+            10, 4157165,  '(ffab * 10) mod ffa + 10 div f + '
+            '8 xor 2 + 3fad * ff + (15 or ff)', 1),
         result_for_base_n(
-            2, 4157165,  '(ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)', 2),
+            2, 4157165,  '(ffab * 10) mod ffa + 10 div f + '
+            '8 xor 2 + 3fad * ff + (15 or ff)', 2),
         result_for_base_n(
-            8, 4157165,  '(ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)', 3),
+            8, 4157165,  '(ffab * 10) mod ffa + 10 div f + '
+            '8 xor 2 + 3fad * ff + (15 or ff)', 3),
         result_for_base16_string(
-            '20:28:66:66:61:62:20:2a:20:31:30:29:20:6d:6f:64:20:66:66:61:20:2b:20:31:30:20:64:69:'
-            '76:20:66:20:2b:20:38:20:78:6f:72:20:32:20:2b:20:33:66:61:64:20:2a:20:66:66:20:2b:20:'
-            '28:31:35:20:6f:72:20:66:66:29',
-            '(ffab * 10) mod ffa + 10 div f + 8 xor 2 + 3fad * ff + (15 or ff)',
+            '20:28:66:66:61:62:20:2a:20:31:30:29:20:6d:6f:64:20:66:66:61:20:'
+            '2b:20:31:30:20:64:69:76:20:66:20:2b:20:38:20:78:6f:72:20:32:20:'
+            '2b:20:33:66:61:64:20:2a:20:66:66:20:2b:20:28:31:35:20:6f:72:20:'
+            '66:66:29',
+            '(ffab * 10) mod ffa + 10 div f + '
+            '8 xor 2 + 3fad * ff + (15 or ff)',
             4
         )],
 }, {
@@ -297,7 +309,7 @@ test_spec_base16 = [{
 
 
 @pytest.mark.parametrize('test_spec', test_spec_base16)
-def test_base10(test_spec):
+def test_base16(test_spec):
     query_test_helper(Base16QueryHandler, test_spec)
 
 

@@ -70,22 +70,26 @@ class PintDefinitionParser:
         else:
             self._unit_registry.define('{} = {}'.format(root_unit, rest_units))
 
-    def _process_line(self, line, line_n, file_path, translation_adder, is_currency):
+    def _process_line(self, line, line_n, file_path,
+                      translation_adder, is_currency):
         try:
             line = line.strip()
             if line.startswith('#'):
                 return
             if line.startswith('@alias '):
-                return self._process_alias(line, translation_adder, is_currency)
+                return self._process_alias(line,
+                                           translation_adder,
+                                           is_currency)
             if line.startswith('@reverse.alias'):
                 return self._process_reverse_alias(line, translation_adder)
             return self._process_definition(line, is_currency)
         except Exception as e:
             self._logger.exception(
-                'Got exception when parsing line {} in {}: {}'.format(line_n, file_path, e))
+                'Got exception when parsing line {} in {}: {}'
+                .format(line_n, file_path, e))
 
-    def load_file(self, file_path, translation_mode, is_currency=True):
-        translation_adder = LanguageService().get_translation_adder(translation_mode)
+    def load_file(self, file_path, mode, is_currency=True):
+        translation_adder = LanguageService().translation_adder(mode)
         try:
             with open(file_path, 'r') as f:
                 for i, line in enumerate(f):
@@ -97,4 +101,5 @@ class PintDefinitionParser:
                 'Unit definitions file not found: {}'.format(file_path))
         except Exception as e:
             self._logger.exception(
-                'Exception when loading unit definitons file {}: {}'.format(file_path, e))
+                'Exception when loading unit definitons file {}: {}'
+                .format(file_path, e))

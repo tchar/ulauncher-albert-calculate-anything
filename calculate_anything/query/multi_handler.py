@@ -37,8 +37,9 @@ class MultiHandler:
             try:
                 result = handler.handle(query)
             except Exception as e:
-                self._logger.exception('Got exception when handling with: {}: {}'.format(
-                    handler.__class__.__name__, e))
+                self._logger.exception(
+                    'Got exception when handling with: {}: {}'
+                    .format(handler.__class__.__name__, e))
                 result = None
 
             if not result:

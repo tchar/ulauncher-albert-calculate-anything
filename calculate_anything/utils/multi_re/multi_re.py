@@ -62,10 +62,12 @@ class _MultiRe:
             def repl(m): return self._replace_dict[m.group(0)]
         return self._sub(repl, s, count, func)
 
-    def sub(self, repl: Union[str, Callable[[Match], str]], s: str, count: int = 0) -> str:
+    def sub(self, repl: Union[str, Callable[[Match], str]],
+            s: str, count: int = 0) -> str:
         return self._sub(repl, s, count, self._re.sub)
 
-    def subn(self, repl: Union[str, Callable[[Match], str]], s: str, count: int = 0) -> str:
+    def subn(self, repl: Union[str, Callable[[Match], str]],
+             s: str, count: int = 0) -> str:
         return self._sub(repl, s, count, self._re.subn)
 
     def sub_dict(self, s: str, count: int = 0) -> str:

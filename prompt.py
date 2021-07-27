@@ -1,25 +1,26 @@
 #! /usr/bin/env python3
 
-import locale  # noqa: E402
-locale.setlocale(locale.LC_ALL, '')  # noqa: E402
-from prompt_toolkit.styles import Style
-from prompt_toolkit import HTML, PromptSession
-from prompt_toolkit.patch_stdout import patch_stdout
-from prompt_toolkit.validation import Validator
-from prompt_toolkit.key_binding import KeyBindings
-from calculate_anything.preferences import Preferences
-from calculate_anything import logging
-from calculate_anything.lang import LanguageService
-from calculate_anything.query.handlers import MultiHandler
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,
     CalculatorQueryHandler, PercentagesQueryHandler
 )
+from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.lang import LanguageService
+from calculate_anything import logging
+from calculate_anything.preferences import Preferences
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.validation import Validator
+from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit import HTML, PromptSession
+from prompt_toolkit.styles import Style
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
 class SilentLogger:
-    """Define A stupid logger to make Calculate Anything shut up and don't print anything on prompt_toolkit"""
+    """Define A stupid logger to make Calculate Anything shut up and don't
+    print anything on prompt_toolkit"""
 
     def __init__(self):
         self.debug = lambda *args, **kwargs: None
@@ -119,7 +120,8 @@ class Program(Validator):
     def _process_results(self, results):
         pad = ' ' * 400
         results_strs = []
-        str_fmt = '<b><style bg="#22242e" fg="#7d4bc4">❯  {}{}</style></b>\n<style bg="#d1d1d1" >   ⮞ {}</style>'
+        str_fmt = '<b><style bg="#22242e" fg="#7d4bc4">'
+        '❯  {}{}</style></b>\n<style bg="#d1d1d1" >   ⮞ {}</style>'
         for result in results:
             results_strs.append(str_fmt.format(
                 result.name, pad, result.description))
@@ -142,7 +144,8 @@ class Program(Validator):
             mode = 'No mode selected'
         else:
             mode = keywords[key]['mode_description']
-        return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'.format(mode))
+        return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'
+                    .format(mode))
 
     def handle_c_a(self, event):
         pos = event.current_buffer.cursor_position
@@ -166,7 +169,8 @@ class Program(Validator):
             results = '  {} \n  {}'.format(
                 LanguageService().translate('no-result', 'misc'),
                 LanguageService().translate(
-                    'no-result-{}-description'.format(keywords[self._kw]['mode']), 'misc')
+                    'no-result-{}-description'
+                    .format(keywords[self._kw]['mode']), 'misc')
             )
         elif not self._results:
             results = '\n'

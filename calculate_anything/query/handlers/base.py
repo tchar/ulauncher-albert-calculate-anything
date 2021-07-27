@@ -1,5 +1,4 @@
 from functools import wraps
-from calculate_anything.utils.singleton import Singleton
 
 
 class QueryHandler:

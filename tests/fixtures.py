@@ -2,6 +2,7 @@ import pytest
 import os
 from tests.utils import random_str
 
+
 @pytest.fixture(scope='session')
 def log_filepath():
     rand_name = random_str(5)

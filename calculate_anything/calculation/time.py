@@ -13,7 +13,8 @@ __all__ = ['TimeCalculation',
 
 
 class TimeCalculation(_Calculation):
-    def __init__(self, value=None, reference_date=None, query='', error=None, order=0):
+    def __init__(self, value=None, reference_date=None,
+                 query='', error=None, order=0):
         super().__init__(value=value, query=query, error=error, order=order)
         self.reference_date = reference_date
 
@@ -87,7 +88,8 @@ class TimeCalculation(_Calculation):
 
 
 class LocationTimeCalculation(TimeCalculation):
-    def __init__(self, value=None, location=None, query='', error=None, order=-1):
+    def __init__(self, value=None, location=None,
+                 query='', error=None, order=-1):
         super().__init__(value=value, query=query, error=error, order=order)
         self.location = location
 
@@ -114,7 +116,7 @@ class LocationTimeCalculation(TimeCalculation):
         if country_code in FLAGS:
             icon = 'images/flags/{}'.format(FLAGS[country_code])
         else:
-            # Can't test this since we possible have all flags, leave it just in case
+            # Can't test this since we possible have all flags.
             icon = 'images/country.svg'  # pragma: no cover
 
         return QueryResult(
@@ -128,7 +130,8 @@ class LocationTimeCalculation(TimeCalculation):
 
 
 class TimedeltaCalculation(TimeCalculation):
-    def __init__(self, value=None, reference_date=None, target_date=None, query='', error=None, order=0):
+    def __init__(self, value=None, reference_date=None,
+                 target_date=None, query='', error=None, order=0):
         super().__init__(value=value, reference_date=reference_date,
                          query=query, error=error, order=order)
         self.target_date = target_date
@@ -142,7 +145,7 @@ class TimedeltaCalculation(TimeCalculation):
         else:
             sign = 1
 
-        years_diff = target_date.year - reference.year
+        dyears = target_date.year - reference.year
         old_value = target_date
         # Check if target date is february 29 before replacing years
         # If not reference is leap year move to March 1st
@@ -153,43 +156,43 @@ class TimedeltaCalculation(TimeCalculation):
             value = target_date.replace(year=reference.year)
         if value < reference:
             value = old_value
-            years_diff = 0
+            dyears = 0
         date_dt = value - reference
-        days_diff = date_dt.days
-        hours_diff, remainder = divmod(date_dt.seconds, 3600)
-        minutes_diff, seconds_diff = divmod(remainder, 60)
-        return sign, years_diff, days_diff, hours_diff, minutes_diff, seconds_diff
+        ddays = date_dt.days
+        dhours, remainder = divmod(date_dt.seconds, 3600)
+        dmins, dsecs = divmod(remainder, 60)
+        return sign, dyears, ddays, dhours, dmins, dsecs
 
     @TimeCalculation.Decorators.handle_error_results
     def to_query_result(self):
-        sign, years_diff, days_diff, hours_diff, minutes_diff, seconds_diff = self._calculate_diff()
+        sign, dyears, ddays, dhours, dmins, dsecs = self._calculate_diff()
 
         translator = LanguageService().get_translator('time')
         names = []
-        if years_diff > 0:
-            text = 'year' if years_diff == 1 else 'years'
+        if dyears > 0:
+            text = 'year' if dyears == 1 else 'years'
             text = translator(text)
-            name = '{} {}'.format(years_diff, text)
+            name = '{} {}'.format(dyears, text)
             names.append(name)
-        if days_diff > 0:
-            text = 'day' if days_diff == 1 else 'days'
+        if ddays > 0:
+            text = 'day' if ddays == 1 else 'days'
             text = translator(text)
-            name = '{} {}'.format(days_diff, text)
+            name = '{} {}'.format(ddays, text)
             names.append(name)
-        if hours_diff > 0:
-            text = 'hour' if hours_diff == 1 else 'hours'
+        if dhours > 0:
+            text = 'hour' if dhours == 1 else 'hours'
             text = translator(text)
-            name = '{} {}'.format(hours_diff, text)
+            name = '{} {}'.format(dhours, text)
             names.append(name)
-        if minutes_diff > 0:
-            text = 'minute' if minutes_diff == 1 else 'minutes'
+        if dmins > 0:
+            text = 'minute' if dmins == 1 else 'minutes'
             text = translator(text)
-            name = '{} {}'.format(minutes_diff, text)
+            name = '{} {}'.format(dmins, text)
             names.append(name)
-        if seconds_diff > 0:
-            text = 'second' if seconds_diff == 1 else 'seconds'
+        if dsecs > 0:
+            text = 'second' if dsecs == 1 else 'seconds'
             text = translator(text)
-            name = '{} {}'.format(seconds_diff, text)
+            name = '{} {}'.format(dsecs, text)
             names.append(name)
 
         names = names[:3]

@@ -10,7 +10,9 @@ from calculate_anything.currency.providers import (
 )
 from calculate_anything.currency.providers.base import _MockCurrencyProvider
 from calculate_anything import logging
-from calculate_anything.exceptions import CurrencyProviderException, CurrencyProviderRequestException
+from calculate_anything.exceptions import (
+    CurrencyProviderException, CurrencyProviderRequestException
+)
 
 
 __all__ = ['CombinedCurrencyProvider']
@@ -30,10 +32,6 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             self._free_providers[provider.__class__] = provider
         self._api_providers = OrderedDict()
         self._logger = logging.getLogger(__name__)
-
-    @property
-    def api_key_valid(self):
-        return True
 
     @property
     def api_key_valid(self):
@@ -63,23 +61,28 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         provider_name = provider_cls.__name__
         try:
             return provider.request_currencies(*currencies, force=force)
-        except (CurrencyProviderException, CurrencyProviderRequestException) as e:
+        except (CurrencyProviderException,
+                CurrencyProviderRequestException) as e:
             self._logger.exception(
-                'Got exception when requesting from provider {}: {}'.format(provider_name, e))
+                'Got exception when requesting from provider {}: {}'
+                .format(provider_name, e))
         except Exception as e:
             self._logger.exception(
-                'An unexpected exception occured when requesting from provider {}: {}'.format(provider_name, e))
+                'An unexpected exception occured when requesting '
+                'from provider {}: {}'.format(provider_name, e))
         return {}
 
     def _request_free(self, currencies, force):
         if not self._free_providers:
             return []
 
-        with ThreadPoolExecutor(max_workers=len(self._free_providers)) as executor:
+        max_workers = len(self._free_providers)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             tasks = []
             for provider_cls, provider in self._free_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_cls, provider, *currencies, force=force)
+                    self._thread_request, provider_cls,
+                    provider, *currencies, force=force)
                 tasks.append(task)
         return tasks
 
@@ -87,11 +90,13 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         if not self._api_providers:
             return []
 
-        with ThreadPoolExecutor(max_workers=len(self._api_providers)) as executor:
+        max_workers = len(self._api_providers)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             tasks = []
             for provider_cls, provider in self._api_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_cls, provider, *currencies, force=force)
+                    self._thread_request, provider_cls,
+                    provider, *currencies, force=force)
                 tasks.append(task)
         return tasks
 
@@ -114,8 +119,10 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 providers_currencies.update(result)
 
         self.had_error = (
-            all(map(lambda provider: provider.had_error, self._free_providers.values())) and
-            all(map(lambda provider: provider.had_error, self._api_providers.values()))
+            all(map(lambda provider: provider.had_error,
+                    self._free_providers.values())) and
+            all(map(lambda provider: provider.had_error,
+                    self._api_providers.values()))
         )
         if self.had_error:
             raise CurrencyProviderException(

@@ -2,7 +2,10 @@
 
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Container, Iterable, Iterator, List, Optional, Type, Union
+from typing import (
+    Any, Callable, Container, Iterator,
+    List, Optional, Type, Union
+)
 from types import ModuleType
 import importlib
 from calculate_anything import logging
@@ -31,7 +34,7 @@ def get_module(name: str) -> Union[None, ModuleType]:
 
 
 def is_types(*types: Type[Any]) -> Callable[[Any], bool]:
-    '''Check if a value is of type. Useful for maps and filters. 
+    '''Check if a value is of type. Useful for maps and filters.
 
     Args:
         types (Any): The type to check against.
@@ -44,7 +47,7 @@ def is_types(*types: Type[Any]) -> Callable[[Any], bool]:
 
 
 def is_not_types(*types: List[Type[Any]]) -> bool:
-    '''Check if a value is not of type. Useful for maps and filters. 
+    '''Check if a value is not of type. Useful for maps and filters.
 
     Args:
         types (Any): The type to check against.
@@ -58,7 +61,7 @@ def is_not_types(*types: List[Type[Any]]) -> bool:
 
 def get_or_default(value: Any, type: Type[Any], default: Any,
                    allowed_values: Optional[Container] = None) -> Any:
-    '''Return a value if it is of specified type and in allowed values 
+    '''Return a value if it is of specified type and in allowed values
 
     Args:
         value (Any): The value to check.
@@ -109,7 +112,7 @@ class StupidEval:
     def __init__(self, *args: Any, **kwargs: Any):
         self.operators = {}
 
-    @staticmethod
+    @ staticmethod
     def _try_parse(query, type):
         try:
             return type(query)
@@ -142,12 +145,13 @@ class StupidEval:
         raise MissingSimpleevalException
 
 
-@contextmanager
+@ contextmanager
 def safe_operation(message: str = '') -> Iterator[None]:
     '''Context manager for safe operations to catch any errors.
 
     Args:
-        message (str, optional): The message to log. If not provided no log is made.
+        message (str, optional): The message to log. If not provided no log is
+            made.
     '''
     logger = logging.getLogger(__name__)
     if message:
@@ -166,7 +170,7 @@ def safe_operation(message: str = '') -> Iterator[None]:
 def lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
     '''Method decorator for classes that use locks. The class should
     have a property called '_lock' and the lock should be a contextmanager.
-    (i.e threading.RLock). 
+    (i.e threading.RLock).
 
     Args:
         func (Callable): A method to decorate
@@ -174,7 +178,7 @@ def lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
     Returns:
         func (Callable): The method decorated with lock.
     '''
-    @wraps(func)
+    @ wraps(func)
     def _wrapper(self, *args, **kwargs):
         with self._lock:
             return func(self, *args, **kwargs)

@@ -121,11 +121,19 @@ class UnitsService(metaclass=Singleton):
 
         pint_parser = PintDefinitionParser(self._unit_registry)
         pint_parser.load_file(os.path.join(
-            MAIN_DIR, 'data/currency/definitions.txt'), translation_mode='units', is_currency=True)
+            MAIN_DIR, 'data/currency/definitions.txt'),
+            mode='units',
+            is_currency=True
+        )
         pint_parser.load_file(os.path.join(
-            MAIN_DIR, 'data/lang/currency.txt'), translation_mode='units', is_currency=True)
+            MAIN_DIR, 'data/lang/currency.txt'), mode='units',
+            is_currency=True
+        )
         pint_parser.load_file(os.path.join(
-            MAIN_DIR, 'data/lang/units.txt'), translation_mode='units', is_currency=False)
+            MAIN_DIR, 'data/lang/units.txt'),
+            mode='units',
+            is_currency=False
+        )
         self._base_currency = self._unit_registry.Quantity(1, 'currency_EUR')
         CurrencyService().remove_update_callback(self._update_callback)
         CurrencyService().add_update_callback(self._update_callback)

@@ -1,4 +1,4 @@
-# TODO: To be removed, replaced by CurrencyUnitsCalculation
+# # TODO: To be removed, replaced by CurrencyUnitsCalculation
 
 # import locale
 # from calculate_anything.calculation.base import _Calculation
@@ -7,7 +7,8 @@
 
 
 # class CurrencyCalculation(_Calculation):
-#     def __init__(self, value=None, error=None, order=0, rate=None, date=None, currency_from=None, currency_to=None):
+#     def __init__(self, value=None, error=None, order=0,
+#                  rate=None, date=None, currency_from=None, currency_to=None):
 #         super().__init__(value=value, error=error, order=order)
 #         self.rate = rate
 #         self.date = date

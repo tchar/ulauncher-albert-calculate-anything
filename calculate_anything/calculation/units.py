@@ -14,7 +14,10 @@ from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import multi_re
-from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS, UNIT_CURRENCY_RE
+from calculate_anything.constants import (
+    FLAGS, TIME_DATETIME_FORMAT_NUMBERS,
+    UNIT_CURRENCY_RE
+)
 
 
 __all__ = ['UnitsCalculation', 'CurrencyUnitsCalculation',
@@ -80,7 +83,7 @@ class UnitsCalculation(_Calculation):
             try:
                 name, description = self._format_babel()
                 use_translator = False
-            except Exception as e:
+            except Exception:
                 pass
 
         translator = LanguageService().get_translator('units')
@@ -100,7 +103,9 @@ class UnitsCalculation(_Calculation):
         if not self.value.dimensionless:
             dimensionality = str(self.value.dimensionality)
             dimensionality = re.sub(
-                r'\[(.*?)\]', lambda s: translator(s.group(0)[1:-1]), dimensionality)
+                r'\[(.*?)\]',
+                lambda s: translator(s.group(0)[1:-1]),
+                dimensionality)
         else:
             dimensionality = ''
 
@@ -150,7 +155,8 @@ class TemperatureUnitsCalculation(UnitsCalculation):
                 unit_name = str(self.value.units).replace(
                     'degree_', 'temperature-', 1).lower()
                 name = babel_units.format_unit(
-                    self.value.magnitude, unit_name, locale=_locale, format='#,##0.##;-#')
+                    self.value.magnitude, unit_name,
+                    locale=_locale, format='#,##0.##;-#')
                 parse_default = False
             except Exception:
                 pass
@@ -164,8 +170,9 @@ class TemperatureUnitsCalculation(UnitsCalculation):
 
 
 class CurrencyUnitsCalculation(UnitsCalculation):
-    def __init__(self, value=None, error=None,  query='', order=0,
-                 rate=None, unit_from=None, unit_to=None, update_timestamp=None):
+    def __init__(self, value=None, error=None,
+                 query='', order=0, rate=None,
+                 unit_from=None, unit_to=None, update_timestamp=None):
         super().__init__(value=value, error=error, query=query, order=order,
                          rate=rate, unit_from=unit_from, unit_to=unit_to)
         self.update_timestamp = update_timestamp

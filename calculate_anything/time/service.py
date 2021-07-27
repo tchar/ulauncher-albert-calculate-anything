@@ -23,7 +23,7 @@ class TimezoneService(metaclass=Singleton):
 
     def set_default_cities(self, default_cities):
         self._default_cities_search = default_cities
-    
+
     def parse_default_cities_str(self, default_cities_str, save=False):
         regex = re.compile(r'^(.*)\s+([a-z]{2,3})$', flags=re.IGNORECASE)
 

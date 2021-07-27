@@ -18,7 +18,7 @@ from calculate_anything import logging
 
 class LanguageService(metaclass=Singleton):
     '''A language service class which acts like a Singleton.
-    
+
     Attributes:
         lang (str): The language currently in use
     '''
@@ -71,13 +71,15 @@ class LanguageService(metaclass=Singleton):
                     self._data = json.loads(f.read())
             except Exception as e:
                 self._logger.exception(
-                    'Could not load language, falling back to en_US: {}: {}'.format(lang_filepath, e))
+                    'Could not load language, falling back to en_US: {}: {}'
+                    .format(lang_filepath, e))
                 fallback = True
 
         if fallback:
             if lang == 'en_US':
                 self._logger.error(
-                    'en_US does not exist, will not use any language aliases: {}'.format(lang_filepath))
+                    'en_US does not exist, will not use any language '
+                    'aliases: {}'.format(lang_filepath))
                 return
             return self.set('en_US')
 
@@ -92,7 +94,8 @@ class LanguageService(metaclass=Singleton):
 
         Args:
             word (str): A word/key to translate.
-            mode (str): A mode to use form the language file (i.e the dict key).
+            mode (str): A mode to use form the language file
+                (i.e the dict key).
         '''
         word = str(word)
         return self._data.get(mode, {}).get(word, word)
@@ -101,17 +104,20 @@ class LanguageService(metaclass=Singleton):
         '''Get a translator function with the provided mode.
 
         Args:
-            mode (str): A mode to use form the language file (i.e the dict key).
+            mode (str): A mode to use form the language file
+                (i.e the dict key).
 
         Returns:
-            callable: A translator callable which takes as input a word (str) and returns
-                the translated word (str) if there is any or the word itself.
+            callable: A translator callable which takes as input a word (str)
+                and returns the translated word (str) if there is any or the
+                word itself.
         '''
         def _translator(word):
             return self.translate(word, mode)
         return _translator
 
-    def add_translation(self, word: str, translated_word: str, mode: str) -> None:
+    def add_translation(self, word: str,
+                        translated_word: str, mode: str) -> None:
         '''Adds a word/key to the translations in runtime (only kept in memory).
 
         Args:
@@ -123,7 +129,7 @@ class LanguageService(metaclass=Singleton):
             self._data[mode] = {}
         self._data[mode][word] = translated_word
 
-    def get_translation_adder(self, mode: str) -> Callable[[str, str], None]:
+    def translation_adder(self, mode: str) -> Callable[[str, str], None]:
         '''Get a translator adder function with the provided mode.
 
         Args:
@@ -138,18 +144,20 @@ class LanguageService(metaclass=Singleton):
             self.add_translation(word, translated_word, mode)
         return _translation_adder
 
-    def replace_all(self, string: str, mode: str, ignorecase: bool = True) -> str:
-        '''Replaces all substrings in the provided string with the translated ones if any.
-
+    def replace_all(self, string: str, mode: str,
+                    ignorecase: bool = True) -> str:
+        '''Replaces all substrings in the provided string with the translated
+        ones if any.
 
         Args:
             string (str): A string to replace all substrings with translations.
-            mode (str): A mode to use form the language file (i.e the dict key).
+            mode (str): A mode to use form the language file
+                (i.e the dict key).
             ignorecase (bool, default True): ignore case when replacing.
 
         Returns:
-            str: The provided str with all substrings replaced with translations
-                (if any).
+            str: The provided str with all substrings replaced with
+                translations (if any).
         '''
         if mode not in self._data:
             return string
@@ -161,15 +169,17 @@ class LanguageService(metaclass=Singleton):
             sort=True
         )
 
-    def get_replacer(self, mode: str, ignorecase: bool = True) -> Callable[[str], str]:
+    def get_replacer(self, mode: str,
+                     ignorecase: bool = True) -> Callable[[str], str]:
         '''Get a translator replacer function with the provided mode.
 
         Args:
             mode (str): A mode to use (i.e the dict key).
 
         Returns:
-            callable: A translator replacer callable which takes as input a string
-                (str) and replaces any substring with the corresponding translation.
+            callable: A translator replacer callable which takes as input a
+                string  and replaces any substring with the corresponding
+                translation.
         '''
         def _replacer(string):
             return self.replace_all(string, mode, ignorecase)

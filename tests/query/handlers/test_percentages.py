@@ -2,7 +2,9 @@ import pytest
 from tests.utils import query_test_helper
 from calculate_anything.query.handlers import PercentagesQueryHandler
 from calculate_anything.lang import LanguageService
-from calculate_anything.exceptions import BooleanPercetageException, ZeroDivisionException
+from calculate_anything.exceptions import (
+    BooleanPercetageException, ZeroDivisionException
+)
 
 
 LanguageService().set('en_US')
@@ -45,7 +47,8 @@ test_spec_normal = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '4.48 + 0.175i',
-            'description': '(128 + 5i)% of 3.5 ({})'.format(tr_calc('result-complex').capitalize()),
+            'description': '(128 + 5i)% of 3.5 ({})'.format(
+                tr_calc('result-complex').capitalize()),
             'clipboard': '4.48 + 0.175i',
             'error': None,
             'order': 0,
@@ -167,7 +170,9 @@ test_spec_inverse = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '(43.397 - 4.23602i)%',
-            'description': '(1.41421 + 10i) is (43.397 - 4.23602i)% of (1 + 23.1407i) ({})'.format(tr_calc('result-complex').capitalize()),
+            'description': '(1.41421 + 10i) is '
+            '(43.397 - 4.23602i)% of (1 + 23.1407i) ({})'.format(
+                tr_calc('result-complex').capitalize()),
             'clipboard': '(43.397 - 4.23602i)%',
             'error': None,
             'order': 0,
@@ -314,7 +319,8 @@ test_spec_calc = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '132.48 + 10.35i',
-            'description': '(128 + 10i) + (3.5)% ({})'.format(tr_calc('result-complex').capitalize()),
+            'description': '(128 + 10i) + (3.5)% ({})'.format(
+                tr_calc('result-complex').capitalize()),
             'clipboard': '132.48 + 10.35i',
             'error': None,
             'order': 0,
@@ -335,7 +341,8 @@ test_spec_calc = [{
         'query_result': {
             'icon': 'images/icon.svg',
             'name': '5.07071i',
-            'description': '(5i) + (1.41421)% ({})'.format(tr_calc('result-imaginary').capitalize()),
+            'description': '(5i) + (1.41421)% ({})'.format(
+                tr_calc('result-imaginary').capitalize()),
             'clipboard': '5.07071i',
             'error': None,
             'order': 0,
@@ -451,7 +458,7 @@ test_spec_calc = [{
     # Unmatched paren (for custom parsing)
     'query': '= 100 + ((100)%',
     'results': [],
-},]
+}, ]
 
 
 @pytest.mark.parametrize('test_spec', test_spec_calc)
