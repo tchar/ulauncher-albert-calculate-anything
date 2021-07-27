@@ -173,9 +173,11 @@ def test_stupid_eval():
     stupid_eval = utils_misc.StupidEval()
     for i in range(10):
         assert stupid_eval.eval(str(i)) == i
+        assert stupid_eval.eval(str(i + 0.1)) == pytest.approx(i + 0.1)
+        assert stupid_eval.eval(str(i + 0.5j)) == pytest.approx(i + 0.5j)
 
     with_exception = [
-        '1.1', 'some-text', 'True', '1 + 1',
+        'some-text', 'True', '1 + 1',
         True, 1, 1.2, 1 + 2j, utils_misc.StupidEval,
         stupid_eval, None
     ]
