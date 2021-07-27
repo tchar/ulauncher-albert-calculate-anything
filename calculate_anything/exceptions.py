@@ -1,6 +1,22 @@
-# Exceptions for Currency conversion
+'''All exceptions found in this module
+
+All exceptions are subclass of ExtendedException
+'''
+
+from typing import Any, Optional
+
+
 class ExtendedException(Exception):
-    def __init__(self, message='', extra=None):
+    '''An extended Exception which apart from message
+    holds extra information
+    '''
+
+    def __init__(self, message='', extra: Optional[Any] = None):
+        '''Args:
+            message (str): The message for this exception
+            extra (any, optional): Any extra information to be kept
+                and used later
+        '''
         super().__init__(message)
         self.extra = extra
 
