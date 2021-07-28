@@ -26,6 +26,7 @@ class CurrencyException(ExtendedException):
 
 
 class CurrencyProviderException(CurrencyException):
+    order = -60
     pass
 
 
@@ -43,18 +44,22 @@ class CalculatorException(ExtendedException):
 
 
 class ZeroDivisionException(CalculatorException):
+    order = -70
     pass
 
 
 class BooleanPercetageException(CalculatorException):
+    order = -20
     pass
 
 
 class WrongBaseException(CalculatorException):
+    order = -40
     pass
 
 
 class BaseFloatingPointException(CalculatorException):
+    order = -30
     pass
 
 # Exceptions for boolean representation in calculator
@@ -65,6 +70,7 @@ class BooleanException(ExtendedException):
 
 
 class BooleanComparisonException(BooleanException):
+    order = -10
     pass
 
 # Exceptions for Time conversion
@@ -75,10 +81,12 @@ class TimeException(ExtendedException):
 
 
 class DateOverflowException(TimeException):
+    order = -50
     pass
 
 
 class MisparsedDateTimeException(TimeException):
+    order = -80
     pass
 
 # Exceptions for missing modules
@@ -88,13 +96,16 @@ class MissingModuleException(ExtendedException):
     pass
 
 
-class MissingSimpleevalException(MissingModuleException):
+class MissingPintException(MissingModuleException):
+    order = -1020
     pass
 
 
-class MissingPintException(MissingModuleException):
+class MissingSimpleevalException(MissingModuleException):
+    order = -1010
     pass
 
 
 class MissingParsedatetimeException(MissingModuleException):
+    order = -1000
     pass

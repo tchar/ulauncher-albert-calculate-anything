@@ -44,22 +44,19 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 error=amount1.error,
                 amounts=(amount1, amount2),
                 query=query,
-                order=amount1.order
             )
         if amount2.error:
             return NormalPercentageCalculation(
                 error=amount2.error,
                 amounts=(amount1, amount2),
                 query=query,
-                order=amount2.order
             )
 
         if amount1.value_type == Calculation.VALUE_BOOLEAN or \
                 amount2.value_type == Calculation.VALUE_BOOLEAN:
             return PercentageCalculation(
-                error=BooleanPercetageException,
+                error=BooleanPercetageException(),
                 query=query,
-                order=-20
             )
 
         return amount1, amount2
@@ -127,8 +124,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return InversePercentageCalculation(
                 amounts=(percentage_from, percentage_to),
                 query=query,
-                error=ZeroDivisionException,
-                order=-70
+                error=ZeroDivisionException(),
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover

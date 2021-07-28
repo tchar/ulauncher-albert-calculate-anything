@@ -149,8 +149,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return BooleanCalculation(
                 value=None,
                 query=query,
-                error=BooleanComparisonException,
-                order=-10
+                error=BooleanComparisonException(),
             )
 
         return BooleanCalculation(value=result, query=query, order=0)
@@ -191,15 +190,13 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         except MissingSimpleevalException:
             item = Calculation(
                 query=query,
-                error=MissingSimpleevalException,
-                order=-1010
+                error=MissingSimpleevalException(),
             )
             return [item]
         except ZeroDivisionError:
             item = Calculation(
                 query=query,
-                error=ZeroDivisionException,
-                order=-70
+                error=ZeroDivisionException(),
             )
             return [item]
         except (SyntaxError, TypeError):

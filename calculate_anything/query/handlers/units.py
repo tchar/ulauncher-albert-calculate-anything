@@ -40,7 +40,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             any(map(lambda d: '[currency]' in d, unit_dimensionalities))
         )
         if currency_provider_had_error:
-            item = UnitsCalculation(error=CurrencyProviderException, order=-60)
+            item = UnitsCalculation(
+                error=CurrencyProviderException(),
+            )
             return [item]
         return []
 
@@ -182,8 +184,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             return None
         if pint is None:
             item = UnitsCalculation(
-                error=MissingPintException,
-                order=-1020
+                error=MissingPintException(),
             )
             return [item]
         if not UnitsService().running:

@@ -10,6 +10,35 @@ from calculate_anything.utils import multi_re
 __all__ = ['Calculation', 'BooleanCalculation']
 
 
+def get_value_type(value):
+    if isinstance(value, complex):
+        value = complex(
+            Calculation.fix_number_precision(value.real),
+            Calculation.fix_number_precision(value.imag)
+        )
+        value = value.real if value.imag == 0 else value
+
+    if isinstance(value, float):
+        value = Calculation.fix_number_precision(value)
+
+    if value is None:
+        return value, Calculation.VALUE_NONE
+    if isinstance(value, bool):
+        return value, Calculation.VALUE_BOOLEAN
+    if isinstance(value, float):
+        return value, Calculation.VALUE_FLOAT
+    if isinstance(value, int):
+        return value, Calculation.VALUE_INT
+    if isinstance(value, str):
+        return value, Calculation.VALUE_STRING
+    if isinstance(value, complex) and value.real == 0:
+        return value, Calculation.VALUE_IMAGINARY
+    if isinstance(value, complex):
+        return value, Calculation.VALUE_COMPLEX
+
+    return value, Calculation.VALUE_UNKNOWN
+
+
 class Calculation(_Calculation):
     VALUE_UNKNOWN = -1
     VALUE_NONE = 0
@@ -21,36 +50,9 @@ class Calculation(_Calculation):
     VALUE_STRING = 7
 
     def __init__(self, value=None, query='', error=None, order=0):
-        if isinstance(value, complex):
-            value = complex(
-                Calculation.fix_number_precision(value.real),
-                Calculation.fix_number_precision(value.imag)
-            )
-            if value.imag == 0:
-                value = value.real
-
-        if isinstance(value, float):
-            value = Calculation.fix_number_precision(value)
-
+        value, value_type = get_value_type(value)
+        self.value_type = value_type
         super().__init__(value=value, query=query, error=error, order=order)
-
-        if value is None:
-            self.value_type = Calculation.VALUE_NONE
-        elif isinstance(value, bool):
-            self.value_type = Calculation.VALUE_BOOLEAN
-        elif isinstance(value, float):
-            self.value_type = Calculation.VALUE_FLOAT
-        elif isinstance(value, int):
-            self.value_type = Calculation.VALUE_INT
-        elif isinstance(value, str):
-            self.value_type = Calculation.VALUE_STRING
-        elif isinstance(value, complex):
-            if self.value.real == 0:
-                self.value_type = Calculation.VALUE_IMAGINARY
-            else:
-                self.value_type = Calculation.VALUE_COMPLEX
-        else:
-            self.value_type = Calculation.VALUE_UNKNOWN
 
     @staticmethod
     def fix_number_precision(number):

@@ -1,7 +1,5 @@
 import os
 import shutil
-from datetime import datetime
-import json
 from threading import RLock
 try:
     import sqlite3

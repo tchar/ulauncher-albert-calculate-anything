@@ -120,19 +120,11 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
         try:
             expr_dec, operators, expr_parsed = self._parse_expression(query)
-        except WrongBaseException:
-            item = BaseNCalculation(
-                error=WrongBaseException,
-                query=original_query,
-                order=-40
-            )
+        except WrongBaseException as e:
+            item = BaseNCalculation(error=e, query=original_query)
             return [item]
-        except BaseFloatingPointException:
-            item = BaseNCalculation(
-                error=BaseFloatingPointException,
-                query=original_query,
-                order=-30
-            )
+        except BaseFloatingPointException as e:
+            item = BaseNCalculation(error=e, query=original_query)
             return [item]
         except Exception as e:
             self._logger.exception(
@@ -145,16 +137,14 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             results = [self._simple_eval.eval(exp) for exp in expr_dec]
         except MissingSimpleevalException:
             item = BaseNCalculation(
-                error=MissingSimpleevalException,
+                error=MissingSimpleevalException(),
                 query=original_query,
-                order=-1010
             )
             return [item]
         except ZeroDivisionError:
             item = BaseNCalculation(
-                error=ZeroDivisionException,
+                error=ZeroDivisionException(),
                 query=original_query,
-                order=-70
             )
             return [item]
         except Exception:
@@ -165,10 +155,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         elif len(results) == 1:
             result = results[0]
             if not is_integer(result):
-                item = BaseNCalculation(
-                    error=BaseFloatingPointException,
-                    order=0
-                )
+                item = BaseNCalculation(error=BaseFloatingPointException())
             else:
                 item = BaseNCalculation(
                     value=results[0],

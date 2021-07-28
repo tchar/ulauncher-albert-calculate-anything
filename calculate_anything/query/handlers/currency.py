@@ -61,7 +61,7 @@
 
 #         if service.provider_had_error:
 #             result = CurrencyCalculation(
-#                 error=CurrencyProviderException, order=-1)
+#                 error=CurrencyProviderException)
 #             return [result]
 
 #         if currency_from not in rates:

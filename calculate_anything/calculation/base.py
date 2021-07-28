@@ -5,96 +5,94 @@ from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import (
     BaseFloatingPointException, BooleanComparisonException,
-    CurrencyProviderException, DateOverflowException,
+    CurrencyProviderException, DateOverflowException, ExtendedException,
     MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException,
     BooleanPercetageException, MissingPintException
 )
 
-# TODO: Fix this mess
 
-
-def missing_parsedatetime_query_result():
+def missing_parsedatetime_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/time.svg',
         name=translator('missing-parsedatetime-error'),
         description=translator('missing-parsedatetime-error-description'),
         clipboard='pip install parsedatetime',
-        error=MissingParsedatetimeException,
-        order=-1000
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def missing_simpleeval_query_result():
+def missing_simpleeval_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('missing-simpleeval-error'),
         description=translator('missing-simpleeval-error-description'),
         clipboard='pip install simpleeval',
-        error=MissingSimpleevalException,
-        order=-1010
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def missing_pint_error_query_result():
+def missing_pint_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/convert.svg',
         name=translator('missing-pint-error'),
         description=translator('missing-pint-error-description'),
         clipboard='pip install Pint',
-        error=MissingPintException,
-        order=-1020
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def boolean_comparison_error_query_result():
+def boolean_comparison_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('boolean-comparison-error'),
         description=translator('boolean-comparison-error-description'),
         clipboard='',
-        error=BooleanComparisonException,
-        order=-10
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def boolean_percentage_error_query_result():
+def boolean_percentage_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('boolean-percentage-error'),
         description=translator('boolean-percentage-error-description'),
         clipboard='',
-        error=BooleanPercetageException,
-        order=-20
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def base_floating_point_exception_query_result():
+def base_floating_point_exception_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('base-floating-error'),
         description=translator('base-floating-error-description'),
         clipboard='',
-        error=BaseFloatingPointException,
-        order=-30
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def wrong_base_exception_query_result():
+def wrong_base_exception_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('wrong-base-error'),
         description=translator('wrong-base-error-description'),
         clipboard='',
-        error=WrongBaseException,
-        order=-40
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
@@ -105,32 +103,32 @@ def date_overflow_error_query_result(calculation):
         name=translator('date-overflow'),
         description=translator('date-overflow-description'),
         clipboard='',
-        error=DateOverflowException,
-        order=-50
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def currency_provider_error_query_result():
+def currency_provider_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('currency-provider-error'),
         description=translator('currency-provider-error-description'),
         clipboard='',
-        error=CurrencyProviderException,
-        order=-60
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
-def zero_division_error_query_result():
+def zero_division_error_query_result(calculation):
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon='images/icon.svg',
         name=translator('zero-division-error'),
         description=translator('zero-division-error-description'),
         clipboard='',
-        error=ZeroDivisionException,
-        order=-70
+        error=calculation.error,
+        order=calculation.error.order
     )
 
 
@@ -146,9 +144,24 @@ def misparsed_time_exception(calculation):
         name=name,
         description=description,
         clipboard='',
-        error=MisparsedDateTimeException,
-        order=-80
+        error=calculation.error,
+        order=calculation.error.order
     )
+
+
+_HANDLERS = {
+    MissingPintException: missing_pint_error_query_result,
+    MissingSimpleevalException: missing_simpleeval_query_result,
+    MissingParsedatetimeException: missing_parsedatetime_query_result,
+    ZeroDivisionException: zero_division_error_query_result,
+    DateOverflowException: date_overflow_error_query_result,
+    MisparsedDateTimeException: misparsed_time_exception,
+    CurrencyProviderException: currency_provider_error_query_result,
+    BooleanComparisonException: boolean_comparison_error_query_result,
+    BooleanPercetageException: boolean_percentage_error_query_result,
+    WrongBaseException: wrong_base_exception_query_result,
+    BaseFloatingPointException: base_floating_point_exception_query_result
+}
 
 
 class _Calculation:
@@ -156,28 +169,8 @@ class _Calculation:
         def handle_error_results(func):
             @wraps(func)
             def _wrapper(self, *args, **kwargs):
-                if self.is_error(MissingPintException):
-                    return missing_pint_error_query_result()
-                if self.is_error(MissingSimpleevalException):
-                    return missing_simpleeval_query_result()
-                if self.is_error(MissingParsedatetimeException):
-                    return missing_parsedatetime_query_result()
-                if self.is_error(ZeroDivisionException):
-                    return zero_division_error_query_result()
-                if self.is_error(DateOverflowException):
-                    return date_overflow_error_query_result(self)
-                if isinstance(self.error, MisparsedDateTimeException):
-                    return misparsed_time_exception(self)
-                if self.is_error(CurrencyProviderException):
-                    return currency_provider_error_query_result()
-                if self.is_error(BooleanComparisonException):
-                    return boolean_comparison_error_query_result()
-                if self.is_error(BooleanPercetageException):
-                    return boolean_percentage_error_query_result()
-                if self.is_error(WrongBaseException):
-                    return wrong_base_exception_query_result()
-                if self.is_error(BaseFloatingPointException):
-                    return base_floating_point_exception_query_result()
+                if isinstance(self.error, ExtendedException):
+                    return _HANDLERS[self.error.__class__](self)
                 if self.is_error():
                     self._logger.exception(  # pragma: no cover (just in case)
                         'Uknown error type: {}'.format(self.error))
@@ -185,11 +178,11 @@ class _Calculation:
                 return func(self, *args, **kwargs)
             return _wrapper
 
-    def __init__(self, value=None, query='', error=None, order=-1):
+    def __init__(self, value=None, query='', error=None, order=0):
         self.value = value
         self.query = query
         self.error = error
-        self.order = order
+        self.order = order if not error else error.order
         self._logger = logging.getLogger(__name__)
 
     def is_error(self, _type=None):
