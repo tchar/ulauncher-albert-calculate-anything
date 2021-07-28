@@ -18,24 +18,10 @@ import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
-class SilentLogger:
-    """Define A stupid logger to make Calculate Anything shut up and don't
-    print anything on prompt_toolkit"""
-
-    def __init__(self):
-        self.debug = lambda *args, **kwargs: None
-        self.info = lambda *args, **kwargs: None
-        self.warning = lambda *args, **kwargs: None
-        self.error = lambda *args, **kwargs: None
-        self.exception = lambda *args, **kwargs: None
-
-    def getLogger(self, _):
-        return self
-
-
 # Setup Calculate Anything (Order is important)
-# Uncomment this line to get log messages (use patch stdout in such case)
-logging.set_logging(SilentLogger())
+# Comment this line to get log messages (use patch stdout in such case)
+logging.disable_file_handler()
+logging.disable_stdout_handler()
 
 # Set the language
 preferences = Preferences()
@@ -120,8 +106,8 @@ class Program(Validator):
     def _process_results(self, results):
         pad = ' ' * 400
         results_strs = []
-        str_fmt = '<b><style bg="#22242e" fg="#7d4bc4">'
-        '❯  {}{}</style></b>\n<style bg="#d1d1d1" >   ⮞ {}</style>'
+        str_fmt = ('<b><style bg="#22242e" fg="#7d4bc4">❯  {}{}</style></b>\n'
+                   '<style bg="#d1d1d1" >   ⮞ {}</style>')
         for result in results:
             results_strs.append(str_fmt.format(
                 result.name, pad, result.description))
