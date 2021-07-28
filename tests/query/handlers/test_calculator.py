@@ -44,7 +44,7 @@ test_spec_calculator = [{
             'query': '(1 + 2) / (1 - 1)',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -52,7 +52,7 @@ test_spec_calculator = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -130,7 +130,7 @@ test_spec_calculator = [{
             'value': None,
             'query': '1 + 1j > 0.5 + 2j',
             'error': BooleanComparisonException,
-            'order': -10
+            'order': BooleanComparisonException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -138,7 +138,7 @@ test_spec_calculator = [{
             'description': tr_err('boolean-comparison-error-description'),
             'clipboard': '',
             'error': BooleanComparisonException,
-            'order': -10,
+            'order': BooleanComparisonException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -250,7 +250,7 @@ test_spec_missing_simpleeval = [{
             'query': '1245 + sqrt(2)',
             'value': None,
             'error': MissingSimpleevalException,
-            'order': -1010
+            'order': MissingSimpleevalException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -258,7 +258,7 @@ test_spec_missing_simpleeval = [{
             'description': tr_err('missing-simpleeval-error-description'),
             'clipboard': 'pip install simpleeval',
             'error': MissingSimpleevalException,
-            'order': -1010,
+            'order': MissingSimpleevalException.order,
             'value': None,
             'value_type': type(None)
         }

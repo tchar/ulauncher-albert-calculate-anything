@@ -65,7 +65,7 @@ test_spec_normal = [{
             'query': '1231 / (1-1) % of 2.477',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -73,7 +73,7 @@ test_spec_normal = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -86,7 +86,7 @@ test_spec_normal = [{
             'query': '10 = 10% of 2',
             'value': None,
             'error': BooleanPercetageException,
-            'order': -20
+            'order': BooleanPercetageException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -94,7 +94,7 @@ test_spec_normal = [{
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
             'error': BooleanPercetageException,
-            'order': -20,
+            'order': BooleanPercetageException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -107,7 +107,7 @@ test_spec_normal = [{
             'query': '1=0 % of 0',
             'value': None,
             'error': BooleanPercetageException,
-            'order': -20
+            'order': BooleanPercetageException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -115,7 +115,7 @@ test_spec_normal = [{
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
             'error': BooleanPercetageException,
-            'order': -20,
+            'order': BooleanPercetageException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -191,7 +191,7 @@ test_spec_inverse = [{
             'query': '1 /0 as % of  10',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -199,7 +199,7 @@ test_spec_inverse = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -212,7 +212,7 @@ test_spec_inverse = [{
             'query': '1 =1 as % of  2',
             'value': None,
             'error': BooleanPercetageException,
-            'order': -20
+            'order': BooleanPercetageException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -220,7 +220,7 @@ test_spec_inverse = [{
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
             'error': BooleanPercetageException,
-            'order': -20,
+            'order': BooleanPercetageException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -233,7 +233,7 @@ test_spec_inverse = [{
             'query': '1 / 0 as % of  1 = 1',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -241,7 +241,7 @@ test_spec_inverse = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -254,7 +254,7 @@ test_spec_inverse = [{
             'query': '2.25 as % of 0',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -262,7 +262,7 @@ test_spec_inverse = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -361,7 +361,7 @@ test_spec_calc = [{
             'query': '10 + 0.5/0 + 2%',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -369,7 +369,7 @@ test_spec_calc = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -382,7 +382,7 @@ test_spec_calc = [{
             'query': '10 = 10 + 2%',
             'value': None,
             'error': BooleanPercetageException,
-            'order': -20
+            'order': BooleanPercetageException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -390,7 +390,7 @@ test_spec_calc = [{
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
             'error': BooleanPercetageException,
-            'order': -20,
+            'order': BooleanPercetageException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -403,7 +403,7 @@ test_spec_calc = [{
             'query': '1/0 + 2=2%',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -411,7 +411,7 @@ test_spec_calc = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -424,7 +424,7 @@ test_spec_calc = [{
             'query': '1 + 2/0%',
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -432,7 +432,7 @@ test_spec_calc = [{
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }

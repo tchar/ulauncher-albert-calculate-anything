@@ -187,11 +187,11 @@ def get_resulttd(target: timedelta, query: str, order: int):
 
 def get_resultexc(query, exception, name_post='', desc_post=''):
     if exception == DateOverflowException:
-        order = -50
+        order = DateOverflowException.order
         name_key = 'date-overflow'
         desc_key = 'date-overflow-description'
     elif exception == MisparsedDateTimeException:
-        order = -80
+        order = MisparsedDateTimeException.order
         name_key = 'misparsed-datetime'
         desc_key = 'misparsed-datetime-description'
 
@@ -492,7 +492,7 @@ test_spec_parsedatetime_missing = [{
             'value': None,
             'query': '',
             'error': MissingParsedatetimeException,
-            'order': -1000
+            'order': MissingParsedatetimeException.order
         },
         'query_result': {
             'icon': 'images/time.svg',
@@ -502,7 +502,7 @@ test_spec_parsedatetime_missing = [{
             'error': MissingParsedatetimeException,
             'value': None,
             'value_type': type(None),
-            'order': -1000
+            'order': MissingParsedatetimeException.order
         }
     }]
 }]

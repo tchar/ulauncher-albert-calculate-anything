@@ -339,7 +339,7 @@ test_spec_missing_pint = [{
             'query': '',
             'value': None,
             'error': MissingPintException,
-            'order': -1020
+            'order': MissingPintException.order
         },
         'query_result': {
             'icon': 'images/convert.svg',
@@ -347,7 +347,7 @@ test_spec_missing_pint = [{
             'description': tr_err('missing-pint-error-description'),
             'clipboard': 'pip install Pint',
             'error': MissingPintException,
-            'order': -1020,
+            'order': MissingPintException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -375,7 +375,7 @@ test_spec_provider_had_error = [{
             'query': '',
             'value': None,
             'error': CurrencyProviderException,
-            'order': -60
+            'order': CurrencyProviderException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -383,7 +383,7 @@ test_spec_provider_had_error = [{
             'description': tr_err('currency-provider-error-description'),
             'clipboard': '',
             'error': CurrencyProviderException,
-            'order': -60,
+            'order': CurrencyProviderException.order,
             'value': None,
             'value_type': type(None)
         }

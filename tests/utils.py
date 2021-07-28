@@ -213,7 +213,7 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
         assert item['result']['value'] == result.value
         assert item['result']['query'] == result.query
         assert (
-            item['result']['error'] == result.error or
+            item['result']['error'] is None or
             isinstance(result.error, item['result']['error'])
         )
         assert item['result']['order'] == result.order

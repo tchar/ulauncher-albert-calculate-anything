@@ -7,6 +7,7 @@ from typing import Any, Optional
 
 
 class ExtendedException(Exception):
+    order = -10
     '''An extended Exception which apart from message
     holds extra information
     '''
@@ -22,11 +23,12 @@ class ExtendedException(Exception):
 
 
 class CurrencyException(ExtendedException):
+    order = -100
     pass
 
 
 class CurrencyProviderException(CurrencyException):
-    order = -60
+    order = -110
     pass
 
 
@@ -34,78 +36,76 @@ class CurrencyProviderException(CurrencyException):
 
 
 class UnitException(ExtendedException):
+    order = -200
     pass
 
 # Calculator exceptions
 
 
 class CalculatorException(ExtendedException):
+    order = -300
     pass
 
 
 class ZeroDivisionException(CalculatorException):
-    order = -70
+    order = -310
     pass
 
 
 class BooleanPercetageException(CalculatorException):
-    order = -20
+    order = -320
     pass
 
 
 class WrongBaseException(CalculatorException):
-    order = -40
+    order = -330
     pass
 
 
 class BaseFloatingPointException(CalculatorException):
-    order = -30
-    pass
-
-# Exceptions for boolean representation in calculator
-
-
-class BooleanException(ExtendedException):
+    order = -340
     pass
 
 
-class BooleanComparisonException(BooleanException):
-    order = -10
+class BooleanComparisonException(CalculatorException):
+    order = -350
     pass
 
 # Exceptions for Time conversion
 
 
 class TimeException(ExtendedException):
+    order = -400
     pass
 
 
 class DateOverflowException(TimeException):
-    order = -50
+    order = -410
     pass
 
 
 class MisparsedDateTimeException(TimeException):
-    order = -80
+    order = -420
     pass
 
 # Exceptions for missing modules
 
 
 class MissingModuleException(ExtendedException):
+    order = -1000
     pass
 
 
 class MissingPintException(MissingModuleException):
-    order = -1020
+    order = -1100
     pass
 
 
 class MissingSimpleevalException(MissingModuleException):
-    order = -1010
+    order = -1200
     pass
 
 
 class MissingParsedatetimeException(MissingModuleException):
-    order = -1000
+    order = -1300
     pass

@@ -111,7 +111,7 @@ def result_for_zero_division_exc(query):
             'query': query,
             'value': None,
             'error': ZeroDivisionException,
-            'order': -70
+            'order': ZeroDivisionException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -119,7 +119,7 @@ def result_for_zero_division_exc(query):
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
             'error': ZeroDivisionException,
-            'order': -70,
+            'order': ZeroDivisionException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -132,7 +132,7 @@ def result_for_wrong_base_exc(query):
             'query': query,
             'value': None,
             'error': WrongBaseException,
-            'order': -40
+            'order': WrongBaseException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -140,7 +140,7 @@ def result_for_wrong_base_exc(query):
             'description': tr_err('wrong-base-error-description'),
             'clipboard': '',
             'error': WrongBaseException,
-            'order': -40,
+            'order': WrongBaseException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -153,7 +153,7 @@ def result_for_base_floating_point_exc(query):
             'query': query,
             'value': None,
             'error': BaseFloatingPointException,
-            'order': -30
+            'order': BaseFloatingPointException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -161,7 +161,7 @@ def result_for_base_floating_point_exc(query):
             'description': tr_err('base-floating-error-description'),
             'clipboard': '',
             'error': BaseFloatingPointException,
-            'order': -30,
+            'order': BaseFloatingPointException.order,
             'value': None,
             'value_type': type(None)
         }
@@ -174,7 +174,7 @@ def missing_simpleeval_result(query):
             'query': query,
             'value': None,
             'error': MissingSimpleevalException,
-            'order': -1010
+            'order': MissingSimpleevalException.order
         },
         'query_result': {
             'icon': 'images/icon.svg',
@@ -182,7 +182,7 @@ def missing_simpleeval_result(query):
             'description': tr_err('missing-simpleeval-error-description'),
             'clipboard': 'pip install simpleeval',
             'error': MissingSimpleevalException,
-            'order': -1010,
+            'order': MissingSimpleevalException.order,
             'value': None,
             'value_type': type(None)
         }
