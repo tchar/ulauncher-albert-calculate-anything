@@ -48,10 +48,10 @@ Optional Dependencies: [babel](https://github.com/python-babel/babel). Installin
 
 ## Install for Ulauncher
 
-Thus extension depends on [requests](https://github.com/psf/), [pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
+Thus extension depends on [Pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
 ```bash
 # You probably have some of them already installed
-pip install requests pint simpleeval parsedatetime pytz
+pip install Pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
 pip install babel
@@ -66,7 +66,7 @@ Similarly to `Ulauncher` the same dependencies are are required.
 To install the extension for Albert run
 ```bash
 # You probably have some of them already installed
-pip install requests pint simpleeval parsedatetime pytz
+pip install Pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
 pip install babel
