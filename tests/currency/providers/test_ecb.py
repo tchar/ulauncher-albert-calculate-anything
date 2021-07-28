@@ -1,35 +1,16 @@
+import pytest
+from calculate_anything.currency.providers import ECBCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
 from datetime import datetime
-
-import pytest
-# import pytest
 from tests.utils import currency_data, expected_currencies
 
 
-def xmldata(rates, time=datetime.today().strftime('%Y-%m-%d')):
-    rates = ((k, v) for k, v in rates.items() if k != 'EUR')
-    rates = ['<Cube currency="{}" rate="{}"/>'.format(c, r) for c, r in rates]
-    rates = '\n'.join(rates)
-
-    return '''
-    <gesmes:Envelope xmlns:gesmes="http://www.gesmes.org/xml/2002-08-01"
-        xmlns="http://www.ecb.int/vocabulary/2002-08-01/eurofxref">
-        <gesmes:subject>Reference rates</gesmes:subject>
-    <gesmes:Sender>
-        <gesmes:name>European Central Bank</gesmes:name>
-    </gesmes:Sender>
-    <Cube>
-        <Cube time="{}">
-            {}
-        </Cube>
-    </Cube>
-    </gesmes:Envelope>
-    '''.format(time, rates)
-
-
-def test_normal(mock_ecb):
+def test_normal(mock_currency_provider, ecb_data):
+    cls = ECBCurrencyProvider
     rates = currency_data()['rates']
-    with mock_ecb(data=xmldata(rates)) as ecb:
+    data = ecb_data(rates)
+
+    with mock_currency_provider(cls, data, use_json=False) as ecb:
         currencies = ecb.request_currencies()
         timestamp = datetime.today().replace(hour=0, minute=0,
                                              second=0, microsecond=0)
@@ -38,21 +19,25 @@ def test_normal(mock_ecb):
         assert ecb.had_error is False
 
 
-def test_malformed_time(mock_ecb):
+def test_malformed_time(mock_currency_provider, ecb_data):
+    cls = ECBCurrencyProvider
     rates = currency_data()['rates']
-    with mock_ecb(data=xmldata(rates, 'Some time')) as ecb:
+    data = ecb_data(rates, 'Some time')
+    with mock_currency_provider(cls, data, use_json=False) as ecb:
         currencies = ecb.request_currencies()
         timestamp = datetime.now().timestamp()
         assert currencies == expected_currencies(timestamp=timestamp)
         assert ecb.had_error is False
 
 
-def test_malformed_partial_data(mock_ecb):
+def test_malformed_partial_data(mock_currency_provider, ecb_data):
+    cls = ECBCurrencyProvider
     rates = currency_data()['rates']
     rates = rates.copy()
     rates['USD'] = 'Some invalid rate'
+    data = ecb_data(rates)
 
-    with mock_ecb(data=xmldata(rates)) as ecb:
+    with mock_currency_provider(cls, data, use_json=False) as ecb:
         currencies = ecb.request_currencies()
         timestamp = datetime.today().replace(hour=0, minute=0,
                                              second=0, microsecond=0)
@@ -63,8 +48,10 @@ def test_malformed_partial_data(mock_ecb):
 
 
 @pytest.mark.parametrize('status_code', (300, 400, 500))
-def test_response_code(mock_ecb, status_code):
-    with mock_ecb(None, status=status_code) as ecb:
+def test_response_code(mock_currency_provider, status_code):
+    cls = ECBCurrencyProvider
+    with mock_currency_provider(cls, None, status=status_code,
+                                use_json=False) as ecb:
         with pytest.raises(CurrencyProviderException) as excinfo:
             ecb.request_currencies()
 
@@ -73,8 +60,10 @@ def test_response_code(mock_ecb, status_code):
         assert ecb.had_error is True
 
 
-def test_no_response(mock_ecb):
-    with mock_ecb(None, respond=False) as ecb:
+def test_no_response(mock_currency_provider):
+    cls = ECBCurrencyProvider
+    with mock_currency_provider(cls, None, respond=False,
+                                use_json=False) as ecb:
         with pytest.raises(CurrencyProviderException) as excinfo:
             ecb.request_currencies()
 
@@ -82,7 +71,8 @@ def test_no_response(mock_ecb):
         assert ecb.had_error is True
 
 
-def test_no_xml_children(mock_ecb):
+def test_no_xml_children(mock_currency_provider):
+    cls = ECBCurrencyProvider
     data = '''
     <gesmes:Envelope xmlns:gesmes="http://www.gesmes.org/xml/2002-08-01"
         xmlns="http://www.ecb.int/vocabulary/2002-08-01/eurofxref">
@@ -95,7 +85,7 @@ def test_no_xml_children(mock_ecb):
     </gesmes:Envelope>
     '''
 
-    with mock_ecb(data=data) as ecb:
+    with mock_currency_provider(cls, data, use_json=False) as ecb:
         with pytest.raises(CurrencyProviderException) as excinfo:
             ecb.request_currencies()
 
@@ -103,9 +93,11 @@ def test_no_xml_children(mock_ecb):
             assert ecb.had_error is True
 
 
-def test_malformed_data(mock_ecb):
+def test_malformed_data(mock_currency_provider, ecb_data):
+    cls = ECBCurrencyProvider
     rates = currency_data()['rates']
-    with mock_ecb(data=xmldata(rates) + 'somestring') as ecb:
+    with mock_currency_provider(cls, ecb_data(rates) + 'junk',
+                                use_json=False) as ecb:
         with pytest.raises(CurrencyProviderException) as excinfo:
             ecb.request_currencies()
 

@@ -88,10 +88,6 @@ class MissingModuleException(ExtendedException):
     pass
 
 
-class MissingRequestsException(MissingModuleException):
-    pass
-
-
 class MissingSimpleevalException(MissingModuleException):
     pass
 

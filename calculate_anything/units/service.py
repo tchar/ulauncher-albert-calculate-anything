@@ -27,9 +27,12 @@ class UnitsService(metaclass=Singleton):
         self._base_currency = None
         self._enabled = False
         self._running = False
+        self._currency_timestamps = {}
         self._conversion_mode = UnitsService.ConversionMode.NORMAL
 
     def _update_callback(self, data):
+        if not data:
+            return
         self._logger.info('Updating currency registry')
         ureg = self._unit_registry
         ctx = self._ctx
@@ -42,6 +45,10 @@ class UnitsService(metaclass=Singleton):
 
             updated_currencies.add('currency_' + currency)
             currency_units = ureg('currency_' + currency)
+
+            timestamp = currency_info['timestamp_refresh']
+            self._currency_timestamps[str(currency_units.units)] = timestamp
+
             if currency_units.units == self._base_currency.units:
                 continue
             rate = currency_info['rate']
@@ -62,8 +69,8 @@ class UnitsService(metaclass=Singleton):
     def get_rate_timestamp(self, unit):
         if isinstance(unit, pint.Quantity):
             unit = unit.units
-        unit_name = str(unit).replace('currency_', '')
-        return CurrencyService().get_rate_timestamp(unit_name)
+        unit_name = str(unit)
+        return self._currency_timestamps.get(unit_name)
 
     def set_conversion_mode(self, mode):
         self._conversion_mode = mode

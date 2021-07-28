@@ -145,7 +145,7 @@ class StupidEval:
         raise MissingSimpleevalException
 
 
-@ contextmanager
+@contextmanager
 def safe_operation(message: str = '') -> Iterator[None]:
     '''Context manager for safe operations to catch any errors.
 

@@ -1,48 +1,38 @@
 import pytest
+from calculate_anything.currency.providers import CoinbaseCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
 from tests.utils import currency_data, expected_currencies
 
 
-def test_normal(mock_coinbase):
-    data = {
-        'data': {
-            'currency': 'EUR',
-            'rates': currency_data()['rates']
-        }
-    }
+def test_normal(mock_currency_provider, coinbase_data):
+    cls = CoinbaseCurrencyProvider
+    data = coinbase_data('EUR', currency_data('EUR')['rates'])
 
-    with mock_coinbase(data, use_json=True) as coinbase:
+    with mock_currency_provider(cls, data, use_json=True) as coinbase:
         currencies = coinbase.request_currencies()
         assert currencies == expected_currencies()
         assert coinbase.had_error is False
 
 
-def test_other_base_currency(mock_coinbase):
-    data = {
-        'data': {
-            'currency': 'USD',
-            'rates': currency_data('USD')['rates']
-        }
-    }
-
-    with mock_coinbase(data, use_json=True) as coinbase:
+def test_other_base_currency(mock_currency_provider, coinbase_data):
+    cls = CoinbaseCurrencyProvider
+    data = coinbase_data('USD', currency_data('USD')['rates'])
+    with mock_currency_provider(cls, data, use_json=True) as coinbase:
         currencies = coinbase.request_currencies()
         assert currencies == expected_currencies()
         assert coinbase.had_error is False
 
 
-def test_eur_not_in_rates(mock_coinbase):
-    data = {
-        'data': {
-            'currency': 'USD',
-            'rates': {
-                k: v
-                for k, v in currency_data('USD')['rates'].items()
-                if k != 'EUR'}
-        }
+def test_eur_not_in_rates(mock_currency_provider, coinbase_data):
+    cls = CoinbaseCurrencyProvider
+    rates = {
+        k: v
+        for k, v in currency_data('USD')['rates'].items()
+        if k != 'EUR'
     }
+    data = coinbase_data('USD', rates)
 
-    with mock_coinbase(data, use_json=True) as coinbase:
+    with mock_currency_provider(cls, data, use_json=True) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 
@@ -51,8 +41,10 @@ def test_eur_not_in_rates(mock_coinbase):
 
 
 @pytest.mark.parametrize('status_code', (300, 400, 500))
-def test_response_code(mock_coinbase, status_code):
-    with mock_coinbase(None, use_json=False, status=status_code) as coinbase:
+def test_response_code(mock_currency_provider, status_code):
+    cls = CoinbaseCurrencyProvider
+    with mock_currency_provider(cls, None, use_json=False,
+                                status=status_code) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 
@@ -61,8 +53,10 @@ def test_response_code(mock_coinbase, status_code):
         assert coinbase.had_error is True
 
 
-def test_no_response(mock_coinbase):
-    with mock_coinbase(None, use_json=False, respond=False) as coinbase:
+def test_no_response(mock_currency_provider):
+    cls = CoinbaseCurrencyProvider
+    with mock_currency_provider(cls, None, use_json=False,
+                                respond=False) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 
@@ -75,8 +69,9 @@ def test_no_response(mock_coinbase):
     ({'errors': {'message': 'Something else went wrong'}},
      'Something else went wrong')
 ))
-def test_error(mock_coinbase, error_data, msg):
-    with mock_coinbase(error_data, use_json=True) as coinbase:
+def test_error(mock_currency_provider, error_data, msg):
+    cls = CoinbaseCurrencyProvider
+    with mock_currency_provider(cls, error_data, use_json=True) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 
@@ -84,13 +79,15 @@ def test_error(mock_coinbase, error_data, msg):
         assert coinbase.had_error is True
 
 
-def test_malformed_json(mock_coinbase):
+def test_malformed_json(mock_currency_provider):
+    cls = CoinbaseCurrencyProvider
     malformed_jsondata = {
         'some other fields': 'EUR',
         'some fields': 1
     }
 
-    with mock_coinbase(malformed_jsondata, use_json=True) as coinbase:
+    with mock_currency_provider(cls, malformed_jsondata,
+                                use_json=True) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 
@@ -102,8 +99,10 @@ def test_malformed_json(mock_coinbase):
     ('Some malformed not json data', 'Data is not a JSON', True),
     ('Some malformed not json data', 'Could not decode json data', False),
 ))
-def test_malformed_data(mock_coinbase, error_data, msg, use_json):
-    with mock_coinbase(error_data, use_json=use_json) as coinbase:
+def test_malformed_data(mock_currency_provider, error_data, msg, use_json):
+    cls = CoinbaseCurrencyProvider
+    with mock_currency_provider(cls, error_data,
+                                use_json=use_json) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 

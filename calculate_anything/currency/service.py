@@ -1,9 +1,6 @@
 from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
-from calculate_anything.exceptions import (
-    CurrencyProviderException, MissingRequestsException
-)
 from calculate_anything.utils import Singleton, safe_operation, lock
 from calculate_anything import logging
 
@@ -22,19 +19,14 @@ class CurrencyService(metaclass=Singleton):
         self._is_running = False
         self._enabled = True
         self._update_callbacks = []
-        self._missing_requests = False
 
     def __get_currencies(self, *currencies, force=False):
         provider = self._provider.__class__.__name__
         if force or not self._cache.enabled or self._cache.should_update():
             self._logger.info('Will load currencies')
-            try:
-                self._cache.clear()
-                currency_rates = self._provider.request_currencies(
-                    *currencies, force=force)
-            except MissingRequestsException as e:
-                self._missing_requests = True
-                raise e
+            self._cache.clear()
+            currency_rates = self._provider.request_currencies(
+                *currencies, force=force)
             self._cache.save(currency_rates, provider)
         else:
             currency_rates = self._cache.get_rates(*currencies)
@@ -59,18 +51,14 @@ class CurrencyService(metaclass=Singleton):
                 'Stopping thread (id={}). Cache not enabled'.format(thread_id))
             self._is_running = False
             return
-        try:
+
+        currency_rates = {}
+        with safe_operation('Requesting currencies'):
             currency_rates = self.__get_currencies(force=force)
-            for callback in self._update_callbacks:
-                with safe_operation():
-                    callback(currency_rates)
-        except CurrencyProviderException as e:
-            self._logger.exception(
-                'Error when contacting provider: {}'.format(e))
-        except MissingRequestsException as e:
-            self._logger.exception('Missing requests: {}'.format(e))
-            self._missing_requests = True
-            return
+
+        for callback in self._update_callbacks:
+            with safe_operation():
+                callback(currency_rates)
 
         if force and not self._cache.enabled:
             self._logger.info(
@@ -159,15 +147,6 @@ class CurrencyService(metaclass=Singleton):
         callbacks = self._update_callbacks
         callbacks = [cb for cb in callbacks if cb != callback]
         self._update_callbacks = callbacks
-
-    @lock
-    def get_rate_timestamp(self, currency):
-        return self._cache.get_rate_timestamp(currency)
-
-    @property
-    @lock
-    def missing_requests(self):
-        return self._missing_requests
 
     # @lock
     # def get_rates(self, *currencies, force=False):

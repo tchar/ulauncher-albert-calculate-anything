@@ -91,7 +91,7 @@ def timedelta_to_ydhms(dt: datetime, ref: datetime):
     return sg + ', '.join(ydhms)
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def get_result(description, query, order, td=timedelta()):
     return {
         'result': {
@@ -115,7 +115,7 @@ def get_result(description, query, order, td=timedelta()):
     }
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def get_resulttz(city_name, country_name,
                  iso2, query, order, tz, td=timedelta()):
     return {
@@ -260,7 +260,7 @@ test_spec_simple = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_simple)
+@pytest.mark.parametrize('test_spec', test_spec_simple)
 def test_simple(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
@@ -292,7 +292,7 @@ test_spec_target_city = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_target_city)
+@pytest.mark.parametrize('test_spec', test_spec_target_city)
 def test_target_city(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
@@ -359,7 +359,7 @@ test_spec_time = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_time)
+@pytest.mark.parametrize('test_spec', test_spec_time)
 def test_time(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
@@ -395,7 +395,7 @@ test_spec_time_target_city = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_time_target_city)
+@pytest.mark.parametrize('test_spec', test_spec_time_target_city)
 def test_time_target_city(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
@@ -468,7 +468,7 @@ test_spec_until = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_until)
+@pytest.mark.parametrize('test_spec', test_spec_until)
 def test_until(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
@@ -499,7 +499,7 @@ test_spec_parsedatetime_missing = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_parsedatetime_missing)
+@pytest.mark.parametrize('test_spec', test_spec_parsedatetime_missing)
 def test_parsedatetime_missing(test_spec):
     # Set parsedatetime to None
     with reset_instance(TimeQueryHandler, context=no_parsedatetime):
@@ -660,7 +660,7 @@ test_spec_cov = [{
 }]
 
 
-@ pytest.mark.parametrize('test_spec', test_spec_cov)
+@pytest.mark.parametrize('test_spec', test_spec_cov)
 def test_coverage(test_spec):
     with reset_instance(TimezoneService, context=no_default_cities):
         with reset_instance(TimezoneService,

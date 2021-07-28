@@ -1,9 +1,8 @@
 from datetime import datetime
-from urllib.parse import urljoin
-try:
-    import requests
-except ImportError:  # pragma: no cover
-    requests = None  # pragma: no cover
+import json
+from json.decoder import JSONDecodeError
+from urllib.request import urlopen
+from urllib.error import HTTPError
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException
@@ -19,11 +18,6 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
     def __init__(self):
         super().__init__()
         self._logger = logging.getLogger(__name__)
-
-    @property
-    def url(self):
-        cls = MyCurrencyNetCurrencyProvider
-        return urljoin(cls.BASE_URL, cls.API_URL)
 
     def _convert_rates(self, data):
         try:
@@ -75,24 +69,30 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
         try:
-            response = requests.get(self.url)
+            self._logger.info('Making request to mycyrrency.net')
+            with urlopen(self.get_request()) as response:
+                data = response.read().decode()
+                response_code = response.getcode()
+        except HTTPError as e:
+            response_code = e.code
         except Exception as e:
             msg = 'Could not connect: {}'.format(e)
             self._logger.exception(msg)
             self.had_error = True
             raise CurrencyProviderException(msg)
-        if not str(response.status_code).startswith('2'):
+
+        if not str(response_code).startswith('2'):
             self.had_error = True
-            msg = 'Response code not 2xx: {}'.format(response.status_code)
+            msg = 'Response code not 2xx: {}'.format(response_code)
             self._logger.error(msg)
             raise CurrencyProviderException(msg)
+
         try:
-            data = response.json()
-        except Exception as e:
+            data = json.loads(data)
+        except JSONDecodeError as e:
             self.had_error = True
             self._logger.exception('Could not decode json data: {}'.format(e))
-            raise CurrencyProviderException(
-                'Could not decode json data')
+            raise CurrencyProviderException('Could not decode json data')
 
         currencies = self._convert_rates(data)
         return currencies

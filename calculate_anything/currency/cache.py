@@ -120,12 +120,6 @@ class CurrencyCache:
             }
         return self._data['exchange_rates']
 
-    @preload
-    def get_rate_timestamp(self, currency):
-        if currency not in self._data['exchange_rates']:
-            return None
-        return self._data['exchange_rates'][currency].get('timestamp_refresh')
-
     def enable(self, update_frequency):
         self._update_frequency = update_frequency
 

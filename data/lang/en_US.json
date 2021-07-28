@@ -96,9 +96,6 @@
         "base-floating-error": "Result is a floating point number",
         "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
 
-        "missing-requests-error": "Looks like requests is not installed",
-        "missing-requests-error-description": "Install it with \"pip install requests\" and restart launcher",
-
         "missing-simpleeval-error": "Looks like simpleeval is not installed",
         "missing-simpleeval-error-description": "Install it with \"pip install simpleeval\" and restart launcher",
 

@@ -7,7 +7,7 @@ from tests.utils import random_str
 from calculate_anything import logging
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def get_file_handler(filepath):
     file_hdlr = RotatingFileHandler(
         filepath,
@@ -18,7 +18,7 @@ def get_file_handler(filepath):
     return file_hdlr
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def get_stdout_handler():
     hdlr = logging.CustomHandler(
         print, print, print, print, print)

@@ -1,9 +1,8 @@
 from datetime import datetime
-from urllib.parse import urljoin
-try:
-    import requests
-except ImportError:
-    requests = None
+import json
+from json.decoder import JSONDecodeError
+from urllib.request import urlopen
+from urllib.error import HTTPError
 from calculate_anything import logging
 from calculate_anything.currency.providers import ApiKeyCurrencyProvider
 from calculate_anything.utils import get_or_default
@@ -14,17 +13,12 @@ __all__ = ['FixerIOCurrencyProvider']
 
 
 class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
-    BASE_URL = 'http://data.fixer.io/api/'
-    API_URL = '/latest'
+    BASE_URL = 'http://data.fixer.io'
+    API_URL = '/api/latest'
 
     def __init__(self, api_key=''):
         super().__init__(api_key)
         self._logger = logging.getLogger(__name__)
-
-    @property
-    def url(self):
-        cls = FixerIOCurrencyProvider
-        return urljoin(cls.BASE_URL, cls.API_URL)
 
     def _validate_data(self, data):
         if not isinstance(data, dict):
@@ -85,24 +79,28 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
         params = {'access_key': self._api_key, 'base': 'EUR'}
         if currencies:
             params['symbols'] = ','.join(currencies)
-
         try:
-            response = requests.get(self.url, params=params)
+            self._logger.info('Making request to fixerio')
+            with urlopen(self.get_request(params)) as response:
+                data = response.read().decode()
+                response_code = response.getcode()
+        except HTTPError as e:
+            response_code = e.code
         except Exception as e:
             msg = 'Could not connect: {}'.format(e)
             self._logger.exception(e)
             self.had_error = True
             raise CurrencyProviderException(msg)
 
-        if not str(response.status_code).startswith('2'):
+        if not str(response_code).startswith('2'):
             self.had_error = True
-            msg = 'Response code not 2xx: {}'.format(response.status_code)
+            msg = 'Response code not 2xx: {}'.format(response_code)
             self._logger.error(msg)
             raise CurrencyProviderException(msg)
 
         try:
-            data = response.json()
-        except Exception as e:
+            data = json.loads(data)
+        except JSONDecodeError as e:
             self.had_error = True
             self._logger.exception('Could not decode json data: {}'.format(e))
             raise CurrencyProviderException('Could not decode json data')

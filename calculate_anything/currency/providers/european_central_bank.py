@@ -1,8 +1,6 @@
 from urllib.parse import urljoin
-try:
-    import requests
-except ImportError:  # pragma: no cover
-    requests = None  # pragma: no cover
+from urllib.request import urlopen
+from urllib.error import HTTPError
 from datetime import datetime
 from xml.etree import ElementTree
 from calculate_anything.currency.providers import FreeCurrencyProvider
@@ -50,20 +48,23 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
         try:
-            response = requests.get(self.url)
+            self._logger.info('Making request to ECB')
+            with urlopen(self.get_request()) as response:
+                data = response.read().decode()
+                response_code = response.getcode()
+        except HTTPError as e:
+            response_code = e.code
         except Exception as e:
             self.had_error = True
             msg = 'Could not connect: {}'.format(e)
             self._logger.exception(msg)
             raise CurrencyProviderException(msg)
 
-        if not str(response.status_code).startswith('2'):
+        if not str(response_code).startswith('2'):
             self.had_error = True
-            msg = 'Response code not 2xx ({})'.format(response.status_code)
+            msg = 'Response code not 2xx ({})'.format(response_code)
             self._logger.error(msg)
             raise CurrencyProviderException(msg)
-
-        data = response.text
 
         try:
             xml_tree, timestamp = self._validate_data(data)
