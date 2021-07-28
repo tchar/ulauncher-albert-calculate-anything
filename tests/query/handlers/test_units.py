@@ -4,7 +4,8 @@ from calculate_anything.currency import CurrencyService
 import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
-from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query.handlers import UnitsQueryHandler
 from calculate_anything.exceptions import (
     MissingPintException, CurrencyProviderException
 )
@@ -120,6 +121,8 @@ def test_units_simple(mock_currency_service, test_spec):
         Quantity = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Quantity)
         query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_units_multi = [lambda Q: {
@@ -325,6 +328,8 @@ def test_currency(mock_currency_service, test_spec):
         Q = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Q, data)
         query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_missing_pint = [{
@@ -354,9 +359,13 @@ test_spec_missing_pint = [{
 def test_missing_pint(test_spec):
     with no_pint(units_service=True):
         query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
     with no_pint(units_service=False):
         query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_provider_had_error = [{
@@ -386,3 +395,5 @@ test_spec_provider_had_error = [{
 def test_provider_had_error(mock_currency_service, test_spec):
     with mock_currency_service(error=True):
         query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

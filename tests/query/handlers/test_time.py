@@ -5,6 +5,7 @@ import pytest
 from pytz import timezone
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import TimeQueryHandler
 from calculate_anything.constants import (
     TIME_DATETIME_FORMAT, TIME_DATE_FORMAT,
@@ -297,6 +298,8 @@ def test_target_city(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_time = [{
@@ -364,6 +367,8 @@ def test_time(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_time_target_city = [{
@@ -400,6 +405,8 @@ def test_time_target_city(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_until = [{
@@ -473,6 +480,8 @@ def test_until(test_spec):
     with reset_instance(TimeQueryHandler,
                         context=set_time_reference(time_reference)):
         query_test_helper(TimeQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_parsedatetime_missing = [{
@@ -504,6 +513,8 @@ def test_parsedatetime_missing(test_spec):
     # Set parsedatetime to None
     with reset_instance(TimeQueryHandler, context=no_parsedatetime):
         query_test_helper(TimeQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 # Some more tests for coverage
@@ -666,3 +677,5 @@ def test_coverage(test_spec):
         with reset_instance(TimezoneService,
                             context=set_time_reference(time_reference)):
             query_test_helper(TimeQueryHandler, test_spec)
+            query_test_helper(MultiHandler, test_spec, raw=True)
+            query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

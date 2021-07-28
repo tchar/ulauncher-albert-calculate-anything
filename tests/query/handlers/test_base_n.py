@@ -1,5 +1,6 @@
 import pytest
 from calculate_anything.lang import LanguageService
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import (
     Base10QueryHandler,
     Base16QueryHandler,
@@ -232,6 +233,8 @@ test_spec_base10 = [{
 @pytest.mark.parametrize('test_spec', test_spec_base10)
 def test_base10(test_spec):
     query_test_helper(Base10QueryHandler, test_spec)
+    query_test_helper(MultiHandler, test_spec, raw=True)
+    query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_base16 = [{
@@ -311,6 +314,8 @@ test_spec_base16 = [{
 @pytest.mark.parametrize('test_spec', test_spec_base16)
 def test_base16(test_spec):
     query_test_helper(Base16QueryHandler, test_spec)
+    query_test_helper(MultiHandler, test_spec, raw=True)
+    query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_missing_simpleeval = [{
@@ -343,3 +348,5 @@ test_spec_missing_simpleeval = [{
 def test_missing_simpleeval(test_spec):
     with reset_instance(test_spec['class'], context=base_n_no_simpleeval):
         query_test_helper(test_spec['class'], test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

@@ -31,11 +31,9 @@ class TimezoneSqliteCache:
         if not os.path.isfile(sql_filepath):
             return False
 
-        self._last_clear_cache_timestamp = datetime.now().timestamp()
         if not self._init_db(TIMEZONES_SQLITE_FILE_USER, load_only=True):
             self._init_db(TIMEZONES_SQLITE_FILE_DEFAULT)
 
-        self._init_cache()
         self._post_init()
         return True
 
@@ -75,8 +73,11 @@ class TimezoneSqliteCache:
 
         if mode & (MODE_LOAD | MODE_LOAD_ONLY):
             try:
-                self._db = db = sqlite3.connect(file_path,
-                                                check_same_thread=False)
+                self._db = db = sqlite3.connect(
+                    file_path,
+                    check_same_thread=False,
+                    cached_statements=500
+                )
                 db.cursor().execute('PRAGMA foreign_keys = ON;').close()
                 self._logger.info(
                     'Loaded timezone database: {}'.format(file_path))
@@ -113,7 +114,10 @@ class TimezoneSqliteCache:
             if mode & MODE_CREATE:
                 try:
                     self._db = db = sqlite3.connect(
-                        file_path, check_same_thread=False)
+                        file_path,
+                        check_same_thread=False,
+                        cached_statements=500
+                    )
                     self._logger.info(
                         'Did not find {}, created from scratch'
                         .format(file_path))
@@ -124,45 +128,16 @@ class TimezoneSqliteCache:
                     mode |= MODE_MEMORY
             if mode & MODE_MEMORY:
                 self._db = db = sqlite3.connect(
-                    ':memory:', check_same_thread=False)
+                    ':memory:',
+                    check_same_thread=False,
+                    cached_statements=500
+                )
                 self._logger.info('Fell back to memory')
             cursor = db.cursor()
             cursor.executescript(data)
             cursor.execute('PRAGMA foreign_keys = ON;')
             db.commit()
             cursor.close()
-
-    def _init_cache(self):
-        db = sqlite3.connect(':memory:', check_same_thread=False)
-        cur = db.cursor()
-        cur.execute('PRAGMA foreign_keys = ON;')
-        cur.execute('''CREATE TABLE IF NOT EXISTS queries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            key STRING UNIQUE COLLATE NOCASE,
-            timestamp DATETIME DEFAULT (DATETIME('now', 'localtime')))''')
-
-        cur.execute('''CREATE TABLE IF NOT EXISTS results (
-                    id INTEGER UNIQUE,
-                    data JSON)''')
-
-        cur.execute('''CREATE TABLE IF NOT EXISTS queries_results (
-            query_id INTEGER,
-            result_id INTEGER,
-            result_order INTEGER,
-            FOREIGN KEY(query_id) REFERENCES queries(id) ON DELETE CASCADE,
-            FOREIGN KEY(result_id) REFERENCES results(id)
-                ON DELETE CASCADE)''')
-
-        cur.execute(
-            '''CREATE INDEX queries_timestamp_idx ON queries(timestamp)''')
-        cur.execute(
-            '''CREATE INDEX queries_key_idx ON queries(key COLLATE NOCASE)''')
-        cur.execute(
-            '''CREATE INDEX queries_results_result_order_idx ON
-            queries_results(result_order)''')
-        db.commit()
-        cur.close()
-        self._db_cache = db
 
     def _post_init(self):
         try:
@@ -277,124 +252,10 @@ class TimezoneSqliteCache:
             yield row
         cur.close()
 
-    @lock
-    def _cache_results(self, city_name_search, search_terms, cities):
-        city_name_search = city_name_search.replace('::', '')
-        if search_terms:
-            result_keys = []
-            for search_term in search_terms:
-                result_key = city_name_search + '::' + \
-                    search_term.replace('::', '')
-                result_keys.append(result_key)
-        else:
-            result_keys = [city_name_search]
-
-        db_cache = self._db_cache
-        cursor = db_cache.cursor()
-        for result_key in result_keys:
-            cursor.execute('''INSERT OR REPLACE INTO queries (key, timestamp)
-                            VALUES (?, datetime('now', 'localtime'))''',
-                           (result_key,))
-            qid = cursor.lastrowid
-            for i, city in enumerate(cities):
-                cursor.execute('''INSERT OR IGNORE INTO
-                            results (id, data)
-                            VALUES (?, ?)''', (city['id'], json.dumps(city),))
-                cursor.execute('''INSERT OR IGNORE INTO
-                            queries_results (query_id, result_id, result_order)
-                            VALUES (?, ?, ?)''', (qid, city['id'], i))
-        db_cache.commit()
-        cursor.close()
-
-    @lock
-    def _get_from_cached(self, city_name_search, search_terms):
-        city_name_search = city_name_search.replace('::', '')
-        query_keys = []
-        if search_terms:
-            for search_term in search_terms:
-                result_key = city_name_search + '::' + \
-                    search_term.replace('::', '')
-                query_keys.append(result_key)
-        else:
-            query_keys = [city_name_search]
-
-        alt_query = ['? LIKE q.key || \'%\''] * len(query_keys)
-        alt_query = ' OR '.join(alt_query)
-        query = ['?'] * len(query_keys)
-        query = ','.join(query)
-
-        db_cache = self._db_cache
-        cursor = db_cache.cursor()
-        qid = None
-        qkey = None
-        cursor.execute('''SELECT q.id, q.key FROM queries q
-            WHERE {} ORDER BY length(q.key) DESC LIMIT 1
-            '''.format(alt_query), query_keys)
-
-        row = cursor.fetchone()
-        if row is None:
-            return [], False
-
-        qid, qkey = row
-        # If not found in cache, return empty and found=False
-        if qid is None:
-            return [], False
-
-        exact_key = any(map(lambda k: k == qkey, query_keys))
-
-        cursor.execute('''SELECT r.data FROM results r
-            INNER JOIN queries_results qr ON qr.result_id = r.id AND
-            qr.query_id = ?
-            ORDER BY qr.result_order ASC''', (qid, ))
-
-        cities = cursor.fetchmany()
-
-        # If key matches, return cities, and found=True
-        if exact_key:
-            # Load it here for better performance
-            cities = map(lambda c: c[0], cities)
-            cities = map(json.loads, cities)
-            return list(cities), True
-
-        # If exact_key = False and no cities found with the key
-        # save it to cache for future, and return empty and found=True
-        if not cities:
-            self._cache_results(city_name_search, search_terms, [])
-            return [], True
-
-        # Last resort, exact_key = False, undetermined situation
-        # Return empty and found=False
-        return [], False
-
-    @lock
-    def _clear_cache(self):
-        now = datetime.now().timestamp()
-        time_diff = now - self._last_clear_cache_timestamp
-        if time_diff <= 86400:
-            return
-        self._logger.info('Clearing in-memory cache')
-        db_cache = self._db_cache
-        cursor = db_cache.cursor()
-        cursor.execute('''DELETE FROM queries
-                        WHERE datetime(timestamp, '+2 hour') <
-                            datetime('now', 'localtime')''')
-        db_cache.commit()
-        cursor.close()
-        self._last_clear_cache_timestamp = now
-        self._logger.info('Cleared cache')
-
     def get(self, city_name_search, *search_terms, exact=False):
         city_name_search = city_name_search.replace('?', '')
         search_terms = map(lambda s: s.replace('?', ''), search_terms)
         search_terms = list(search_terms)
-
-        if not exact:
-            cities, found = self._get_from_cached(
-                city_name_search, search_terms)
-            if found:
-                self._clear_cache()
-                self._logger.info('Returning cached city results')
-                return cities
 
         if not search_terms:
             gen = self._query_no_search_terms(city_name_search, exact=exact)
@@ -413,10 +274,6 @@ class TimezoneSqliteCache:
                 'state': state_name,
                 'timezone': tz_name
             })
-
-        self._clear_cache()
-        if not exact:
-            self._cache_results(city_name_search, search_terms, cities)
 
         return cities
 

@@ -36,10 +36,11 @@ class MultiHandler:
                 handler = handler()
             try:
                 result = handler.handle(query)
-            except Exception as e:
-                self._logger.exception(
-                    'Got exception when handling with: {}: {}'
-                    .format(handler.__class__.__name__, e))
+            except Exception as e:  # pragma: no cover
+                hdlr_name = handler.__class__.__name__
+                msg = 'Exception in handler: {}: {}'  # pragma: no cover
+                msg = msg.format(hdlr_name, e)  # pragma: no cover
+                self._logger.exception(msg)
                 result = None
 
             if not result:

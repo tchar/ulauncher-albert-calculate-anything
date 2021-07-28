@@ -124,15 +124,6 @@ class Program(Validator):
         else:
             self._results = ''
 
-    def get_rprompt(self):
-        key = self._kw
-        if key not in keywords:
-            mode = 'No mode selected'
-        else:
-            mode = keywords[key]['mode_description']
-        return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'
-                    .format(mode))
-
     def handle_c_a(self, event):
         pos = event.current_buffer.cursor_position
         while event.current_buffer.cursor_position > 0:
@@ -141,6 +132,15 @@ class Program(Validator):
         event.current_buffer.start_selection()
         while event.current_buffer.cursor_position < pos:
             event.current_buffer.cursor_right()
+
+    def rprompt(self):
+        key = self._kw
+        if key not in keywords:
+            mode = 'No mode selected'
+        else:
+            mode = keywords[key]['mode_description']
+        return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'
+                    .format(mode))
 
     def bottom_toolbar(self):
         if self._kw not in keywords:
@@ -167,7 +167,7 @@ program = Program()
 bindings.add('c-a')(program.handle_c_a)
 session = PromptSession(
     key_bindings=bindings,
-    rprompt=program.get_rprompt,
+    rprompt=program.rprompt,
     bottom_toolbar=program.bottom_toolbar,
     validator=program,
     validate_while_typing=True,

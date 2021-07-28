@@ -172,8 +172,29 @@ def approxunits(unit, tol=0.01):
     return ApproxUnits(unit, tol)
 
 
-def query_test_helper(cls, test_spec):
-    results = cls().handle(test_spec['query'])
+def test_query_result(item, query_result):
+    assert item['query_result']['icon'] == query_result.icon
+    assert item['query_result']['name'] == query_result.name
+    assert item['query_result']['description'] == query_result.description
+    assert item['query_result']['clipboard'] == query_result.clipboard
+    assert (
+        item['query_result']['error'] == query_result.error or
+        isinstance(query_result.error, item['query_result']['error'])
+    )
+    assert item['query_result']['order'] == query_result.order
+    assert item['query_result']['value'] == query_result.value
+    # Although seems stupid we use this to distinguish between equalities
+    # in floats and ints. For example 3.0 is not equal to 3 we want the
+    # type to be correct
+    assert isinstance(query_result.value,
+                      item['query_result']['value_type'])
+
+
+def query_test_helper(cls, test_spec, raw=False, only_qr=False):
+    if raw:
+        results = cls().handle_raw(test_spec['query'])
+    else:
+        results = cls().handle(test_spec['query'])
     if results is None:
         assert len(test_spec['results']) == 0
         return
@@ -184,6 +205,11 @@ def query_test_helper(cls, test_spec):
     assert len(test_spec['results']) == len(results)
 
     for result, item in zip(results, test_spec['results']):
+        if only_qr:
+            query_result = result
+            test_query_result(item, query_result)
+            return
+
         assert item['result']['value'] == result.value
         assert item['result']['query'] == result.query
         assert (
@@ -193,21 +219,7 @@ def query_test_helper(cls, test_spec):
         assert item['result']['order'] == result.order
 
         query_result = result.to_query_result()
-        assert item['query_result']['icon'] == query_result.icon
-        assert item['query_result']['name'] == query_result.name
-        assert item['query_result']['description'] == query_result.description
-        assert item['query_result']['clipboard'] == query_result.clipboard
-        assert (
-            item['query_result']['error'] == query_result.error or
-            isinstance(query_result.error, item['query_result']['error'])
-        )
-        assert item['query_result']['order'] == query_result.order
-        assert item['query_result']['value'] == query_result.value
-        # Although seems stupid we use this to distinguish between equalities
-        # in floats and ints. For example 3.0 is not equal to 3 we want the
-        # type to be correct
-        assert isinstance(query_result.value,
-                          item['query_result']['value_type'])
+        test_query_result(item, query_result)
 
 
 @lru_cache(maxsize=None)

@@ -1,6 +1,7 @@
 import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import StupidEval
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.exceptions import (
     BooleanComparisonException, MissingSimpleevalException,
@@ -218,6 +219,8 @@ test_spec_calculator = [{
 @pytest.mark.parametrize('test_spec', test_spec_calculator)
 def test_calculator(test_spec):
     query_test_helper(CalculatorQueryHandler, test_spec)
+    # query_test_helper(MultiHandler, test_spec, raw=True)
+    # query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 test_spec_missing_simpleeval = [{
@@ -272,3 +275,5 @@ def test_missing_simpleeval(test_spec):
         # Set stupid StupidEval as SimpleEval
         assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
         query_test_helper(CalculatorQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

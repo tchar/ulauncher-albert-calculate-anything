@@ -12,11 +12,11 @@ class TimezoneJsonCache:
         try:
             with open(TIMEZONES_JSON_FILE, 'r') as f:
                 self._data = json.loads(f.read())
-        except Exception as e:
-            self._logger.exception(
+        except Exception as e:  # pragma: no cover
+            self._logger.exception(  # pragma: no cover
                 'Could not load timezone data: {}: {}'
                 .format(TIMEZONES_JSON_FILE, e))
-            return False
+            return False  # pragma: no cover
         return True
 
     def get(self, city_name, *search_terms):

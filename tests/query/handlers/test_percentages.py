@@ -1,5 +1,6 @@
 import pytest
 from tests.utils import query_test_helper
+from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import PercentagesQueryHandler
 from calculate_anything.lang import LanguageService
 from calculate_anything.exceptions import (
@@ -133,6 +134,8 @@ test_spec_normal = [{
 @pytest.mark.parametrize('test_spec', test_spec_normal)
 def test_normal(test_spec):
     query_test_helper(PercentagesQueryHandler, test_spec)
+    query_test_helper(MultiHandler, test_spec, raw=True)
+    query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 # Test Inverse
@@ -464,6 +467,8 @@ test_spec_calc = [{
 @pytest.mark.parametrize('test_spec', test_spec_calc)
 def test_calc(test_spec):
     query_test_helper(PercentagesQueryHandler, test_spec)
+    query_test_helper(MultiHandler, test_spec, raw=True)
+    query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
 def test_complete_cov():
