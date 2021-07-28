@@ -29,9 +29,6 @@ class CurrencyProviderException(CurrencyException):
     pass
 
 
-class CurrencyProviderRequestException(CurrencyProviderException):
-    pass
-
 # Exceptions for unit conversion
 
 

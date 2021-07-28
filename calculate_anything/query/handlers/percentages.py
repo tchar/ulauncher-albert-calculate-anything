@@ -9,7 +9,7 @@ from calculate_anything.exceptions import (
     BooleanPercetageException, ZeroDivisionException
 )
 from calculate_anything.utils import Singleton
-from calculate_anything.constants import (
+from calculate_anything.regex import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
     PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REGEX,
 )

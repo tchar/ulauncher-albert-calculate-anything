@@ -1,6 +1,7 @@
 import pytest
 import random
 import string
+from functools import lru_cache
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
@@ -225,3 +226,32 @@ def query_test_helper(cls, test_spec):
         # type to be correct
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])
+
+
+@lru_cache(maxsize=None)
+def currency_data(base_currency='EUR'):
+    rates = {
+        'EUR': 1,
+        'USD': 0.9,
+        # 'BTC': 100000
+
+    }
+    return {
+        'base_currency': base_currency,
+        'rates': {
+            k: v / rates[base_currency]
+            for k, v in rates.items()
+        }
+    }
+
+
+def expected_currencies(timestamp=None, filterc=set()):
+    timestamp = timestamp or datetime.now().timestamp()
+    return {
+        k: {
+            'rate': pytest.approx(v),
+            'timestamp_refresh': pytest.approx(timestamp)
+        }
+        for k, v in currency_data('EUR')['rates'].items()
+        if k not in filterc
+    }

@@ -47,16 +47,13 @@ You can create your own provider by subclassing `CurrencyProvider` or `ApiKeyCur
 For example:
 ```python
 from calculate_anything.currency.providers import CurrencyProvider
-from calculate_anything.exceptions import (
-    CurrencyProviderException,
-    CurrencyProviderRequestException
-)
+from calculate_anything.exceptions import CurrencyProviderException
 
 class MyProvider(ApiKeyCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         # Write your code. Return a dictionary like
         if some_error:
-            raise CurrencyProviderRequestException('Some error')
+            raise CurrencyProviderException('Some error')
         return {
             'EUR': {'rate': 1, 'timestamp' 123123123123},
             'USD': {'rate': 1.2231, 'timestmap': 123123123},

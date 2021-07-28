@@ -2,7 +2,7 @@ from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
 from threading import RLock, Timer
 from calculate_anything.exceptions import (
-    CurrencyProviderRequestException, MissingRequestsException
+    CurrencyProviderException, MissingRequestsException
 )
 from calculate_anything.utils import Singleton, safe_operation, lock
 from calculate_anything import logging
@@ -64,7 +64,7 @@ class CurrencyService(metaclass=Singleton):
             for callback in self._update_callbacks:
                 with safe_operation():
                     callback(currency_rates)
-        except CurrencyProviderRequestException as e:
+        except CurrencyProviderException as e:
             self._logger.exception(
                 'Error when contacting provider: {}'.format(e))
         except MissingRequestsException as e:
@@ -103,7 +103,7 @@ class CurrencyService(metaclass=Singleton):
             self._logger.warning('Service is disabled, cannot enable cache')
             return
         self._logger.info(
-            'Enabling cache with update frequence = {}'
+            'Enabling cache with update frequency = {}'
             .format(update_frequency))
         self._cache.enable(update_frequency)
         return self
@@ -176,14 +176,14 @@ class CurrencyService(metaclass=Singleton):
     #         return {}
     #     try:
     #         return self.__get_currencies(*currencies, force=force)
-    #     except CurrencyProviderRequestException:
+    #     except CurrencyProviderException:
     #         return {}
 
     # @lock
     # def get_available_currencies(self):
     #     try:
     #         available_currencies = list(self.__get_currencies().keys())
-    #     except CurrencyProviderRequestException as e:
+    #     except CurrencyProviderException as e:
     #         self._logger.error('Error when contacting provider: {}'
     #                            .format(e))
     #         available_currencies = []

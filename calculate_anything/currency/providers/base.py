@@ -1,5 +1,5 @@
 from calculate_anything.exceptions import (
-    CurrencyProviderRequestException, MissingRequestsException
+    CurrencyProviderException, MissingRequestsException
 )
 from datetime import datetime
 from calculate_anything.utils import get_module
@@ -22,11 +22,13 @@ class CurrencyProvider:
         if not has_requests:
             self.had_error = True
             raise MissingRequestsException('requests is not installed')
+
+        timestamp = datetime.now().timestamp()
         if not force and self.had_error and \
-                datetime.now().timestamp() - 60 <= self.last_request_timestamp:
+                timestamp - 60 <= self.last_request_timestamp:
             self.had_error = True
-            raise CurrencyProviderRequestException('Could not make request')
-        self.last_request_timestamp = datetime.now().timestamp()
+            raise CurrencyProviderException('Too many requests')
+        self.last_request_timestamp = timestamp
         return {}
 
 
@@ -50,5 +52,5 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
         super_result = super().request_currencies(*currencies, force)
         if not self.api_key_valid:
             self.had_error = True
-            raise CurrencyProviderRequestException('API Key is not valid')
+            raise CurrencyProviderException('API Key is not valid')
         return super_result

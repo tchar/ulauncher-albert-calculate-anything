@@ -4,7 +4,7 @@ except ImportError:
     pint = None
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
-from calculate_anything.constants import UNIT_ALIASES_RE
+from calculate_anything.regex import UNIT_ALIASES_RE
 
 
 class PintDefinitionParser:

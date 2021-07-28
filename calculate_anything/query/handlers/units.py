@@ -15,7 +15,7 @@ from calculate_anything.calculation import (
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.utils import is_types, Singleton
-from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
+from calculate_anything.regex import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from calculate_anything.exceptions import (
     CurrencyProviderException, MissingPintException, MissingRequestsException
 )
