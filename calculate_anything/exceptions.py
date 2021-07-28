@@ -29,9 +29,6 @@ class CurrencyProviderException(CurrencyException):
     pass
 
 
-class CurrencyProviderRequestException(CurrencyProviderException):
-    pass
-
 # Exceptions for unit conversion
 
 
@@ -88,10 +85,6 @@ class MisparsedDateTimeException(TimeException):
 
 
 class MissingModuleException(ExtendedException):
-    pass
-
-
-class MissingRequestsException(MissingModuleException):
     pass
 
 

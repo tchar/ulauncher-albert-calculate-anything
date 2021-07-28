@@ -13,7 +13,6 @@ import logging as _logging
 import logging.handlers as _handlers
 import copy
 from typing import Callable
-from calculate_anything.utils import Singleton
 from calculate_anything.constants import LOGS_DIR
 
 
@@ -130,7 +129,7 @@ class CustomHandler(_logging.Handler):
         log(message)
 
 
-class Logging(metaclass=Singleton):
+class Logging:
     '''Holds the logging information such as handlers to use.
     Prefer to use the functons provided in this module.
     '''
@@ -213,14 +212,17 @@ class Logging(metaclass=Singleton):
         return logger
 
 
+Logging = Logging()
+
+
 def setLevel(level: int) -> None:
     '''Sets the level for all loggers'''
-    Logging().set_level(level)
+    Logging.set_level(level)
 
 
 def disable_file_handler() -> None:
     '''Disables file handler provided from this class'''
-    Logging().disable_file_handler()
+    Logging.disable_file_handler()
 
 
 def set_file_handler(hdlr: _logging.Handler) -> None:
@@ -229,12 +231,12 @@ def set_file_handler(hdlr: _logging.Handler) -> None:
     Args:
         hdlr (logging.FileHandler): The file handler to set
     '''
-    Logging().set_file_handler(hdlr)
+    Logging.set_file_handler(hdlr)
 
 
 def disable_stdout_handler() -> None:
     '''Disables stdout handler provided from this class'''
-    Logging().disable_stdout_handler()
+    Logging.disable_stdout_handler()
 
 
 def set_stdout_handler(hdlr: _logging.Handler) -> None:
@@ -243,7 +245,7 @@ def set_stdout_handler(hdlr: _logging.Handler) -> None:
     Args:
         hdlr (logging.FileHandler): The stdout handler to set
     '''
-    Logging().set_stdout_handler(hdlr)
+    Logging.set_stdout_handler(hdlr)
 
 
 def getLogger(name: str) -> _logging.Logger:
@@ -253,4 +255,4 @@ def getLogger(name: str) -> _logging.Logger:
     Args:
         name (str): The name of the logger as in logging.getLogger(name)
     '''
-    return Logging().get_logger(name)
+    return Logging.get_logger(name)

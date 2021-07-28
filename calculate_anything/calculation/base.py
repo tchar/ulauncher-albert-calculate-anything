@@ -8,7 +8,7 @@ from calculate_anything.exceptions import (
     CurrencyProviderException, DateOverflowException,
     MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
     MissingSimpleevalException, MissingParsedatetimeException,
-    MissingRequestsException, BooleanPercetageException, MissingPintException
+    BooleanPercetageException, MissingPintException
 )
 
 # TODO: Fix this mess
@@ -47,18 +47,6 @@ def missing_pint_error_query_result():
         clipboard='pip install Pint',
         error=MissingPintException,
         order=-1020
-    )
-
-
-def missing_requests_query_result():
-    translator = LanguageService().get_translator('errors')
-    return QueryResult(
-        icon='images/icon.svg',
-        name=translator('missing-requests-error'),
-        description=translator('missing-requests-error-description'),
-        clipboard='pip install requests',
-        error=MissingRequestsException,
-        order=-1030
     )
 
 
@@ -174,8 +162,6 @@ class _Calculation:
                     return missing_simpleeval_query_result()
                 if self.is_error(MissingParsedatetimeException):
                     return missing_parsedatetime_query_result()
-                if self.is_error(MissingRequestsException):
-                    return missing_requests_query_result()
                 if self.is_error(ZeroDivisionException):
                     return zero_division_error_query_result()
                 if self.is_error(DateOverflowException):

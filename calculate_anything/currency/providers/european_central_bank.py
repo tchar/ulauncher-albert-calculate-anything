@@ -1,81 +1,88 @@
-try:
-    import requests
-except ImportError:
-    requests = None
+from urllib.parse import urljoin
+from urllib.request import urlopen
+from urllib.error import HTTPError
 from datetime import datetime
 from xml.etree import ElementTree
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
-from calculate_anything.exceptions import CurrencyProviderRequestException
+from calculate_anything.exceptions import CurrencyProviderException
 
 __all__ = ['ECBCurrencyProvider']
 
 
 class ECBCurrencyProvider(FreeCurrencyProvider):
-    BASE_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml'
+    BASE_URL = 'https://www.ecb.europa.eu'
+    API_URL = '/stats/eurofxref/eurofxref-daily.xml'
 
     def __init__(self):
         super().__init__()
         self._logger = logging.getLogger(__name__)
 
+    @property
+    def url(self):
+        cls = ECBCurrencyProvider
+        return urljoin(cls.BASE_URL, cls.API_URL)
+
+    def _validate_data(self, data):
+        try:
+            xml_tree = ElementTree.fromstring(data)
+        except ElementTree.ParseError as e:
+            msg = 'Could not parse ECB xml response: {}'.format(e)
+            self._logger.exception(msg)
+            raise CurrencyProviderException(msg)
+
+        try:
+            timestamp = xml_tree[2][0].attrib['time']
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%d').timestamp()
+        except IndexError as e:
+            msg = 'XML data not as expected: {}'.format(e)
+            self._logger.exception(msg)
+            raise CurrencyProviderException(msg)
+        except Exception as e:
+            msg = 'Could not read timestamp: {}'.format(e)
+            self._logger.exception(msg)
+            timestamp = datetime.now().timestamp()
+
+        return xml_tree, timestamp
+
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
         try:
-            response = requests.get(ECBCurrencyProvider.BASE_URL)
+            self._logger.info('Making request to ECB')
+            with urlopen(self.get_request()) as response:
+                data = response.read().decode()
+                response_code = response.getcode()
+        except HTTPError as e:
+            response_code = e.code
         except Exception as e:
-            self._logger.exception(
-                'Could not connect to European Central Bank: {}'.format(e))
             self.had_error = True
-            raise CurrencyProviderRequestException(
-                'Could not connect to conversion service')
+            msg = 'Could not connect: {}'.format(e)
+            self._logger.exception(msg)
+            raise CurrencyProviderException(msg)
 
-        if not str(response.status_code).startswith('2'):
+        if not str(response_code).startswith('2'):
             self.had_error = True
-            raise CurrencyProviderRequestException(
-                'European Central Bank response code was {}'
-                .format(response.status_code))
-
-        data = response.text
-        try:
-            tree = ElementTree.fromstring(data)
-            timestamp = tree[2][0].attrib['time']
-            timestamp = datetime.strptime(timestamp, '%Y-%m-%d').timestamp()
-        except (IndexError, KeyError) as e:
-            self._logger.exception('Could not read update timestamp: {}'
-                                   .format(e))
-            timestamp = datetime.now().timestamp()
-        except Exception as e:
-            self._logger.exception(
-                'An unexpected exception occured when reading '
-                'update timestamp: {}'.format(e))
-            timestamp = datetime.now().timestamp()
+            msg = 'Response code not 2xx ({})'.format(response_code)
+            self._logger.error(msg)
+            raise CurrencyProviderException(msg)
 
         try:
-            tree[2][0]
-        except IndexError as e:
-            self._logger.exception('Could not read currencies: {}'.format(e))
-            raise CurrencyProviderRequestException(e)
-        except Exception as e:
-            self._logger.exception(
-                'An unexpected exception occured when reading currencies: {}'
-                .format(e))
-            raise CurrencyProviderRequestException(e)
+            xml_tree, timestamp = self._validate_data(data)
+        except CurrencyProviderException as e:
+            self.had_error = True
+            self._logger.exception(e)
+            raise e
 
-        currency_data = {}
-        for i, child in enumerate(tree[2][0]):
+        currency_data = {'EUR': {'rate': 1.0, 'timestamp_refresh': timestamp}}
+        for i, child in enumerate(xml_tree[2][0]):
             try:
                 curr = child.attrib['currency']
                 rate = float(child.attrib['rate'])
                 currency_data[curr] = {'rate': rate,
                                        'timestamp_refresh': timestamp}
-            except (TypeError, ValueError) as e:
+            except Exception as e:
                 self._logger.exception(
                     'Could not read rate for currency at line {}: {}'
                     .format(i, e))
-            except Exception as e:
-                self._logger.exception(
-                    'An unexpected exception occured when reading rate '
-                    'for currency at line {}: {}'.format(i, e))
-
         self.had_error = False
         return currency_data

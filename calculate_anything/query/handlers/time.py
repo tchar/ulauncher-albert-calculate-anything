@@ -18,7 +18,7 @@ from calculate_anything.exceptions import (
 from calculate_anything.utils import partition, flatten, deduplicate, Singleton
 from calculate_anything.utils.datetime import parsedatetime_str
 from calculate_anything import logging
-from calculate_anything.constants import (
+from calculate_anything.regex import (
     TIME_AGO_BEFORE_REGEX, TIME_QUERY_REGEX_SPLIT, TIME_SUBQUERY_REGEX,
     TIME_SPLIT_REGEX, PLUS_MINUS_REGEX,
     TIME_LOCATION_REPLACE_REGEX

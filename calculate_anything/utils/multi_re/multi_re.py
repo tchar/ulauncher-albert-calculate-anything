@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Union, Iterable, List, Optional, Match, Callable, Dict
 import sys
 import re
@@ -8,14 +9,16 @@ class _MultiRe:
     COMPATIBILITY_ITER = 0
     COMPATIBILITY_DICT = 1
 
-    def __init__(self, value: Union[Dict[str, str], Iterable[str], str],
+    def __init__(self, value: Union[Dict[str, str], Iterable[str],
+                                    str, 'OrderedDict[str, str]'],
                  sort: bool = True, include: bool = True, flags: int = 0):
 
         if isinstance(value, dict):
             self._mode = _MultiRe.COMPATIBILITY_DICT
             if flags & re.IGNORECASE:
                 value = {k.lower(): v for k, v in value.items()}
-            if sys.version_info[:2] < (3, 7):
+            if sys.version_info[:2] < (3, 7) and \
+                    not isinstance(value, OrderedDict):  # pragma: no cover
                 sort = True  # pragma: no cover
             self._replace_dict = value
         elif isinstance(value, set):

@@ -10,9 +10,7 @@ from calculate_anything.currency.providers import (
 )
 from calculate_anything.currency.providers.base import _MockCurrencyProvider
 from calculate_anything import logging
-from calculate_anything.exceptions import (
-    CurrencyProviderException, CurrencyProviderRequestException
-)
+from calculate_anything.exceptions import CurrencyProviderException
 
 
 __all__ = ['CombinedCurrencyProvider']
@@ -61,8 +59,7 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         provider_name = provider_cls.__name__
         try:
             return provider.request_currencies(*currencies, force=force)
-        except (CurrencyProviderException,
-                CurrencyProviderRequestException) as e:
+        except CurrencyProviderException as e:
             self._logger.exception(
                 'Got exception when requesting from provider {}: {}'
                 .format(provider_name, e))

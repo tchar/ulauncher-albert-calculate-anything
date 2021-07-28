@@ -1,6 +1,7 @@
 import pytest
 import random
 import string
+from functools import lru_cache
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
@@ -76,15 +77,6 @@ def no_default_currencies():
 
 
 @contextmanager
-def no_requests():
-    missing_requests = CurrencyService()._missing_requests
-    CurrencyService()._missing_requests = True
-    with no_default_currencies():
-        yield
-    CurrencyService()._missing_requests = missing_requests
-
-
-@contextmanager
 def no_default_cities():
     default_cities = TimezoneService().default_cities
     TimezoneService().set_default_cities([])
@@ -100,15 +92,6 @@ def set_time_reference(datetime):
         yield
         time_handler.TimeQueryHandler.now = now
     return _set_time_reference
-
-
-@contextmanager
-def currency_provider_had_error():
-    provider_had_error = CurrencyService()._provider.had_error
-    CurrencyService()._provider.had_error = True
-    with no_default_currencies():
-        yield
-    CurrencyService()._provider.had_error = provider_had_error
 
 
 @contextmanager
@@ -225,3 +208,36 @@ def query_test_helper(cls, test_spec):
         # type to be correct
         assert isinstance(query_result.value,
                           item['query_result']['value_type'])
+
+
+@lru_cache(maxsize=None)
+def currency_data(base_currency='EUR'):
+    rates = {
+        'EUR': 1,
+        'USD': 0.9,
+        'MXN': 0.2,
+        'CAD': 0.7,
+        'AMD': 0.4,
+        'RON': 0.5,
+        'AED': 10,
+        'BTC': 100000,
+    }
+    return {
+        'base_currency': base_currency,
+        'rates': {
+            k: v / rates[base_currency]
+            for k, v in rates.items()
+        }
+    }
+
+
+def expected_currencies(timestamp=None, filterc=set()):
+    timestamp = timestamp or datetime.now().timestamp()
+    return {
+        k: {
+            'rate': pytest.approx(v),
+            'timestamp_refresh': pytest.approx(timestamp)
+        }
+        for k, v in currency_data('EUR')['rates'].items()
+        if k not in filterc
+    }

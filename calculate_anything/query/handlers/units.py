@@ -15,9 +15,9 @@ from calculate_anything.calculation import (
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.utils import is_types, Singleton
-from calculate_anything.constants import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
+from calculate_anything.regex import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
 from calculate_anything.exceptions import (
-    CurrencyProviderException, MissingPintException, MissingRequestsException
+    CurrencyProviderException, MissingPintException
 )
 
 
@@ -31,25 +31,15 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
     def _items_for_currency_errors(self, unit_dimensionalities):
         currency_service = CurrencyService()
-        missing_requests = currency_service.enabled and \
-            currency_service.missing_requests
         currency_provider_had_error = currency_service.enabled and \
             currency_service.provider_had_error
 
-        missing_requests = currency_service.enabled and \
-            currency_service.missing_requests
         currency_provider_had_error = (
             currency_service.enabled and
             currency_service.provider_had_error and
             any(map(lambda d: '[currency]' in d, unit_dimensionalities))
         )
-        if missing_requests:
-            item = UnitsCalculation(
-                error=MissingRequestsException,
-                order=-1030
-            )
-            return [item]
-        elif currency_provider_had_error:
+        if currency_provider_had_error:
             item = UnitsCalculation(error=CurrencyProviderException, order=-60)
             return [item]
         return []
@@ -298,9 +288,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 if unit_converted.units == unit_from_ureg.units:
                     continue
                 UnitClass = CurrencyUnitsCalculation
+                timestamp = UnitsService().get_rate_timestamp(unit_to_ureg)
                 kwargs = {
-                    'update_timestamp': (UnitsService()
-                                         .get_rate_timestamp(unit_to_ureg))
+                    'update_timestamp': timestamp
                 }
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation

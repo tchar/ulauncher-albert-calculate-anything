@@ -1,6 +1,6 @@
 # flake8: noqa
 #from ...constants import CURRENCY_QUERY_REGEX, CURRENCY_QUERY_DEFAULT_REGEX, EMPTY_AMOUNT
-# from ...exceptions import CurrencyProviderException, MissingRequestsException
+# from ...exceptions import CurrencyProviderException
 # from ...utils import Singleton
 # from ...lang import LanguageService
 # from ...calculation import CurrencyCalculation
@@ -57,13 +57,7 @@
 #             return
 
 #         service = CurrencyService()
-#         try:
-#             rates = service.get_rates(currency_from, *currencies_to)
-#         except MissingRequestsException:
-#             result = CurrencyCalculation(
-#                 error=MissingRequestsException,
-#                 order=-1)
-#             return [result]
+#         rates = service.get_rates(currency_from, *currencies_to)
 
 #         if service.provider_had_error:
 #             result = CurrencyCalculation(

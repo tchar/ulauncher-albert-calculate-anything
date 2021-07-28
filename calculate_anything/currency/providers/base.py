@@ -1,9 +1,7 @@
-from calculate_anything.exceptions import (
-    CurrencyProviderRequestException, MissingRequestsException
-)
+from calculate_anything.exceptions import CurrencyProviderException
 from datetime import datetime
-from calculate_anything.utils import get_module
-has_requests = get_module('requests') is not None
+from urllib.parse import urljoin, urlparse, urlunparse, urlencode
+from urllib.request import Request
 
 __all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider']
 
@@ -14,19 +12,31 @@ class _MockCurrencyProvider:
 
 
 class CurrencyProvider:
+    BASE_URL = ''
+    API_URL = ''
+
     def __init__(self):
         self.last_request_timestamp = 0
         self.had_error = False
 
+    def get_request(self, params={}):
+        cls = self.__class__
+        headers = {
+            'user-agent': 'Calculate Anything'
+        }
+        url = urljoin(cls.BASE_URL, cls.API_URL)
+        url = list(urlparse(url))
+        url[4] = urlencode(params)
+        url = urlunparse(url)
+        return Request(url, headers=headers)
+
     def request_currencies(self, *currencies, force=False):
-        if not has_requests:
-            self.had_error = True
-            raise MissingRequestsException('requests is not installed')
+        timestamp = datetime.now().timestamp()
         if not force and self.had_error and \
-                datetime.now().timestamp() - 60 <= self.last_request_timestamp:
+                timestamp - 60 <= self.last_request_timestamp:
             self.had_error = True
-            raise CurrencyProviderRequestException('Could not make request')
-        self.last_request_timestamp = datetime.now().timestamp()
+            raise CurrencyProviderException('Too many requests')
+        self.last_request_timestamp = timestamp
         return {}
 
 
@@ -50,5 +60,5 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
         super_result = super().request_currencies(*currencies, force)
         if not self.api_key_valid:
             self.had_error = True
-            raise CurrencyProviderRequestException('API Key is not valid')
+            raise CurrencyProviderException('API Key is not valid')
         return super_result

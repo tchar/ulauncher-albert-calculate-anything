@@ -6,10 +6,8 @@ from logging.handlers import RotatingFileHandler
 from tests.utils import random_str
 from calculate_anything import logging
 
-logging.disable_file_handler()
 
-
-@lru_cache
+@lru_cache(maxsize=None)
 def get_file_handler(filepath):
     file_hdlr = RotatingFileHandler(
         filepath,
@@ -20,7 +18,7 @@ def get_file_handler(filepath):
     return file_hdlr
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def get_stdout_handler():
     hdlr = logging.CustomHandler(
         print, print, print, print, print)
@@ -36,8 +34,8 @@ def get_stdout_handler():
 ])
 def test_logging(caplog, level):
     with caplog.at_level(level):
-        logging.Logging().set_level(level)
-        logging.Logging().set_file_handler(None)
+        logging.setLevel(level)
+        logging.set_file_handler(None)
 
         logger = logging.getLogger('test_logging_logging')
         assert len(logger.handlers) == 1
@@ -74,9 +72,9 @@ def test_logging(caplog, level):
 def test_logging_custom_stdout_hannler(caplog, level):
     hdlr = get_stdout_handler()
     with caplog.at_level(level):
-        logging.Logging().set_level(level)
-        logging.Logging().set_file_handler(None)
-        logging.Logging().set_stdout_handler(hdlr)
+        logging.setLevel(level)
+        logging.set_file_handler(None)
+        logging.set_stdout_handler(hdlr)
 
         logger = logging.getLogger('test_logging_custom_stdout_hannler')
         assert len(logger.handlers) == 1
@@ -112,9 +110,9 @@ def test_logging_custom_stdout_hannler(caplog, level):
 ])
 def test_logging_no_stdout_handler(caplog, level):
     with caplog.at_level(level):
-        logging.Logging().set_level(level)
-        logging.Logging().set_file_handler(None)
-        logging.Logging().set_stdout_handler(None)
+        logging.setLevel(level)
+        logging.set_file_handler(None)
+        logging.set_stdout_handler(None)
 
         logger = logging.getLogger('test_logging_no_stdout_handler')
         assert not logger.handlers
@@ -132,9 +130,9 @@ def test_logging_file(log_filepath, level):
     hdlr = get_file_handler(log_filepath)
     print('Saving logs to {}'.format(log_filepath))
 
-    logging.Logging().set_level(level)
-    logging.Logging().set_file_handler(hdlr)
-    logging.Logging().set_stdout_handler(None)
+    logging.setLevel(level)
+    logging.set_file_handler(hdlr)
+    logging.set_stdout_handler(None)
 
     logger = logging.getLogger('test_logging_file')
 

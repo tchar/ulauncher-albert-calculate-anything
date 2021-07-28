@@ -3,7 +3,7 @@ import cmath
 from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
-from calculate_anything.constants import CALCULATOR_ERROR
+from calculate_anything.regex import CALCULATOR_ERROR
 from calculate_anything.utils import multi_re
 
 

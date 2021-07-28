@@ -1,46 +1,49 @@
 from datetime import datetime
-try:
-    import requests
-except ImportError:
-    requests = None
+import json
+from json.decoder import JSONDecodeError
+from urllib.parse import urljoin
+from urllib.request import urlopen
+from urllib.error import HTTPError
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.utils import get_or_default
-from calculate_anything.exceptions import (
-    CurrencyProviderException, CurrencyProviderRequestException
-)
+from calculate_anything.exceptions import CurrencyProviderException
 
 
 __all__ = ['CoinbaseCurrencyProvider']
 
 
 class CoinbaseCurrencyProvider(FreeCurrencyProvider):
-    BASE_URL = 'https://api.coinbase.com/v2/exchange-rates?currency=EUR'
+    BASE_URL = 'https://api.coinbase.com'
+    API_URL = '/v2/exchange-rates'
 
     def __init__(self):
         super().__init__()
         self._logger = logging.getLogger(__name__)
 
-    def request_currencies(self, *currencies, force=False):
-        try:
-            response = requests.get(CoinbaseCurrencyProvider.BASE_URL)
-        except Exception as e:
-            self._logger.exception(
-                'Could not connect to mycurrency.net: {}'.format(e))
+    @property
+    def url(self):
+        cls = CoinbaseCurrencyProvider
+        return urljoin(cls.BASE_URL, cls.API_URL)
 
-        if not str(response.status_code).startswith('2'):
-            self.had_error = True
-            raise CurrencyProviderRequestException(
-                'Coinbase response code was {}'.format(response.status_code))
+    def _validate_data(self, data):
+        if not isinstance(data, dict):
+            raise CurrencyProviderException('Data is not a JSON')
 
-        data = response.json()
         if 'errors' in data:
-            message = data['errors'].get(
-                'message', 'Could not connect to coinbase')
-            raise CurrencyProviderRequestException(message)
+            errors = data['errors']
+            if not isinstance(errors, dict):
+                msg = str(errors)
+            else:
+                msg = data['errors'].get('message')
+            msg = 'Error in response: {}'.format(msg)
+            raise CurrencyProviderException(msg)
 
-        base_currency = data['data']['currency']
-        rates = data['data']['rates']
+        try:
+            base_currency = data['data']['currency']
+            rates = data['data']['rates']
+        except KeyError:
+            raise CurrencyProviderException('Missing keys from JSON response')
 
         rates = map(lambda r: (r[0], get_or_default(
             r[1], float, None)), rates.items())
@@ -51,12 +54,15 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         if base_currency != 'EUR' and ('EUR' not in rates or
                                        base_currency not in rates):
             raise CurrencyProviderException(
-                'Could not convert to base currency')
+                'EUR not base currency or not in rates')
+
+        return base_currency, rates
+
+    def _convert_rates(self, base_currency, rates):
 
         if base_currency != 'EUR':
-            base_rate = rates['EUR']
-            request_base_rate = rates[base_currency]
-            def rate_conv(r): return r * request_base_rate / base_rate
+            eur_rate = rates['EUR']
+            def rate_conv(r): return r / eur_rate
         else:
             def rate_conv(r): return r
 
@@ -68,3 +74,41 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
             }
             for currency, rate in rates.items()
         }
+
+    def request_currencies(self, *currencies, force=False):
+        super().request_currencies(*currencies, force=force)
+        params = {'currency': 'EUR'}
+        try:
+            self._logger.info('Making request to Coinbase')
+            with urlopen(self.get_request(params)) as response:
+                data = response.read().decode()
+                response_code = response.getcode()
+        except HTTPError as e:
+            response_code = e.code
+        except Exception as e:
+            self.had_error = True
+            msg = 'Could not connect: {}'.format(e)
+            self._logger.exception(msg)
+            raise CurrencyProviderException(msg)
+
+        if not str(response_code).startswith('2'):
+            self.had_error = True
+            msg = 'Response code not 2xx: {}'.format(response_code)
+            self._logger.error(msg)
+            raise CurrencyProviderException(msg)
+
+        try:
+            data = json.loads(data)
+        except JSONDecodeError as e:
+            self.had_error = True
+            self._logger.exception('Could not decode json data: {}'.format(e))
+            raise CurrencyProviderException('Could not decode json data')
+
+        try:
+            base_currency, rates = self._validate_data(data)
+        except CurrencyProviderException as e:
+            self.had_error = True
+            self._logger.exception(e)
+            raise e
+
+        return self._convert_rates(base_currency, rates)

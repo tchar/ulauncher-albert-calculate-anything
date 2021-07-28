@@ -18,7 +18,7 @@ from calculate_anything.exceptions import (
     MissingSimpleevalException, ZeroDivisionException,
     BooleanComparisonException
 )
-from calculate_anything.constants import (
+from calculate_anything.regex import (
     CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE,
     CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
 )
