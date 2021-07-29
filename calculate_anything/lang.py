@@ -69,18 +69,18 @@ class LanguageService(metaclass=Singleton):
             try:
                 with open(lang_filepath) as f:
                     self._data = json.loads(f.read())
-            except Exception as e:
-                self._logger.exception(
+            except Exception as e:  # pragma no cover
+                self._logger.exception(  # pragma no cover
                     'Could not load language, falling back to en_US: {}: {}'
                     .format(lang_filepath, e))
-                fallback = True
+                fallback = True  # pragma no cover
 
         if fallback:
-            if lang == 'en_US':
-                self._logger.error(
+            if lang == 'en_US':  # pragma no cover
+                self._logger.error(  # pragma no cover
                     'en_US does not exist, will not use any language '
                     'aliases: {}'.format(lang_filepath))
-                return
+                return  # pragma no cover
             return self.set('en_US')
 
         self._lang = lang
