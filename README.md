@@ -1,5 +1,8 @@
 # <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
+[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything)
+[![codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything) 
+
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
 The `calculate_anything` module does not depend on `Ulauncher` or `Albert` so it is extensible for other use cases (see [demo with prompt_toolkit](#extending-and-more)).
