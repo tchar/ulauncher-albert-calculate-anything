@@ -30,8 +30,8 @@ class TimezoneJsonCache:
         search_terms = [s.lower() for s in search_terms]
         cities_found = []
         for city in cities:
-            found_all = True
             for search_term in search_terms:
+                found = False
                 if search_term == city['state'].lower():
                     found = True
                 elif search_term == city['country'].lower():
@@ -40,13 +40,8 @@ class TimezoneJsonCache:
                     found = True
                 elif search_term == city['timezone'].lower():
                     found = True
-                else:
-                    found = False
-
                 if not found:
-                    found_all = False
                     break
-
-            if found_all:
+            else:
                 cities_found.append(city)
         return cities_found or cities

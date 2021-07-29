@@ -28,50 +28,54 @@ class TimeCalculation(_Calculation):
 
         if now == self.value:
             description = translator('now').capitalize()
-        elif now.year - 1 == self.value.year:
-            description = translator('last-year').capitalize()
-        elif now.year + 1 == self.value.year:
-            description = translator('next-year').capitalize()
-        elif now.year != self.value.year:
-            if self.value.year > now.year:
-                description = translator('years-from-now')
-            else:
-                description = translator('years-ago')
-            description = '{} {}'.format(
-                abs(now.year - self.value.year), description)
-        elif now.month - 1 == self.value.month:
-            description = translator('last-month').capitalize()
-        elif now.month + 1 == self.value.month:
-            description = translator('next-month').capitalize()
-        elif now.month != self.value.month:
-            if self.value.month > now.month:
-                description = translator('months-from-now')
-            else:
-                description = translator('months-ago')
-            description = '{} {}'.format(
-                abs(now.month - self.value.month), description)
-        elif now_week - 1 == date_week:
-            description = translator('last-week').capitalize()
-        elif now_week + 1 == date_week:
-            description = translator('next-week').capitalize()
-        elif now_week != date_week:
-            if date_week > now_week:
-                description = translator('weeks-from-now')
-            else:
-                description = translator('weeks-ago')
-            description = '{} {}'.format(
-                abs(now_week - date_week), description)
-        elif now.day - 1 == self.value.day:
-            description = translator('yesterday').capitalize()
-        elif now.day + 1 == self.value.day:
-            description = translator('tomorrow').capitalize()
-        elif now.day != self.value.day:
-            if self.value.day > now.day:
-                description = translator('days-from-now')
-            else:
-                description = translator('days-ago')
-            description = '{} {}'.format(
-                abs(now.day - self.value.day), description)
+        elif now.year < self.value.year:
+            diff = self.value.year - now.year
+            description = 'years-from-now' if diff > 1 else 'next-year'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now.year > self.value.year:
+            diff = now.year - self.value.year
+            description = 'years-ago' if diff > 1 else 'last-year'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now.month < self.value.month:
+            diff = self.value.month - now.month
+            description = 'months-from-now' if diff > 1 else 'next-month'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now.month > self.value.month:
+            diff = now.month - self.value.month
+            description = 'months-ago' if diff > 1 else 'last-month'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now_week < date_week:
+            diff = date_week - now_week
+            description = 'weeks-from-now' if diff > 1 else 'next-week'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now_week > date_week:
+            diff = now_week - date_week
+            description = 'weeks-ago' if diff > 1 else 'last-week'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now.day < self.value.day:
+            diff = self.value.day - now.day
+            description = 'days-from-now' if diff > 1 else 'tomorrow'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
+        elif now.day > self.value.day:
+            diff = now.day - self.value.day
+            description = 'days-ago' if diff > 1 else 'yesterday'
+            diff = '{} '.format(diff) if diff > 1 else ''
+            description = translator(description)
+            description = '{}{}'.format(diff, description)
         else:
             description = translator('today').capitalize()
 

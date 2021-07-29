@@ -67,9 +67,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         prev_space = False
         for c in expression:
             is_space = c.strip() == ''
-            if is_space:
-                expr += c
-            elif c in self._keywords_set:
+            if is_space or c in self._keywords_set:
                 expr += c
             elif 'j' in c:
                 return None, False

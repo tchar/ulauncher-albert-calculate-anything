@@ -141,15 +141,11 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         # Parse expression because it is ambiguous to match with regex
+        parens_dict = {')': 1, '(': -1}
         signs = set(['+', '-'])
         parens = 0
         for i, c in enumerate(reversed(query)):
-            if c == '%':
-                pass
-            elif c == ')':
-                parens += 1
-            elif c == '(':
-                parens -= 1
+            parens += parens_dict.get(c, 0)
             if c in signs and parens == 0:
                 break
         else:
@@ -158,7 +154,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         i = len(query) - i - 1
 
         amount = query[:i]
-        sign = query[i]
+        sign = 1 if query[i] == '+' else -1
         percentage = query[i+1:-1]
         if not amount.strip() or not percentage.strip():
             return None
@@ -172,11 +168,8 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         amount, percentage = result
         try:
-            amount2 = percentage.value * amount.value / 100
-            if sign == '+':
-                result = amount.value + amount2
-            else:
-                result = amount.value - amount2
+            result = percentage.value * amount.value / 100
+            result = amount.value + sign * result
             query_amount = amount.query
             query_percentage = percentage.query
             query = '({}) + ({})%'.format(query_amount, query_percentage)

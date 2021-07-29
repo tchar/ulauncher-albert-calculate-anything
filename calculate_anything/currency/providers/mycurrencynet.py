@@ -39,9 +39,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
                 continue
             r = rate['rate']
             cc = rate['currency_code']
-            if base_currency == 'EUR':
-                found_eur = True
-            if cc == 'EUR':
+            if 'EUR' in [base_currency, cc]:
                 found_eur = True
             if rate['currency_code'] == base_currency:
                 found_base = True
