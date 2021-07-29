@@ -8,6 +8,7 @@ from itertools import zip_longest
 from simpleeval import SimpleEval
 import parsedatetime
 from calculate_anything.time import TimezoneService
+from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
 import calculate_anything.query.handlers.units as units_handler
@@ -92,6 +93,17 @@ def set_time_reference(datetime):
         yield
         time_handler.TimeQueryHandler.now = now
     return _set_time_reference
+
+
+@contextmanager
+def extra_translations(mode, translations):
+    old_data = LanguageService()._data.copy()
+    if mode not in LanguageService()._data:
+        LanguageService()._data[mode] = {}
+    for k, v in translations.items():
+        LanguageService()._data[mode][k] = v
+    yield
+    LanguageService()._data = old_data
 
 
 @contextmanager

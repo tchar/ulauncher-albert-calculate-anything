@@ -94,11 +94,11 @@ class CustomHandler(_logging.Handler):
                  critical: Callable[[str], None],
                  level=_logging.NOTSET) -> None:
         '''Args:
-            debug (callable): Called when debug log is received.
-            info (callable): Called when info log is received.
-            warning (callable): Called when warning log is received.
-            error (callable): Called when error log is received.
-            critical (callable): Called when critical log is received.
+            debug (Callable[str]): Called when debug log is received.
+            info (Callable[str]): Called when info log is received.
+            warning (Callable[str]): Called when warning log is received.
+            error (Callable[str]): Called when error log is received.
+            critical (Callable[str]): Called when critical log is received.
             level (int): Same as logging module's values.
         '''
         super().__init__(level=level)
@@ -111,17 +111,18 @@ class CustomHandler(_logging.Handler):
 
     def emit(self, record: _logging.LogRecord) -> None:
         '''Emits the LogRecord using the provided callables when
-        instantiated'''
+        instantiated.
+        '''
 
-        if record.levelno == _logging.DEBUG:
+        if record.levelno <= _logging.DEBUG:
             log = self._debug
-        elif record.levelno == _logging.INFO:
+        elif record.levelno <= _logging.INFO:
             log = self._info
-        elif record.levelno == _logging.WARNING:
+        elif record.levelno <= _logging.WARNING:
             log = self._warning
-        elif record.levelno == _logging.ERROR:
+        elif record.levelno <= _logging.ERROR:
             log = self._error
-        elif record.levelno == _logging.CRITICAL:
+        elif record.levelno <= _logging.CRITICAL:
             log = self._critical
         else:
             return

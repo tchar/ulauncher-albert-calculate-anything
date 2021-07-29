@@ -80,8 +80,9 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
         if currencies:
             params['symbols'] = ','.join(currencies)
         try:
-            self._logger.info('Making request to fixerio')
-            with urlopen(self.get_request(params)) as response:
+            request = self.get_request(params)
+            self._logger.info('Making request to: {}'.format(request.full_url))
+            with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
         except HTTPError as e:

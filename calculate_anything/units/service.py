@@ -104,10 +104,10 @@ class UnitsService(metaclass=Singleton):
         return self
 
     def stop(self):
-        self._running = False
+        CurrencyService().remove_update_callback(self._update_callback)
         self._unit_registry = None
         self._base_currency = None
-        CurrencyService().remove_update_callback(self._update_callback)
+        self._running = False
         return self
 
     def start(self, force=False):

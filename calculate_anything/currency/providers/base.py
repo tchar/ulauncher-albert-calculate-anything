@@ -34,7 +34,6 @@ class CurrencyProvider:
         timestamp = datetime.now().timestamp()
         if not force and self.had_error and \
                 timestamp - 60 <= self.last_request_timestamp:
-            self.had_error = True
             raise CurrencyProviderException('Too many requests')
         self.last_request_timestamp = timestamp
         return {}

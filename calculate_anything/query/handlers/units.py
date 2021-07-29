@@ -15,9 +15,9 @@ from calculate_anything.calculation import (
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.utils import is_types, Singleton
-from calculate_anything.regex import UNIT_QUERY_REGEX, UNIT_SPLIT_RE
+from calculate_anything.regex import UNIT_QUERY_SPLIT_RE, UNIT_SPLIT_RE
 from calculate_anything.exceptions import (
-    CurrencyProviderException, MissingPintException
+    CurrencyProviderException, MissingPintException, ZeroDivisionException
 )
 
 
@@ -29,7 +29,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         super().__init__('=')
         self._logger = logging.getLogger(__name__)
 
-    def _items_for_currency_errors(self, unit_dimensionalities):
+    def _items_for_currency_errors(self, units):
+        dimensionalities = set(unit.dimensionality for unit in units)
         currency_service = CurrencyService()
         currency_provider_had_error = currency_service.enabled and \
             currency_service.provider_had_error
@@ -37,7 +38,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         currency_provider_had_error = (
             currency_service.enabled and
             currency_service.provider_had_error and
-            any(map(lambda d: '[currency]' in d, unit_dimensionalities))
+            any(map(lambda d: '[currency]' in d, dimensionalities))
         )
         if currency_provider_had_error:
             item = UnitsCalculation(
@@ -48,14 +49,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
     @staticmethod
     def _extract_query(query):
-        matches = UNIT_QUERY_REGEX.findall(query)
-        if not matches:
-            return None
+        query = UNIT_QUERY_SPLIT_RE.split(query, maxsplit=1)
 
-        unit_from, units_to = matches[0]
-        units_to = units_to.split(',')
+        unit_from = query[0].strip()
+        units_to = []
+        if len(query) == 1:
+            return unit_from, units_to
 
-        unit_from = unit_from.strip()
+        units_to = query[1].split(',')
         units_to = map(str.strip, units_to)
         units_to = filter(None, units_to)
         units_to = list(units_to)
@@ -115,7 +116,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             else:
                 expression = expression_fmt.format(*expression)
                 yield expression
-        yield unit_from
+        # TODO: To be removed
+        # yield unit_from
 
     def _get_only_one_unit(self, unit_from):
         translator = LanguageService().get_translator('units')
@@ -147,26 +149,27 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         yield unit_from
 
     def _get_possible_units(self, unit_from):
-        if UnitsService().conversion_mode == \
-                UnitsService.ConversionMode.NORMAL:
-            return self._get_only_one_unit(unit_from)
         if UnitsService().conversion_mode == UnitsService.ConversionMode.CRAZY:
             return self._get_all_possible_units(unit_from)
         return self._get_only_one_unit(unit_from)
 
     def _parse_safe(self, expression):
+        unit = None
+        error_to_show = None
         try:
             unit = UnitsService().unit_registry.parse_expression(expression)
-            if not isinstance(unit, pint.Quantity):
-                return None
+            if UnitsCalculation.is_strictly_dimensionless(unit):
+                unit = None
             if (UnitsService().conversion_mode ==
                 UnitsService.ConversionMode.NORMAL and
                 CurrencyUnitsCalculation.has_currency(unit) and
                     not CurrencyUnitsCalculation.is_currency(unit)):
-                return None
-            return unit
+                unit = None
         except TypeError:
             pass
+        except ZeroDivisionError:
+            extra = {'icon': 'images/convert.svg'}
+            error_to_show = ZeroDivisionException(extra=extra)
         except (pint.errors.DimensionalityError,
                 pint.errors.UndefinedUnitError,
                 pint.errors.DefinitionSyntaxError,
@@ -174,10 +177,12 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             self._logger.debug(
                 'Got pint exception when trying to parse {!r}: {}'
                 .format(expression, e))
-        except Exception as e:
-            self._logger.exception(
+        except Exception as e:  # pragma no cover
+            self._logger.exception(  # pragma no cover
                 'Got exception when trying to parse: {!r}: {}'
                 .format(expression, e))
+
+        return unit, error_to_show
 
     def handle_raw(self, query):
         if '%' in query:
@@ -192,31 +197,39 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         original_query = query
         query = UnitsQueryHandler._extract_query(query)
-        if not query:
-            return None
 
         ureg = UnitsService().unit_registry
         base_currency = UnitsService().base_currency
         unit_from, units_to = query
 
+        parse_err = None
         unit_from_ureg_currency = None
-        unit_dimensionalities = set()
+        unit_set = set()
         units_from_ureg = []
         with ureg.context('currency'):
             for expression in self._get_possible_units(unit_from):
-                unit_from_ureg = self._parse_safe(expression)
+                unit_from_ureg, parse_err = self._parse_safe(expression)
+                if parse_err:
+                    break
                 if unit_from_ureg is None:
                     continue
-                unit_from_ureg_dim = unit_from_ureg.dimensionality
-                if unit_from_ureg_dim in unit_dimensionalities:
+                unit_from_ureg_unit = unit_from_ureg.units
+                if unit_from_ureg_unit in unit_set:
                     continue
                 if UnitsCalculation.is_currency(unit_from_ureg):
                     unit_from_ureg_currency = unit_from_ureg
                 units_from_ureg.append(unit_from_ureg)
-                unit_dimensionalities.add(unit_from_ureg_dim)
+                unit_set.add(unit_from_ureg_unit)
+
+        if parse_err:
+            suffix = ', '.join(units_to)
+            suffix = ' to {}'.format(suffix) if suffix else ''
+            query = '{}{}'.format(expression, suffix)
+            item = UnitsCalculation(query=query, error=parse_err)
+            return [item]
 
         items = []
-        items.extend(self._items_for_currency_errors(unit_dimensionalities))
+        items.extend(self._items_for_currency_errors(unit_set))
 
         if not units_to:
             # Add currency units if compattible with units from
@@ -250,6 +263,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             units_to_ureg = map(self._get_possible_units, units_to)
             units_to_ureg = chain.from_iterable(units_to_ureg)
             units_to_ureg = map(self._parse_safe, units_to_ureg)
+            units_to_ureg = filter(lambda u: u[1] is None, units_to_ureg)
+            units_to_ureg = map(lambda u: u[0], units_to_ureg)
             units_to_ureg = filter(is_types(pint.Quantity), units_to_ureg)
             units_to_ureg = filter(lambda u: u.magnitude == 1, units_to_ureg)
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
@@ -271,16 +286,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                         )
                     )
                     continue
-                try:
-                    rate = unit_converted.magnitude / unit_from_ureg.magnitude
-                    rate = ureg.Quantity(rate, unit_to_ureg)
-                except ZeroDivisionError:
-                    rate = None
-            except Exception as e:
-                self._logger.exception(
+                Q = ureg.Quantity
+                rate = Q(1, unit_from_ureg.units)
+                rate = rate.to(Q(1, unit_converted.units), 'currency')
+            except Exception as e:  # pragma no cover
+                self._logger.exception(  # pragma no cover
                     'Unexpected exception uni units conversion: {!r}: {}'
                     .format(original_query, e))
-                continue
+                continue  # pragma no cover
 
             kwargs = {}
             if UnitsCalculation.is_currency(unit_converted):
@@ -315,10 +328,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             )
 
         if unit_from_ureg_currency and added_currency:
+            Q = ureg.Quantity
             items.append(
                 CurrencyUnitsCalculation(
                     value=unit_from_ureg_currency,
-                    rate=None,
+                    rate=Q(1.0, unit_from_ureg_currency.units),
                     unit_from=unit_from_ureg_currency.units,
                     unit_to=unit_from_ureg_currency.units,
                     query='{0} {1} to {1}'.format(

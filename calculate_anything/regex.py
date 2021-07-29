@@ -7,8 +7,7 @@ PLUS_MINUS_REGEX = multi_re.compile(
     {'plus': '+', 'minus': '-'}, flags=re.IGNORECASE)
 
 # Unit conversion regex match
-UNIT_QUERY_REGEX = re.compile(
-    r'(.*?)(?:\s+to|\s*$)(?:\s+(.*))?', flags=re.IGNORECASE)
+UNIT_QUERY_SPLIT_RE = re.compile(r'\sto\s', flags=re.IGNORECASE)
 # Unit conversion when no target unit specified
 # UNIT_REGEX_SPLIT = re.compile(r'[^\W_0-9]+')
 UNIT_SPLIT_RE = re.compile(r'([A-Za-z_]+)')

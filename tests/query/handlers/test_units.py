@@ -4,12 +4,15 @@ from calculate_anything.currency import CurrencyService
 import pytest
 from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
+from calculate_anything.preferences import Preferences
 from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import UnitsQueryHandler
 from calculate_anything.exceptions import (
-    MissingPintException, CurrencyProviderException
+    MissingPintException, CurrencyProviderException, ZeroDivisionException
 )
-from tests.utils import approxunits, no_pint, query_test_helper
+from tests.utils import (
+    approxunits, extra_translations, no_pint, query_test_helper
+)
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 LanguageService().set('en_US')
@@ -67,6 +70,15 @@ def currency_description(Q, data):
 
 test_spec_units_simple = [lambda Q: {
     # Simple test - 1
+    'query': '= 1 m',
+    'results': [
+        get_unit_result(Q)(
+            '1 meter to meter', approxunits(Q(1, 'meter')),
+            '1 meter', '[length]'
+        ),
+    ]
+}, lambda Q: {
+    # Simple test - 2
     'query': '= 1 cm to m',
     'results': [
         get_unit_result(Q)(
@@ -75,7 +87,7 @@ test_spec_units_simple = [lambda Q: {
         ),
     ]
 }, lambda Q: {
-    # Simple test - 2
+    # Simple test - 3
     'query': '= 10 c to f',
     'results': [
         get_unit_result(Q)(
@@ -85,7 +97,7 @@ test_spec_units_simple = [lambda Q: {
         ),
     ]
 }, lambda Q: {
-    # Simple test - 2
+    # Simple test - 4
     'query': '= 27.75 kg to pounds',
     'results': [
         get_unit_result(Q)(
@@ -94,7 +106,7 @@ test_spec_units_simple = [lambda Q: {
         ),
     ]
 }, lambda Q: {
-    # Simple test - 4
+    # Simple test - 5
     'query': '= 5400 second to h',
     'results': [
         get_unit_result(Q)(
@@ -103,7 +115,7 @@ test_spec_units_simple = [lambda Q: {
         ),
     ]
 }, lambda Q: {
-    # Simple test - 1
+    # Simple test - 6
     'query': '= 150000000 b to mb',
     'results': [
         get_unit_result(Q)(
@@ -112,7 +124,28 @@ test_spec_units_simple = [lambda Q: {
             '150 megabyte', ''
         ),
     ]
-}, ]
+}, lambda _: {
+    # Test zero division error
+    'query': '= 10 / 0 meters to decimeters',
+    'results': [{
+        'result': {
+            'query': '10 / 0 meters to decimeters',
+            'value': None,
+            'error': ZeroDivisionException,
+            'order': ZeroDivisionException.order
+        },
+        'query_result': {
+            'icon': 'images/convert.svg',
+            'name': tr_err('zero-division-error'),
+            'description': tr_err('zero-division-error-description'),
+            'clipboard': '',
+            'error': ZeroDivisionException,
+            'order': ZeroDivisionException.order,
+            'value': None,
+            'value_type': type(None)
+        }
+    }]
+}]
 
 
 @pytest.mark.parametrize('test_spec', test_spec_units_simple)
@@ -213,12 +246,64 @@ test_spec_units_multi = [lambda Q: {
 }, ]
 
 
-# @pytest.mark.parametrize('test_spec', test_spec_units_multi)
-# def test_units_multi(test_spec):
-#     query_test_helper(UnitsQueryHandler, test_spec)
+@pytest.mark.parametrize('test_spec', test_spec_units_multi)
+def test_units_multi(test_spec, mock_currency_service):
+    with mock_currency_service(error=False):
+        Quantity = UnitsService().unit_registry.Quantity
+        test_spec = test_spec(Quantity)
+        query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
+
+
+test_spec_units_mode_crazy = [lambda Q: {
+    # Simple test - 1
+    'query': '= 1 m',
+    'results': [
+        get_unit_result(Q)(
+            '1 meter to meter', approxunits(Q(1, 'meter')),
+            '1 meter', '[length]'
+        ), get_unit_result(Q)(
+            '1 molar to molar', approxunits(Q(1, 'molar')),
+            '1 molar', '[substance / length ^ 3]', 1
+        ),
+    ]
+}, lambda Q: {
+    # Simple test - 2
+    'query': '= 1 cm to m',
+    'results': [
+        get_unit_result(Q)(
+            '1 centimeter to meter', approxunits(Q(0.01, 'meter')),
+            '0.01 meter', '1 centimeter = 0.01 meter • [length]'
+        ), get_unit_result(Q)(
+            '1 centimolar to molar', approxunits(Q(0.01, 'molar')),
+            '0.01 molar',
+            '1 centimolar = 0.01 molar • [substance / length ^ 3]', 1
+        ),
+    ]
+}, ]
+
+
+@pytest.mark.parametrize('test_spec', test_spec_units_mode_crazy)
+def test_units_mode_crazy(test_spec, mock_currency_service):
+    with mock_currency_service(error=False):
+        # Set crazy mode
+        preferences = Preferences()
+        preferences.units.set_conversion_mode('crazy')
+        preferences.commit()
+
+        Quantity = UnitsService().unit_registry.Quantity
+        test_spec = test_spec(Quantity)
+        query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
+
+        preferences.units.set_conversion_mode('normal')
+        preferences.commit()
+
 
 test_spec_currency = [lambda Q, data: {
-    'query': '= 10,000 MXN',
+    'query': '= 10,000 mexican',
     'results': [
         get_unit_result(Q)(
             '10000 currency_MXN to currency_EUR',
@@ -270,6 +355,23 @@ test_spec_currency = [lambda Q, data: {
             approxunits(currency_amount(Q, data)(7.277, 'AMD', 'AMD', True)),
             '7.28 AMD', '',
             order=1, icon='images/flags/AMD.svg'
+        ), ]
+}, lambda Q, data: {
+    # Test aliases from translator
+    'query': '= 100.27 $ to BTC',
+    'results': [
+        get_unit_result(Q)(
+             '100.27 currency_USD to currency_BTC',
+             approxunits(currency_amount(Q, data)(100.27, 'USD', 'BTC', True)),
+             currency_amount(Q, data)(100.27, 'USD', 'BTC', False),
+             currency_description(Q, data)('USD', 'BTC'),
+             order=0, icon='images/flags/BTC.svg'
+        ),
+        get_unit_result(Q)(
+            '100.27 currency_USD to currency_USD',
+            approxunits(currency_amount(Q, data)(100.27, 'USD', 'USD', True)),
+            '100.27 USD', '',
+            order=1, icon='images/flags/USD.svg'
         ), ]
 }, lambda Q, data: {
     # Only one result (do not show duplicate 10 CAD)
@@ -327,6 +429,46 @@ def test_currency(mock_currency_service, test_spec):
     with mock_currency_service(error=False) as data:
         Q = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Q, data)
+        query_test_helper(UnitsQueryHandler, test_spec)
+        query_test_helper(MultiHandler, test_spec, raw=True)
+        query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
+
+
+test_spec_aliases_translations = [lambda Q: {
+    'query': '= 1 &',
+    'results': [
+        get_unit_result(Q)(
+            '1 meter to meter', approxunits(Q(1, 'meter')),
+            '1 meter', '[length]'
+        ),
+    ]
+}, lambda Q: {
+    'query': '= 1 & to c&',
+    'results': [
+        get_unit_result(Q)(
+            '1 meter to centimeter', approxunits(Q(100, 'centimeter')),
+            '100 centimeter', '1 meter = 100 centimeter • [length]'
+        ),
+    ]
+}, lambda Q: {
+    'query': '= 1 m',
+    'results': [
+        get_unit_result(Q)(
+            '1 meter to meter', approxunits(Q(1, 'meter')),
+            '1 meter', '[length]'
+        ),
+    ]
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_spec_aliases_translations)
+def test_aliases_translations(mock_currency_service, test_spec):
+    translations = {'&': 'meter', 'm': 'meter'}
+    with mock_currency_service(error=False), \
+            extra_translations('units', translations):
+        Q = UnitsService().unit_registry.Quantity
+        test_spec = test_spec(Q)
+
         query_test_helper(UnitsQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -397,3 +539,62 @@ def test_provider_had_error(mock_currency_service, test_spec):
         query_test_helper(UnitsQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
+
+
+test_special_cases = [lambda _: {
+    'query': '= 10',
+    'results': []
+}, lambda _:  {
+    'query': '= 10 cm / cm',
+    'results': []
+}, lambda _: {
+    # Only on NORMAL mode
+    'query': '= 10 EUR / kilogram',
+    'results': []
+}, lambda Q: {
+    'query': '= 10 c ()',
+    'results': [
+        get_unit_result(Q)(
+            '10 degree_Celsius to degree_Celsius',
+            approxunits(Q(10.0, 'degree_Celsius')),
+            '10 degree Celsius', '[temperature]'
+        ),
+    ]
+}, lambda Q: {
+    'query': '= 10 m',
+    'results': [
+        get_unit_result(Q)(
+            '10 meter to meter',
+            approxunits(Q(10.0, 'meter')),
+            '10 meter', '[length]'
+        ),
+    ]
+}, lambda _: {
+    'query': '= 10 c(c',
+    'results': []
+}, lambda _: {
+    'query': '= 10 % c',
+    'results': []
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_special_cases)
+def test_special_cases(mock_currency_service, test_spec):
+    with mock_currency_service(error=False):
+        Q = UnitsService().unit_registry.Quantity
+        test_spec = test_spec(Q)
+        query_test_helper(UnitsQueryHandler, test_spec)
+
+
+test_units_service_not_running = [lambda _: {
+    'query': '= 10 meter to centimeter',
+    'results': []
+}]
+
+
+@pytest.mark.parametrize('test_spec', test_units_service_not_running)
+def test_unit_service_not_running(mock_currency_service, test_spec):
+    with mock_currency_service(error=False):
+        UnitsService().stop()
+        test_spec = test_spec(None)
+        query_test_helper(UnitsQueryHandler, test_spec)

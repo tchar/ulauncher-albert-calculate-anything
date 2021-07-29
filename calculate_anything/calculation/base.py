@@ -121,9 +121,12 @@ def currency_provider_error_query_result(calculation):
 
 
 def zero_division_error_query_result(calculation):
+    icon = 'images/icon.svg'
+    if calculation.error.extra is not None:
+        icon = calculation.error.extra.get('icon', icon)
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon='images/icon.svg',
+        icon=icon,
         name=translator('zero-division-error'),
         description=translator('zero-division-error-description'),
         clipboard='',

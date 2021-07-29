@@ -67,8 +67,9 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
         try:
-            self._logger.info('Making request to mycyrrency.net')
-            with urlopen(self.get_request()) as response:
+            request = self.get_request()
+            self._logger.info('Making request to: {}'.format(request.full_url))
+            with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
         except HTTPError as e:

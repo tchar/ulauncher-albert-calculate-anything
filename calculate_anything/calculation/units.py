@@ -58,8 +58,6 @@ class UnitsCalculation(_Calculation):
             name = self.value.format_babel(locale=_locale, spec='g')
         else:
             name = '{:g}'.format(self.value.magnitude)
-        if self.rate is None:
-            return name, ''
 
         if not self.unit_from.dimensionless:
             unit_from_name = self.unit_from.format_babel(
@@ -91,7 +89,7 @@ class UnitsCalculation(_Calculation):
             unit_name = translator(unit_name)
             name = '{:g} {}'.format(self.value.magnitude, unit_name)
 
-            if self.rate is not None and self.unit_from != self.unit_to:
+            if self.unit_from != self.unit_to:
                 unit_from_name = str(self.unit_from)
                 description = '1 {} = {:g} {}'.format(
                     unit_from_name, self.rate.magnitude, unit_name)
@@ -212,8 +210,6 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
         name = '{} {}'.format(converted_amount, unit_name)
         clipboard = '{} {}'.format(converted_amount, clipboard)
-        if self.rate is None:
-            return name, '', clipboard
 
         unit_from_name = str(self.unit_from)
         unit_from_name = replace_re.sub_dict(unit_from_name)
