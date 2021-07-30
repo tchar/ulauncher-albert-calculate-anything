@@ -1,48 +1,22 @@
 import os
 import shutil
-from functools import wraps
-from enum import IntFlag
 try:
     import sqlite3
 except ImportError:  # pragma: no cover
-    sqlite3 = None  # pragma: no cover
+    sqlite3 = None
+from calculate_anything.utils.loaders.loader import Loader
 from calculate_anything import logging
 
 
 __all__ = ['SqliteLoader']
 
 
-class SqliteLoader:
-    class Mode(IntFlag):
-        LOAD = 1
-        CREATE = LOAD << 1
-        REMOVE = LOAD << 2
-        MEMORY = LOAD << 3
-        FAIL = LOAD << 4
-
-    class Decorators:
-        def with_sql_data(func):
-            @wraps(func)
-            def _wrapper(self, *args, **kwargs):
-                if self.sql_data is None:
-                    self._mode |= SqliteLoader.Mode.FAIL
-                    return
-                return func(self, *args, **kwargs)
-            return _wrapper
-
-        def with_no_fail(func):
-            @wraps(func)
-            def _wrapper(self, *args, **kwargs):
-                if self._mode & SqliteLoader.Mode.FAIL:
-                    return
-                return func(self, *args, **kwargs)
-            return _wrapper
-
+class SqliteLoader(Loader):
     def __init__(self, sqlite_filepath,
-                 sql_filepath=None, name=None, mode=None):
+                 sql_filepath=None, name=None, mode=0):
+        super().__init__(Loader.Status.PENDING, mode)
         self.sqlite_filepath = sqlite_filepath
         self.sql_filepath = sql_filepath
-        self._mode = mode
         self._logger = logging.getLogger(__name__)
         if name is not None:
             self._logger = self._logger.getChild(name)
@@ -57,6 +31,7 @@ class SqliteLoader:
         self._sql_data = None
         self._sql_data_loaded = False
 
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
     def _pre_load(self):
         self._sqlite_file_exists = False
         if self.sqlite_filepath is not None:
@@ -76,18 +51,17 @@ class SqliteLoader:
 
         if self._sqlite_file_exists and self._sql_file_exists and \
                 self._sqlite_file_mtime >= self._sql_file_mtime:
-            mode = SqliteLoader.Mode.LOAD
+            self._mode |= Loader.Mode.LOAD
         elif self._sqlite_file_exists and self._sql_file_exists and \
                 self._sqlite_file_mtime < self._sql_file_mtime:
-            mode = SqliteLoader.Mode.REMOVE
+            self._mode |= Loader.Mode.REMOVE
         elif not self._sqlite_file_exists:
-            mode = SqliteLoader.Mode.CREATE
+            self._mode |= Loader.Mode.CREATE
         else:
-            mode = SqliteLoader.Mode.LOAD
+            self._mode |= Loader.Mode.LOAD
 
-        self._mode = mode if self._mode is None else self._mode
-
-    @Decorators.with_no_fail
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
+    @Loader.Decorators.with_mode(Loader.Mode.LOAD)
     def _load(self):
         try:
             self.db = db = sqlite3.connect(
@@ -96,6 +70,7 @@ class SqliteLoader:
                 cached_statements=500
             )
             db.cursor().execute('PRAGMA foreign_keys = ON;').close()
+            self._status |= Loader.Status.SUCCESS
             msg = 'Loaded timezone database: {}'
             msg = msg.format(self.sqlite_filepath)
             self._logger.info(msg)
@@ -103,45 +78,58 @@ class SqliteLoader:
             msg = 'Could not read database file: {}'
             msg = msg.format(e)
             self._logger.exception(e)
-            self._mode |= SqliteLoader.Mode.REMOVE
+            self._mode |= Loader.Mode.REMOVE
 
-    @Decorators.with_no_fail
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
+    @Loader.Decorators.without_mode(Loader.Mode.NO_REMOVE)
+    @Loader.Decorators.with_mode(Loader.Mode.REMOVE)
     def _remove(self):
-        try:
-            if os.path.isdir(self.sqlite_filepath):
+        if os.path.isdir(self.sqlite_filepath):
+            self._status |= Loader.Status.FILE_IS_DIR
+            try:
                 shutil.rmtree(self.sqlite_filepath)
-            else:
+            except Exception as e:  # pragma: no cover
+                self._mode |= Loader.Mode.MEMORY
+                msg = 'Could not remove directory database {}: {}'
+                msg = msg.format(self.sqlite_filepath, e)
+                self._logger.exception(msg)
+                return
+        else:
+            try:
                 os.remove(self.sqlite_filepath)
-            self._logger.info('Found new timezones, cleared database')
-            self._mode |= SqliteLoader.Mode.CREATE
-        # Can't test this without huge hacks
-        # In case we can't remove the file/directory
-        # Use memory
-        except Exception as e:  # pragma: no cover
-            msg = 'Exception when removing database {}: {}'  # pragma: no cover
-            msg = msg.format(self.sqlite_filepath, e)  # pragma: no cover
-            self._logger.exception(msg)  # pragma: no cover
-            self._mode |= SqliteLoader.Mode.MEMORY  # pragma: no cover
+            except Exception as e:  # pragma: no cover
+                self._mode |= Loader.Mode.MEMORY
+                msg = 'Could not remove file database {}: {}'
+                msg = msg.format(self.sqlite_filepath, e)
+                self._logger.exception(msg)
+                return
 
-    @Decorators.with_no_fail
-    def _execute_script(self, data):
+        self._logger.info('Found new timezones, cleared database')
+        self._mode |= Loader.Mode.CREATE
+
+    @Loader.Decorators.with_data
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
+    def _execute_script(self):
         db = self.db
+        data = self.data
         try:
             cursor = db.cursor()
             cursor.executescript(data)
             cursor.execute('PRAGMA foreign_keys = ON;')
             db.commit()
             cursor.close()
+            self._status |= Loader.Status.SUCCESS
         except Exception as e:
             msg = 'Could not execute sql file {}: {}'
             msg = msg.format(self.sql_filepath, e)
             self._logger.exception(msg)
-            self._mode |= SqliteLoader.Mode.FAIL
+            self._status |= Loader.Status.FAIL
+            self._status |= Loader.Status.INVALID_DATA
 
-    @Decorators.with_sql_data
-    @Decorators.with_no_fail
+    @Loader.Decorators.with_data
+    @Loader.Decorators.with_mode(Loader.Mode.CREATE)
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
     def _create(self):
-        data = self.sql_data
         try:
             self.db = sqlite3.connect(
                 self.sqlite_filepath,
@@ -156,27 +144,27 @@ class SqliteLoader:
         # Use memory
         except Exception as e:  # pragma: no cover
             msg = 'Could not create database {}: {}'  # pragma: no cover
-            msg = msg.format(self.sqlite_filepath, e)  # pragma: no cover
-            self._logger.exception(msg)  # pragma: no cover
-            self._mode |= SqliteLoader.Mode.MEMORY  # pragma: no cover
-            return  # pragma: no cover
-        self._execute_script(data)
+            msg = msg.format(self.sqlite_filepath, e)
+            self._logger.exception(msg)
+            self._mode |= Loader.Mode.MEMORY
+            return
+        self._execute_script()
 
-    @Decorators.with_sql_data
-    @Decorators.with_no_fail
+    @Loader.Decorators.with_data
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
+    @Loader.Decorators.with_mode(Loader.Mode.MEMORY)
     def _create_memory(self):
-        data = self.sql_data
         self.db = sqlite3.connect(
             ':memory:',
             check_same_thread=False,
             cached_statements=500
         )
         self._logger.info('Fell back to memory')
-        self._execute_script(data)
+        self._execute_script()
 
     @property
-    @Decorators.with_no_fail
-    def sql_data(self):
+    @Loader.Decorators.without_status(Loader.Status.FAIL)
+    def data(self):
         if self._sql_data_loaded:
             return self._sql_data
         if self.sql_filepath is None or not self._sql_file_exists:
@@ -195,28 +183,23 @@ class SqliteLoader:
         self._sql_data_loaded = True
         return data
 
-    @property
-    def mode(self):
-        return self._mode
-
     def load(self):
         if sqlite3 is None:
             return False  # pragma: no cover
 
         self._pre_load()
-        if self.mode & SqliteLoader.Mode.LOAD:
-            self._load()
+        self._load()
+        self._remove()
+        self._create()
+        self._create_memory()
 
-        if self.mode & SqliteLoader.Mode.REMOVE:
-            self._remove()
-
-        if self.mode & SqliteLoader.Mode.CREATE:
-            self._create()
-
-        if self.mode & SqliteLoader.Mode.MEMORY:
-            self._create_memory()
-
-        return not (self.mode & SqliteLoader.Mode.FAIL)
+        # Some cleanup
+        self._status &= ~Loader.Status.PENDING
+        if self._mode & Loader.Mode.NO_REMOVE:
+            self._mode &= ~Loader.Mode.REMOVE
+        if not (self.status & Loader.Status.SUCCESS):
+            self._status |= Loader.Status.FAIL
+        return self.status & Loader.Status.SUCCESS == 1
 
     def close(self):
         if self.db is not None:
