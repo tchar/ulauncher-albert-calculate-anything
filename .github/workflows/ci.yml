@@ -46,7 +46,7 @@ jobs:
       with:
         name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
         token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./cover/
+        directory: ./cover/xml
         files: coverage.xml
         env_vars: OS,PYTHON
         parallel: true
