@@ -7,7 +7,7 @@ from calculate_anything.exceptions import (
     BooleanComparisonException, MissingSimpleevalException,
     ZeroDivisionException
 )
-from tests.utils import (
+from tests.tutils import (
     calculator_no_simpleeval, reset_instance, query_test_helper
 )
 

@@ -1,7 +1,7 @@
 import pytest
 from calculate_anything.currency.providers import CoinbaseCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
-from tests.utils import currency_data, expected_currencies
+from tests.tutils import currency_data, expected_currencies
 
 
 def test_normal(mock_currency_provider, coinbase_data):

@@ -1,5 +1,5 @@
 import pytest
-from tests.utils import query_test_helper
+from tests.tutils import query_test_helper
 from calculate_anything.query.multi_handler import MultiHandler
 from calculate_anything.query.handlers import PercentagesQueryHandler
 from calculate_anything.lang import LanguageService

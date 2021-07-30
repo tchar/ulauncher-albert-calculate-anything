@@ -13,7 +13,9 @@ from calculate_anything.exceptions import (
     WrongBaseException,
     ZeroDivisionException
 )
-from tests.utils import base_n_no_simpleeval, query_test_helper, reset_instance
+from tests.tutils import (
+    base_n_no_simpleeval, query_test_helper, reset_instance
+)
 
 
 LanguageService().set('en_US')

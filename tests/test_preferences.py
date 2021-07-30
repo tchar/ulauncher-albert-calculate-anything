@@ -8,7 +8,7 @@ from calculate_anything.currency import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.time import TimezoneService
 from calculate_anything.preferences import Preferences
-from tests.utils import reset_instance
+from tests.tutils import reset_instance
 
 
 def test_defaults():

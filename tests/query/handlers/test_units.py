@@ -10,7 +10,7 @@ from calculate_anything.query.handlers import UnitsQueryHandler
 from calculate_anything.exceptions import (
     MissingPintException, CurrencyProviderException, ZeroDivisionException
 )
-from tests.utils import (
+from tests.tutils import (
     approxunits, extra_translations, no_pint, query_test_helper
 )
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')

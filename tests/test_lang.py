@@ -1,6 +1,6 @@
 from queue import Queue
 from calculate_anything.lang import LanguageService
-from tests.utils import reset_instance, extra_translations
+from tests.tutils import reset_instance, extra_translations
 
 
 def test_main():

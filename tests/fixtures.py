@@ -11,7 +11,7 @@ from calculate_anything.currency.providers import (
     MyCurrencyNetCurrencyProvider, FixerIOCurrencyProvider
 )
 from calculate_anything.currency.providers.base import ApiKeyCurrencyProvider
-from tests.utils import random_str, currency_data
+from tests.tutils import random_str, currency_data
 
 
 @pytest.fixture(scope='session')
@@ -162,12 +162,19 @@ def mock_currency_provider(httpserver: HTTPServer):
     return _mock_currency_provider
 
 
+_mock_currency_service_data = {}
+
+
 @pytest.fixture(scope='function')
 def mock_currency_service(mock_currency_provider, coinbase_data,
                           mycurrencynet_data, fixerio_data, ecb_data):
 
     @contextmanager
     def _mock_currency_service(error=False):
+        if error in _mock_currency_service_data:
+            yield _mock_currency_service_data[error]
+            return
+
         coindata = coinbase_data('EUR', currency_data('EUR')['rates'])
 
         timestamp = datetime.now().timestamp()
@@ -204,4 +211,5 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
             CurrencyService().start(force=True)
             data = data_queue.get(block=True, timeout=None)
             yield data
+            _mock_currency_service_data[error] = data
     return _mock_currency_service

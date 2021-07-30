@@ -1,15 +1,14 @@
-import os
-import shutil
 from threading import RLock
 try:
     import sqlite3
-except ImportError:
-    sqlite3 = None
+except ImportError:  # pragma: no cover
+    sqlite3 = None  # pragma: no cover
 from calculate_anything import logging
 from calculate_anything.utils import lock
+from calculate_anything.utils.loaders import SqliteLoader
 from calculate_anything.constants import (
-    MAIN_DIR, TIMEZONES_SQLITE_FILE_DEFAULT,
-    TIMEZONES_SQLITE_FILE_USER, TIMEZONES_SQL_FILE
+    TIMEZONES_SQLITE_FILE_DEFAULT, TIMEZONES_SQLITE_FILE_USER,
+    TIMEZONES_SQL_FILE
 )
 
 
@@ -23,119 +22,20 @@ class TimezoneSqliteCache:
     @lock
     def load(self):
         if sqlite3 is None:
-            return False
+            return False  # pragma no cover
 
-        sql_filepath = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
-        if not os.path.isfile(sql_filepath):
-            return False
+        loader = SqliteLoader(TIMEZONES_SQLITE_FILE_USER)
 
-        if not self._init_db(TIMEZONES_SQLITE_FILE_USER, load_only=True):
-            self._init_db(TIMEZONES_SQLITE_FILE_DEFAULT)
+        if not loader.load():
+            loader = SqliteLoader(TIMEZONES_SQLITE_FILE_DEFAULT,
+                                  TIMEZONES_SQL_FILE)
 
+        # If second time loading fails we can't do anything about it
+        if not loader.load():
+            return False  # pragma no cover
+        self._db = loader.db
         self._post_init()
         return True
-
-    def _init_db(self, file_path, load_only=False):
-        MODE_LOAD_ONLY = 1
-        MODE_LOAD = MODE_LOAD_ONLY << 1
-        MODE_CREATE = MODE_LOAD << 2
-        MODE_DELETE = MODE_LOAD << 3
-        MODE_MEMORY = MODE_LOAD << 4
-
-        sqlite_file_exists = os.path.exists(file_path)
-        if sqlite_file_exists:
-            sqlite_file_mtime = os.path.getmtime(file_path)
-        elif load_only:
-            return False
-        else:
-            sqlite_file_mtime = 0
-
-        sql_file_exists = os.path.exists(TIMEZONES_SQL_FILE)
-        if sql_file_exists:
-            sql_file_mtime = os.path.getmtime(TIMEZONES_SQL_FILE)
-        else:
-            sql_file_mtime = 0
-
-        if load_only:
-            mode = MODE_LOAD_ONLY
-        elif sqlite_file_exists and sqlite_file_exists and \
-                sqlite_file_mtime >= sql_file_mtime:
-            mode = MODE_LOAD
-        elif sqlite_file_exists and sql_file_exists and \
-                sqlite_file_mtime < sql_file_mtime:
-            mode = MODE_DELETE | MODE_CREATE
-        elif not sqlite_file_exists:
-            mode = MODE_CREATE
-        else:
-            mode = MODE_LOAD
-
-        if mode & (MODE_LOAD | MODE_LOAD_ONLY):
-            try:
-                self._db = db = sqlite3.connect(
-                    file_path,
-                    check_same_thread=False,
-                    cached_statements=500
-                )
-                db.cursor().execute('PRAGMA foreign_keys = ON;').close()
-                self._logger.info(
-                    'Loaded timezone database: {}'.format(file_path))
-            except sqlite3.DatabaseError as e:
-                self._logger.exception(
-                    'Could not read database file {}: {}'.format(file_path, e))
-                mode |= MODE_DELETE
-            except Exception as e:
-                self._logger.exception(
-                    'Got unexpected error when reading database file: {}'
-                    .format(e))
-                mode |= MODE_DELETE
-
-        if mode & MODE_LOAD_ONLY:
-            # Return True only if mode did not change
-            return mode == MODE_LOAD_ONLY
-
-        if mode & MODE_DELETE:
-            try:
-                if os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-                else:
-                    os.remove(file_path)
-                self._logger.info('Found new timezones, cleared database')
-            except Exception as e:
-                self._logger.exception(
-                    'Got unexpected exception when trying to remove the '
-                    'database: {}'.format(e))
-                mode = MODE_MEMORY
-
-        if mode & (MODE_CREATE | MODE_MEMORY):
-            with open(TIMEZONES_SQL_FILE, 'r') as f:
-                data = f.read()
-            if mode & MODE_CREATE:
-                try:
-                    self._db = db = sqlite3.connect(
-                        file_path,
-                        check_same_thread=False,
-                        cached_statements=500
-                    )
-                    self._logger.info(
-                        'Did not find {}, created from scratch'
-                        .format(file_path))
-                except Exception as e:
-                    self._logger.exception(
-                        'Got unexpected exception when trying to create the '
-                        'database: {}'.format(e))
-                    mode |= MODE_MEMORY
-            if mode & MODE_MEMORY:
-                self._db = db = sqlite3.connect(
-                    ':memory:',
-                    check_same_thread=False,
-                    cached_statements=500
-                )
-                self._logger.info('Fell back to memory')
-            cursor = db.cursor()
-            cursor.executescript(data)
-            cursor.execute('PRAGMA foreign_keys = ON;')
-            db.commit()
-            cursor.close()
 
     def _post_init(self):
         try:
@@ -143,16 +43,17 @@ class TimezoneSqliteCache:
             rows = cur.execute(
                 '''SELECT city_name_chunks_max FROM meta LIMIT 1''')
             self._city_name_chunks_max = next(iter(rows))[0]
-        except Exception as e:
+        # This should not happen but capture it just in case
+        # It is no fatal error
+        except Exception as e:  # pragma no cover
             self._city_name_chunks_max = None
-            self._logger.exception(
-                'Got exception when trying to fetch city_name_chunks_max: {}'
-                .format(e))
+            msg = 'Could not fetch city_name_chunks_max {}'
+            msg = msg.format(e)
+            self._logger.exception(msg)
         finally:
             cur.close()
 
     def _query_no_search_terms(self, city_name_search, exact):
-        # Allow user to use underscore
         if not exact:
             primary_query = 'name_alias LIKE ?'
             param = city_name_search + '%'
@@ -251,6 +152,7 @@ class TimezoneSqliteCache:
         cur.close()
 
     def get(self, city_name_search, *search_terms, exact=False):
+        # Allow user to use underscore in LIKE
         city_name_search = city_name_search.replace('?', '')
         search_terms = map(lambda s: s.replace('?', ''), search_terms)
         search_terms = list(search_terms)
@@ -278,6 +180,6 @@ class TimezoneSqliteCache:
     @lock
     def close_db(self):
         if self._db is None:
-            return
+            return  # pragma: no cover
         self._db.close()
         self._logger.info('Database closed')
