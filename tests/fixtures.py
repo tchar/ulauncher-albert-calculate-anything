@@ -1,4 +1,3 @@
-import os
 from contextlib import contextmanager
 from datetime import datetime
 from queue import Queue
