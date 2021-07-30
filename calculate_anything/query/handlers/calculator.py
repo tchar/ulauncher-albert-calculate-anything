@@ -154,6 +154,14 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
 
         return BooleanCalculation(value=result, query=query, order=0)
 
+    def can_handle(self, query):
+        if not super().can_handle(query):
+            return False
+
+        if CALCULATOR_REGEX_REJECT.match(query):
+            return False
+        return True
+
     def handle_raw(self, query: str) -> Union[List[Calculation], None]:
         """Handles a calculation query
 
@@ -168,9 +176,6 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             A list of calculation results.
         """
         query = query.lower()
-        if CALCULATOR_REGEX_REJECT.match(query):
-            return None
-
         query = CALCULATOR_QUERY_REGEX_REPLACE.sub_dict(query)
         query, _ = self._parse_expression(query)
         if not query:

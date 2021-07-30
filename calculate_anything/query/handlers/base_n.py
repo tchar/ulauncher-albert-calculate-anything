@@ -120,10 +120,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
         try:
             expr_dec, operators, expr_parsed = self._parse_expression(query)
-        except WrongBaseException as e:
-            item = BaseNCalculation(error=e, query=original_query)
-            return [item]
-        except BaseFloatingPointException as e:
+        except (WrongBaseException, BaseFloatingPointException) as e:
             item = BaseNCalculation(error=e, query=original_query)
             return [item]
         except Exception as e:
@@ -135,9 +132,9 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         results = []
         try:
             results = [self._simple_eval.eval(exp) for exp in expr_dec]
-        except MissingSimpleevalException:
+        except MissingSimpleevalException as e:
             item = BaseNCalculation(
-                error=MissingSimpleevalException(),
+                error=e,
                 query=original_query,
             )
             return [item]

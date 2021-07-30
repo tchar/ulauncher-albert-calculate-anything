@@ -21,7 +21,8 @@ CURRENCY_QUERY_DEFAULT_REGEX = re.compile(
 EMPTY_AMOUNT = re.compile(r'^\s*$')
 
 CALCULATOR_ERROR = 1e-10
-CALCULATOR_REGEX_REJECT = re.compile(r'.*(%|\/\/|==|[^A-Za-z]is[^A-Za-z]).*')
+CALCULATOR_REGEX_REJECT = re.compile(
+    r'.*(%|\/\/|==|[^a-z]is[^a-z]).*', flags=re.IGNORECASE)
 CALCULATOR_QUERY_REGEX_REPLACE = multi_re.compile({
     'mod ': '%', 'div ': '//', '^': '**',
     '>=': '>=', '<=': '<=', '=': '=='

@@ -184,9 +184,14 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         return unit, error_to_show
 
-    def handle_raw(self, query):
+    def can_handle(self, query):
+        if not super().can_handle(query):
+            return False
         if '%' in query:
-            return None
+            return False
+        return True
+
+    def handle_raw(self, query):
         if pint is None:
             item = UnitsCalculation(
                 error=MissingPintException(),
