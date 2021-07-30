@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 - Phrase/keyword you used
-- If you used any custom code, provide the code (use \`\`\`)
+- If you used any custom code, provide the code (use ```)
 
 **Expected behavior**
 What did you expect to happen.
