@@ -1,4 +1,4 @@
-# <img src="images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
+# <img src="calculate_anything/images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
 [![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything)
 [![codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything) 
@@ -11,11 +11,11 @@ See [Features](#features) for supported features, [Contents](#contents) for inst
 
 ## Albert Demo
 
-![](images/demo-albert.gif)
+![](demo/demo-albert.gif)
 
 ## Ulauncher Demo 
 
-![](images/demo-ulauncher.gif)
+![](demo/demo-ulauncher.gif)
 
 ## Features
 
@@ -366,12 +366,12 @@ You can also find a sample usage of the API using [prompt_toolkit](https://githu
 
 Here is a demo
 
-![](images/demo-prompt_toolkit.gif)
+![](demo/demo-prompt_toolkit.gif)
 
 ### Adding flags
 
-If your currencie's flag is missing you can place it in the extension's flags directory at `images/flags/` and restart your launcher or make a pull request to include it.
+If your currencie's flag is missing you can place it in the extension's flags directory at `calculate_anything/images/flags/` and restart your launcher or make a pull request to include it.
 
-Make sure to name your flag image in uppercase 2 letter name of your country. To make a currency flag, simply link the country flag you want to the currency `e.g ln -s US.svg USD.svg` or add a completely new flag For example American Dollar's flag is in `images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
+Make sure to name your flag image in uppercase 2 letter name of your country. To make a currency flag, simply link the country flag you want to the currency `e.g ln -s US.svg USD.svg` or add a completely new flag For example American Dollar's flag is in `calculate_anything/images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
 
 <div>Flag Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
