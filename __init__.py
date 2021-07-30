@@ -52,6 +52,7 @@ from calculate_anything.query.handlers import (  # noqa: E402
     PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
     Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
 )
+from calculate_anything.utils import images_dir  # noqa: E402
 from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402, E501
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -153,7 +154,7 @@ def handleQuery(query):
     items = []
     results = MultiHandler().handle(query_str, *handlers)
     for result in results:
-        icon = result.icon or 'calculate_anything/images/icon.svg'
+        icon = result.icon or images_dir('icon.svg')
         icon = os.path.join(MAIN_DIR, icon)
 
         if result.clipboard is not None:
@@ -175,7 +176,7 @@ def handleQuery(query):
                                                     SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
-        icon = os.path.join(MAIN_DIR, 'calculate_anything/images/icon.svg')
+        icon = os.path.join(MAIN_DIR, images_dir('icon.svg'))
         items.append(
             Item(
                 id=__title__,

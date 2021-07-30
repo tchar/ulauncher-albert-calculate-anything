@@ -179,7 +179,7 @@ def test_sqlite(test_spec):
 test_spec_json = [{
     # No file
     'id': '1',
-    'file': 'data1.json',
+    'file': 'datajson1.json',
     'default_data': None,
     'expected': {
         'data': None,
@@ -190,8 +190,8 @@ test_spec_json = [{
 }, {
     # File
     'id': '2',
-    'create': ('data2.json', '{"some-key": "some-value"}'),
-    'file': 'data2.json',
+    'create': ('datajson2.json', '{"some-key": "some-value"}'),
+    'file': 'datajson2.json',
     'default_data': {},
     'expected': {
         'data': {'some-key': 'some-value'},
@@ -202,8 +202,8 @@ test_spec_json = [{
 }, {
     # File
     'id': '3',
-    'create': ('data3.json', None),
-    'file': 'data3.json',
+    'create': ('datajson3.json', None),
+    'file': 'datajson3.json',
     'default_data': {'fallback': True},
     'expected': {
         'data': {'fallback': True},
@@ -216,8 +216,8 @@ test_spec_json = [{
 }, {
     # Junk data
     'id': '4',
-    'create': ('data4.json', '{{invalidata}'),
-    'file': 'data4.json',
+    'create': ('datajson4.json', '{{invalidata}'),
+    'file': 'datajson4.json',
     'default_data': {},
     'expected': {
         'data': {},
@@ -228,8 +228,8 @@ test_spec_json = [{
     }
 }, {
     # Junk data
-    'id': '4',
-    'file': 'data4.json',
+    'id': '5',
+    'file': 'datajson5.json',
     # Can't be jsoned
     'default_data': set(),
     'expected': {
@@ -240,10 +240,10 @@ test_spec_json = [{
     }
 }, {
     # No remove
-    'id': '3',
+    'id': '6',
     'mode': JsonLoader.Mode.NO_REMOVE,
-    'create': ('data3.json', None),
-    'file': 'data3.json',
+    'create': ('datajson3.json', None),
+    'file': 'datajson3.json',
     'default_data': {'fallback': True},
     'expected': {
         'data': None,
@@ -284,10 +284,10 @@ def test_json(test_spec):
 test_spec_json_currency = [{
     # Test simple
     'create': (
-        'data1.json',
+        'datajsoncurrency1.json',
         {'exchange_rates': {}, 'last_update_timestamp': 0}
     ),
-    'file': 'data1.json',
+    'file': 'datajsoncurrency1.json',
     'expected': {
         'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
         'load': True,
@@ -298,7 +298,7 @@ test_spec_json_currency = [{
 }, {
     # Test valid
     'create': (
-        'data8.json',
+        'datajsoncurrency8.json',
         {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 0},
             'BTC': {'rate': 1000, 'timestamp_refresh': 0},
@@ -306,7 +306,7 @@ test_spec_json_currency = [{
             'RON': {'rate': 0.20, 'timestamp_refresh': 0},
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data8.json',
+    'file': 'datajsoncurrency8.json',
     'expected': {
         'data':  {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 0},
@@ -322,10 +322,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 1
     'create': (
-        'data2.json',
+        'datajsoncurrency2.json',
         'Invalid data'
     ),
-    'file': 'data2.json',
+    'file': 'datajsoncurrency2.json',
     'expected': {
         'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
         'load': True,
@@ -339,10 +339,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 2
     'create': (
-        'data3.json',
+        'datajsoncurrency3.json',
         {'exchange-rates': 'some invalid rates', 'last_update_timestamp': 0}
     ),
-    'file': 'data3.json',
+    'file': 'datajsoncurrency3.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -356,10 +356,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 3
     'create': (
-        'data4.json',
+        'datajsoncurrency4.json',
         {'exchange_rates': {}, 'last_update_timestamp': 'invalid'}
     ),
-    'file': 'data4.json',
+    'file': 'datajsoncurrency4.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -373,10 +373,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 4
     'create': (
-        'data5.json',
+        'datajsoncurrency5.json',
         {'exchange_rates': {'rate': 1}, 'last_update_timestamp': 0}
     ),
-    'file': 'data5.json',
+    'file': 'datajsoncurrency5.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -390,12 +390,12 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 5
     'create': (
-        'data6.json',
+        'datajsoncurrency6.json',
         {'exchange_rates': {
             'EUR': {'rate': 'a', 'timestamp_refresh': 0}
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data6.json',
+    'file': 'datajsoncurrency6.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -407,14 +407,14 @@ test_spec_json_currency = [{
             CurrencyCacheLoader.Mode.LOAD
     }
 }, {
-    # Test invalid 7
+    # Test invalid 6
     'create': (
-        'data8.json',
+        'datajsoncurrency7.json',
         {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 'a'}
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data8.json',
+    'file': 'datajsoncurrency7.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,

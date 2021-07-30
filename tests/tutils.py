@@ -130,14 +130,18 @@ def extra_translations(mode, translations):
 
 
 def osremove(path):
-    if path is None:
-        return
-    if not os.path.exists(path):
-        return
-    if os.path.isdir(path):
-        os.rmdir(path)
-    else:
-        os.remove(path)
+    try:
+        if path is None:
+            return
+        if not os.path.exists(path):
+            return
+        if os.path.isdir(path):
+            os.rmdir(path)
+        else:
+            os.remove(path)
+    # Fucking windows
+    except Exception:
+        pass
 
 
 def temp_filepath(*filenames):
