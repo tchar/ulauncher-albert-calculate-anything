@@ -91,7 +91,7 @@ class PintDefinitionParser:
     def load_file(self, file_path, mode, is_currency=True):
         translation_adder = LanguageService().translation_adder(mode)
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 for i, line in enumerate(f):
                     self._process_line(line, i + 1, file_path,
                                        translation_adder, is_currency)

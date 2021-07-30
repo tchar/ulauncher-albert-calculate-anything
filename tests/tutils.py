@@ -39,7 +39,7 @@ def mem_path():
     rand_name = random_str(20)
     rand_path = os.path.join(mem_path_, rand_name)
     try:
-        with open(rand_path, 'w') as f:
+        with open(rand_path, 'w', encoding='utf-8') as f:
             f.write('\n')
     except Exception:
         return fallback
@@ -166,7 +166,7 @@ def temp_file(*filenames, sleep=0):
         for filename, data in filenames:
             filepath = temp_filepath(filename)
             if isinstance(data, str):
-                with open(filepath, 'w') as f:
+                with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(data)
                     time.sleep(sleep)
             else:
