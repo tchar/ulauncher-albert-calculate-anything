@@ -1,47 +1,10 @@
-import pytest
-import os
 import json
-import time
+from tests.tutils import temp_file, temp_filepath, osremove
+import pytest
 from calculate_anything.utils.loaders import (
     SqliteLoader, JsonLoader, CurrencyCacheLoader
 )
 from calculate_anything.utils.loaders.loader import Loader
-
-
-temp_dir = '/dev/shm'
-
-
-def oscreate(path, data):
-    if path is None:
-        return
-    if not os.path.isabs(path):
-        path = os.path.join(temp_dir, path)
-
-    if os.path.exists(path):
-        osremove(path)
-
-    if not isinstance(data, str):
-        os.mkdir(path)
-        if data:
-            data(path)
-        return
-
-    with open(path, 'w') as f:
-        f.write(data)
-
-
-def osremove(path):
-    if path is None:
-        return
-    if not os.path.isabs(path):
-        path = os.path.join(temp_dir, path)
-    if not os.path.exists(path):
-        return
-
-    if os.path.isdir(path):
-        os.rmdir(path)
-    else:
-        os.remove(path)
 
 
 test_spec_sqlite = [{
@@ -184,41 +147,33 @@ test_spec_sqlite = [{
 @ pytest.mark.parametrize('test_spec', test_spec_sqlite)
 def test_sqlite(test_spec):
     loader = None
-    try:
-        _id = test_spec['id']
+    _id = test_spec['id']
+    create = test_spec.get('create', [])
 
-        create = test_spec.get('create', [])
-        for i, [fname, data] in enumerate(create):
-            # Sleep to have different mtime files
-            if i != 0:
-                time.sleep(0.01)
-            oscreate(fname, data)
+    sqlite_fpath = test_spec['sqlite_file']
+    if sqlite_fpath:
+        sqlite_fpath = temp_filepath(sqlite_fpath)
 
-        sqlite_fpath = test_spec['sqlite_file']
-        if sqlite_fpath:
-            sqlite_fpath = os.path.join(temp_dir, sqlite_fpath)
-        sql_fpath = test_spec['sql_file']
-        if sql_fpath:
-            sql_fpath = os.path.join(temp_dir, sql_fpath)
+    sql_fpath = test_spec['sql_file']
+    if sql_fpath:
+        sql_fpath = temp_filepath(sql_fpath)
 
-        mode = test_spec.get('mode', 0)
+    mode = test_spec.get('mode', 0)
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    name = 'Test' + _id
 
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
-
-        name = 'Test' + _id
-        loader = SqliteLoader(sqlite_fpath, sql_fpath, name=name, mode=mode)
-
+    with temp_file(*create, sleep=0.01):
+        loader = SqliteLoader(sqlite_fpath, sql_fpath,
+                              name=name, mode=mode)
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_loaded == loaded
-    finally:
-        if loader is not None:
-            loader.close()
-        osremove(sqlite_fpath)
-        osremove(sql_fpath)
+        loader.close()
+    osremove(sqlite_fpath)
+    osremove(sql_fpath)
 
 
 test_spec_json = [{
@@ -303,35 +258,27 @@ test_spec_json = [{
 def test_json(test_spec):
     _id = test_spec['id']
     default_data = test_spec['default_data']
+
     file = test_spec['file']
     if file:
-        file = os.path.join(temp_dir, file)
-    create = test_spec.get('create', None)
-    fname = None
-    if create:
-        fname, data = create
-        oscreate(fname, data)
-    try:
-        mode = test_spec.get('mode', 0)
+        file = temp_filepath(file)
 
-        expected_data = test_spec['expected']['data']
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
+    create = test_spec.get('create')
 
-        name = 'Test' + _id
-
+    mode = test_spec.get('mode', 0)
+    expected_data = test_spec['expected']['data']
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    name = 'Test' + _id
+    with temp_file(create):
         loader = JsonLoader(file, default_data, name=name, mode=mode)
-
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_data == loader.data
         assert expected_loaded == loaded
-    finally:
-        osremove(file)
-        if fname:
-            osremove(fname)
+    osremove(file)
 
 
 test_spec_json_currency = [{
@@ -485,31 +432,26 @@ test_spec_json_currency = [{
 def test_json_currency(test_spec):
     file = test_spec['file']
     if file:
-        file = os.path.join(temp_dir, file)
+        file = temp_filepath(file)
     create = test_spec.get('create', None)
-    fname = None
     if create:
         fname, data = create
-        if data is not None:
-            data = json.dumps(data)
-        oscreate(fname, data)
-    try:
-        expected_data = test_spec['expected']['data']
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
+        data = json.dumps(data)
+        create = (fname, data)
 
+    expected_data = test_spec['expected']['data']
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    with temp_file(create):
         loader = CurrencyCacheLoader(file)
-
         loaded = loader.load()
+
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_data == loader.data
         assert expected_loaded == loaded
-    finally:
-        osremove(file)
-        if fname:
-            osremove(fname)
+    osremove(file)
 
 
 class MockLoader(Loader):

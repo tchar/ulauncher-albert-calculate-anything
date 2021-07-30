@@ -1,10 +1,13 @@
+import os
 import pytest
 import random
 import string
+import time
 from functools import lru_cache
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from itertools import zip_longest
+import tempfile
 from simpleeval import SimpleEval
 import parsedatetime
 from calculate_anything.time import TimezoneService
@@ -25,6 +28,26 @@ def random_str(length=None):
         random.choice(string.ascii_letters + string.digits)
         for _ in range(length)
     )
+
+
+@lru_cache(maxsize=None)
+def mem_path():
+    mem_path_ = '/dev/shm'
+    fallback = tempfile.gettempdir()
+    if not os.path.exists(mem_path_):
+        return fallback
+    rand_name = random_str(20)
+    rand_path = os.path.join(mem_path_, rand_name)
+    try:
+        with open(rand_path, 'w') as f:
+            f.write('\n')
+    except Exception:
+        return fallback
+    try:
+        os.remove(rand_path)
+        return mem_path_
+    except Exception:
+        return fallback
 
 
 @contextmanager
@@ -104,6 +127,57 @@ def extra_translations(mode, translations):
         LanguageService()._data[mode][k] = v
     yield
     LanguageService()._data = old_data
+
+
+def osremove(path):
+    if path is None:
+        return
+    if not os.path.exists(path):
+        return
+    if os.path.isdir(path):
+        os.rmdir(path)
+    else:
+        os.remove(path)
+
+
+def temp_filepath(*filenames):
+    mem_path_ = mem_path()
+    filepaths = []
+    for filename in filenames:
+        filepath = os.path.join(mem_path_, filename)
+        osremove(filepath)
+        filepaths.append(filepath)
+
+    if len(filepaths) == 1:
+        return filepaths[0]
+    if len(filepaths) > 1:
+        return filepaths
+
+
+@contextmanager
+def temp_file(*filenames, sleep=0):
+    filepaths = []
+    filenames = filter(None, filenames)
+    try:
+        for filename, data in filenames:
+            filepath = temp_filepath(filename)
+            if isinstance(data, str):
+                with open(filepath, 'w') as f:
+                    f.write(data)
+                    time.sleep(sleep)
+            else:
+                os.mkdir(filepath)
+                time.sleep(sleep)
+            filepaths.append(filepath)
+        if len(filepaths) == 1:
+            yield filepaths[0]
+        elif len(filepaths) > 1:
+            yield filepaths
+        else:
+            yield
+    finally:
+        for filepath in filepaths:
+            osremove(filepath)
 
 
 @contextmanager
