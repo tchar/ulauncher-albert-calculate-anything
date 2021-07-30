@@ -1,4 +1,3 @@
-import os
 from contextlib import contextmanager
 from datetime import datetime
 from queue import Queue
@@ -11,17 +10,16 @@ from calculate_anything.currency.providers import (
     MyCurrencyNetCurrencyProvider, FixerIOCurrencyProvider
 )
 from calculate_anything.currency.providers.base import ApiKeyCurrencyProvider
-from tests.tutils import random_str, currency_data
+from tests.tutils import osremove, random_str, currency_data, temp_filepath
 
 
 @pytest.fixture(scope='session')
 def log_filepath():
     rand_name = random_str(5)
     rand_name = 'pytest-calculate-anything-{}.log'.format(rand_name)
-    rand_filepath = os.path.join('/dev/shm', rand_name)
+    rand_filepath = temp_filepath(rand_name)
     yield rand_filepath
-    if os.path.exists(rand_filepath):
-        os.remove(rand_filepath)
+    osremove(rand_filepath)
 
 
 @pytest.fixture(scope='function')

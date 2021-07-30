@@ -8,6 +8,7 @@ omit =
     main.py
     __init__.py
     tests/*
+    calculate_anything/appdirs.py
 
 
 [report]

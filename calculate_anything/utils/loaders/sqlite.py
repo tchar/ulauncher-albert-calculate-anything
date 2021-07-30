@@ -172,7 +172,7 @@ class SqliteLoader(Loader):
             self._sql_data = None
             return None
         try:
-            with open(self.sql_filepath, 'r') as f:
+            with open(self.sql_filepath, 'r', encoding='utf-8') as f:
                 data = f.read()
         except Exception as e:
             msg = 'Could not read sql file {}: {}'

@@ -161,7 +161,7 @@ def test_logging_file(log_filepath, level):
     msgs.append((msg, _logging.CRITICAL))
 
     assert os.path.exists(log_filepath)
-    with open(log_filepath, 'r') as f:
+    with open(log_filepath, 'r', encoding='utf-8') as f:
         log = f.read()
 
     for msg, mlevel in msgs:

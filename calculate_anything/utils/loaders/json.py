@@ -31,7 +31,7 @@ class JsonLoader(Loader):
     @Loader.Decorators.with_mode(Loader.Mode.LOAD)
     def _load(self):
         try:
-            with open(self.filepath, 'r') as f:
+            with open(self.filepath, 'r', encoding='utf-8') as f:
                 self._data = f.read()
         except Exception as e:
             self._mode |= Loader.Mode.REMOVE
@@ -85,7 +85,7 @@ class JsonLoader(Loader):
             return
         try:
             data = json.dumps(self.default_data)
-            with open(self.filepath, 'w') as f:
+            with open(self.filepath, 'w', encoding='utf-8') as f:
                 f.write(data)
             self._data = self.default_data.copy()
             self._status |= Loader.Status.SUCCESS

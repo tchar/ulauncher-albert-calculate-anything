@@ -107,7 +107,7 @@ class CurrencyCache:
         if self._use_only_memory:
             return
         try:
-            with open(CURRENCY_DATA_FILE, 'w') as f:
+            with open(CURRENCY_DATA_FILE, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:  # pragma: no cover
             self._logger.exception(

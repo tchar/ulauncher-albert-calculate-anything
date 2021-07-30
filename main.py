@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from calculate_anything.utils.misc import images_dir
 from calculate_anything import logging
 from ulauncher.api.shared.action.CopyToClipboardAction import (
     CopyToClipboardAction
@@ -87,7 +88,7 @@ class KeywordQueryEventListener(EventListener):
                 on_enter = HideWindowAction()
 
             items.append(ExtensionResultItem(
-                icon=result.icon or 'calculate_anything/images/icon.svg',
+                icon=result.icon or images_dir('icon.svg'),
                 name=result.name,
                 description=result.description,
                 highlightable=False,
@@ -101,7 +102,7 @@ class KeywordQueryEventListener(EventListener):
 
         if should_show_placeholder:
             items.append(ExtensionResultItem(
-                icon='calculate_anything/images/icon.svg',
+                icon=images_dir('icon.svg'),
                 name=LanguageService().translate('no-result', 'misc'),
                 description=LanguageService().translate(
                     'no-result-{}-description'.format(mode), 'misc'),

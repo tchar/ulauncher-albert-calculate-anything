@@ -67,7 +67,7 @@ class LanguageService(metaclass=Singleton):
             fallback = True
         if not fallback:
             try:
-                with open(lang_filepath) as f:
+                with open(lang_filepath, 'r', encoding='utf-8') as f:
                     self._data = json.loads(f.read())
             except Exception as e:  # pragma: no cover
                 self._logger.exception(  # pragma: no cover

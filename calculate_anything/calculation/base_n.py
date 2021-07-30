@@ -1,6 +1,7 @@
 from calculate_anything.calculation import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
+from calculate_anything.utils import images_dir
 from calculate_anything.utils.colors import (
     hex_to_rgb, rgb_to_hsv,
     rgb_to_cmyk, rgb_to_hsl
@@ -29,7 +30,7 @@ class BaseNCalculation(Calculation):
         name = self.format()
         description = self.get_description()
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=name,
             description=description,
             clipboard=name,
@@ -133,7 +134,7 @@ class ColorBase16Calculation(Base16Calculation):
 
     @Base16Calculation.Decorators.handle_error_results
     def to_query_result(self):
-        icon = 'calculate_anything/images/color.svg'
+        icon = images_dir('color.svg')
         name = self.format()
         description = self.get_description()
         clipboard = name

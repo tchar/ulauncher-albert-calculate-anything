@@ -1,47 +1,10 @@
-import pytest
-import os
 import json
-import time
+from tests.tutils import temp_file, temp_filepath, osremove
+import pytest
 from calculate_anything.utils.loaders import (
     SqliteLoader, JsonLoader, CurrencyCacheLoader
 )
 from calculate_anything.utils.loaders.loader import Loader
-
-
-temp_dir = '/dev/shm'
-
-
-def oscreate(path, data):
-    if path is None:
-        return
-    if not os.path.isabs(path):
-        path = os.path.join(temp_dir, path)
-
-    if os.path.exists(path):
-        osremove(path)
-
-    if not isinstance(data, str):
-        os.mkdir(path)
-        if data:
-            data(path)
-        return
-
-    with open(path, 'w') as f:
-        f.write(data)
-
-
-def osremove(path):
-    if path is None:
-        return
-    if not os.path.isabs(path):
-        path = os.path.join(temp_dir, path)
-    if not os.path.exists(path):
-        return
-
-    if os.path.isdir(path):
-        os.rmdir(path)
-    else:
-        os.remove(path)
 
 
 test_spec_sqlite = [{
@@ -184,47 +147,39 @@ test_spec_sqlite = [{
 @ pytest.mark.parametrize('test_spec', test_spec_sqlite)
 def test_sqlite(test_spec):
     loader = None
-    try:
-        _id = test_spec['id']
+    _id = test_spec['id']
+    create = test_spec.get('create', [])
 
-        create = test_spec.get('create', [])
-        for i, [fname, data] in enumerate(create):
-            # Sleep to have different mtime files
-            if i != 0:
-                time.sleep(0.01)
-            oscreate(fname, data)
+    sqlite_fpath = test_spec['sqlite_file']
+    if sqlite_fpath:
+        sqlite_fpath = temp_filepath(sqlite_fpath)
 
-        sqlite_fpath = test_spec['sqlite_file']
-        if sqlite_fpath:
-            sqlite_fpath = os.path.join(temp_dir, sqlite_fpath)
-        sql_fpath = test_spec['sql_file']
-        if sql_fpath:
-            sql_fpath = os.path.join(temp_dir, sql_fpath)
+    sql_fpath = test_spec['sql_file']
+    if sql_fpath:
+        sql_fpath = temp_filepath(sql_fpath)
 
-        mode = test_spec.get('mode', 0)
+    mode = test_spec.get('mode', 0)
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    name = 'Test' + _id
 
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
-
-        name = 'Test' + _id
-        loader = SqliteLoader(sqlite_fpath, sql_fpath, name=name, mode=mode)
-
+    with temp_file(*create, sleep=0.01):
+        loader = SqliteLoader(sqlite_fpath, sql_fpath,
+                              name=name, mode=mode)
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_loaded == loaded
-    finally:
-        if loader is not None:
-            loader.close()
-        osremove(sqlite_fpath)
-        osremove(sql_fpath)
+        loader.close()
+    osremove(sqlite_fpath)
+    osremove(sql_fpath)
 
 
 test_spec_json = [{
     # No file
     'id': '1',
-    'file': 'data1.json',
+    'file': 'datajson1.json',
     'default_data': None,
     'expected': {
         'data': None,
@@ -235,8 +190,8 @@ test_spec_json = [{
 }, {
     # File
     'id': '2',
-    'create': ('data2.json', '{"some-key": "some-value"}'),
-    'file': 'data2.json',
+    'create': ('datajson2.json', '{"some-key": "some-value"}'),
+    'file': 'datajson2.json',
     'default_data': {},
     'expected': {
         'data': {'some-key': 'some-value'},
@@ -247,8 +202,8 @@ test_spec_json = [{
 }, {
     # File
     'id': '3',
-    'create': ('data3.json', None),
-    'file': 'data3.json',
+    'create': ('datajson3.json', None),
+    'file': 'datajson3.json',
     'default_data': {'fallback': True},
     'expected': {
         'data': {'fallback': True},
@@ -261,8 +216,8 @@ test_spec_json = [{
 }, {
     # Junk data
     'id': '4',
-    'create': ('data4.json', '{{invalidata}'),
-    'file': 'data4.json',
+    'create': ('datajson4.json', '{{invalidata}'),
+    'file': 'datajson4.json',
     'default_data': {},
     'expected': {
         'data': {},
@@ -273,8 +228,8 @@ test_spec_json = [{
     }
 }, {
     # Junk data
-    'id': '4',
-    'file': 'data4.json',
+    'id': '5',
+    'file': 'datajson5.json',
     # Can't be jsoned
     'default_data': set(),
     'expected': {
@@ -285,10 +240,10 @@ test_spec_json = [{
     }
 }, {
     # No remove
-    'id': '3',
+    'id': '6',
     'mode': JsonLoader.Mode.NO_REMOVE,
-    'create': ('data3.json', None),
-    'file': 'data3.json',
+    'create': ('datajson3.json', None),
+    'file': 'datajson3.json',
     'default_data': {'fallback': True},
     'expected': {
         'data': None,
@@ -303,44 +258,36 @@ test_spec_json = [{
 def test_json(test_spec):
     _id = test_spec['id']
     default_data = test_spec['default_data']
+
     file = test_spec['file']
     if file:
-        file = os.path.join(temp_dir, file)
-    create = test_spec.get('create', None)
-    fname = None
-    if create:
-        fname, data = create
-        oscreate(fname, data)
-    try:
-        mode = test_spec.get('mode', 0)
+        file = temp_filepath(file)
 
-        expected_data = test_spec['expected']['data']
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
+    create = test_spec.get('create')
 
-        name = 'Test' + _id
-
+    mode = test_spec.get('mode', 0)
+    expected_data = test_spec['expected']['data']
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    name = 'Test' + _id
+    with temp_file(create):
         loader = JsonLoader(file, default_data, name=name, mode=mode)
-
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_data == loader.data
         assert expected_loaded == loaded
-    finally:
-        osremove(file)
-        if fname:
-            osremove(fname)
+    osremove(file)
 
 
 test_spec_json_currency = [{
     # Test simple
     'create': (
-        'data1.json',
+        'datajsoncurrency1.json',
         {'exchange_rates': {}, 'last_update_timestamp': 0}
     ),
-    'file': 'data1.json',
+    'file': 'datajsoncurrency1.json',
     'expected': {
         'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
         'load': True,
@@ -351,7 +298,7 @@ test_spec_json_currency = [{
 }, {
     # Test valid
     'create': (
-        'data8.json',
+        'datajsoncurrency8.json',
         {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 0},
             'BTC': {'rate': 1000, 'timestamp_refresh': 0},
@@ -359,7 +306,7 @@ test_spec_json_currency = [{
             'RON': {'rate': 0.20, 'timestamp_refresh': 0},
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data8.json',
+    'file': 'datajsoncurrency8.json',
     'expected': {
         'data':  {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 0},
@@ -375,10 +322,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 1
     'create': (
-        'data2.json',
+        'datajsoncurrency2.json',
         'Invalid data'
     ),
-    'file': 'data2.json',
+    'file': 'datajsoncurrency2.json',
     'expected': {
         'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
         'load': True,
@@ -392,10 +339,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 2
     'create': (
-        'data3.json',
+        'datajsoncurrency3.json',
         {'exchange-rates': 'some invalid rates', 'last_update_timestamp': 0}
     ),
-    'file': 'data3.json',
+    'file': 'datajsoncurrency3.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -409,10 +356,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 3
     'create': (
-        'data4.json',
+        'datajsoncurrency4.json',
         {'exchange_rates': {}, 'last_update_timestamp': 'invalid'}
     ),
-    'file': 'data4.json',
+    'file': 'datajsoncurrency4.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -426,10 +373,10 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 4
     'create': (
-        'data5.json',
+        'datajsoncurrency5.json',
         {'exchange_rates': {'rate': 1}, 'last_update_timestamp': 0}
     ),
-    'file': 'data5.json',
+    'file': 'datajsoncurrency5.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -443,12 +390,12 @@ test_spec_json_currency = [{
 }, {
     # Test invalid 5
     'create': (
-        'data6.json',
+        'datajsoncurrency6.json',
         {'exchange_rates': {
             'EUR': {'rate': 'a', 'timestamp_refresh': 0}
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data6.json',
+    'file': 'datajsoncurrency6.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -460,14 +407,14 @@ test_spec_json_currency = [{
             CurrencyCacheLoader.Mode.LOAD
     }
 }, {
-    # Test invalid 7
+    # Test invalid 6
     'create': (
-        'data8.json',
+        'datajsoncurrency7.json',
         {'exchange_rates': {
             'EUR': {'rate': 1, 'timestamp_refresh': 'a'}
         }, 'last_update_timestamp': 0}
     ),
-    'file': 'data8.json',
+    'file': 'datajsoncurrency7.json',
     'expected': {
             'data':  {'exchange_rates': {}, 'last_update_timestamp': 0},
             'load': True,
@@ -485,31 +432,26 @@ test_spec_json_currency = [{
 def test_json_currency(test_spec):
     file = test_spec['file']
     if file:
-        file = os.path.join(temp_dir, file)
+        file = temp_filepath(file)
     create = test_spec.get('create', None)
-    fname = None
     if create:
         fname, data = create
-        if data is not None:
-            data = json.dumps(data)
-        oscreate(fname, data)
-    try:
-        expected_data = test_spec['expected']['data']
-        expected_loaded = test_spec['expected']['load']
-        expected_status = test_spec['expected']['status']
-        expected_mode = test_spec['expected']['mode']
+        data = json.dumps(data)
+        create = (fname, data)
 
+    expected_data = test_spec['expected']['data']
+    expected_loaded = test_spec['expected']['load']
+    expected_status = test_spec['expected']['status']
+    expected_mode = test_spec['expected']['mode']
+    with temp_file(create):
         loader = CurrencyCacheLoader(file)
-
         loaded = loader.load()
+
         assert expected_status == loader.status
         assert expected_mode == loader.mode
         assert expected_data == loader.data
         assert expected_loaded == loaded
-    finally:
-        osremove(file)
-        if fname:
-            osremove(fname)
+    osremove(file)
 
 
 class MockLoader(Loader):
