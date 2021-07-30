@@ -143,7 +143,7 @@ class Program(Validator):
             mode = 'No mode selected'
         else:
             mode = keywords[key]['mode_description']
-        return HTML('<b><style bg="#ff5555" fg="#282a36"> {} </style></b>'
+        return HTML('<style bg="#ff5555" fg="#282a36"> {} </style>'
                     .format(mode))
 
     def bottom_toolbar(self):
@@ -166,8 +166,10 @@ class Program(Validator):
             results = '\n'
         return HTML(results)
 
-
-sys.stdin = open('/dev/tty', 'r')
+try:
+    sys.stdin = open('/dev/tty', 'r')
+except Exception:
+    pass
 program = Program()
 bindings.add('c-a')(program.handle_c_a)
 session = PromptSession(

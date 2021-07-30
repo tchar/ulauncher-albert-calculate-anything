@@ -6,6 +6,9 @@ name: Linux
 on:
   push:
     branches: [ master ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ master ]
 
 jobs:
   build:
