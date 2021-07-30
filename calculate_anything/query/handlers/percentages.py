@@ -8,7 +8,7 @@ from calculate_anything.calculation import (
 from calculate_anything.exceptions import (
     BooleanPercetageException, ZeroDivisionException
 )
-from calculate_anything.utils import Singleton
+from calculate_anything.utils import Singleton, images_dir
 from calculate_anything.regex import (
     PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
     PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REGEX,
@@ -40,12 +40,14 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         if amount1.error:
+            amount1.error.extra['icon'] = images_dir('percent.svg')
             return NormalPercentageCalculation(
                 error=amount1.error,
                 amounts=(amount1, amount2),
                 query=query,
             )
         if amount2.error:
+            amount2.error.extra['icon'] = images_dir('percent.svg')
             return NormalPercentageCalculation(
                 error=amount2.error,
                 amounts=(amount1, amount2),
@@ -54,8 +56,9 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         if amount1.value_type == Calculation.VALUE_BOOLEAN or \
                 amount2.value_type == Calculation.VALUE_BOOLEAN:
+            icon = images_dir('percent.svg')
             return PercentageCalculation(
-                error=BooleanPercetageException(),
+                error=BooleanPercetageException(extra={'icon': icon}),
                 query=query,
             )
 
@@ -121,10 +124,11 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 order=0
             )
         except ZeroDivisionError:
+            icon = images_dir('percent.svg')
             return InversePercentageCalculation(
                 amounts=(percentage_from, percentage_to),
                 query=query,
-                error=ZeroDivisionException(),
+                error=ZeroDivisionException(extra={'icon': icon}),
             )
         except Exception as e:  # pragma: no cover
             self._logger.exception(  # pragma: no cover

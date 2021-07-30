@@ -26,7 +26,7 @@ test_spec_normal = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '1',
             'description': '10% of 10',
             'clipboard': '1',
@@ -47,7 +47,7 @@ test_spec_normal = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '4.48 + 0.175i',
             'description': '(128 + 5i)% of 3.5 ({})'.format(
                 tr_calc('result-complex').capitalize()),
@@ -69,7 +69,7 @@ test_spec_normal = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -90,7 +90,7 @@ test_spec_normal = [{
             'order': BooleanPercetageException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
@@ -111,7 +111,7 @@ test_spec_normal = [{
             'order': BooleanPercetageException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
@@ -151,7 +151,7 @@ test_spec_inverse = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '5%',
             'description': '(10) is 5% of (200)',
             'clipboard': '5%',
@@ -172,7 +172,7 @@ test_spec_inverse = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '(43.397 - 4.23602i)%',
             'description': '(1.41421 + 10i) is '
             '(43.397 - 4.23602i)% of (1 + 23.1407i) ({})'.format(
@@ -195,7 +195,7 @@ test_spec_inverse = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -216,7 +216,7 @@ test_spec_inverse = [{
             'order': BooleanPercetageException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
@@ -237,7 +237,7 @@ test_spec_inverse = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -258,7 +258,7 @@ test_spec_inverse = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -300,7 +300,7 @@ test_spec_calc = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '11',
             'description': '(10) + (10)%',
             'clipboard': '11',
@@ -321,7 +321,7 @@ test_spec_calc = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '132.48 + 10.35i',
             'description': '(128 + 10i) + (3.5)% ({})'.format(
                 tr_calc('result-complex').capitalize()),
@@ -343,7 +343,7 @@ test_spec_calc = [{
             'order': 0
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': '5.07071i',
             'description': '(5i) + (1.41421)% ({})'.format(
                 tr_calc('result-imaginary').capitalize()),
@@ -365,7 +365,7 @@ test_spec_calc = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -386,7 +386,7 @@ test_spec_calc = [{
             'order': BooleanPercetageException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('boolean-percentage-error'),
             'description': tr_err('boolean-percentage-error-description'),
             'clipboard': '',
@@ -407,7 +407,7 @@ test_spec_calc = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -428,7 +428,7 @@ test_spec_calc = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('percent.svg'),
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',

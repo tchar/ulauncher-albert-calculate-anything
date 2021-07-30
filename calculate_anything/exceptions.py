@@ -19,7 +19,7 @@ class ExtendedException(Exception):
                 and used later
         '''
         super().__init__(message)
-        self.extra = extra
+        self.extra = extra or {}
 
 
 class CurrencyException(ExtendedException):

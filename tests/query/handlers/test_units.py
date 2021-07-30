@@ -523,7 +523,7 @@ test_spec_provider_had_error = [{
             'order': CurrencyProviderException.order
         },
         'query_result': {
-            'icon': images_dir('icon.svg'),
+            'icon': images_dir('convert.svg'),
             'name': tr_err('currency-provider-error'),
             'description': tr_err('currency-provider-error-description'),
             'clipboard': '',

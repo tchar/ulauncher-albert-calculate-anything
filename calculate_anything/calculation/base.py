@@ -14,9 +14,10 @@ from calculate_anything.exceptions import (
 
 
 def missing_parsedatetime_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('time.svg'),
+        icon=icon,
         name=translator('missing-parsedatetime-error'),
         description=translator('missing-parsedatetime-error-description'),
         clipboard='pip install parsedatetime',
@@ -26,9 +27,10 @@ def missing_parsedatetime_query_result(calculation):
 
 
 def missing_simpleeval_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('missing-simpleeval-error'),
         description=translator('missing-simpleeval-error-description'),
         clipboard='pip install simpleeval',
@@ -38,9 +40,10 @@ def missing_simpleeval_query_result(calculation):
 
 
 def missing_pint_error_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('convert.svg'),
+        icon=icon,
         name=translator('missing-pint-error'),
         description=translator('missing-pint-error-description'),
         clipboard='pip install Pint',
@@ -50,9 +53,10 @@ def missing_pint_error_query_result(calculation):
 
 
 def boolean_comparison_error_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('boolean-comparison-error'),
         description=translator('boolean-comparison-error-description'),
         clipboard='',
@@ -62,9 +66,10 @@ def boolean_comparison_error_query_result(calculation):
 
 
 def boolean_percentage_error_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('boolean-percentage-error'),
         description=translator('boolean-percentage-error-description'),
         clipboard='',
@@ -74,9 +79,10 @@ def boolean_percentage_error_query_result(calculation):
 
 
 def base_floating_point_exception_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('base-floating-error'),
         description=translator('base-floating-error-description'),
         clipboard='',
@@ -86,9 +92,10 @@ def base_floating_point_exception_query_result(calculation):
 
 
 def wrong_base_exception_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('wrong-base-error'),
         description=translator('wrong-base-error-description'),
         clipboard='',
@@ -98,9 +105,10 @@ def wrong_base_exception_query_result(calculation):
 
 
 def date_overflow_error_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('time.svg'),
+        icon=icon,
         name=translator('date-overflow'),
         description=translator('date-overflow-description'),
         clipboard='',
@@ -110,9 +118,10 @@ def date_overflow_error_query_result(calculation):
 
 
 def currency_provider_error_query_result(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
-        icon=images_dir('icon.svg'),
+        icon=icon,
         name=translator('currency-provider-error'),
         description=translator('currency-provider-error-description'),
         clipboard='',
@@ -122,9 +131,7 @@ def currency_provider_error_query_result(calculation):
 
 
 def zero_division_error_query_result(calculation):
-    icon = images_dir('icon.svg')
-    if calculation.error.extra is not None:
-        icon = calculation.error.extra.get('icon', icon)
+    icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
         icon=icon,
@@ -137,6 +144,7 @@ def zero_division_error_query_result(calculation):
 
 
 def misparsed_time_exception(calculation):
+    icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     name = translator('misparsed-datetime')
     name = '{}: "{}"'.format(name, calculation.error.extra['parsed_query'])
@@ -144,7 +152,7 @@ def misparsed_time_exception(calculation):
     description = '{}: "{}"'.format(
         description, calculation.error.extra['original_query'])
     return QueryResult(
-        icon=images_dir('time.svg'),
+        icon=icon,
         name=name,
         description=description,
         clipboard='',

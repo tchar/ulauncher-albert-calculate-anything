@@ -166,6 +166,7 @@ class Program(Validator):
             results = '\n'
         return HTML(results)
 
+
 try:
     sys.stdin = open('/dev/tty', 'r')
 except Exception:
