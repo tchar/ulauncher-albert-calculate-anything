@@ -4,7 +4,7 @@ from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.regex import CALCULATOR_ERROR
-from calculate_anything.utils import multi_re
+from calculate_anything.utils import multi_re, images_dir
 
 
 __all__ = ['Calculation', 'BooleanCalculation']
@@ -135,7 +135,7 @@ class Calculation(_Calculation):
             description = '{} ({})'.format(description, description_paren)
 
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=name,
             description=description,
             clipboard=name,
@@ -155,7 +155,7 @@ class BooleanCalculation(Calculation):
         description = '{} ({})'.format(description, result_is_bool_str)
 
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=result,
             description=description,
             clipboard=result,

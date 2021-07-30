@@ -1,6 +1,7 @@
-from calculate_anything.utils.datetime import is_leap_year
 from calculate_anything.lang import LanguageService
 from calculate_anything.calculation.base import _Calculation
+from calculate_anything.utils.datetime import is_leap_year
+from calculate_anything.utils import images_dir
 from calculate_anything.constants import (
     FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT,
     TIME_TIME_FORMAT
@@ -82,7 +83,7 @@ class TimeCalculation(_Calculation):
         value = self.value.strftime(TIME_DATETIME_FORMAT)
 
         return QueryResult(
-            icon='calculate_anything/images/time.svg',
+            icon=images_dir('time.svg'),
             name=value,
             description=description,
             clipboard=value,
@@ -119,10 +120,10 @@ class LocationTimeCalculation(TimeCalculation):
 
         if country_code in FLAGS:
             icon = FLAGS[country_code]
-            icon = 'calculate_anything/images/flags/{}'.format(icon)
+            icon = images_dir('flags', icon)
         else:
             # Can't test this since we possible have all flags.
-            icon = 'calculate_anything/images/country.svg'  # pragma: no cover
+            icon = images_dir('country.svg')  # pragma: no cover
 
         return QueryResult(
             icon=icon,
@@ -216,7 +217,7 @@ class TimedeltaCalculation(TimeCalculation):
             self.query.capitalize(), is_on, description_date)
 
         return QueryResult(
-            icon='calculate_anything/images/time.svg',
+            icon=images_dir('time.svg'),
             name=name,
             description=description,
             clipboard=name,

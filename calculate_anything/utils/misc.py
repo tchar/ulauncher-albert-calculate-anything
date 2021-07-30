@@ -1,7 +1,8 @@
 '''Miscellaneous utility functions'''
 
 from contextlib import contextmanager
-from functools import wraps
+from functools import lru_cache, wraps
+import os
 from typing import (
     Any, Callable, Container, Iterator,
     List, Optional, Type, Union
@@ -183,3 +184,8 @@ def lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
         with self._lock:
             return func(self, *args, **kwargs)
     return _wrapper
+
+
+@lru_cache(maxsize=20)
+def images_dir(*paths):
+    return os.path.join('calculate_anything', 'images', *paths)

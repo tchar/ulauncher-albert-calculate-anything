@@ -6,19 +6,18 @@ If important directories do not exist, they are created here
 
 import os
 import calculate_anything
+from calculate_anything.appdirs import AppDirs
 
 
 MAIN_DIR = os.path.dirname(os.path.dirname(
     os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(
-    os.path.join(MAIN_DIR, 'calculate_anything/images/flags'))}
+    os.path.join(MAIN_DIR, 'calculate_anything', 'images', 'flags'))}
 
-XDG_FALLBACK = os.getenv('HOME')
-if XDG_FALLBACK is None:
-    XDG_FALLBACK = os.path.expanduser('~')  # pragma: no cover
-XDG_FALLBACK = os.path.join(XDG_FALLBACK, '.cache')
-XDG_CACHE = os.getenv('XDG_CACHE_HOME', XDG_FALLBACK)
-CACHE_DIR = os.path.join(XDG_CACHE,  'extension_calculate_anything')
+APP_NAME = 'calculate_anything'
+APP_DIRS = AppDirs(APP_NAME)
+
+CACHE_DIR = APP_DIRS.user_cache_dir
 LOGS_DIR = os.path.join(CACHE_DIR, 'logs')
 
 if os.path.isfile(CACHE_DIR):

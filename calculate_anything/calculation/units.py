@@ -13,7 +13,7 @@ from calculate_anything import logging
 from calculate_anything.calculation.base import _Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
-from calculate_anything.utils import multi_re
+from calculate_anything.utils import multi_re, images_dir
 from calculate_anything.constants import FLAGS, TIME_DATETIME_FORMAT_NUMBERS
 from calculate_anything.regex import UNIT_CURRENCY_RE
 
@@ -130,7 +130,7 @@ class UnitsCalculation(_Calculation):
             descriptions.append(desc_part)
 
         description = ' '.join(descriptions)
-        icon = 'calculate_anything/images/convert.svg'
+        icon = images_dir('convert.svg')
 
         return QueryResult(
             icon=icon,
@@ -244,10 +244,10 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
         if unit_to_name in FLAGS:
             icon = FLAGS[unit_to_name]
-            icon = 'calculate_anything/images/flags/{}'.format(icon)
+            icon = images_dir('flags', icon)
         else:
             # Can't test this since we possible have all flags.
-            icon = 'calculate_anything/images/currency.svg'  # pragma: no cover
+            icon = images_dir('currency.svg')  # pragma: no cover
 
         return QueryResult(
             icon=icon,

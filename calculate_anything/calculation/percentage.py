@@ -1,6 +1,7 @@
 from calculate_anything.calculation import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
+from calculate_anything.utils import images_dir
 
 
 __all__ = ['PercentageCalculation',
@@ -49,7 +50,7 @@ class PercentageCalculation(Calculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=name,
             description=description,
             clipboard=name,
@@ -83,7 +84,7 @@ class NormalPercentageCalculation(PercentageCalculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=name,
             description=description,
             clipboard=name,
@@ -117,7 +118,7 @@ class InversePercentageCalculation(PercentageCalculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='calculate_anything/images/icon.svg',
+            icon=images_dir('icon.svg'),
             name=name,
             description=description,
             clipboard=name,
