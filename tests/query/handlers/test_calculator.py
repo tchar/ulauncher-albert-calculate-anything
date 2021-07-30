@@ -213,6 +213,10 @@ test_spec_calculator = [{
     # Test i alone after number with spaces
     'query': '= 5 i',
     'results': [],
+}, {
+    # Test FunctionNotDefined
+    'query': '= print(12)',
+    'results': []
 }]
 
 

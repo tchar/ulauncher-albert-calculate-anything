@@ -4,7 +4,9 @@ import re
 import cmath
 import operator as op
 try:
-    from simpleeval import SimpleEval, NameNotDefined, FeatureNotAvailable
+    from simpleeval import (
+        SimpleEval, NameNotDefined, FeatureNotAvailable, FunctionNotDefined
+    )
 except ImportError:  # pragma: no cover
     from calculate_anything.utils import StupidEval  # pragma: no cover
     SimpleEval = StupidEval  # pragma: no cover
@@ -199,7 +201,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return [item]
         except (SyntaxError, TypeError):
             return None
-        except(NameNotDefined, FeatureNotAvailable) as e:
+        except(NameNotDefined, FeatureNotAvailable, FunctionNotDefined) as e:
             self._logger.debug(
                 'Got simpleval Exception: when calculating {!r}: {}'
                 .format(query, e))
