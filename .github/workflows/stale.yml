@@ -1,17 +1,13 @@
 name: stale
-
 on:
   schedule:
   - cron: '12 0 * * *'
-
 jobs:
   stale:
-
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
-
     steps:
     - uses: actions/stale@v3
       with:
