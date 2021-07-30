@@ -49,7 +49,7 @@ class PercentageCalculation(Calculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=name,
             description=description,
             clipboard=name,
@@ -83,7 +83,7 @@ class NormalPercentageCalculation(PercentageCalculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=name,
             description=description,
             clipboard=name,
@@ -117,7 +117,7 @@ class InversePercentageCalculation(PercentageCalculation):
             description = '{} ({})'.format(description, extra_descriptions)
 
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=name,
             description=description,
             clipboard=name,

@@ -102,7 +102,7 @@ def get_result(description, query, order, td=timedelta()):
             'order': order
         },
         'query_result': {
-            'icon': 'images/time.svg',
+            'icon': 'calculate_anything/images/time.svg',
             'name': approxstr((now() + td)
                               .strftime(TIME_DATETIME_FORMAT)),
             'description': approxstr(description),
@@ -119,6 +119,7 @@ def get_result(description, query, order, td=timedelta()):
 @lru_cache(maxsize=None)
 def get_resulttz(city_name, country_name,
                  iso2, query, order, tz, td=timedelta()):
+    icon = 'calculate_anything/images/flags/{}.svg'.format(iso2.upper())
     return {
         'result': {
             'value': approxdt(now(tz=timezone(tz)) + td),
@@ -127,7 +128,7 @@ def get_resulttz(city_name, country_name,
             'order': order
         },
         'query_result': {
-            'icon': 'images/flags/{}.svg'.format(iso2.upper()),
+            'icon': icon,
             'name': approxstr(
                 '{}: {}'.format(
                     city_name,
@@ -167,7 +168,7 @@ def get_resulttd(target: timedelta, query: str, order: int):
             'order': order
         },
         'query_result': {
-            'icon': 'images/time.svg',
+            'icon': 'calculate_anything/images/time.svg',
             'name': approxstr(timedelta_to_ydhms(target + now(), now())),
             'description': approxstr(
                 '"{}" {} on {}'.format(
@@ -203,7 +204,7 @@ def get_resultexc(query, exception, name_post='', desc_post=''):
             'order': order
         },
         'query_result': {
-            'icon': 'images/time.svg',
+            'icon': 'calculate_anything/images/time.svg',
             'name': tr_err(name_key) + name_post,
             'description': tr_err(desc_key) + desc_post,
             'clipboard': '',
@@ -495,7 +496,7 @@ test_spec_parsedatetime_missing = [{
             'order': MissingParsedatetimeException.order
         },
         'query_result': {
-            'icon': 'images/time.svg',
+            'icon': 'calculate_anything/images/time.svg',
             'name': tr_err('missing-parsedatetime-error'),
             'description': tr_err('missing-parsedatetime-error-description'),
             'clipboard': 'pip install parsedatetime',

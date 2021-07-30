@@ -168,7 +168,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         except TypeError:
             pass
         except ZeroDivisionError:
-            extra = {'icon': 'images/convert.svg'}
+            extra = {'icon': 'calculate_anything/images/convert.svg'}
             error_to_show = ZeroDivisionException(extra=extra)
         except (pint.errors.DimensionalityError,
                 pint.errors.UndefinedUnitError,

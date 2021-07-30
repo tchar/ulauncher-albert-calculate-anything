@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-# pragma: no cover
+import sys
+import os
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,
@@ -164,6 +167,7 @@ class Program(Validator):
         return HTML(results)
 
 
+sys.stdin = open('/dev/tty', 'r')
 program = Program()
 bindings.add('c-a')(program.handle_c_a)
 session = PromptSession(

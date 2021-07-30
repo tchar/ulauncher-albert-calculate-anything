@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pragma: no cover
 from calculate_anything import logging
 from ulauncher.api.shared.action.CopyToClipboardAction import (
     CopyToClipboardAction
@@ -88,7 +87,7 @@ class KeywordQueryEventListener(EventListener):
                 on_enter = HideWindowAction()
 
             items.append(ExtensionResultItem(
-                icon=result.icon or 'images/icon.svg',
+                icon=result.icon or 'calculate_anything/images/icon.svg',
                 name=result.name,
                 description=result.description,
                 highlightable=False,
@@ -102,7 +101,7 @@ class KeywordQueryEventListener(EventListener):
 
         if should_show_placeholder:
             items.append(ExtensionResultItem(
-                icon='images/icon.svg',
+                icon='calculate_anything/images/icon.svg',
                 name=LanguageService().translate('no-result', 'misc'),
                 description=LanguageService().translate(
                     'no-result-{}-description'.format(mode), 'misc'),

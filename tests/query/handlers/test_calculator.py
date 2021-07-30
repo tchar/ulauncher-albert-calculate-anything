@@ -26,7 +26,7 @@ test_spec_calculator = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': '3',
             'description': '1 + 1 + 1',
             'clipboard': '3',
@@ -47,7 +47,7 @@ test_spec_calculator = [{
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -68,7 +68,7 @@ test_spec_calculator = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': '4 + i',
             'description': '(1 + 7 + 5i + 4i - 7i) / 2 ({})'.format(
                 tr_calc('result-complex').capitalize()),
@@ -90,7 +90,7 @@ test_spec_calculator = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': '4 - 2i',
             'description': '(1 + 7 + 2i + 5i - 11i) / 2 ({})'
             .format(tr_calc('result-complex').capitalize()),
@@ -112,7 +112,7 @@ test_spec_calculator = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': '-1',
             'description': 'e ^ (π × i)',
             'clipboard': '-1',
@@ -133,7 +133,7 @@ test_spec_calculator = [{
             'order': BooleanComparisonException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('boolean-comparison-error'),
             'description': tr_err('boolean-comparison-error-description'),
             'clipboard': '',
@@ -154,7 +154,7 @@ test_spec_calculator = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': 'true',
             'description': 'e ^ (π × i) + 1 = 0 ({})'.format(
                 tr_calc('result-boolean').capitalize()),
@@ -233,7 +233,7 @@ test_spec_missing_simpleeval = [{
             'order': 0
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': '1245',
             'description': '1245',
             'clipboard': '1245',
@@ -253,7 +253,7 @@ test_spec_missing_simpleeval = [{
             'order': MissingSimpleevalException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('missing-simpleeval-error'),
             'description': tr_err('missing-simpleeval-error-description'),
             'clipboard': 'pip install simpleeval',

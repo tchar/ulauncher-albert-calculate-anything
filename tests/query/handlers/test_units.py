@@ -22,8 +22,9 @@ tr_err = LanguageService().get_translator('errors')
 
 
 def get_unit_result(Q):
-    def _get_unit_result(parsed_query, value, name, description,
-                         order=0, icon='images/convert.svg', error=None):
+    def _get_unit_result(parsed_query, value, name, description, order=0,
+                         icon='calculate_anything/images/convert.svg',
+                         error=None):
         return {
             'result': {
                 'query': parsed_query,
@@ -135,7 +136,7 @@ test_spec_units_simple = [lambda Q: {
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': 'images/convert.svg',
+            'icon': 'calculate_anything/images/convert.svg',
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -310,34 +311,34 @@ test_spec_currency = [lambda Q, data: {
             approxunits(currency_amount(Q, data)(10000, 'MXN', 'EUR', True)),
             currency_amount(Q, data)(10000, 'MXN', 'EUR', False),
             currency_description(Q, data)('MXN', 'EUR'),
-            order=0, icon='images/flags/EUR.svg'
+            order=0, icon='calculate_anything/images/flags/EUR.svg'
         ),
         get_unit_result(Q)(
             '10000 currency_MXN to currency_USD',
             approxunits(currency_amount(Q, data)(10000, 'MXN', 'USD', True)),
             currency_amount(Q, data)(10000, 'MXN', 'USD', False),
             currency_description(Q, data)('MXN', 'USD'),
-            order=1, icon='images/flags/USD.svg'
+            order=1, icon='calculate_anything/images/flags/USD.svg'
         ),
         get_unit_result(Q)(
             '10000 currency_MXN to currency_BTC',
             approxunits(currency_amount(Q, data)(10000, 'MXN', 'BTC', True)),
             currency_amount(Q, data)(10000, 'MXN', 'BTC', False),
             currency_description(Q, data)('MXN', 'BTC'),
-            order=2, icon='images/flags/BTC.svg'
+            order=2, icon='calculate_anything/images/flags/BTC.svg'
         ),
         get_unit_result(Q)(
             '10000 currency_MXN to currency_CAD',
             approxunits(currency_amount(Q, data)(10000, 'MXN', 'CAD', True)),
             currency_amount(Q, data)(10000, 'MXN', 'CAD', False),
             currency_description(Q, data)('MXN', 'CAD'),
-            order=3, icon='images/flags/CAD.svg'
+            order=3, icon='calculate_anything/images/flags/CAD.svg'
         ),
         get_unit_result(Q)(
             '10000 currency_MXN to currency_MXN',
             approxunits(currency_amount(Q, data)(10000, 'MXN', 'MXN', True)),
             '10,000.00 MXN', '',
-            order=4, icon='images/flags/MXN.svg'
+            order=4, icon='calculate_anything/images/flags/MXN.svg'
         ),
     ]
 }, lambda Q, data: {
@@ -348,13 +349,13 @@ test_spec_currency = [lambda Q, data: {
              approxunits(currency_amount(Q, data)(7.277, 'AMD', 'RON', True)),
              currency_amount(Q, data)(7.277, 'AMD', 'RON', False),
              currency_description(Q, data)('AMD', 'RON'),
-             order=0, icon='images/flags/RON.svg'
+             order=0, icon='calculate_anything/images/flags/RON.svg'
         ),
         get_unit_result(Q)(
             '7.277 currency_AMD to currency_AMD',
             approxunits(currency_amount(Q, data)(7.277, 'AMD', 'AMD', True)),
             '7.28 AMD', '',
-            order=1, icon='images/flags/AMD.svg'
+            order=1, icon='calculate_anything/images/flags/AMD.svg'
         ), ]
 }, lambda Q, data: {
     # Test aliases from translator
@@ -365,13 +366,13 @@ test_spec_currency = [lambda Q, data: {
              approxunits(currency_amount(Q, data)(100.27, 'USD', 'BTC', True)),
              currency_amount(Q, data)(100.27, 'USD', 'BTC', False),
              currency_description(Q, data)('USD', 'BTC'),
-             order=0, icon='images/flags/BTC.svg'
+             order=0, icon='calculate_anything/images/flags/BTC.svg'
         ),
         get_unit_result(Q)(
             '100.27 currency_USD to currency_USD',
             approxunits(currency_amount(Q, data)(100.27, 'USD', 'USD', True)),
             '100.27 USD', '',
-            order=1, icon='images/flags/USD.svg'
+            order=1, icon='calculate_anything/images/flags/USD.svg'
         ), ]
 }, lambda Q, data: {
     # Only one result (do not show duplicate 10 CAD)
@@ -380,7 +381,8 @@ test_spec_currency = [lambda Q, data: {
         get_unit_result(Q)(
             '10 currency_CAD to currency_CAD',
             approxunits(currency_amount(Q, data)(10, 'CAD', 'CAD', True)),
-            '10.00 CAD', '', order=0, icon='images/flags/CAD.svg'
+            '10.00 CAD', '', order=0,
+            icon='calculate_anything/images/flags/CAD.svg'
         ),
     ]
 }, lambda Q, data: {
@@ -391,34 +393,34 @@ test_spec_currency = [lambda Q, data: {
              approxunits(currency_amount(Q, data)(0.1, 'BTC', 'CAD', True)),
              currency_amount(Q, data)(0.1, 'BTC', 'CAD', False),
              currency_description(Q, data)('BTC', 'CAD'),
-             order=0, icon='images/flags/CAD.svg'
+             order=0, icon='calculate_anything/images/flags/CAD.svg'
         ),
         get_unit_result(Q)(
             '0.1 currency_BTC to currency_EUR',
             approxunits(currency_amount(Q, data)(0.1, 'BTC', 'EUR', True)),
             currency_amount(Q, data)(0.1, 'BTC', 'EUR', False),
             currency_description(Q, data)('BTC', 'EUR'),
-            order=1, icon='images/flags/EUR.svg'
+            order=1, icon='calculate_anything/images/flags/EUR.svg'
         ),
         get_unit_result(Q)(
             '0.1 currency_BTC to currency_USD',
             approxunits(currency_amount(Q, data)(0.1, 'BTC', 'USD', True)),
             currency_amount(Q, data)(0.1, 'BTC', 'USD', False),
             currency_description(Q, data)('BTC', 'USD'),
-            order=2, icon='images/flags/USD.svg'
+            order=2, icon='calculate_anything/images/flags/USD.svg'
         ),
         get_unit_result(Q)(
             '0.1 currency_BTC to currency_AED',
             approxunits(currency_amount(Q, data)(0.1, 'BTC', 'AED', True)),
             currency_amount(Q, data)(0.1, 'BTC', 'AED', False),
             currency_description(Q, data)('BTC', 'AED'),
-            order=3, icon='images/flags/AED.svg'
+            order=3, icon='calculate_anything/images/flags/AED.svg'
         ),
         get_unit_result(Q)(
             '0.1 currency_BTC to currency_BTC',
             approxunits(currency_amount(Q, data)(0.1, 'BTC', 'BTC', True)),
             '0.10 BTC', '',
-            order=4, icon='images/flags/BTC.svg'
+            order=4, icon='calculate_anything/images/flags/BTC.svg'
         ),
     ]
 }]
@@ -484,7 +486,7 @@ test_spec_missing_pint = [{
             'order': MissingPintException.order
         },
         'query_result': {
-            'icon': 'images/convert.svg',
+            'icon': 'calculate_anything/images/convert.svg',
             'name': tr_err('missing-pint-error'),
             'description': tr_err('missing-pint-error-description'),
             'clipboard': 'pip install Pint',
@@ -520,7 +522,7 @@ test_spec_provider_had_error = [{
             'order': CurrencyProviderException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('currency-provider-error'),
             'description': tr_err('currency-provider-error-description'),
             'clipboard': '',

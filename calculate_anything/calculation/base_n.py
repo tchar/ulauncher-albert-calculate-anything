@@ -29,7 +29,7 @@ class BaseNCalculation(Calculation):
         name = self.format()
         description = self.get_description()
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=name,
             description=description,
             clipboard=name,
@@ -133,7 +133,7 @@ class ColorBase16Calculation(Base16Calculation):
 
     @Base16Calculation.Decorators.handle_error_results
     def to_query_result(self):
-        icon = 'images/color.svg'
+        icon = 'calculate_anything/images/color.svg'
         name = self.format()
         description = self.get_description()
         clipboard = name

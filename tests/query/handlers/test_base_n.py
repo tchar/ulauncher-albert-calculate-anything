@@ -45,7 +45,7 @@ def result_for_base_n(base, value, query, order):
             'order': order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': name,
             'description': description,
             'clipboard': name,
@@ -66,7 +66,7 @@ def result_for_base16_string(value, query, order):
             'order': order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': value,
             'description': 'BYTES',
             'clipboard': value,
@@ -95,7 +95,7 @@ def result_for_colors(value, query, order, color):
             'order': order
         },
         'query_result': {
-            'icon': 'images/color.svg',
+            'icon': 'calculate_anything/images/color.svg',
             'name': name,
             'description': color,
             'clipboard': name,
@@ -116,7 +116,7 @@ def result_for_zero_division_exc(query):
             'order': ZeroDivisionException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('zero-division-error'),
             'description': tr_err('zero-division-error-description'),
             'clipboard': '',
@@ -137,7 +137,7 @@ def result_for_wrong_base_exc(query):
             'order': WrongBaseException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('wrong-base-error'),
             'description': tr_err('wrong-base-error-description'),
             'clipboard': '',
@@ -158,7 +158,7 @@ def result_for_base_floating_point_exc(query):
             'order': BaseFloatingPointException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('base-floating-error'),
             'description': tr_err('base-floating-error-description'),
             'clipboard': '',
@@ -179,7 +179,7 @@ def missing_simpleeval_result(query):
             'order': MissingSimpleevalException.order
         },
         'query_result': {
-            'icon': 'images/icon.svg',
+            'icon': 'calculate_anything/images/icon.svg',
             'name': tr_err('missing-simpleeval-error'),
             'description': tr_err('missing-simpleeval-error-description'),
             'clipboard': 'pip install simpleeval',

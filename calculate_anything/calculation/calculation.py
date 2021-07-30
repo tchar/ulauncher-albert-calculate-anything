@@ -135,7 +135,7 @@ class Calculation(_Calculation):
             description = '{} ({})'.format(description, description_paren)
 
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=name,
             description=description,
             clipboard=name,
@@ -155,7 +155,7 @@ class BooleanCalculation(Calculation):
         description = '{} ({})'.format(description, result_is_bool_str)
 
         return QueryResult(
-            icon='images/icon.svg',
+            icon='calculate_anything/images/icon.svg',
             name=result,
             description=description,
             clipboard=result,

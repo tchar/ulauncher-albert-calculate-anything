@@ -130,7 +130,7 @@ class UnitsCalculation(_Calculation):
             descriptions.append(desc_part)
 
         description = ' '.join(descriptions)
-        icon = 'images/convert.svg'
+        icon = 'calculate_anything/images/convert.svg'
 
         return QueryResult(
             icon=icon,
@@ -243,9 +243,11 @@ class CurrencyUnitsCalculation(UnitsCalculation):
                 'currency_', '', 1).replace()
 
         if unit_to_name in FLAGS:
-            icon = 'images/flags/{}'.format(FLAGS[unit_to_name])
+            icon = FLAGS[unit_to_name]
+            icon = 'calculate_anything/images/flags/{}'.format(icon)
         else:
-            icon = 'images/currency.svg'
+            # Can't test this since we possible have all flags.
+            icon = 'calculate_anything/images/currency.svg'  # pragma: no cover
 
         return QueryResult(
             icon=icon,

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pragma: no cover
 '''Converter for currency, units and calculator.
 
 Current backends: fixer.io.
@@ -154,7 +153,7 @@ def handleQuery(query):
     items = []
     results = MultiHandler().handle(query_str, *handlers)
     for result in results:
-        icon = result.icon or 'images/icon.svg'
+        icon = result.icon or 'calculate_anything/images/icon.svg'
         icon = os.path.join(MAIN_DIR, icon)
 
         if result.clipboard is not None:
@@ -176,10 +175,11 @@ def handleQuery(query):
                                                     SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
+        icon = os.path.join(MAIN_DIR, 'calculate_anything/images/icon.svg')
         items.append(
             Item(
                 id=__title__,
-                icon=os.path.join(MAIN_DIR, 'images/icon.svg'),
+                icon=icon,
                 text=LanguageService().translate('no-result', 'misc'),
                 subtext=LanguageService().translate(
                     'no-result-{}-description'.format(mode), 'misc')

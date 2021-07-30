@@ -82,7 +82,7 @@ class TimeCalculation(_Calculation):
         value = self.value.strftime(TIME_DATETIME_FORMAT)
 
         return QueryResult(
-            icon='images/time.svg',
+            icon='calculate_anything/images/time.svg',
             name=value,
             description=description,
             clipboard=value,
@@ -118,10 +118,11 @@ class LocationTimeCalculation(TimeCalculation):
             location_date, country_name, timezone_name, utc)
 
         if country_code in FLAGS:
-            icon = 'images/flags/{}'.format(FLAGS[country_code])
+            icon = FLAGS[country_code]
+            icon = 'calculate_anything/images/flags/{}'.format(icon)
         else:
             # Can't test this since we possible have all flags.
-            icon = 'images/country.svg'  # pragma: no cover
+            icon = 'calculate_anything/images/country.svg'  # pragma: no cover
 
         return QueryResult(
             icon=icon,
@@ -215,7 +216,7 @@ class TimedeltaCalculation(TimeCalculation):
             self.query.capitalize(), is_on, description_date)
 
         return QueryResult(
-            icon='images/time.svg',
+            icon='calculate_anything/images/time.svg',
             name=name,
             description=description,
             clipboard=name,

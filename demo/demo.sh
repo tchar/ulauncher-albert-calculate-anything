@@ -12,7 +12,7 @@ setup_launcher() {
 }
 
 setup_peek() {
-    if [ "$use_peek" == "nopeek" ]; then
+    if [ "$use_peek" != "peek" ]; then
         return 0
     fi
 	peek_id=$(xdotool search --onlyvisible --class Peek)
@@ -39,6 +39,7 @@ setup() {
         pad_y=70
     elif [ "$launcher_name" == "prompt_toolkit" ]; then
         use_peek="nopeek"
+        python demo/prompt.py &
     else
         echo "No launcher provided"
         exit

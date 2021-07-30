@@ -11,7 +11,7 @@ import calculate_anything
 MAIN_DIR = os.path.dirname(os.path.dirname(
     os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(
-    os.path.join(MAIN_DIR, 'images/flags'))}
+    os.path.join(MAIN_DIR, 'calculate_anything/images/flags'))}
 
 XDG_FALLBACK = os.getenv('HOME')
 if XDG_FALLBACK is None:
