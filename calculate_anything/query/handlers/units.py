@@ -177,8 +177,8 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             self._logger.debug(
                 'Got pint exception when trying to parse {!r}: {}'
                 .format(expression, e))
-        except Exception as e:  # pragma no cover
-            self._logger.exception(  # pragma no cover
+        except Exception as e:  # pragma: no cover
+            self._logger.exception(  # pragma: no cover
                 'Got exception when trying to parse: {!r}: {}'
                 .format(expression, e))
 
@@ -289,11 +289,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 Q = ureg.Quantity
                 rate = Q(1, unit_from_ureg.units)
                 rate = rate.to(Q(1, unit_converted.units), 'currency')
-            except Exception as e:  # pragma no cover
-                self._logger.exception(  # pragma no cover
+            except Exception as e:  # pragma: no cover
+                self._logger.exception(  # pragma: no cover
                     'Unexpected exception uni units conversion: {!r}: {}'
                     .format(original_query, e))
-                continue  # pragma no cover
+                continue  # pragma: no cover
 
             kwargs = {}
             if UnitsCalculation.is_currency(unit_converted):

@@ -22,7 +22,7 @@ class TimezoneSqliteCache:
     @lock
     def load(self):
         if sqlite3 is None:
-            return False  # pragma no cover
+            return False  # pragma: no cover
 
         loader = SqliteLoader(TIMEZONES_SQLITE_FILE_USER)
 
@@ -32,7 +32,7 @@ class TimezoneSqliteCache:
 
         # If second time loading fails we can't do anything about it
         if not loader.load():
-            return False  # pragma no cover
+            return False  # pragma: no cover
         self._db = loader.db
         self._post_init()
         return True
@@ -45,7 +45,7 @@ class TimezoneSqliteCache:
             self._city_name_chunks_max = next(iter(rows))[0]
         # This should not happen but capture it just in case
         # It is no fatal error
-        except Exception as e:  # pragma no cover
+        except Exception as e:  # pragma: no cover
             self._city_name_chunks_max = None
             msg = 'Could not fetch city_name_chunks_max {}'
             msg = msg.format(e)

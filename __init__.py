@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pragma: no cover
 '''Converter for currency, units and calculator.
 
 Current backends: fixer.io.

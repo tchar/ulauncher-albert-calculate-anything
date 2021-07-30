@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
-
+# -*- coding: utf-8 -*-
+# pragma: no cover
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# pragma: no cover
 from calculate_anything import logging
 from ulauncher.api.shared.action.CopyToClipboardAction import (
     CopyToClipboardAction

@@ -2,8 +2,8 @@ from enum import Enum
 import os
 try:
     import pint
-except ImportError:  # pragma no cover
-    pint = None  # pragma no cover
+except ImportError:  # pragma: no cover
+    pint = None  # pragma: no cover
 from calculate_anything.units.parser import PintDefinitionParser
 from calculate_anything.currency import CurrencyService
 from calculate_anything import logging
