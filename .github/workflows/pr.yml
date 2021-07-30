@@ -1,10 +1,11 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: ci
+name: pr
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     branches: [ master ]
 
 jobs:
@@ -43,7 +44,7 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
         name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
-        token: ${{ secrets.CODECOV_TOKEN }}
+        dry-run: true
         directory: ./cover/xml
         files: coverage.xml
         env_vars: OS,PYTHON
