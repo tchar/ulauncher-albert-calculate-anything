@@ -15,9 +15,8 @@
 The module works by parsing the input string and uses different handlers to calculate the expression.
 
 The following handlers are supported:
-- `UnitsQueryHandler`: Handles Units
+- `UnitsQueryHandler`: Handles Units and Currency
 - `CalculatorQueryHandler`: Handles Calculations
-- `CurrencyQueryHandler`: Handles Currency
 - `PercentagesQueryHandler`: Handles Percentages
 - `TimeQueryHandler`: Handles Time
 - `Base10QueryHandler`: Handles Decimal
@@ -106,13 +105,13 @@ for query in queries:
 
 # Import one or more handlers
 from calculate_anything.query.handlers import (
-    CurrencyQueryHandler, TimeQueryHandler, UnitsQueryHandler,
+    TimeQueryHandler, UnitsQueryHandler,
     PercentagesQueryHandler, CalculatorQueryHandler,
     Base10QueryHandler, Base16QueryHandler, Base2QueryHandler,
     Base8QueryHandler
 )
 
-handlers = [CurrencyQueryHandler, TimeQueryHandler]
+handlers = [UnitsQueryHandler, TimeQueryHandler]
 
 for query in queries:
     result = MultiHandler().handle(query, *handlers)
