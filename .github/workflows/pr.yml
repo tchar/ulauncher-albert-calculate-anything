@@ -31,7 +31,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov pytest-httpserver
         pip install -r requirements.txt
-        pip install sqlite3
+        python -c "import sqlite3; print(sqlite3.sqlite_version)"
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
