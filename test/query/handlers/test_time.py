@@ -44,19 +44,6 @@ def dt(dt=None, tz=None):
     return ret
 
 
-# def td_pdt(year=0, month=0, week=0, day=0, hour=0, minute=0, second=0):
-#     vals = [year, month, week, day, hour, minute, second]
-#     info = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
-
-#     vals = zip(vals, info)
-#     vals = filter(lambda v: v[0], vals)
-#     vals = map(lambda v: (abs(v[0]), v[1] if v[0]
-#                > 0 else v[1] + ' ago'), vals)
-#     vals = map(lambda v: '{} {}'.format(v[0], v[1]), vals)
-#     _now = dt()
-#     return cal.parseDT(', '.join(vals), sourceTime=_now)[0] - _now
-
-
 def timedelta_to_ydhms(dt: datetime, ref: datetime):
     if dt < ref:
         sg = '- '
@@ -273,7 +260,8 @@ test_spec_target_city = [{
         get_resulttz('Vancouver', 'Canada', 'CA', query='at Vancouver',
                      order=0, value=dt(tz='America/Vancouver')),
         get_resulttz('Vancouver', 'WA United States', 'US',
-                     query='at Vancouver', order=1, value=dt(tz='America/Los_Angeles')),
+                     query='at Vancouver', order=1,
+                     value=dt(tz='America/Los_Angeles')),
         get_result('Now', query='', order=2)
     ]
 }, {
