@@ -1,5 +1,6 @@
 # <img src="calculate_anything/images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
+![Python Versions](misc/platforms-badge.svg)
 [![Python Versions](misc/python-badge.svg)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/tchar/ulauncher-albert-calculate-anything?color=%23007ec6)](LICENSE)
 [![Latest Version](https://img.shields.io/github/v/tag/tchar/ulauncher-albert-calculate-anything?label=version)](https://github.com/tchar/ulauncher-albert-calculate-anything/releases)
