@@ -1,13 +1,11 @@
 # .coveragerc to control coverage.py
 [run]
 branch = False
-include =
-    calculate_anything
 omit =
-    prompt.py
+    demo/*
+    test/*
     main.py
     __init__.py
-    test/*
     calculate_anything/appdirs.py
 
 
