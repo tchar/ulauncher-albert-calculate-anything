@@ -1,7 +1,6 @@
 from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.units.service import UnitsService
 import pytest
-import random
 from datetime import datetime, timedelta
 from pytz import timezone
 from itertools import zip_longest
