@@ -1,10 +1,11 @@
 # <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="icon" width="25"/> Ulauncher/Albert Calculate Anything
 
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
-[![codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
+![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/python-badge.svg)
+[![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
+[![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
+[![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
+[![Benchmark](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
+[![Codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
@@ -14,11 +15,11 @@ See [Features](#features) for supported features, [Contents](#contents) for inst
 
 ## Albert Demo
 
-![](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/demo/demo-albert.gif)
+![Albert Demo](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/demo-albert.gif)
 
 ## Ulauncher Demo 
 
-![](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/demo/demo-ulauncher.gif)
+![Ulauncher Demo](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/demo-ulauncher.gif)
 
 ## Features
 
@@ -365,11 +366,11 @@ The calculate_anything module does not depend on ulauncher or albert, only the `
 
 See the [documentation](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/docs/API.md) for API call examples
 
-You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/demo/prompt.py) file.
+You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/misc/prompt.py) file.
 
 Here is a demo
 
-![](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/demo/demo-prompt_toolkit.gif)
+![](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/demo-prompt_toolkit.gif)
 
 ### Adding flags
 
