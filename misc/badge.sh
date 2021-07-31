@@ -1,3 +1,5 @@
+data=$(cat misc/python.svg | base64)
+
 python -m pybadges \
     --left-text="python" \
     --right-text="3.6 | 3.7 | 3.8 | 3.9" \
@@ -5,7 +7,7 @@ python -m pybadges \
     --right-color='#28A745' \
     --left-link=https://www.python.org/ \
     --right-link=https://www.python.org/doc/versions/ \
-    --logo='misc/python.svg' \
+    --logo="data:image/svg+xml;base64,$data" \
     --embed-logo \
     --whole-title="Python versions" \
     --left-title="Python" \
