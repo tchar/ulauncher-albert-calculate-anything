@@ -4,7 +4,7 @@ python -m pybadges \
     --left-text="python" \
     --right-text="3.6 | 3.7 | 3.8 | 3.9" \
     --left-color='#444D56' \
-    --right-color='#28A745' \
+    --right-color='#007ec6' \
     --left-link=https://www.python.org/ \
     --right-link=https://www.python.org/doc/versions/ \
     --logo="data:image/svg+xml;base64,$data" \

@@ -1,4 +1,4 @@
 Pint==0.17
 simpleeval==0.9.10
 parsedatetime==2.6
-pytz==2019.3
+pytz==2021.1

@@ -1,11 +1,16 @@
 # <img src="calculate_anything/images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
 [![Python Versions](misc/python-badge.svg)](https://www.python.org/)
+[![License](https://img.shields.io/github/license/tchar/ulauncher-albert-calculate-anything?color=%23007ec6)](LICENSE)
+[![Latest Version](https://img.shields.io/github/v/tag/tchar/ulauncher-albert-calculate-anything?label=version)](https://github.com/tchar/ulauncher-albert-calculate-anything/releases)
+[![Requirements Status](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements.svg?branch=master)](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements/?branch=master)
+
 [![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
 [![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
 [![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
 [![Benchmark](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
 [![Codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
+
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
