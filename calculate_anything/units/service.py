@@ -1,5 +1,6 @@
-from enum import Enum
 import os
+from threading import RLock
+from enum import Enum
 try:
     import pint
 except ImportError:  # pragma: no cover
@@ -7,7 +8,7 @@ except ImportError:  # pragma: no cover
 from calculate_anything.units.parser import PintDefinitionParser
 from calculate_anything.currency import CurrencyService
 from calculate_anything import logging
-from calculate_anything.utils import Singleton
+from calculate_anything.utils import Singleton, lock
 from calculate_anything.constants import MAIN_DIR
 
 
@@ -21,6 +22,7 @@ class UnitsService(metaclass=Singleton):
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
+        self._lock = RLock()
         self._unit_registry = None
         self._ctx = None
         self._currencies_in_registry = set()
@@ -30,6 +32,7 @@ class UnitsService(metaclass=Singleton):
         self._currency_timestamps = {}
         self._conversion_mode = UnitsService.ConversionMode.NORMAL
 
+    @lock
     def _update_callback(self, data):
         if not data:
             return
@@ -84,6 +87,7 @@ class UnitsService(metaclass=Singleton):
         return self._base_currency
 
     @property
+    @lock
     def unit_registry(self):
         return self._unit_registry
 
@@ -110,6 +114,7 @@ class UnitsService(metaclass=Singleton):
         self._running = False
         return self
 
+    @lock
     def start(self, force=False):
         if pint is None:
             return
