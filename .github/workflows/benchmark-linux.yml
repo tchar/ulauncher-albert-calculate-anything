@@ -42,7 +42,7 @@ jobs:
           pytest test/benchmark/* --benchmark-json benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
         # Download previous benchmark result from cache (if exists)
       - name: Download previous benchmark data
-        if: ${{ github.head_ref == 'master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
@@ -52,7 +52,7 @@ jobs:
         # Store benchmark results only when branch is master
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
-        if: ${{ github.head_ref == 'master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tool: 'pytest'
           output-file-path: benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
@@ -65,7 +65,7 @@ jobs:
           benchmark-data-dir-path: benchmarks
         # Push results to gh-pages only when branch is master
       - name: Push benchmarks to gh-pages
-        if: ${{ github.head_ref == 'master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         env: 
           SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
