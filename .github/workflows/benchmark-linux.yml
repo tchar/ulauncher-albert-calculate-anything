@@ -1,0 +1,73 @@
+name: Benchmark
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ master ]
+jobs:
+  benchmark:
+    name: Performance regression check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        include:
+        - os: ubuntu-latest
+          path: ~/.cache
+        python-version: [ '3.9' ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+      # Load pip cache
+        with:
+          path: ${{ matrix.path }}/pip
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
+          restore-keys: |
+           ${{ matrix.os }}-pip-${{ matrix.python-version }}
+      # Setup python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/requirements.txt
+          pip install -r requirements/dev-requirements.txt
+        # Run benchmark
+      - name: Benchmark with pytest
+        run: |
+          pytest test/benchmark/* --benchmark-json benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
+        # Download previous benchmark result from cache (if exists)
+      - name: Download previous benchmark data
+        if: ${{ github.head_ref == 'master' }}
+        uses: actions/cache@v2
+        with:
+          path: ${{ matrix.path }}
+          key: ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
+          restore-keys: |
+           ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
+        # Store benchmark results only when branch is master
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        if: ${{ github.head_ref == 'master' }}
+        with:
+          tool: 'pytest'
+          output-file-path: benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
+          fail-on-alert: true
+          alert-threshold: 200%
+          fail-threshold: 400%
+          alert-comment-cc-users: '@tchar'
+          auto-push: false
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+        # Push results to gh-pages only when branch is master
+      - name: Push benchmarks to gh-pages
+        if: ${{ github.head_ref == 'master' }}
+        env: 
+          SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: git push https://tchar:"$SECRETS_PERSONAL_GITHUB_TOKEN"@github.com/"$GITHUB_REPOSITORY".git gh-pages:gh-pages
+
