@@ -3,7 +3,7 @@ import os
 from functools import lru_cache
 import logging as _logging
 from logging.handlers import RotatingFileHandler
-from tests.tutils import random_str
+from test.tutils import random_str
 from calculate_anything import logging
 
 

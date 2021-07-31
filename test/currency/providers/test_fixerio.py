@@ -2,7 +2,7 @@ from datetime import datetime
 import pytest
 from calculate_anything.currency.providers import FixerIOCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
-from tests.tutils import currency_data, expected_currencies
+from test.tutils import currency_data, expected_currencies
 
 
 def test_normal(mock_currency_provider, fixerio_data):

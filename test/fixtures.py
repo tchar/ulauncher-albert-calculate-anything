@@ -10,7 +10,7 @@ from calculate_anything.currency.providers import (
     MyCurrencyNetCurrencyProvider, FixerIOCurrencyProvider
 )
 from calculate_anything.currency.providers.base import ApiKeyCurrencyProvider
-from tests.tutils import osremove, random_str, currency_data, temp_filepath
+from test.tutils import osremove, random_str, currency_data, temp_filepath
 
 
 @pytest.fixture(scope='session')

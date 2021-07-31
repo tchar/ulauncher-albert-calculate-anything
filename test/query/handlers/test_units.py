@@ -11,7 +11,7 @@ from calculate_anything.utils import images_dir
 from calculate_anything.exceptions import (
     MissingPintException, CurrencyProviderException, ZeroDivisionException
 )
-from tests.tutils import (
+from test.tutils import (
     approxunits, extra_translations, no_pint, query_test_helper
 )
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')

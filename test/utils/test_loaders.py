@@ -1,10 +1,10 @@
 import json
-from tests.tutils import temp_file, temp_filepath, osremove
 import pytest
 from calculate_anything.utils.loaders import (
     SqliteLoader, JsonLoader, CurrencyCacheLoader
 )
 from calculate_anything.utils.loaders.loader import Loader
+from test.tutils import temp_file, temp_filepath, osremove
 
 
 test_spec_sqlite = [{

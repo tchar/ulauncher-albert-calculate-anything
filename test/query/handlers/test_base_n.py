@@ -14,7 +14,7 @@ from calculate_anything.exceptions import (
     WrongBaseException,
     ZeroDivisionException
 )
-from tests.tutils import (
+from test.tutils import (
     base_n_no_simpleeval, query_test_helper, reset_instance
 )
 

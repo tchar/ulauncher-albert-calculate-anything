@@ -17,7 +17,7 @@ from calculate_anything.exceptions import (
     DateOverflowException, MisparsedDateTimeException,
     MissingParsedatetimeException
 )
-from tests.tutils import (
+from test.tutils import (
     no_default_cities, no_parsedatetime,
     reset_instance, approxdt, approxstr,
     query_test_helper, set_time_reference
