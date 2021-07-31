@@ -3,9 +3,29 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'docs/**'
+      - 'misc/**'
+      - '__init__.py'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'main.py'
+      - 'manifest.json'
+      - 'README.md'
+      - 'versions.json'
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [ master ]
+    paths-ignore:
+      - 'docs/**'
+      - 'misc/**'
+      - '__init__.py'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'main.py'
+      - 'manifest.json'
+      - 'README.md'
+      - 'versions.json'
 jobs:
   benchmark:
     name: Performance regression check
