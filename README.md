@@ -1,6 +1,11 @@
 # <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="icon" width="25"/> Ulauncher/Albert Calculate Anything
 
+![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/platforms-badge.svg)
 [![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/python-badge.svg)](https://www.python.org/)
+[![License](https://img.shields.io/github/license/tchar/ulauncher-albert-calculate-anything?color=%23007ec6)](LICENSE)
+[![Latest Version](https://img.shields.io/github/v/tag/tchar/ulauncher-albert-calculate-anything?label=version)](https://github.com/tchar/ulauncher-albert-calculate-anything/releases)
+[![Requirements Status](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements.svg?branch=master)](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements/?branch=master)
+
 [![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
 [![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
 [![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
