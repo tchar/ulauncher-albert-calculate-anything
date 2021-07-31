@@ -167,10 +167,10 @@ class Program(Validator):
         return HTML(results)
 
 
-try:
+# Some hacks when creating demos, don't put this in your code
+if os.environ.get('RECORD', '').lower() == 'true':
     sys.stdin = open('/dev/tty', 'r')
-except Exception:
-    pass
+
 program = Program()
 bindings.add('c-a')(program.handle_c_a)
 session = PromptSession(

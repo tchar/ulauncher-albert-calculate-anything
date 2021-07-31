@@ -39,7 +39,7 @@ setup() {
         pad_y=70
     elif [ "$launcher_name" == "prompt_toolkit" ]; then
         use_peek="nopeek"
-        python demo/prompt.py &
+        RECORD=true python demo/prompt.py &
     else
         echo "No launcher provided"
         exit
