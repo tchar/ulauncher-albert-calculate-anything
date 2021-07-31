@@ -30,6 +30,10 @@ jobs:
   benchmark:
     name: Performance regression check
     runs-on: ubuntu-latest
+    env: 
+      SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      BENCHMARKS_BRANCH: gh-pages
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -81,13 +85,12 @@ jobs:
           fail-threshold: 400%
           alert-comment-cc-users: '@tchar'
           auto-push: false
-          gh-pages-branch: gh-pages
+          gh-pages-branch: ${{ env.BENCHMARKS_BRANCH }}
           benchmark-data-dir-path: benchmarks
         # Push results to gh-pages only when branch is master
       - name: Push benchmarks to gh-pages
         if: ${{ github.ref == 'refs/heads/master' }}
         env: 
           SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: git push https://tchar:"$SECRETS_PERSONAL_GITHUB_TOKEN"@github.com/"$GITHUB_REPOSITORY".git gh-pages:gh-pages
+        run: git push https://tchar:"$SECRETS_PERSONAL_GITHUB_TOKEN"@github.com/"$GITHUB_REPOSITORY".git "$BENCHMARKS_BRANCH":"$BENCHMARKS_BRANCH"
 
