@@ -24,9 +24,9 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ matrix.path }}
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
+        key: ${{ matrix.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
         restore-keys: |
-         ${{ runner.os }}-pip-${{ matrix.python-version }}
+         ${{ matrix.os }}-pip-${{ matrix.python-version }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
