@@ -168,24 +168,25 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
                           mycurrencynet_data, fixerio_data, ecb_data):
 
     @contextmanager
-    def _mock_currency_service(error=False):
-        if error in _mock_currency_service_data:
-            yield _mock_currency_service_data[error]
+    def _mock_currency_service(default_currencies, error=False, **extra_rates):
+        CurrencyService().set_default_currencies(default_currencies)
+        rates = currency_data('EUR', **extra_rates)['rates']
+
+        key = (tuple(default_currencies), error, *rates.items())
+        if key in _mock_currency_service_data:
+            yield _mock_currency_service_data[key]
             return
 
-        coindata = coinbase_data('EUR', currency_data('EUR')['rates'])
+        coindata = coinbase_data('EUR', rates)
 
         timestamp = datetime.now().timestamp()
-        rates = currency_data()['rates']
         fixerdata = fixerio_data('EUR', rates, timestamp)
 
-        rates = [
+        mycurrdata = mycurrencynet_data('EUR', [
             {'currency_code': k, 'rate': v}
-            for k, v in currency_data()['rates'].items()
-        ]
-        mycurrdata = mycurrencynet_data('EUR', rates)
+            for k, v in rates.items()
+        ])
 
-        rates = currency_data()['rates']
         ecbdata = ecb_data(rates)
 
         klasses = [CoinbaseCurrencyProvider, FixerIOCurrencyProvider,
@@ -209,5 +210,5 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
             CurrencyService().start(force=True)
             data = data_queue.get(block=True, timeout=None)
             yield data
-            _mock_currency_service_data[error] = data
+            _mock_currency_service_data[key] = data
     return _mock_currency_service

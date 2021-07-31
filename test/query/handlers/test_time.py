@@ -1,6 +1,5 @@
 from functools import lru_cache
 from datetime import datetime, timedelta
-import parsedatetime
 import pytest
 from pytz import timezone
 from calculate_anything.time import TimezoneService
@@ -30,31 +29,32 @@ tr_err = LanguageService().get_translator('errors')
 TimezoneService().start()
 TimezoneService().parse_default_cities_str(
     'Athens GR,New York City US', save=True)
-cal = parsedatetime.Calendar(version=parsedatetime.VERSION_CONTEXT_STYLE)
-dt_now = TimeQueryHandler.now()
 time_reference = datetime(2021, 7, 15, 14, 0, 0)
 
 
-def now(tz=None):
+def dt(dt=None, tz=None):
     """Set a datetime reference for testing"""
+
+    if dt is None:
+        dt = time_reference
     if tz:
-        ret = time_reference.astimezone(tz)
+        ret = dt.astimezone(timezone(tz))
     else:
-        ret = time_reference
+        ret = dt
     return ret
 
 
-def td_pdt(year=0, month=0, week=0, day=0, hour=0, minute=0, second=0):
-    vals = [year, month, week, day, hour, minute, second]
-    info = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
+# def td_pdt(year=0, month=0, week=0, day=0, hour=0, minute=0, second=0):
+#     vals = [year, month, week, day, hour, minute, second]
+#     info = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
 
-    vals = zip(vals, info)
-    vals = filter(lambda v: v[0], vals)
-    vals = map(lambda v: (abs(v[0]), v[1] if v[0]
-               > 0 else v[1] + ' ago'), vals)
-    vals = map(lambda v: '{} {}'.format(v[0], v[1]), vals)
-    _now = now()
-    return cal.parseDT(', '.join(vals), sourceTime=_now)[0] - _now
+#     vals = zip(vals, info)
+#     vals = filter(lambda v: v[0], vals)
+#     vals = map(lambda v: (abs(v[0]), v[1] if v[0]
+#                > 0 else v[1] + ' ago'), vals)
+#     vals = map(lambda v: '{} {}'.format(v[0], v[1]), vals)
+#     _now = dt()
+#     return cal.parseDT(', '.join(vals), sourceTime=_now)[0] - _now
 
 
 def timedelta_to_ydhms(dt: datetime, ref: datetime):
@@ -94,23 +94,21 @@ def timedelta_to_ydhms(dt: datetime, ref: datetime):
 
 
 @lru_cache(maxsize=None)
-def get_result(description, query, order, td=timedelta()):
+def get_result(description, query, order, value=dt()):
     return {
         'result': {
-            'value': approxdt(now() + td),
+            'value': approxdt(value),
             'query': query,
             'error': None,
             'order': order
         },
         'query_result': {
             'icon': images_dir('time.svg'),
-            'name': approxstr((now() + td)
-                              .strftime(TIME_DATETIME_FORMAT)),
+            'name': approxstr(value.strftime(TIME_DATETIME_FORMAT)),
             'description': approxstr(description),
-            'clipboard': approxstr((now() + td)
-                                   .strftime(TIME_DATETIME_FORMAT)),
+            'clipboard': approxstr(value.strftime(TIME_DATETIME_FORMAT)),
             'error': None,
-            'value': approxdt(now() + td),
+            'value': approxdt(value),
             'value_type': datetime,
             'order': order
         }
@@ -119,11 +117,11 @@ def get_result(description, query, order, td=timedelta()):
 
 @lru_cache(maxsize=None)
 def get_resulttz(city_name, country_name,
-                 iso2, query, order, tz, td=timedelta()):
+                 iso2, query, order, value):
     icon = images_dir('flags', '{}.svg'.format(iso2.upper()))
     return {
         'result': {
-            'value': approxdt(now(tz=timezone(tz)) + td),
+            'value': approxdt(value),
             'query': query,
             'error': None,
             'order': order
@@ -131,56 +129,53 @@ def get_resulttz(city_name, country_name,
         'query_result': {
             'icon': icon,
             'name': approxstr(
-                '{}: {}'.format(
-                    city_name,
-                    (now(tz=timezone(tz)) + td).strftime(TIME_TIME_FORMAT))
+                '{}: {}'.format(city_name, value.strftime(TIME_TIME_FORMAT))
             ),
             'description': approxstr(
                 '{} • {} • {} ({})'.format(
-                    (now(tz=timezone(tz)) + td).strftime(
+                    value.strftime(
                         TIME_DATE_FORMAT),
                     country_name,
-                    now(tz=timezone(tz)).tzname(),
-                    'UTC{:+.0f}'.format((now(tz=timezone(tz)) + td)
-                                        .utcoffset().total_seconds() / 60 / 60)
+                    value.tzname(),
+                    'UTC{:+.0f}'.format(value.utcoffset()
+                                        .total_seconds() / 60 / 60)
                 )
             ),
             'clipboard': approxstr(
                 '{}: {}'.format(
-                    city_name,
-                    (now(tz=timezone(tz)) + td).strftime(
-                        TIME_TIME_FORMAT)
+                    city_name, value.strftime(TIME_TIME_FORMAT)
                 )
             ),
             'error': None,
-            'value': approxdt(now(tz=timezone(tz)) + td),
+            'value': approxdt(value),
             'order': order,
             'value_type': datetime
         }
     }
 
 
-def get_resulttd(target: timedelta, query: str, order: int):
+@lru_cache(maxsize=None)
+def get_resulttd(value: timedelta, query: str, order: int):
     return {
         'result': {
-            'value': approxdt(target),
+            'value': approxdt(value),
             'query': query,
             'error': None,
             'order': order
         },
         'query_result': {
             'icon': images_dir('time.svg'),
-            'name': approxstr(timedelta_to_ydhms(target + now(), now())),
+            'name': approxstr(timedelta_to_ydhms(value + dt(), dt())),
             'description': approxstr(
                 '"{}" {} on {}'.format(
                     query.capitalize(),
-                    'is' if target + now() >= now() else 'was',
-                    (target + now()).strftime(TIME_DATETIME_FORMAT)
+                    'is' if value + dt() >= dt() else 'was',
+                    (value + dt()).strftime(TIME_DATETIME_FORMAT)
                 )
             ),
-            'clipboard': approxstr(timedelta_to_ydhms(target + now(), now())),
+            'clipboard': approxstr(timedelta_to_ydhms(value + dt(), dt())),
             'error': None,
-            'value': approxdt(target),
+            'value': approxdt(value),
             'value_type': timedelta,
             'order': order
         }
@@ -223,21 +218,23 @@ test_spec_simple = [{
     'results': [
         get_result('Now', query='', order=0),
         get_resulttz('Athens', 'Greece', 'GR', query='',
-                     order=1, tz='Europe/Athens'),
+                     order=1, value=dt(tz='Europe/Athens')),
         get_resulttz('New York City', 'NY United States', 'US',
-                     query='', order=2, tz='America/New_York')
+                     query='', order=2, value=dt(tz='America/New_York'))
     ]
 }, {
     # Normal test 2
     'query': 'time + 1 day before',
     'results': [
         get_result('Yesterday', query='+ 1 day before',
-                   order=0, td=timedelta(days=-1)),
-        get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day before',
-                     order=1, tz='Europe/Athens', td=timedelta(days=-1)),
+                   order=0, value=dt(datetime(2021, 7, 14, 14, 0, 0))),
+        get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day before', order=1,
+                     value=dt(datetime(2021, 7, 14, 14, 0, 0),
+                              tz='Europe/Athens',)),
         get_resulttz('New York City', 'NY United States', 'US',
                      query='+ 1 day before', order=2,
-                     tz='America/New_York', td=timedelta(days=-1))
+                     value=dt(datetime(2021, 7, 14, 14, 0, 0),
+                              tz='America/New_York'))
     ]
 }, {
     # Overflow with one chunk
@@ -265,8 +262,7 @@ test_spec_simple = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_simple)
 def test_simple(test_spec):
-    with reset_instance(TimeQueryHandler,
-                        context=set_time_reference(time_reference)):
+    with set_time_reference(time_reference):
         query_test_helper(TimeQueryHandler, test_spec)
 
 
@@ -275,9 +271,9 @@ test_spec_target_city = [{
     'query': 'time at Vancouver',
     'results': [
         get_resulttz('Vancouver', 'Canada', 'CA', query='at Vancouver',
-                     order=0, tz='America/Vancouver'),
+                     order=0, value=dt(tz='America/Vancouver')),
         get_resulttz('Vancouver', 'WA United States', 'US',
-                     query='at Vancouver', order=1, tz='America/Los_Angeles'),
+                     query='at Vancouver', order=1, value=dt(tz='America/Los_Angeles')),
         get_result('Now', query='', order=2)
     ]
 }, {
@@ -285,7 +281,7 @@ test_spec_target_city = [{
     'query': 'time at Paris France',
     'results': [
         get_resulttz('Paris', 'France', 'FR', query='at Paris France',
-                     order=0, tz='Europe/Paris'),
+                     order=0, value=dt(tz='Europe/Paris')),
         get_result('Now', query='', order=1)
     ]
 }, {
@@ -297,8 +293,7 @@ test_spec_target_city = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_target_city)
 def test_target_city(test_spec):
-    with reset_instance(TimeQueryHandler,
-                        context=set_time_reference(time_reference)):
+    with set_time_reference(time_reference):
         query_test_helper(TimeQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -312,17 +307,17 @@ test_spec_time = [{
         get_result('Tomorrow',
                    query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
                    '2 months 26 hour 30 minutes 2 SeCond',
-                   order=0, td=td_pdt(day=1)),
+                   order=0, value=dt(datetime(2021, 7, 16, 14, 0, 0))),
         get_resulttz('Athens', 'Greece', 'GR',
                      query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
-                     '2 months 26 hour 30 minutes 2 SeCond',
-                     order=1, tz='Europe/Athens',
-                     td=td_pdt(day=1)),
+                     '2 months 26 hour 30 minutes 2 SeCond', order=1,
+                     value=dt(datetime(2021, 7, 16, 14, 0, 0),
+                              tz='Europe/Athens')),
         get_resulttz('New York City', 'NY United States', 'US',
                      query='+ 2 MONTH 2 day 2 HoUrS 30 minutes 2 seconds - '
-                     '2 months 26 hour 30 minutes 2 SeCond',
-                     order=2, tz='America/New_York',
-                     td=td_pdt(day=1))
+                     '2 months 26 hour 30 minutes 2 SeCond', order=2,
+                     value=dt(datetime(2021, 7, 16, 14, 0, 0),
+                              tz='America/New_York'))
     ]
 }, {
     # Test partial matching
@@ -334,12 +329,14 @@ test_spec_time = [{
             desc_post=': "time + 1 day 2 some text"'
         ),
         get_result('Tomorrow', query='+ 1 day', order=0,
-                   td=td_pdt(day=1)),
+                   value=dt(datetime(2021, 7, 16, 14, 0, 0))),
         get_resulttz('Athens', 'Greece', 'GR', query='+ 1 day', order=1,
-                     tz='Europe/Athens', td=td_pdt(day=1)),
+                     value=dt(datetime(2021, 7, 16, 14, 0, 0),
+                              tz='Europe/Athens')),
         get_resulttz('New York City', 'NY United States', 'US',
-                     query='+ 1 day', order=2, tz='America/New_York',
-                     td=td_pdt(day=1))
+                     query='+ 1 day', order=2,
+                     value=dt(datetime(2021, 7, 16, 14, 0, 0),
+                              tz='America/New_York'))
     ]
 }, {
     # Test overflows
@@ -366,8 +363,7 @@ test_spec_time = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_time)
 def test_time(test_spec):
-    with reset_instance(TimeQueryHandler,
-                        context=set_time_reference(time_reference)):
+    with set_time_reference(time_reference):
         query_test_helper(TimeQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -378,34 +374,34 @@ test_spec_time_target_city = [{
     'query': 'time - 1 WeEk 1 DaY 2 HouR 56 min At ParIs',
     'results': [
         get_resulttz('Paris', 'France', 'FR',
-                     query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs',
-                     order=0, tz='Europe/Paris',
-                     td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
+                     query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs', order=0,
+                     value=dt(datetime(2021, 7, 7, 11, 4, 0),
+                              tz='Europe/Paris')),
         get_resulttz('Paris', 'TX United States', 'US',
-                     query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs',
-                     order=1, tz='America/Chicago',
-                     td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
+                     query='- 1 WeEk 1 DaY 2 HouR 56 min At ParIs', order=1,
+                     value=dt(datetime(2021, 7, 7, 11, 4, 0),
+                              tz='America/Chicago')),
         get_result(tr_time('last-week').capitalize(),
-                   query='- 1 WeEk 1 DaY 2 HouR 56 min',
-                   order=2, td=td_pdt(week=-1, day=-1, hour=-2, minute=-56)),
+                   query='- 1 WeEk 1 DaY 2 HouR 56 min', order=2,
+                   value=dt(datetime(2021, 7, 7, 11, 4, 0))),
     ]
 }, {
     'query': 'time + 1 month at Prague CzEcHia',
     'results': [
         get_resulttz('Prague', 'Czechia', 'CZ',
-                     query='+ 1 month at Prague CzEcHia',
-                     order=0, tz='Europe/Prague',
-                     td=td_pdt(month=1)),
+                     query='+ 1 month at Prague CzEcHia', order=0,
+                     value=dt(datetime(2021, 8, 15, 14, 0, 0),
+                              tz='Europe/Prague')),
         get_result(tr_time('next-month').capitalize(),
-                   query='+ 1 month', order=1, td=td_pdt(month=1)),
+                   query='+ 1 month', order=1,
+                   value=dt(datetime(2021, 8, 15, 14, 0, 0))),
     ]
 }]
 
 
 @pytest.mark.parametrize('test_spec', test_spec_time_target_city)
 def test_time_target_city(test_spec):
-    with reset_instance(TimeQueryHandler,
-                        context=set_time_reference(time_reference)):
+    with set_time_reference(time_reference):
         query_test_helper(TimeQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -479,8 +475,7 @@ test_spec_until = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_until)
 def test_until(test_spec):
-    with reset_instance(TimeQueryHandler,
-                        context=set_time_reference(time_reference)):
+    with set_time_reference(time_reference):
         query_test_helper(TimeQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -513,7 +508,7 @@ test_spec_parsedatetime_missing = [{
 @pytest.mark.parametrize('test_spec', test_spec_parsedatetime_missing)
 def test_parsedatetime_missing(test_spec):
     # Set parsedatetime to None
-    with reset_instance(TimeQueryHandler, context=no_parsedatetime):
+    with no_parsedatetime(), reset_instance(TimeQueryHandler):
         query_test_helper(TimeQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -524,111 +519,113 @@ test_spec_cov = [{
     # Last year
     'query': 'time - 1 year',
     'results': [
-        get_result('Last year', query='- 1 year', order=0, td=td_pdt(year=-1)),
+        get_result('Last year', query='- 1 year', order=0,
+                   value=dt(datetime(2020, 7, 15, 14, 0, 0))),
     ]
 }, {
     # Next year
     'query': 'time + 1 year',
     'results': [
-        get_result('Next year', query='+ 1 year', order=0, td=td_pdt(year=1)),
+        get_result('Next year', query='+ 1 year', order=0,
+                   value=dt(datetime(2022, 7, 15, 14, 0, 0))),
     ]
 }, {
     # Years from now
     'query': 'time + 10 years',
     'results': [
-        get_result('10 years from now', query='+ 10 years',
-                   order=0, td=td_pdt(year=10)),
+        get_result('10 years from now', query='+ 10 years', order=0,
+                   value=dt(datetime(2031, 7, 15, 14, 0, 0))),
     ]
 }, {
     # Years ago
     'query': 'time - 5 years',
     'results': [
-        get_result('5 years ago', query='- 5 years',
-                   order=0, td=td_pdt(year=-5)),
+        get_result('5 years ago', query='- 5 years', order=0,
+                   value=dt(datetime(2016, 7, 15, 14, 0, 0))),
     ]
 }, {
     # Last month
     'query': 'time - 1 month',
     'results': [
-        get_result('Last month', query='- 1 month',
-                   order=0, td=td_pdt(month=-1)),
+        get_result('Last month', query='- 1 month', order=0,
+                   value=dt(datetime(2021, 6, 15, 14, 0, 0))),
     ]
 }, {
     # Next month
     'query': 'time + 1 month',
     'results': [
-        get_result('Next month', query='+ 1 month',
-                   order=0, td=td_pdt(month=1)),
+        get_result('Next month', query='+ 1 month', order=0,
+                   value=dt(datetime(2021, 8, 15, 14, 0, 0))),
     ]
 }, {
     # months from now
     'query': 'time + 2 months',
     'results': [
-        get_result('2 months from now', query='+ 2 months',
-                   order=0, td=td_pdt(month=2)),
+        get_result('2 months from now', query='+ 2 months', order=0,
+                   value=dt(datetime(2021, 9, 15, 14, 0, 0))),
     ]
 }, {
     # months ago
     'query': 'time - 5 months',
     'results': [
-        get_result('5 months ago', query='- 5 months',
-                   order=0, td=td_pdt(month=-5)),
+        get_result('5 months ago', query='- 5 months', order=0,
+                   value=dt(datetime(2021, 2, 15, 14, 0, 0))),
     ]
 }, {
     # next week
     'query': 'time + 1 week',
     'results': [
-        get_result('Next week', query='+ 1 week',
-                   order=0, td=td_pdt(week=1)),
+        get_result('Next week', query='+ 1 week', order=0,
+                   value=dt(datetime(2021, 7, 22, 14, 0, 0))),
     ]
 }, {
     # last week
     'query': 'time - 1 week',
     'results': [
-        get_result('Last week', query='- 1 week',
-                   order=0, td=td_pdt(week=-1)),
+        get_result('Last week', query='- 1 week', order=0,
+                   value=dt(datetime(2021, 7, 8, 14, 0, 0))),
     ]
 }, {
     # weeks from now
     'query': 'time + 2 weeks',
     'results': [
-        get_result('2 weeks from now', query='+ 2 weeks',
-                   order=0, td=td_pdt(week=2)),
+        get_result('2 weeks from now', query='+ 2 weeks', order=0,
+                   value=dt(datetime(2021, 7, 29, 14, 0, 0))),
     ]
 }, {
     # weeks ago
     'query': 'time - 2 weeks',
     'results': [
-        get_result('2 weeks ago', query='- 2 weeks',
-                   order=0, td=td_pdt(week=-2)),
+        get_result('2 weeks ago', query='- 2 weeks', order=0,
+                   value=dt(datetime(2021, 7, 1, 14, 0, 0))),
     ]
 }, {
     # yesterday
     'query': 'time - 1 day',
     'results': [
-        get_result('Yesterday', query='- 1 day',
-                   order=0, td=td_pdt(day=-1)),
+        get_result('Yesterday', query='- 1 day', order=0,
+                   value=dt(datetime(2021, 7, 14, 14, 0, 0))),
     ]
 }, {
     # in 2 days
     'query': 'time + 2 days',
     'results': [
-        get_result('2 days from now', query='+ 2 days',
-                   order=0, td=td_pdt(day=2)),
+        get_result('2 days from now', query='+ 2 days', order=0,
+                   value=dt(datetime(2021, 7, 17, 14, 0, 0))),
     ]
 }, {
     # 3 days ago
     'query': 'time - 3 days',
     'results': [
-        get_result('3 days ago', query='- 3 days',
-                   order=0, td=td_pdt(day=-3)),
+        get_result('3 days ago', query='- 3 days', order=0,
+                   value=dt(datetime(2021, 7, 12, 14, 0, 0))),
     ]
 }, {
     # today
     'query': 'time + 5 hours 3 minutes',
     'results': [
-        get_result('Today', query='+ 5 hours 3 minutes',
-                   order=0, td=td_pdt(hour=5, minute=3)),
+        get_result('Today', query='+ 5 hours 3 minutes', order=0,
+                   value=dt(datetime(2021, 7, 15, 19, 3, 0))),
     ]
 }, {
     # today
@@ -675,9 +672,8 @@ test_spec_cov = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_cov)
 def test_coverage(test_spec):
-    with reset_instance(TimezoneService, context=no_default_cities):
-        with reset_instance(TimezoneService,
-                            context=set_time_reference(time_reference)):
+    with reset_instance(TimezoneService), no_default_cities():
+        with set_time_reference(time_reference):
             query_test_helper(TimeQueryHandler, test_spec)
             query_test_helper(MultiHandler, test_spec, raw=True)
             query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

@@ -275,8 +275,7 @@ test_spec_missing_simpleeval = [{
 def test_missing_simpleeval(test_spec):
     # Allow CalculatorQueryHandler to be reinstantiated
 
-    with reset_instance(CalculatorQueryHandler,
-                        context=calculator_no_simpleeval):
+    with calculator_no_simpleeval(), reset_instance(CalculatorQueryHandler):
         # Set stupid StupidEval as SimpleEval
         assert isinstance(CalculatorQueryHandler()._simple_eval, StupidEval)
         query_test_helper(CalculatorQueryHandler, test_spec)

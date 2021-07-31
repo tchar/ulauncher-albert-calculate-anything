@@ -24,9 +24,11 @@ from calculate_anything.utils.singleton import Singleton
 
 def random_str(length=None):
     length = length if length else 100
-    return ''.join(
+    # To make it variable compliable
+    first = random.choice(string.ascii_letters)
+    return first + ''.join(
         random.choice(string.ascii_letters + string.digits)
-        for _ in range(length)
+        for _ in range(length - 1)
     )
 
 
@@ -48,11 +50,6 @@ def mem_path():
         return mem_path_
     except Exception:
         return fallback
-
-
-@contextmanager
-def empty_ctx():
-    yield
 
 
 @contextmanager
@@ -108,14 +105,12 @@ def no_default_cities():
     TimezoneService().set_default_cities(default_cities)
 
 
+@contextmanager
 def set_time_reference(datetime):
-    @contextmanager
-    def _set_time_reference():
-        now = time_handler.TimeQueryHandler.now
-        time_handler.TimeQueryHandler.now = lambda: datetime
-        yield
-        time_handler.TimeQueryHandler.now = now
-    return _set_time_reference
+    now = time_handler.TimeQueryHandler.now
+    time_handler.TimeQueryHandler.now = lambda: datetime
+    yield
+    time_handler.TimeQueryHandler.now = now
 
 
 @contextmanager
@@ -168,10 +163,9 @@ def temp_file(*filenames, sleep=0):
             if isinstance(data, str):
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(data)
-                    time.sleep(sleep)
             else:
                 os.mkdir(filepath)
-                time.sleep(sleep)
+            time.sleep(sleep)
             filepaths.append(filepath)
         if len(filepaths) == 1:
             yield filepaths[0]
@@ -185,7 +179,7 @@ def temp_file(*filenames, sleep=0):
 
 
 @contextmanager
-def reset_instance(*classes, context=empty_ctx):
+def reset_instance(*classes):
     old_instances = {}
     for cls in classes:
         if cls in Singleton._instances:
@@ -193,9 +187,8 @@ def reset_instance(*classes, context=empty_ctx):
             old_instances[cls] = instance
             del Singleton._instances[cls]
 
-    with context():
-        tmp_classes = tuple(cls() for cls in classes)
-        yield tmp_classes
+    tmp_classes = tuple(cls() for cls in classes)
+    yield tmp_classes
 
     for cls in classes:
         del Singleton._instances[cls]
@@ -313,17 +306,18 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
 
 
 @lru_cache(maxsize=None)
-def currency_data(base_currency='EUR'):
+def currency_data(base_currency='EUR', **extra_rates):
     rates = {
         'EUR': 1,
-        'USD': 0.9,
-        'MXN': 0.2,
-        'CAD': 0.7,
+        'USD': 1.25,
+        'MXN': 2.0,
+        'CAD': 1.5,
         'AMD': 0.4,
-        'RON': 0.5,
-        'AED': 10,
-        'BTC': 100000,
+        'RON': 4.24,
+        'AED': 0.78,
+        'BTC': 0.000001,
     }
+    rates = {**rates, **extra_rates}
     return {
         'base_currency': base_currency,
         'rates': {

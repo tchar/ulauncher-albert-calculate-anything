@@ -349,7 +349,7 @@ test_spec_missing_simpleeval = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_missing_simpleeval)
 def test_missing_simpleeval(test_spec):
-    with reset_instance(test_spec['class'], context=base_n_no_simpleeval):
+    with base_n_no_simpleeval(), reset_instance(test_spec['class']):
         query_test_helper(test_spec['class'], test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)

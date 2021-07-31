@@ -7,7 +7,7 @@ omit =
     prompt.py
     main.py
     __init__.py
-    tests/*
+    test/*
     calculate_anything/appdirs.py
 
 

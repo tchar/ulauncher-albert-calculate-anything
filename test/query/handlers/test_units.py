@@ -1,7 +1,6 @@
 import locale
 import pytest
 from datetime import datetime
-from calculate_anything.currency import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
 from calculate_anything.preferences import Preferences
@@ -18,7 +17,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 LanguageService().set('en_US')
 UnitsService().start()
-CurrencyService().set_default_currencies(['EUR', 'USD', 'BTC', 'CAD'])
+default_currencies = ['EUR', 'USD', 'BTC', 'CAD']
 tr_err = LanguageService().get_translator('errors')
 
 
@@ -152,7 +151,7 @@ test_spec_units_simple = [lambda Q: {
 
 @pytest.mark.parametrize('test_spec', test_spec_units_simple)
 def test_units_simple(mock_currency_service, test_spec):
-    with mock_currency_service(error=False):
+    with mock_currency_service(default_currencies, error=False):
         Quantity = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Quantity)
         query_test_helper(UnitsQueryHandler, test_spec)
@@ -250,7 +249,7 @@ test_spec_units_multi = [lambda Q: {
 
 @pytest.mark.parametrize('test_spec', test_spec_units_multi)
 def test_units_multi(test_spec, mock_currency_service):
-    with mock_currency_service(error=False):
+    with mock_currency_service(default_currencies, error=False):
         Quantity = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Quantity)
         query_test_helper(UnitsQueryHandler, test_spec)
@@ -288,7 +287,7 @@ test_spec_units_mode_crazy = [lambda Q: {
 
 @pytest.mark.parametrize('test_spec', test_spec_units_mode_crazy)
 def test_units_mode_crazy(test_spec, mock_currency_service):
-    with mock_currency_service(error=False):
+    with mock_currency_service(default_currencies, error=False):
         # Set crazy mode
         preferences = Preferences()
         preferences.units.set_conversion_mode('crazy')
@@ -429,7 +428,7 @@ test_spec_currency = [lambda Q, data: {
 
 @pytest.mark.parametrize('test_spec', test_spec_currency)
 def test_currency(mock_currency_service, test_spec):
-    with mock_currency_service(error=False) as data:
+    with mock_currency_service(default_currencies, error=False) as data:
         Q = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Q, data)
         query_test_helper(UnitsQueryHandler, test_spec)
@@ -467,7 +466,7 @@ test_spec_aliases_translations = [lambda Q: {
 @pytest.mark.parametrize('test_spec', test_spec_aliases_translations)
 def test_aliases_translations(mock_currency_service, test_spec):
     translations = {'&': 'meter', 'm': 'meter'}
-    with mock_currency_service(error=False), \
+    with mock_currency_service(default_currencies, error=False), \
             extra_translations('units', translations):
         Q = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Q)
@@ -538,7 +537,7 @@ test_spec_provider_had_error = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_provider_had_error)
 def test_provider_had_error(mock_currency_service, test_spec):
-    with mock_currency_service(error=True):
+    with mock_currency_service(default_currencies, error=True):
         query_test_helper(UnitsQueryHandler, test_spec)
         query_test_helper(MultiHandler, test_spec, raw=True)
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
@@ -583,7 +582,7 @@ test_special_cases = [lambda _: {
 
 @pytest.mark.parametrize('test_spec', test_special_cases)
 def test_special_cases(mock_currency_service, test_spec):
-    with mock_currency_service(error=False):
+    with mock_currency_service(default_currencies, error=False):
         Q = UnitsService().unit_registry.Quantity
         test_spec = test_spec(Q)
         query_test_helper(UnitsQueryHandler, test_spec)
@@ -597,7 +596,7 @@ test_units_service_not_running = [lambda _: {
 
 @pytest.mark.parametrize('test_spec', test_units_service_not_running)
 def test_unit_service_not_running(mock_currency_service, test_spec):
-    with mock_currency_service(error=False):
+    with mock_currency_service(default_currencies, error=False):
         UnitsService().stop()
         test_spec = test_spec(None)
         query_test_helper(UnitsQueryHandler, test_spec)
