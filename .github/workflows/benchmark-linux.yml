@@ -23,9 +23,9 @@ jobs:
       # Load pip cache
         with:
           path: ${{ matrix.path }}/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
           restore-keys: |
-           ${{ runner.os }}-pip-${{ matrix.python-version }}
+           ${{ matrix.os }}-pip-${{ matrix.python-version }}
       # Setup python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -39,19 +39,35 @@ jobs:
         # Run benchmark
       - name: Benchmark with pytest
         run: |
-          pytest test/benchmark/* --benchmark-json benchmark-${{ runner.os }}-${{ matrix.python-version }}.json
+          pytest test/benchmark/* --benchmark-json benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
         # Download previous benchmark result from cache (if exists)
       - name: Download previous benchmark data
+        if: ${{ github.head_ref == 'master' }}
         uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
-          key: ${{ runner.os }}-benchmark-${{ matrix.python-version }}
+          key: ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
           restore-keys: |
-           ${{ runner.os }}-benchmark-${{ matrix.python-version }}
+           ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
+        # Store benchmark results only when branch is master
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
+        if: ${{ github.head_ref == 'master' }}
         with:
           tool: 'pytest'
-          output-file-path: benchmark-${{ runner.os }}-${{ matrix.python-version }}.json
-          external-data-json-path: ${{ matrix.path }}/benchmark-${{ runner.os }}-${{ matrix.python-version }}.json
+          output-file-path: benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
           fail-on-alert: true
+          alert-threshold: 200%
+          fail-threshold: 400%
+          alert-comment-cc-users: '@tchar'
+          auto-push: false
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+        # Push results to gh-pages only when branch is master
+      - name: Push benchmarks to gh-pages
+        if: ${{ github.head_ref == 'master' }}
+        env: 
+          SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: git push https://tchar:"$SECRETS_PERSONAL_GITHUB_TOKEN"@github.com/"$GITHUB_REPOSITORY".git gh-pages:gh-pages
+
