@@ -1,6 +1,6 @@
 # <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="icon" width="25"/> Ulauncher/Albert Calculate Anything
 
-![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/python-badge.svg)
+[![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/python-badge.svg)](https://www.python.org/)
 [![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
 [![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
 [![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
