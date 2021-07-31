@@ -1,10 +1,11 @@
 # <img src="calculate_anything/images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
-[![github](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
-[![codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
+![Python Versions](misc/python-badge.svg)
+[![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
+[![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml)
+[![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml)
+[![Benchmark](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
+[![Codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
@@ -14,11 +15,11 @@ See [Features](#features) for supported features, [Contents](#contents) for inst
 
 ## Albert Demo
 
-![](demo/demo-albert.gif)
+![Albert Demo](misc/demo-albert.gif)
 
 ## Ulauncher Demo 
 
-![](demo/demo-ulauncher.gif)
+![Ulauncher Demo](misc/demo-ulauncher.gif)
 
 ## Features
 
@@ -365,11 +366,11 @@ The calculate_anything module does not depend on ulauncher or albert, only the `
 
 See the [documentation](docs/API.md) for API call examples
 
-You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](demo/prompt.py) file.
+You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](misc/prompt.py) file.
 
 Here is a demo
 
-![](demo/demo-prompt_toolkit.gif)
+![](misc/demo-prompt_toolkit.gif)
 
 ### Adding flags
 
