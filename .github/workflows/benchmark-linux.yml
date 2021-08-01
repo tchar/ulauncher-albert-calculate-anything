@@ -51,9 +51,9 @@ jobs:
       # Load pip cache
         with:
           path: ${{ matrix.path }}/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements/*requirements.txt') }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements/*requirements.txt') }}
           restore-keys: |
-           ${{ matrix.os }}-pip-${{ matrix.python-version }}
+            ${{ matrix.os }}-${{ matrix.python-version }}-pip-
       # Setup python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -74,9 +74,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
-          key: ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
           restore-keys: |
-           ${{ matrix.os }}-benchmark-${{ matrix.python-version }}
+            ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
         # Store benchmark results only when branch is master
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
