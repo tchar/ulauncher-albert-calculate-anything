@@ -1,6 +1,6 @@
 # <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="icon" width="25"/> Ulauncher/Albert Calculate Anything
 
-![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/platforms-badge.svg)
+![Platforms](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/platforms-badge.svg)
 [![Python Versions](https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/misc/python-badge.svg)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/tchar/ulauncher-albert-calculate-anything?color=%23007ec6)](LICENSE)
 [![Latest Version](https://img.shields.io/github/v/tag/tchar/ulauncher-albert-calculate-anything?label=version)](https://github.com/tchar/ulauncher-albert-calculate-anything/releases)
