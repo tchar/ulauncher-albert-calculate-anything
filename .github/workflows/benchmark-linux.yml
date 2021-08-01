@@ -4,6 +4,8 @@ on:
     branches:
       - master
     paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/benchmark-linux.yml'
       - 'docs/**'
       - 'misc/**'
       - '__init__.py'
@@ -17,6 +19,8 @@ on:
     types: [opened, synchronize, reopened]
     branches: [ master ]
     paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/benchmark-linux.yml'
       - 'docs/**'
       - 'misc/**'
       - '__init__.py'
@@ -38,8 +42,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         include:
-        - os: ubuntu-latest
-          path: ~/.cache
+          - os: ubuntu-latest
+            path: ~/.cache
         python-version: [ '3.9' ]
     steps:
       - uses: actions/checkout@v2
