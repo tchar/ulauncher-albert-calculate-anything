@@ -1,6 +1,8 @@
+from calculate_anything.currency.cache import CurrencyCache
 from contextlib import contextmanager
 from datetime import datetime
 from queue import Queue
+from urllib.parse import urljoin
 import pytest
 from pytest_httpserver.httpserver import HTTPServer, Response
 from calculate_anything.units import UnitsService
@@ -9,7 +11,9 @@ from calculate_anything.currency.providers import (
     CoinbaseCurrencyProvider, ECBCurrencyProvider,
     MyCurrencyNetCurrencyProvider, FixerIOCurrencyProvider
 )
-from calculate_anything.currency.providers.base import ApiKeyCurrencyProvider
+from calculate_anything.currency.providers.base import (
+    CurrencyProvider, ApiKeyCurrencyProvider
+)
 from test.tutils import osremove, random_str, currency_data, temp_filepath
 
 
@@ -100,13 +104,15 @@ def mock_currency_provider(httpserver: HTTPServer):
             instances.append(instance)
             storage[klass] = {
                 'instance': instance,
-                'url': klass.BASE_URL
+                'base_url': klass.BASE_URL,
+                'api_url': klass.API_URL
             }
         return storage
 
-    def restore_data(klasses):
+    def restore_data(klasses: CurrencyProvider):
         for klass, info in klasses.items():
-            klass.BASE_URL = info['url']
+            klass.BASE_URL = info['base_url']
+            klass.API_URL = info['api_url']
 
     def _handle_no_response(klasses):
         base_url = 'http://localhost:1234/{}.{}'.format(
@@ -128,8 +134,9 @@ def mock_currency_provider(httpserver: HTTPServer):
             data = [data] * len(klasses)
         instances = []
         for klass, data, use_json in zip(klasses, data, use_json):
-            api_url = klass.API_URL
-            base_url = httpserver.url_for(klasses[klass]['url'])
+            api_url = urljoin('/', klass.__name__)
+            klass.API_URL = api_url
+            base_url = httpserver.url_for(klasses[klass]['base_url'])
             klass.BASE_URL = base_url
             request = httpserver.expect_request(api_url)
             if status != 200:
@@ -160,23 +167,38 @@ def mock_currency_provider(httpserver: HTTPServer):
     return _mock_currency_provider
 
 
+@pytest.fixture(scope='function')
+def in_memory_cache():
+    @contextmanager
+    def _in_memory_cache():
+        old_cache = CurrencyService()._cache
+        new_cache = CurrencyCache()
+        new_cache._use_only_memory = True
+        CurrencyService()._cache = new_cache
+        if CurrencyService()._thread is not None:
+            CurrencyService()._thread._cache = new_cache
+        yield
+        if CurrencyService()._thread is not None:
+            CurrencyService()._thread._cache = old_cache
+        CurrencyService()._cache = old_cache
+    return _in_memory_cache
+
+
 _mock_currency_service_data = {}
 
 
 @pytest.fixture(scope='function')
 def mock_currency_service(mock_currency_provider, coinbase_data,
-                          mycurrencynet_data, fixerio_data, ecb_data):
+                          mycurrencynet_data, fixerio_data, ecb_data,
+                          in_memory_cache):
+
+    def callback(queue: Queue):
+        def _callback(data, _):
+            queue.put_nowait(data)
+        return _callback
 
     @contextmanager
-    def _mock_currency_service(default_currencies, error=False, **extra_rates):
-        CurrencyService().set_default_currencies(default_currencies)
-        rates = currency_data('EUR', **extra_rates)['rates']
-
-        key = (tuple(default_currencies), error, *rates.items())
-        if key in _mock_currency_service_data:
-            yield _mock_currency_service_data[key]
-            return
-
+    def uncached_data(rates, error):
         coindata = coinbase_data('EUR', rates)
 
         timestamp = datetime.now().timestamp()
@@ -197,19 +219,34 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
             status = 500
         else:
             status = 200
-
-        data_queue = Queue()
-
-        def callback(data, _):
-            data_queue.put_nowait(data)
-
-        with mock_currency_provider(klasses, data, use_json, status=status):
+        with in_memory_cache(), \
+                mock_currency_provider(klasses, data, use_json, status=status):
+            data_queue = Queue()
+            cb = callback(data_queue)
             UnitsService().start(force=True)
-            CurrencyService().remove_update_callback(callback)
-            CurrencyService().add_update_callback(callback)
+            CurrencyService().add_update_callback(cb)
             CurrencyService().start(force=True)
             data = data_queue.get(block=True, timeout=None)
             yield data
-            _mock_currency_service_data[key] = data
+            CurrencyService().remove_update_callback(cb)
             CurrencyService().stop()
+
+    @contextmanager
+    def cached_data(default_currencies, error=False, **extra_rates):
+        rates = currency_data('EUR', **extra_rates)['rates']
+        CurrencyService().set_default_currencies(default_currencies)
+        key = (tuple(default_currencies), error, *rates.items())
+        if key in _mock_currency_service_data:
+            yield _mock_currency_service_data[key]
+            return
+
+        with uncached_data(rates, error) as data:
+            yield data
+            _mock_currency_service_data[key] = data
+
+    @contextmanager
+    def _mock_currency_service(default_currencies, error=False, **extra_rates):
+        with cached_data(default_currencies, error, **extra_rates) as data:
+            yield data
+
     return _mock_currency_service
