@@ -1,8 +1,11 @@
+from threading import Event, RLock, Thread
+from typing import Callable
+import uuid
 from calculate_anything.currency.providers import CombinedCurrencyProvider
 from calculate_anything.currency.cache import CurrencyCache
-from threading import RLock, Timer
-from calculate_anything.utils import Singleton, safe_operation, lock
+from calculate_anything.utils import Singleton, safe_operation, with_lock
 from calculate_anything import logging
+from calculate_anything.currency.providers.base import CurrencyData
 
 
 __all__ = ['CurrencyService']
@@ -11,83 +14,113 @@ __all__ = ['CurrencyService']
 logger = logging.getLogger(__name__)
 
 
+class UpdateThread(Thread):
+    def __init__(self, cache: CurrencyCache,
+                 provider: CombinedCurrencyProvider,
+                 callback: Callable[[CurrencyData, bool], None],
+                 lock: RLock):
+        super().__init__()
+        self._cache = cache
+        self._provider = provider
+        self._callback = callback
+        self._lock = lock
+        self._stop_event = Event()
+        self._wake_event = Event()
+        self._ran = False
+        self._thread_id = uuid.uuid4()
+        name = 'UpdateThread(id={})'.format(self.thread_id)
+        self._logger = logger.getChild(name)
+
+    @property
+    def thread_id(self):
+        return str(self._thread_id).split('-')[-1]
+
+    def _get_currencies(self, *currencies, force) -> CurrencyData:
+        provider = self._provider.__class__.__name__
+
+        if force:
+            pass
+        elif self._cache.enabled and not self._cache.should_update():
+            return self._cache.get_rates(*currencies)
+
+        self._logger.info('Will load currencies')
+        self._cache.clear()
+        currency_rates = self._provider.request_currencies(
+            *currencies, force=force)
+        if not self._stop_event.is_set():
+            self._cache.save(currency_rates, provider)
+        return currency_rates
+
+    @with_lock
+    def _run(self, force) -> int:
+        next_update = 60
+
+        currency_rates = {}
+        try:
+            currency_rates = self._get_currencies(force=force)
+        except Exception as e:
+            self._logger.exception('Could not get currencies: {}'.format(e))
+
+        with safe_operation():
+            self._callback(currency_rates, self._provider.had_error)
+
+        if not self._provider.had_error:
+            cache_next_update = self._cache.next_update_seconds()
+            next_update = max(next_update, cache_next_update)
+        return next_update
+
+    def run(self):
+        self._logger.info('Starting thread')
+        if not self._ran:
+            next_update = self._run(False)
+
+        while True:
+            self._logger.info('Sleeping for {:.0f}s'.format(next_update))
+
+            self._wake_event.wait(next_update)
+            if self._stop_event.is_set():
+                break
+            force = self._wake_event.is_set()
+            next_update = self._run(force)
+            self._wake_event.clear()
+
+        self._logger.info('Stopping thread')
+
+    def wake(self):
+        self._wake_event.set()
+
+    def stop(self):
+        self._stop_event.set()
+        self.wake()
+
+
 class CurrencyService(metaclass=Singleton):
     def __init__(self):
         self._default_currencies = []
         self._lock = RLock()
         self._cache = CurrencyCache()
         self._provider = CombinedCurrencyProvider()
-        self._thread_id = 0
         self._is_running = False
         self._enabled = True
+        self._thread = self._new_thread()
         self._update_callbacks = []
 
-    def __get_currencies(self, *currencies, force=False):
-        provider = self._provider.__class__.__name__
-        if force or not self._cache.enabled or self._cache.should_update():
-            logger.info('Will load currencies')
-            self._cache.clear()
-            currency_rates = self._provider.request_currencies(
-                *currencies, force=force)
-            self._cache.save(currency_rates, provider)
-        else:
-            currency_rates = self._cache.get_rates(*currencies)
+    @property
+    @with_lock
+    def is_running(self):
+        return self._is_running
 
-        return currency_rates
-
-    @lock
-    def _update_thread(self, thread_id, force=False):
-        if force:
-            pass
-        elif not self._is_running:
-            logger.info(
-                'Stopping thread (id={}). Service stopped'.format(thread_id))
-            return
-        elif thread_id != self._thread_id:
-            logger.info('Stopping thread (id={}). Another thread is '
-                        'running (id={})'.format(thread_id,
-                                                 self._thread_id))
-            return
-        elif not self._cache.enabled:
-            logger.info(
-                'Stopping thread (id={}). Cache not enabled'.format(thread_id))
-            self._is_running = False
-            return
-
-        currency_rates = {}
-        with safe_operation('Requesting currencies'):
-            currency_rates = self.__get_currencies(force=force)
-
-        for callback in self._update_callbacks:
-            with safe_operation():
-                callback(currency_rates)
-
-        if force and not self._cache.enabled:
-            logger.info(
-                'Stopping thread (id={}). Cache not enabled'.format(thread_id))
-            self._is_running = False
-            return
-
-        next_update_seconds = 60
-        if not self._provider.had_error:
-            next_update_seconds = max(
-                self._cache.next_update_seconds(), next_update_seconds)
-            timer_thread = Timer(next_update_seconds,
-                                 self._update_thread, args=(thread_id,))
-        else:
-            self._cache.clear()
-            timer_thread = Timer(next_update_seconds,
-                                 self._update_thread, args=(thread_id,))
-
-        timer_thread.setDaemon(True)
-        timer_thread.start()
+    @is_running.setter
+    @with_lock
+    def is_running(self, is_running):
+        self._is_running = is_running
 
     @property
-    @lock
+    @with_lock
     def provider_had_error(self):
         return self._provider.had_error
 
-    @lock
+    @with_lock
     def enable_cache(self, update_frequency):
         if not self._enabled:
             logger.warning('Service is disabled, cannot enable cache')
@@ -98,37 +131,37 @@ class CurrencyService(metaclass=Singleton):
         self._cache.enable(update_frequency)
         return self
 
-    @lock
+    @with_lock
     def disable_cache(self):
         logger.info('Disabling cache')
         self._cache.disable()
         return self
 
     @property
-    @lock
+    @with_lock
     def cache_enabled(self):
         return self._cache.enabled
 
     @property
-    @lock
+    @with_lock
     def enabled(self):
         return self._enabled
 
-    @lock
+    @with_lock
     def add_provider(self, provider):
         logger.info('Adding provider {}'.format(
             provider.__class__.__name__))
         self._provider.add_provider(provider)
         return self
 
-    @lock
+    @with_lock
     def remove_provider(self, provider):
         logger.info('Removing provider {}'.format(
             provider.__class__.__name__))
         self._provider.remove_provider(provider)
         return self
 
-    @lock
+    @with_lock
     def set_default_currencies(self, default_currencies):
         logger.info(
             'Updating default currencies = {}'.format(default_currencies))
@@ -136,66 +169,66 @@ class CurrencyService(metaclass=Singleton):
         return self
 
     @property
-    @lock
+    @with_lock
     def default_currencies(self):
         return self._default_currencies
 
-    @lock
+    @with_lock
     def add_update_callback(self, callback):
         self._update_callbacks.append(callback)
 
-    @lock
+    @with_lock
     def remove_update_callback(self, callback):
         callbacks = self._update_callbacks
         callbacks = [cb for cb in callbacks if cb != callback]
         self._update_callbacks = callbacks
 
-    # @lock
-    # def get_rates(self, *currencies, force=False):
-    #     if not self._enabled:
-    #         logger.warning('Service is disabled cannot get rates')
-    #         return {}
-    #     try:
-    #         return self.__get_currencies(*currencies, force=force)
-    #     except CurrencyProviderException:
-    #         return {}
+    def _new_thread(self):
+        cache = self._cache
+        provider = self._provider
+        callback = self._update_callback
+        lock = self._lock
+        return UpdateThread(cache, provider, callback, lock)
 
-    # @lock
-    # def get_available_currencies(self):
-    #     try:
-    #         available_currencies = list(self.__get_currencies().keys())
-    #     except CurrencyProviderException as e:
-    #         logger.error('Error when contacting provider: {}'
-    #                            .format(e))
-    #         available_currencies = []
-    #     return available_currencies
+    def _stop_thread(self):
+        if self._thread.is_alive():
+            self._thread.stop()
+            self._thread.join()
+            self._thread = self._new_thread()
 
-    @lock
+    def _update_callback(self, data: CurrencyData, had_error: bool) -> None:
+        for callback in self._update_callbacks:
+            with safe_operation():
+                callback(data, had_error)
+
+    @with_lock
     def start(self, force=False):
         if force:
             pass
         elif not self._cache.enabled or self._is_running:
             return
-        self._is_running = True
-        logger.info('Currency Service is running')
-        self._thread_id += 1
-        timer_thread = Timer(0.0, self._update_thread, args=(
-            self._thread_id,), kwargs={'force': force})
-        timer_thread.setDaemon(True)
-        timer_thread.start()
+        else:
+            logger.info('Currency Service is running')
 
-    @lock
+        self._is_running = True
+        if not self._thread.is_alive():
+            self._thread.start()
+        elif force:
+            self._thread.wake()
+
+    @with_lock
     def enable(self):
         self._enabled = True
         return self
 
-    @lock
+    @with_lock
     def disable(self):
         self.disable_cache()
         self._enabled = False
         return self
 
-    @lock
+    # Don't use a lock because it block the thread if it is just before run
     def stop(self):
-        self._is_running = False
+        self._stop_thread()
+        self.is_running = False
         return self

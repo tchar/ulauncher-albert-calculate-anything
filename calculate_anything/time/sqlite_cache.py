@@ -4,7 +4,7 @@ try:
 except ImportError:  # pragma: no cover
     sqlite3 = None  # pragma: no cover
 from calculate_anything import logging
-from calculate_anything.utils import lock
+from calculate_anything.utils import with_lock
 from calculate_anything.utils.loaders import SqliteLoader
 from calculate_anything.constants import (
     TIMEZONES_SQLITE_FILE_DEFAULT, TIMEZONES_SQLITE_FILE_USER,
@@ -21,7 +21,7 @@ class TimezoneSqliteCache:
         self._db = None
         self._lock = RLock()
 
-    @lock
+    @with_lock
     def load(self):
         if sqlite3 is None:
             return False  # pragma: no cover
@@ -179,7 +179,7 @@ class TimezoneSqliteCache:
 
         return cities
 
-    @lock
+    @with_lock
     def close_db(self):
         if self._db is None:
             return  # pragma: no cover

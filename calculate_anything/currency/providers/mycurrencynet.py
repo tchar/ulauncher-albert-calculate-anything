@@ -3,6 +3,7 @@ import json
 from json.decoder import JSONDecodeError
 from urllib.request import urlopen
 from urllib.error import HTTPError
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException
@@ -63,7 +64,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         }
         return rates_ret
 
-    def request_currencies(self, *currencies, force=False):
+    def request_currencies(self, *currencies, force=False) -> CurrencyData:
         super().request_currencies(*currencies, force=force)
         try:
             request = self.get_request()

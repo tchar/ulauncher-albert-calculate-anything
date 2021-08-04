@@ -1,7 +1,9 @@
-from calculate_anything.exceptions import CurrencyProviderException
 from datetime import datetime
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 from urllib.request import Request
+from calculate_anything.currency.data import CurrencyData
+from calculate_anything.exceptions import CurrencyProviderException
+
 
 __all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider']
 
@@ -30,7 +32,7 @@ class CurrencyProvider:
         url = urlunparse(url)
         return Request(url, headers=headers)
 
-    def request_currencies(self, *currencies, force=False):
+    def request_currencies(self, *currencies, force=False) -> CurrencyData:
         timestamp = datetime.now().timestamp()
         if not force and self.had_error and \
                 timestamp - 60 <= self.last_request_timestamp:
@@ -55,7 +57,7 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
     def set_api_key(self, api_key):
         self._api_key = api_key
 
-    def request_currencies(self, *currencies, force):
+    def request_currencies(self, *currencies, force) -> CurrencyData:
         super_result = super().request_currencies(*currencies, force)
         if not self.api_key_valid:
             self.had_error = True

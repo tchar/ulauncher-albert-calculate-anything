@@ -200,7 +200,7 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
 
         data_queue = Queue()
 
-        def callback(data):
+        def callback(data, _):
             data_queue.put_nowait(data)
 
         with mock_currency_provider(klasses, data, use_json, status=status):
@@ -211,4 +211,5 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
             data = data_queue.get(block=True, timeout=None)
             yield data
             _mock_currency_service_data[key] = data
+            CurrencyService().stop()
     return _mock_currency_service
