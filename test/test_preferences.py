@@ -14,19 +14,20 @@ from test.tutils import reset_instance
 
 @contextmanager
 def mock_providers(mock_currency_provider):
-    with mock_currency_provider(CoinbaseCurrencyProvider, {}, True), \
-            mock_currency_provider(MyCurrencyNetCurrencyProvider, {}, False), \
-            mock_currency_provider(ECBCurrencyProvider, {}, True), \
-            mock_currency_provider(FixerIOCurrencyProvider, {}, True):
+    klasses = [CoinbaseCurrencyProvider, FixerIOCurrencyProvider,
+               MyCurrencyNetCurrencyProvider, ECBCurrencyProvider]
+    data = [{}, {}, {}, '']
+    use_json = [True, True, True, False]
+    with mock_currency_provider(klasses, data, use_json):
         yield
 
 
-def test_defaults(mock_currency_provider):
+def test_defaults(in_memory_cache, mock_currency_provider):
     with reset_instance(Preferences, LanguageService,
                         TimezoneService, UnitsService,
                         CurrencyService), \
+        in_memory_cache(), \
             mock_providers(mock_currency_provider):
-
         preferences = Preferences()
         preferences.commit()
         assert preferences.language.lang == LanguageService().lang == 'en_US'
@@ -99,12 +100,12 @@ test_spec_normal_alts = [{
 
 
 @pytest.mark.parametrize('test_spec', test_spec_normal_alts)
-def test_normal(test_spec, mock_currency_provider):
+def test_normal(test_spec, in_memory_cache, mock_currency_provider):
     with reset_instance(Preferences, LanguageService,
                         TimezoneService, UnitsService,
                         CurrencyService), \
+        in_memory_cache(), \
             mock_providers(mock_currency_provider):
-
         lang = test_spec['language']['lang']
         default_cities = test_spec['time']['default_cities']
         units_conversion_mode = test_spec['units']['conversion_mode']
@@ -121,6 +122,7 @@ def test_normal(test_spec, mock_currency_provider):
         for provider, api_key in currency_providers:
             preferences.currency.add_provider(provider, api_key)
         preferences.currency.set_default_currencies(default_currencies)
+
         preferences.commit()
 
         assert preferences.language.lang == LanguageService().lang == 'en_US'
@@ -173,7 +175,9 @@ def test_normal(test_spec, mock_currency_provider):
                 FixerIOCurrencyProvider
             )
             ))
-        assert CurrencyService(
-        )._provider._api_providers[FixerIOCurrencyProvider]._api_key == '12345'
-        assert CurrencyService()._is_running is True
+
+        fixerio = FixerIOCurrencyProvider
+        api_key = CurrencyService()._provider._api_providers[fixerio]._api_key
+        assert api_key == '12345'
+        assert CurrencyService().is_running is True
         CurrencyService().stop()

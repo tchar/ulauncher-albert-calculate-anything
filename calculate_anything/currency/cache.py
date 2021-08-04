@@ -69,9 +69,11 @@ class CurrencyCache:
         return self._data['exchange_rates']
 
     def enable(self, update_frequency):
+        logger.info('Enabling cache every {}s'.format(update_frequency))
         self._update_frequency = update_frequency
 
     def disable(self):
+        logger.info('Disabling cache')
         self._update_frequency = 0
 
     @property
@@ -87,10 +89,14 @@ class CurrencyCache:
             self._update_frequency
 
     def clear(self):
+        logger.info('Clearing cache {}'.format(self._use_only_memory))
         self._data = {
             'exchange_rates': {},
             'last_update_timestamp': 0
         }
+        if self._use_only_memory:
+            logger.info('Using only memory, not deleting file')
+            return
         if os.path.isfile(CURRENCY_DATA_FILE):
             try:
                 os.remove(CURRENCY_DATA_FILE)
@@ -101,6 +107,10 @@ class CurrencyCache:
 
     def save(self, exchange_rates, provider):
         if not self.enabled:
+            logger.warning('Cache not enabled, not saving')
+            return
+        if not exchange_rates:
+            logger.warning('Empty exchange rates, not saving')
             return
         self._data = {
             'provider': provider,
@@ -108,11 +118,12 @@ class CurrencyCache:
             'last_update_timestamp': datetime.now().timestamp()
         }
         if self._use_only_memory:
+            logger.info('Using only memory, not writing to file')
             return
+        logger.info('Writing currency data to file')
         try:
             with open(CURRENCY_DATA_FILE, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:  # pragma: no cover
-            logger.exception(
-                'Could not save cache data {}: {}'
-                .format(CURRENCY_DATA_FILE, e))
+            logger.exception('Could not save cache data {}: {}'
+                             .format(CURRENCY_DATA_FILE, e))
