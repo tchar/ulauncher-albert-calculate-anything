@@ -31,10 +31,18 @@ There is also a generic handler (`MultiHandler`) which handles a request using a
 The currency service by default is enabled, however it is not running.
 There is also a cache to store results in a cache directory which you can enable/disable.
 
-Cache directories are (Suppose your username is `tchar`):
-- Linux: `/home/tchar/.cache/calculate_anything`
-- Windows: `'C:\Users\tchar\AppData\Local\Acme\SuperApp\Cache'`
-- macOS: `/Users/tchar/Library/Caches/calculate_anything`
+### Cache directories
+Suppose your username is `username`:
+- Linux: `/home/username/.cache/com.github.tchar.calculate_anything`
+- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache`
+- macOS: `/Users/username/Library/Caches/com.github.tchar.calculate_anything`
+
+### Log directories
+Supose your username is `username`:
+- Linux: `/home/username/.cache/com.github.tchar.calculate_anything/log`
+- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate_anything\Logs`
+- macOS: `/Users/username/Library/Logs/com.github.tchar.calculate_anything`
+
 
 You can enable/disable the services manually but the prefered way is to use the `calculate_anything.preferences.Preferences` class
 
@@ -225,13 +233,16 @@ from calculate_anything import logging
 from calculate_anything.currency.providers import ApiKeyCurrencyProvider
 from calculate_anything.exceptions import CurrencyProviderException
 
+
+logger = logging.getLogger(__name__)
+
+
 class CustomCurrencyProvider(ApiKeyCurrencyProvider):
     BASE_URL = 'http://your-base-url'
     API_URL = '/the-path-to/api/some-version/whatever'
 
     def __init__(self, api_key=''):
         super().__init__(api_key)
-        self._logger = logging.getLogger(__name__)
 
     def request_currencies(self, *currencies, force=False):
         super().request_currencies(*currencies, force=force)
@@ -240,7 +251,7 @@ class CustomCurrencyProvider(ApiKeyCurrencyProvider):
         try:
             # This is a super method, you can redefine it.
             request = self.get_request(params)
-            self._logger.info('Making request to: {}'.format(request.full_url))
+            logger.info('Making request to: {}'.format(request.full_url))
             with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
@@ -248,21 +259,21 @@ class CustomCurrencyProvider(ApiKeyCurrencyProvider):
             response_code = e.code
         except Exception as e:
             msg = 'Could not connect: {}'.format(e)
-            self._logger.exception(e)
+            logger.exception(e)
             self.had_error = True
             raise CurrencyProviderException(msg)
 
         if not str(response_code).startswith('2'):
             self.had_error = True
             msg = 'Response code not 2xx: {}'.format(response_code)
-            self._logger.error(msg)
+            logger.error(msg)
             raise CurrencyProviderException(msg)
 
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
             self.had_error = True
-            self._logger.exception('Could not decode json data: {}'.format(e))
+            logger.exception('Could not decode json data: {}'.format(e))
             raise CurrencyProviderException('Could not decode json data')
 
         # Here you can handle your result
