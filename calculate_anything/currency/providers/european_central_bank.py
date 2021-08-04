@@ -10,13 +10,12 @@ from calculate_anything.exceptions import CurrencyProviderException
 __all__ = ['ECBCurrencyProvider']
 
 
+logger = logging.getLogger(__name__)
+
+
 class ECBCurrencyProvider(FreeCurrencyProvider):
     BASE_URL = 'https://www.ecb.europa.eu'
     API_URL = '/stats/eurofxref/eurofxref-daily.xml'
-
-    def __init__(self):
-        super().__init__()
-        self._logger = logging.getLogger(__name__)
 
     @property
     def url(self):
@@ -28,7 +27,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             xml_tree = ElementTree.fromstring(data)
         except ElementTree.ParseError as e:
             msg = 'Could not parse ECB xml response: {}'.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             raise CurrencyProviderException(msg)
 
         try:
@@ -36,11 +35,11 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             timestamp = datetime.strptime(timestamp, '%Y-%m-%d').timestamp()
         except IndexError as e:
             msg = 'XML data not as expected: {}'.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             raise CurrencyProviderException(msg)
         except Exception as e:
             msg = 'Could not read timestamp: {}'.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             timestamp = datetime.now().timestamp()
 
         return xml_tree, timestamp
@@ -49,7 +48,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         super().request_currencies(*currencies, force=force)
         try:
             request = self.get_request()
-            self._logger.info('Making request to: {}'.format(request.full_url))
+            logger.info('Making request to: {}'.format(request.full_url))
             with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
@@ -58,20 +57,20 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         except Exception as e:
             self.had_error = True
             msg = 'Could not connect: {}'.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             raise CurrencyProviderException(msg)
 
         if not str(response_code).startswith('2'):
             self.had_error = True
             msg = 'Response code not 2xx ({})'.format(response_code)
-            self._logger.error(msg)
+            logger.error(msg)
             raise CurrencyProviderException(msg)
 
         try:
             xml_tree, timestamp = self._validate_data(data)
         except CurrencyProviderException as e:
             self.had_error = True
-            self._logger.exception(e)
+            logger.exception(e)
             raise e
 
         currency_data = {'EUR': {'rate': 1.0, 'timestamp_refresh': timestamp}}
@@ -82,7 +81,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
                 currency_data[curr] = {'rate': rate,
                                        'timestamp_refresh': timestamp}
             except Exception as e:
-                self._logger.exception(
+                logger.exception(
                     'Could not read rate for currency at line {}: {}'
                     .format(i, e))
         self.had_error = False

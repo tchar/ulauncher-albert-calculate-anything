@@ -29,6 +29,9 @@ from calculate_anything.regex import (
 __all__ = ['CalculatorQueryHandler']
 
 
+logger = logging.getLogger(__name__)
+
+
 class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     """Class that handles Calculation expressions for numbers, complex numbers,
     equalities and inequalities.
@@ -43,7 +46,6 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             if not name.startswith('_') and not name.endswith('_')
         }
         self._simple_eval = SimpleEval(functions=functions)
-        self._logger = logging.getLogger(__name__)
         self._function_names = list(functions.keys())
 
         keywords = [name.lower() for name in self._function_names]
@@ -207,12 +209,12 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         except (SyntaxError, TypeError):
             return None
         except(NameNotDefined, FeatureNotAvailable, FunctionNotDefined) as e:
-            self._logger.debug(
+            logger.debug(
                 'Got simpleval Exception: when calculating {!r}: {}'
                 .format(query, e))
             return None
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got exception when trying to calculate {!r}: {}'
                 .format(query, e))
             return None  # pragma: no cover

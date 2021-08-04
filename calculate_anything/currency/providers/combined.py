@@ -16,6 +16,9 @@ from calculate_anything.exceptions import CurrencyProviderException
 __all__ = ['CombinedCurrencyProvider']
 
 
+logger = logging.getLogger(__name__)
+
+
 class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
     def __init__(self):
         super().__init__()
@@ -29,7 +32,6 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         for provider in free_providers:
             self._free_providers[provider.__class__] = provider
         self._api_providers = OrderedDict()
-        self._logger = logging.getLogger(__name__)
 
     @property
     def api_key_valid(self):
@@ -60,11 +62,11 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         try:
             return provider.request_currencies(*currencies, force=force)
         except CurrencyProviderException as e:
-            self._logger.exception(
+            logger.exception(
                 'Got exception when requesting from provider {}: {}'
                 .format(provider_name, e))
         except Exception as e:
-            self._logger.exception(
+            logger.exception(
                 'An unexpected exception occured when requesting '
                 'from provider {}: {}'.format(provider_name, e))
         return {}

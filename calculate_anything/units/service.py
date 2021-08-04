@@ -15,13 +15,15 @@ from calculate_anything.constants import MAIN_DIR
 __all__ = ['UnitsService']
 
 
+logger = logging.getLogger(__name__)
+
+
 class UnitsService(metaclass=Singleton):
     class ConversionMode(Enum):
         NORMAL = 0
         CRAZY = 1
 
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
         self._lock = RLock()
         self._unit_registry = None
         self._ctx = None
@@ -36,7 +38,7 @@ class UnitsService(metaclass=Singleton):
     def _update_callback(self, data):
         if not data:
             return
-        self._logger.info('Updating currency registry')
+        logger.info('Updating currency registry')
         ureg = self._unit_registry
         ctx = self._ctx
 
@@ -66,7 +68,7 @@ class UnitsService(metaclass=Singleton):
             ctx.redefine('{} = nan currency_EUR'.format(currency))
 
         self._currencies_in_registry = updated_currencies
-        self._logger.info(
+        logger.info(
             'Updated currency registry with {} currencies'.format(len(data)))
 
     def get_rate_timestamp(self, unit):

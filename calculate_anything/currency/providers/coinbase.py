@@ -13,13 +13,12 @@ from calculate_anything.exceptions import CurrencyProviderException
 __all__ = ['CoinbaseCurrencyProvider']
 
 
+logger = logging.getLogger(__name__)
+
+
 class CoinbaseCurrencyProvider(FreeCurrencyProvider):
     BASE_URL = 'https://api.coinbase.com'
     API_URL = '/v2/exchange-rates'
-
-    def __init__(self):
-        super().__init__()
-        self._logger = logging.getLogger(__name__)
 
     @property
     def url(self):
@@ -80,7 +79,7 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         params = {'currency': 'EUR'}
         try:
             request = self.get_request(params)
-            self._logger.info('Making request to: {}'.format(request.full_url))
+            logger.info('Making request to: {}'.format(request.full_url))
             with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
@@ -89,27 +88,27 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         except Exception as e:
             self.had_error = True
             msg = 'Could not connect: {}'.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             raise CurrencyProviderException(msg)
 
         if not str(response_code).startswith('2'):
             self.had_error = True
             msg = 'Response code not 2xx: {}'.format(response_code)
-            self._logger.error(msg)
+            logger.error(msg)
             raise CurrencyProviderException(msg)
 
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
             self.had_error = True
-            self._logger.exception('Could not decode json data: {}'.format(e))
+            logger.exception('Could not decode json data: {}'.format(e))
             raise CurrencyProviderException('Could not decode json data')
 
         try:
             base_currency, rates = self._validate_data(data)
         except CurrencyProviderException as e:
             self.had_error = True
-            self._logger.exception(e)
+            logger.exception(e)
             raise e
 
         return self._convert_rates(base_currency, rates)

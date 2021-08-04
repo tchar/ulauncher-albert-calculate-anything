@@ -16,6 +16,9 @@ from calculate_anything.constants import MAIN_DIR
 from calculate_anything import logging
 
 
+logger = logging.getLogger(__name__)
+
+
 class LanguageService(metaclass=Singleton):
     '''A language service class which acts like a Singleton.
 
@@ -27,7 +30,6 @@ class LanguageService(metaclass=Singleton):
         self._lang = None
         self._data = {}
         self._update_callbacks = []
-        self._logger = logging.getLogger(__name__)
 
     @property
     def lang(self) -> str:
@@ -62,7 +64,7 @@ class LanguageService(metaclass=Singleton):
         lang_filepath = os.path.join(
             MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
         if not os.path.exists(lang_filepath):
-            self._logger.error(
+            logger.error(
                 'Language file does not exist: {}'.format(lang_filepath))
             fallback = True
         if not fallback:
@@ -70,14 +72,14 @@ class LanguageService(metaclass=Singleton):
                 with open(lang_filepath, 'r', encoding='utf-8') as f:
                     self._data = json.loads(f.read())
             except Exception as e:  # pragma: no cover
-                self._logger.exception(  # pragma: no cover
+                logger.exception(  # pragma: no cover
                     'Could not load language, falling back to en_US: {}: {}'
                     .format(lang_filepath, e))
                 fallback = True  # pragma: no cover
 
         if fallback:
             if lang == 'en_US':  # pragma: no cover
-                self._logger.error(  # pragma: no cover
+                logger.error(  # pragma: no cover
                     'en_US does not exist, will not use any language '
                     'aliases: {}'.format(lang_filepath))
                 return  # pragma: no cover

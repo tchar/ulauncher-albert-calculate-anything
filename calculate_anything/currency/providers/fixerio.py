@@ -12,13 +12,12 @@ from calculate_anything.exceptions import CurrencyProviderException
 __all__ = ['FixerIOCurrencyProvider']
 
 
+logger = logging.getLogger(__name__)
+
+
 class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
     BASE_URL = 'http://data.fixer.io'
     API_URL = '/api/latest'
-
-    def __init__(self, api_key=''):
-        super().__init__(api_key)
-        self._logger = logging.getLogger(__name__)
 
     def _validate_data(self, data):
         if not isinstance(data, dict):
@@ -81,7 +80,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
             params['symbols'] = ','.join(currencies)
         try:
             request = self.get_request(params)
-            self._logger.info('Making request to: {}'.format(request.full_url))
+            logger.info('Making request to: {}'.format(request.full_url))
             with urlopen(request) as response:
                 data = response.read().decode()
                 response_code = response.getcode()
@@ -89,28 +88,28 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
             response_code = e.code
         except Exception as e:
             msg = 'Could not connect: {}'.format(e)
-            self._logger.exception(e)
+            logger.exception(e)
             self.had_error = True
             raise CurrencyProviderException(msg)
 
         if not str(response_code).startswith('2'):
             self.had_error = True
             msg = 'Response code not 2xx: {}'.format(response_code)
-            self._logger.error(msg)
+            logger.error(msg)
             raise CurrencyProviderException(msg)
 
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
             self.had_error = True
-            self._logger.exception('Could not decode json data: {}'.format(e))
+            logger.exception('Could not decode json data: {}'.format(e))
             raise CurrencyProviderException('Could not decode json data')
 
         try:
             base_currency, rates = self._validate_data(data)
         except CurrencyProviderException as e:
             self.had_error = True
-            self._logger.exception(e)
+            logger.exception(e)
             raise e
 
         self.had_error = False

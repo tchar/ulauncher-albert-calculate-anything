@@ -28,11 +28,13 @@ from calculate_anything.regex import (
 __all__ = ['TimeQueryHandler']
 
 
+logger = logging.getLogger(__name__)
+
+
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
 
     def __init__(self):
         super().__init__('time')
-        self._logger = logging.getLogger(__name__)
         if parsedatetime is not None:
             self._cal = parsedatetime.Calendar(
                 version=parsedatetime.VERSION_CONTEXT_STYLE)
@@ -47,7 +49,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         try:
             date = self._cal.nlp(query, sourceTime=reference_datetime)
         except Exception as e:  # pragma: no cover (catch unexpected exception)
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got unexpected exception when parsing datetime: '
                 '{} with reference time {}: {}'
                 .format(query, reference_datetime, e))
@@ -105,7 +107,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:  # pragma: no cover
-                self._logger.exception(  # pragma: no cover
+                logger.exception(  # pragma: no cover
                     'Could not find time zone: {}: {}'.format(location, e))
                 continue  # pragma: no cover
 
@@ -279,7 +281,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             date = self._cal.nlp(query_str, sourceTime=now)
             if date is None:
-                self._logger.error(  # pragma: no cover
+                logger.error(  # pragma: no cover
                     'Something went wrong when trying to calculate '
                     'date from date chunks: dates={}, query={}'
                     .format(dates, query_str))

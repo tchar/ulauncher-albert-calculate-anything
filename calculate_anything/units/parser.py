@@ -7,10 +7,12 @@ from calculate_anything import logging
 from calculate_anything.regex import UNIT_ALIASES_RE
 
 
+logger = logging.getLogger(__name__)
+
+
 class PintDefinitionParser:
     def __init__(self, unit_registry: 'pint.registry.UnitRegistry'):
         self._unit_registry = unit_registry
-        self._logger = logging.getLogger(__name__)
 
     def _define_currency(self, currency, definition=None):
         currency_norm = currency.lstrip('currency_')
@@ -84,7 +86,7 @@ class PintDefinitionParser:
                 return self._process_reverse_alias(line, translation_adder)
             return self._process_definition(line, is_currency)
         except Exception as e:
-            self._logger.exception(
+            logger.exception(
                 'Got exception when parsing line {} in {}: {}'
                 .format(line_n, file_path, e))
 
@@ -95,11 +97,11 @@ class PintDefinitionParser:
                 for i, line in enumerate(f):
                     self._process_line(line, i + 1, file_path,
                                        translation_adder, is_currency)
-            self._logger.info('Loaded unit definitions: {}'.format(file_path))
+            logger.info('Loaded unit definitions: {}'.format(file_path))
         except FileNotFoundError:
-            self._logger.warning(
+            logger.warning(
                 'Unit definitions file not found: {}'.format(file_path))
         except Exception as e:
-            self._logger.exception(
+            logger.exception(
                 'Exception when loading unit definitons file {}: {}'
                 .format(file_path, e))

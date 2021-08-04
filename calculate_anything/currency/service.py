@@ -8,11 +8,13 @@ from calculate_anything import logging
 __all__ = ['CurrencyService']
 
 
+logger = logging.getLogger(__name__)
+
+
 class CurrencyService(metaclass=Singleton):
     def __init__(self):
         self._default_currencies = []
         self._lock = RLock()
-        self._logger = logging.getLogger(__name__)
         self._cache = CurrencyCache()
         self._provider = CombinedCurrencyProvider()
         self._thread_id = 0
@@ -23,7 +25,7 @@ class CurrencyService(metaclass=Singleton):
     def __get_currencies(self, *currencies, force=False):
         provider = self._provider.__class__.__name__
         if force or not self._cache.enabled or self._cache.should_update():
-            self._logger.info('Will load currencies')
+            logger.info('Will load currencies')
             self._cache.clear()
             currency_rates = self._provider.request_currencies(
                 *currencies, force=force)
@@ -38,16 +40,16 @@ class CurrencyService(metaclass=Singleton):
         if force:
             pass
         elif not self._is_running:
-            self._logger.info(
+            logger.info(
                 'Stopping thread (id={}). Service stopped'.format(thread_id))
             return
         elif thread_id != self._thread_id:
-            self._logger.info('Stopping thread (id={}). Another thread is '
-                              'running (id={})'.format(thread_id,
-                                                       self._thread_id))
+            logger.info('Stopping thread (id={}). Another thread is '
+                        'running (id={})'.format(thread_id,
+                                                 self._thread_id))
             return
         elif not self._cache.enabled:
-            self._logger.info(
+            logger.info(
                 'Stopping thread (id={}). Cache not enabled'.format(thread_id))
             self._is_running = False
             return
@@ -61,7 +63,7 @@ class CurrencyService(metaclass=Singleton):
                 callback(currency_rates)
 
         if force and not self._cache.enabled:
-            self._logger.info(
+            logger.info(
                 'Stopping thread (id={}). Cache not enabled'.format(thread_id))
             self._is_running = False
             return
@@ -88,9 +90,9 @@ class CurrencyService(metaclass=Singleton):
     @lock
     def enable_cache(self, update_frequency):
         if not self._enabled:
-            self._logger.warning('Service is disabled, cannot enable cache')
+            logger.warning('Service is disabled, cannot enable cache')
             return
-        self._logger.info(
+        logger.info(
             'Enabling cache with update frequency = {}'
             .format(update_frequency))
         self._cache.enable(update_frequency)
@@ -98,7 +100,7 @@ class CurrencyService(metaclass=Singleton):
 
     @lock
     def disable_cache(self):
-        self._logger.info('Disabling cache')
+        logger.info('Disabling cache')
         self._cache.disable()
         return self
 
@@ -114,21 +116,21 @@ class CurrencyService(metaclass=Singleton):
 
     @lock
     def add_provider(self, provider):
-        self._logger.info('Adding provider {}'.format(
+        logger.info('Adding provider {}'.format(
             provider.__class__.__name__))
         self._provider.add_provider(provider)
         return self
 
     @lock
     def remove_provider(self, provider):
-        self._logger.info('Removing provider {}'.format(
+        logger.info('Removing provider {}'.format(
             provider.__class__.__name__))
         self._provider.remove_provider(provider)
         return self
 
     @lock
     def set_default_currencies(self, default_currencies):
-        self._logger.info(
+        logger.info(
             'Updating default currencies = {}'.format(default_currencies))
         self._default_currencies = default_currencies
         return self
@@ -151,7 +153,7 @@ class CurrencyService(metaclass=Singleton):
     # @lock
     # def get_rates(self, *currencies, force=False):
     #     if not self._enabled:
-    #         self._logger.warning('Service is disabled cannot get rates')
+    #         logger.warning('Service is disabled cannot get rates')
     #         return {}
     #     try:
     #         return self.__get_currencies(*currencies, force=force)
@@ -163,7 +165,7 @@ class CurrencyService(metaclass=Singleton):
     #     try:
     #         available_currencies = list(self.__get_currencies().keys())
     #     except CurrencyProviderException as e:
-    #         self._logger.error('Error when contacting provider: {}'
+    #         logger.error('Error when contacting provider: {}'
     #                            .format(e))
     #         available_currencies = []
     #     return available_currencies
@@ -175,7 +177,7 @@ class CurrencyService(metaclass=Singleton):
         elif not self._cache.enabled or self._is_running:
             return
         self._is_running = True
-        self._logger.info('Currency Service is running')
+        logger.info('Currency Service is running')
         self._thread_id += 1
         timer_thread = Timer(0.0, self._update_thread, args=(
             self._thread_id,), kwargs={'force': force})

@@ -12,10 +12,12 @@ from calculate_anything.constants import (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 class TimezoneSqliteCache:
     def __init__(self):
         super().__init__()
-        self._logger = logging.getLogger(__name__)
         self._db = None
         self._lock = RLock()
 
@@ -49,7 +51,7 @@ class TimezoneSqliteCache:
             self._city_name_chunks_max = None
             msg = 'Could not fetch city_name_chunks_max {}'
             msg = msg.format(e)
-            self._logger.exception(msg)
+            logger.exception(msg)
         finally:
             cur.close()
 
@@ -182,4 +184,4 @@ class TimezoneSqliteCache:
         if self._db is None:
             return  # pragma: no cover
         self._db.close()
-        self._logger.info('Database closed')
+        logger.info('Database closed')

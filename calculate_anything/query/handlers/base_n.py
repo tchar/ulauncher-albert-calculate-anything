@@ -26,6 +26,9 @@ from calculate_anything.exceptions import (
 __all__ = ['Base10QueryHandler', 'Base2QueryHandler',
            'Base8QueryHandler', 'Base16QueryHandler']
 
+
+logger = logging.getLogger(__name__)
+
 space_in_middle_re = re.compile(r'\S\s+\S')
 
 expression_eq_split = multi_re.compile(
@@ -59,7 +62,6 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         self._base_class = base_class
         self._convert_classes = convert_classes
         self._simple_eval = get_simple_eval()
-        self._logger = logging.getLogger(__name__)
 
     def _parse_expression(self, expression, split_eq=True, sub_kw=True):
         def convert_to_base_n(m): return str(int(m.group(0), self._base))
@@ -124,7 +126,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             item = BaseNCalculation(error=e, query=original_query)
             return [item]
         except Exception as e:
-            self._logger.exception(
+            logger.exception(
                 'Got exception when trying to parse expression: {!r}: {}'
                 .format(query, e))
             return None

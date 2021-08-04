@@ -8,16 +8,16 @@ from calculate_anything import logging
 __all__ = ['JsonLoader', 'CurrencyCacheLoader']
 
 
+logger = logging.getLogger(__name__)
+
+
 class JsonLoader(Loader):
 
-    def __init__(self, filepath, default_data, name=None, mode=0):
+    def __init__(self, filepath, default_data, mode=0):
         super().__init__(Loader.Status.PENDING, mode)
         self.filepath = filepath
         self.default_data = default_data
         self._data = None
-        self._logger = logging.getLogger(__name__)
-        if name is not None:
-            self._logger = self._logger.getChild(name)
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     def _pre_load(self):
@@ -36,7 +36,7 @@ class JsonLoader(Loader):
         except Exception as e:
             self._mode |= Loader.Mode.REMOVE
             msg = 'Cannot read file {}: {}'.format(self.filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             return
         try:
             self._data = json.loads(self._data)
@@ -44,7 +44,7 @@ class JsonLoader(Loader):
         except Exception as e:
             self._mode |= Loader.Mode.REMOVE
             msg = 'Cannot parse file as json {}: {}'.format(self.filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.without_mode(Loader.Mode.NO_REMOVE)
@@ -58,7 +58,7 @@ class JsonLoader(Loader):
             except Exception as e:  # pragma: no cover
                 msg = 'Could not remove directory {}: {}'
                 msg = msg.format(self.filepath, e)
-                self._logger.exception(msg)
+                logger.exception(msg)
                 self._status |= Loader.Status.FAIL
                 self._status |= Loader.Status.CANNOT_REMOVE_FILE
         else:
@@ -68,7 +68,7 @@ class JsonLoader(Loader):
             except Exception as e:  # pragma: no cover
                 msg = 'Could not remove file {}: {}'
                 msg = msg.format(self.filepath, e)
-                self._logger.exception(msg)
+                logger.exception(msg)
                 self._status |= Loader.Status.FAIL
                 self._status |= Loader.Status.CANNOT_REMOVE_FILE
 
@@ -93,7 +93,7 @@ class JsonLoader(Loader):
         except Exception as e:
             msg = 'Could not write default data {}: {}'
             msg = msg.format(self.filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             self._status |= Loader.Status.FAIL
             self._status |= Loader.Status.CANNOT_WRITE_FILE
 
@@ -118,9 +118,9 @@ class JsonLoader(Loader):
 
 
 class CurrencyCacheLoader(JsonLoader):
-    def __init__(self, filepath, name=None):
+    def __init__(self, filepath):
         default_data = {'exchange_rates': {}, 'last_update_timestamp': 0}
-        super().__init__(filepath, default_data, name, mode=0)
+        super().__init__(filepath, default_data, mode=0)
 
     def _validate_exchange_rate(self, currency, currency_data):
         if not isinstance(currency_data, dict):
@@ -154,4 +154,4 @@ class CurrencyCacheLoader(JsonLoader):
             self._data = None
             self._mode |= Loader.Mode.FALLBACK
             self._status |= Loader.Status.INVALID_DATA
-            self._logger.exception(e)
+            logger.exception(e)

@@ -24,10 +24,12 @@ from calculate_anything.exceptions import (
 __all__ = ['UnitsQueryHandler']
 
 
+logger = logging.getLogger(__name__)
+
+
 class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__('=')
-        self._logger = logging.getLogger(__name__)
 
     def _items_for_currency_errors(self, units):
         dimensionalities = set(unit.dimensionality for unit in units)
@@ -174,11 +176,11 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 pint.errors.UndefinedUnitError,
                 pint.errors.DefinitionSyntaxError,
                 tokenize.TokenError) as e:
-            self._logger.debug(
+            logger.debug(
                 'Got pint exception when trying to parse {!r}: {}'
                 .format(expression, e))
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got exception when trying to parse: {!r}: {}'
                 .format(expression, e))
 
@@ -282,7 +284,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     continue
                 unit_converted = unit_from_ureg.to(unit_to_ureg, 'currency')
                 if math.isnan(unit_converted.magnitude):
-                    self._logger.warning(
+                    logger.warning(
                         'Converted magnitude is NaN'': from={} {}, to={}'
                         .format(
                             unit_from_ureg.magnitude,
@@ -295,7 +297,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 rate = Q(1, unit_from_ureg.units)
                 rate = rate.to(Q(1, unit_converted.units), 'currency')
             except Exception as e:  # pragma: no cover
-                self._logger.exception(  # pragma: no cover
+                logger.exception(  # pragma: no cover
                     'Unexpected exception uni units conversion: {!r}: {}'
                     .format(original_query, e))
                 continue  # pragma: no cover

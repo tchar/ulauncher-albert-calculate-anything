@@ -10,6 +10,9 @@ from calculate_anything.utils.loaders import CurrencyCacheLoader
 __all__ = ['CurrencyCache']
 
 
+logger = logging.getLogger(__name__)
+
+
 def preload(func):
     @wraps(func)
     def _wrapper(self, *args, **kwargs):
@@ -28,7 +31,6 @@ class CurrencyCache:
         }
         self._loaded = False
         self._use_only_memory = False
-        self._logger = logging.getLogger(__name__)
 
     def load(self):
         return self._load()
@@ -92,7 +94,7 @@ class CurrencyCache:
             try:
                 os.remove(CURRENCY_DATA_FILE)
             except Exception as e:  # pragma: no cover
-                self._logger.exception(
+                logger.exception(
                     'Could not remove data file {}: {}'
                     .format(CURRENCY_DATA_FILE, e))
 
@@ -110,6 +112,6 @@ class CurrencyCache:
             with open(CURRENCY_DATA_FILE, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(self._data))
         except Exception as e:  # pragma: no cover
-            self._logger.exception(
+            logger.exception(
                 'Could not save cache data {}: {}'
                 .format(CURRENCY_DATA_FILE, e))

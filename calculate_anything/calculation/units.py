@@ -22,6 +22,9 @@ __all__ = ['UnitsCalculation', 'CurrencyUnitsCalculation',
            'TemperatureUnitsCalculation']
 
 
+logger = logging.getLogger(__name__)
+
+
 class UnitsCalculation(_Calculation):
 
     def __init__(self, value=None, error=None, query='', order=0,
@@ -30,7 +33,6 @@ class UnitsCalculation(_Calculation):
         self.rate = rate
         self.unit_from = unit_from
         self.unit_to = unit_to
-        self._logger = logging.getLogger(__name__)
 
     @staticmethod
     def is_strictly_dimensionless(unit):

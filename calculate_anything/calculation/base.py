@@ -1,5 +1,6 @@
 from functools import wraps
 from abc import abstractmethod
+from typing import Any, Optional
 from calculate_anything import logging
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
@@ -13,7 +14,10 @@ from calculate_anything.exceptions import (
 )
 
 
-def missing_parsedatetime_query_result(calculation):
+logger = logging.getLogger(__name__)
+
+
+def missing_parsedatetime_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -26,7 +30,7 @@ def missing_parsedatetime_query_result(calculation):
     )
 
 
-def missing_simpleeval_query_result(calculation):
+def missing_simpleeval_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -39,7 +43,7 @@ def missing_simpleeval_query_result(calculation):
     )
 
 
-def missing_pint_error_query_result(calculation):
+def missing_pint_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -52,7 +56,7 @@ def missing_pint_error_query_result(calculation):
     )
 
 
-def boolean_comparison_error_query_result(calculation):
+def boolean_comparison_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -65,7 +69,7 @@ def boolean_comparison_error_query_result(calculation):
     )
 
 
-def boolean_percentage_error_query_result(calculation):
+def boolean_percentage_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -78,7 +82,7 @@ def boolean_percentage_error_query_result(calculation):
     )
 
 
-def base_floating_point_exception_query_result(calculation):
+def base_floating_point_exception_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -91,7 +95,7 @@ def base_floating_point_exception_query_result(calculation):
     )
 
 
-def wrong_base_exception_query_result(calculation):
+def wrong_base_exception_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -104,7 +108,7 @@ def wrong_base_exception_query_result(calculation):
     )
 
 
-def date_overflow_error_query_result(calculation):
+def date_overflow_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -117,7 +121,7 @@ def date_overflow_error_query_result(calculation):
     )
 
 
-def currency_provider_error_query_result(calculation):
+def currency_provider_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -130,7 +134,7 @@ def currency_provider_error_query_result(calculation):
     )
 
 
-def zero_division_error_query_result(calculation):
+def zero_division_error_query_result(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -143,7 +147,7 @@ def zero_division_error_query_result(calculation):
     )
 
 
-def misparsed_time_exception(calculation):
+def misparsed_time_exception(calculation: '_Calculation'):
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     name = translator('misparsed-datetime')
@@ -180,22 +184,23 @@ class _Calculation:
     class Decorators:
         def handle_error_results(func):
             @wraps(func)
-            def _wrapper(self, *args, **kwargs):
+            def _wrapper(self: '_Calculation', *args, **kwargs):
                 if isinstance(self.error, ExtendedException):
                     return _HANDLERS[self.error.__class__](self)
                 if self.is_error():
-                    self._logger.exception(  # pragma: no cover (just in case)
-                        'Uknown error type: {}'.format(self.error))
+                    msg = 'Uknown error type: {}'  # pragma: no cover
+                    msg = msg.format(self.error)  # pragma: no cover
+                    logger.exception(msg)  # pragma: no cover
                     raise self.error  # pragma: no cover
                 return func(self, *args, **kwargs)
             return _wrapper
 
-    def __init__(self, value=None, query='', error=None, order=0):
+    def __init__(self, value: Optional[Any] = None, query: str = '',
+                 error: Optional[ExtendedException] = None, order: int = 0):
         self.value = value
         self.query = query
         self.error = error
         self.order = order if not error else error.order
-        self._logger = logging.getLogger(__name__)
 
     def is_error(self, _type=None):
         if _type is None:

@@ -3,17 +3,19 @@ from calculate_anything import logging
 from calculate_anything.constants import TIMEZONES_JSON_FILE
 
 
+logger = logging.getLogger(__name__)
+
+
 class TimezoneJsonCache:
     def __init__(self):
         self._data = {}
-        self._logger = logging.getLogger(__name__)
 
     def load(self):
         try:
             with open(TIMEZONES_JSON_FILE, 'r', encoding='utf-8') as f:
                 self._data = json.loads(f.read())
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Could not load timezone data: {}: {}'
                 .format(TIMEZONES_JSON_FILE, e))
             return False  # pragma: no cover

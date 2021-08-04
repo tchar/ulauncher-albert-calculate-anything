@@ -11,6 +11,9 @@ from calculate_anything import logging
 __all__ = ['MultiHandler']
 
 
+logger = logging.getLogger(__name__)
+
+
 class MultiHandler:
     def __init__(self):
         self._handlers = [
@@ -23,7 +26,6 @@ class MultiHandler:
             Base2QueryHandler,
             Base8QueryHandler,
         ]
-        self._logger = logging.getLogger(__name__)
 
     def _handle(self, query, *handlers, return_raw):
         results = []
@@ -40,7 +42,7 @@ class MultiHandler:
                 hdlr_name = handler.__class__.__name__
                 msg = 'Exception in handler: {}: {}'  # pragma: no cover
                 msg = msg.format(hdlr_name, e)  # pragma: no cover
-                self._logger.exception(msg)
+                logger.exception(msg)
                 result = None
 
             if not result:

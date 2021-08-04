@@ -11,15 +11,14 @@ from calculate_anything import logging
 __all__ = ['SqliteLoader']
 
 
+logger = logging.getLogger(__name__)
+
+
 class SqliteLoader(Loader):
-    def __init__(self, sqlite_filepath,
-                 sql_filepath=None, name=None, mode=0):
+    def __init__(self, sqlite_filepath, sql_filepath=None, mode=0):
         super().__init__(Loader.Status.PENDING, mode)
         self.sqlite_filepath = sqlite_filepath
         self.sql_filepath = sql_filepath
-        self._logger = logging.getLogger(__name__)
-        if name is not None:
-            self._logger = self._logger.getChild(name)
         self._reset()
 
     def _reset(self):
@@ -73,11 +72,11 @@ class SqliteLoader(Loader):
             self._status |= Loader.Status.SUCCESS
             msg = 'Loaded timezone database: {}'
             msg = msg.format(self.sqlite_filepath)
-            self._logger.info(msg)
+            logger.info(msg)
         except Exception as e:
             msg = 'Could not read database file: {}'
             msg = msg.format(e)
-            self._logger.exception(e)
+            logger.exception(e)
             self._mode |= Loader.Mode.REMOVE
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
@@ -92,7 +91,7 @@ class SqliteLoader(Loader):
                 self._mode |= Loader.Mode.MEMORY
                 msg = 'Could not remove directory database {}: {}'
                 msg = msg.format(self.sqlite_filepath, e)
-                self._logger.exception(msg)
+                logger.exception(msg)
                 return
         else:
             try:
@@ -101,10 +100,10 @@ class SqliteLoader(Loader):
                 self._mode |= Loader.Mode.MEMORY
                 msg = 'Could not remove file database {}: {}'
                 msg = msg.format(self.sqlite_filepath, e)
-                self._logger.exception(msg)
+                logger.exception(msg)
                 return
 
-        self._logger.info('Found new timezones, cleared database')
+        logger.info('Found new timezones, cleared database')
         self._mode |= Loader.Mode.CREATE
 
     @Loader.Decorators.with_data
@@ -122,7 +121,7 @@ class SqliteLoader(Loader):
         except Exception as e:
             msg = 'Could not execute sql file {}: {}'
             msg = msg.format(self.sql_filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             self._status |= Loader.Status.FAIL
             self._status |= Loader.Status.INVALID_DATA
 
@@ -138,14 +137,14 @@ class SqliteLoader(Loader):
             )
             msg = 'Did not find sqlite db {}, created from scratch'
             msg = msg.format(self.sqlite_filepath)
-            self._logger.info(msg)
+            logger.info(msg)
         # Can't test this without huge hacks
         # In case we can't remove the file/directory
         # Use memory
         except Exception as e:  # pragma: no cover
             msg = 'Could not create database {}: {}'  # pragma: no cover
             msg = msg.format(self.sqlite_filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             self._mode |= Loader.Mode.MEMORY
             return
         self._execute_script()
@@ -159,7 +158,7 @@ class SqliteLoader(Loader):
             check_same_thread=False,
             cached_statements=500
         )
-        self._logger.info('Fell back to memory')
+        logger.info('Fell back to memory')
         self._execute_script()
 
     @property
@@ -177,7 +176,7 @@ class SqliteLoader(Loader):
         except Exception as e:
             msg = 'Could not read sql file {}: {}'
             msg = msg.format(self.sql_filepath, e)
-            self._logger.exception(msg)
+            logger.exception(msg)
             data = None
         self._sql_data = data
         self._sql_data_loaded = True

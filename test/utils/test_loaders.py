@@ -147,7 +147,6 @@ test_spec_sqlite = [{
 @ pytest.mark.parametrize('test_spec', test_spec_sqlite)
 def test_sqlite(test_spec):
     loader = None
-    _id = test_spec['id']
     create = test_spec.get('create', [])
 
     sqlite_fpath = test_spec['sqlite_file']
@@ -162,11 +161,9 @@ def test_sqlite(test_spec):
     expected_loaded = test_spec['expected']['load']
     expected_status = test_spec['expected']['status']
     expected_mode = test_spec['expected']['mode']
-    name = 'Test' + _id
 
     with temp_file(*create, sleep=0.01):
-        loader = SqliteLoader(sqlite_fpath, sql_fpath,
-                              name=name, mode=mode)
+        loader = SqliteLoader(sqlite_fpath, sql_fpath, mode=mode)
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode
@@ -256,7 +253,6 @@ test_spec_json = [{
 
 @pytest.mark.parametrize('test_spec', test_spec_json)
 def test_json(test_spec):
-    _id = test_spec['id']
     default_data = test_spec['default_data']
 
     file = test_spec['file']
@@ -270,9 +266,8 @@ def test_json(test_spec):
     expected_loaded = test_spec['expected']['load']
     expected_status = test_spec['expected']['status']
     expected_mode = test_spec['expected']['mode']
-    name = 'Test' + _id
     with temp_file(create):
-        loader = JsonLoader(file, default_data, name=name, mode=mode)
+        loader = JsonLoader(file, default_data, mode=mode)
         loaded = loader.load()
         assert expected_status == loader.status
         assert expected_mode == loader.mode

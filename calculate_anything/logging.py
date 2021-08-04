@@ -1,4 +1,4 @@
-'''Logging for calculate anything.
+'''Logging module.
 
 For modules/launchers that support python's logging a RotatingFileHandler
 and a StreamHandler with a color formatter is used.
@@ -12,11 +12,18 @@ import sys
 import logging as _logging
 import logging.handlers as _handlers
 import copy
-from typing import Callable
+from typing import Callable, Dict
 from calculate_anything.constants import LOGS_DIR
 
 
 __all__ = []
+
+
+DEBUG = _logging.DEBUG
+INFO = _logging.INFO
+WARNING = _logging.WARNING
+ERRIR = _logging.ERROR
+CRITICAL = _logging.CRITICAL
 
 
 class ColorFormatter(_logging.Formatter):
@@ -153,18 +160,17 @@ class Logging:
         self.level = level
         self.file_hdlr = file_hdlr
         self.stdout_hdlr = stdout_hdlr
-        self._prev_hdlrs = set()
-        self._got_logger = False
+        self._loggers: Dict[str, _logging.Logger] = {}
 
     def set_level(self, level: int) -> None:
         '''Sets the level for all loggers'''
+        for logger in self._loggers.values():
+            logger.setLevel(level)
         self.level = level
 
     def disable_file_handler(self) -> None:
         '''Disables file handler provided from this class'''
-        if self.stdout_hdlr and self._got_logger:
-            self._prev_hdlrs.add(self.stdout_hdlr)
-        self.file_hdlr = None
+        self.set_file_handler(None)
 
     def set_file_handler(self, hdlr: _logging.FileHandler) -> None:
         '''Sets file handler to be used
@@ -172,15 +178,19 @@ class Logging:
         Args:
             hdlr (logging.FileHandler): The file handler to set
         '''
-        if self.file_hdlr and self._got_logger:
-            self._prev_hdlrs.add(self.file_hdlr)
+        if self.file_hdlr is not None:
+            self.file_hdlr.close()
+
+        for logger in self._loggers.values():
+            if self.file_hdlr is not None:
+                logger.removeHandler(self.file_hdlr)
+            if hdlr is not None:
+                logger.addHandler(hdlr)
         self.file_hdlr = hdlr
 
     def disable_stdout_handler(self) -> None:
         '''Disables stdout handler provided from this class'''
-        if self.stdout_hdlr and self._got_logger:
-            self._prev_hdlrs.add(self.stdout_hdlr)
-        self.stdout_hdlr = None
+        self.set_stdout_handler(None)
 
     def set_stdout_handler(self, hdlr: _logging.Handler) -> None:
         '''Sets stdout handler to be used
@@ -188,8 +198,14 @@ class Logging:
         Args:
             hdlr (logging.FileHandler): The stdout handler to set
         '''
-        if self.stdout_hdlr and self._got_logger:
-            self._prev_hdlrs.add(self.stdout_hdlr)
+        if self.stdout_hdlr is not None:
+            self.stdout_hdlr.close()
+
+        for logger in self._loggers.values():
+            if self.stdout_hdlr is not None:
+                logger.removeHandler(self.stdout_hdlr)
+            if hdlr is not None:
+                logger.addHandler(hdlr)
         self.stdout_hdlr = hdlr
 
     def get_logger(self, name: str) -> _logging.Logger:
@@ -199,17 +215,17 @@ class Logging:
         Args:
             name (str): The name of the logger as in logging.getLogger(name)
         '''
-        self._got_logger = True
+        if name in self._loggers:
+            return self._loggers[name]
+
         logger = _logging.getLogger(name)
+        if self.stdout_hdlr is not None:
+            logger.addHandler(self.stdout_hdlr)
+        if self.file_hdlr is not None:
+            logger.addHandler(self.file_hdlr)
         logger.setLevel(self.level)
 
-        for hdlr in self._prev_hdlrs:
-            logger.removeHandler(hdlr)
-        if self.file_hdlr:
-            logger.addHandler(self.file_hdlr)
-        if self.stdout_hdlr:
-            logger.addHandler(self.stdout_hdlr)
-
+        self._loggers[name] = logger
         return logger
 
 

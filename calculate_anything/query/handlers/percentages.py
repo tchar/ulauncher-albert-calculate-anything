@@ -18,10 +18,12 @@ from calculate_anything.regex import (
 __all__ = ['PercentagesQueryHandler']
 
 
+logger = logging.getLogger(__name__)
+
+
 class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(self):
         super().__init__('=')
-        self._logger = logging.getLogger(__name__)
 
     def _use_calculator(self, query):
         results = CalculatorQueryHandler().handle_raw(query)
@@ -90,7 +92,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 amounts=(percentage_from, percentage_to)
             )
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
                 'with values {}, {}: {}'.format(percentage_from.value,
                                                 percentage_to.value, e))
@@ -131,7 +133,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 error=ZeroDivisionException(extra={'icon': icon}),
             )
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
                 'with values {}, {}: {}'.format(percentage_from.value,
                                                 percentage_to.value, e))
@@ -183,7 +185,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 amounts=(amount, percentage)
             )
         except Exception as e:  # pragma: no cover
-            self._logger.exception(  # pragma: no cover
+            logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
                 'with values {}, {}: {}'.format(amount.value,
                                                 percentage.value, e))
