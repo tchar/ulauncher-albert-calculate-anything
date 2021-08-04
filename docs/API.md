@@ -32,9 +32,15 @@ The currency service by default is enabled, however it is not running.
 There is also a cache to store results in a cache directory which you can enable/disable.
 
 Cache directories are (Suppose your username is `tchar`):
-- Linux: `/home/tchar/.cache/calculate_anything`
-- Windows: `'C:\Users\tchar\AppData\Local\Acme\SuperApp\Cache'`
-- macOS: `/Users/tchar/Library/Caches/calculate_anything`
+- Linux: `/home/tchar/.cache/com.github.tchar.calculate_anything`
+- Windows: `'C:\Users\tchar\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache'`
+- macOS: `/Users/tchar/Library/Caches/com.github.tchar.calculate_anything`
+
+Log directories are (Supose your username is `tchar`):
+- Linux: `/home/tchar/.cache/com.github.tchar.calculate_anything/log`
+- Windows: `'C:\Users\tchar\AppData\Local\tchar\com.github.tchar.calculate_anything\Logs'`
+- macOS: `/Users/tchar/Library/Logs/com.github.tchar.calculate_anything`
+
 
 You can enable/disable the services manually but the prefered way is to use the `calculate_anything.preferences.Preferences` class
 

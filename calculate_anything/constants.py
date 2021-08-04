@@ -8,35 +8,36 @@ import os
 import calculate_anything
 from calculate_anything.appdirs import AppDirs
 
+APP_NAME = 'com.github.tchar.calculate_anything'
+APP_AUTHOR = 'tchar'
+
+APP_DIRS = AppDirs(APP_NAME, APP_AUTHOR)
+
+if os.path.isfile(APP_DIRS.user_cache_dir):
+    os.remove(APP_DIRS.user_cache_dir)
+if not os.path.exists(APP_DIRS.user_cache_dir):
+    os.makedirs(APP_DIRS.user_cache_dir)
+
+if os.path.isfile(APP_DIRS.user_log_dir):
+    os.remove(APP_DIRS.user_log_dir)
+if not os.path.exists(APP_DIRS.user_log_dir):
+    os.makedirs(APP_DIRS.user_log_dir)
+
 
 MAIN_DIR = os.path.dirname(os.path.dirname(
     os.path.realpath(calculate_anything.__file__)))
 FLAGS = {f.split('.')[0]: f for f in os.listdir(
     os.path.join(MAIN_DIR, 'calculate_anything', 'images', 'flags'))}
 
-APP_NAME = 'calculate_anything'
-APP_DIRS = AppDirs(APP_NAME)
 
-CACHE_DIR = APP_DIRS.user_cache_dir
-LOGS_DIR = os.path.join(CACHE_DIR, 'logs')
-
-if os.path.isfile(CACHE_DIR):
-    os.remove(CACHE_DIR)
-if not os.path.exists(CACHE_DIR):
-    os.makedirs(CACHE_DIR)
-
-if os.path.isfile(LOGS_DIR):
-    os.remove(LOGS_DIR)
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-
-CURRENCY_DATA_FILE = os.path.join(CACHE_DIR, 'currency_data.json')
-TIMEZONES_SQLITE_FILE_USER = os.path.join(CACHE_DIR, 'timezones_user.sqlite3')
-TIMEZONES_SQLITE_FILE_DEFAULT = os.path.join(CACHE_DIR, 'timezones.sqlite3')
+CURRENCY_DATA_FILE = os.path.join(
+    APP_DIRS.user_cache_dir, 'currency_data.json')
+TIMEZONES_SQLITE_FILE_USER = os.path.join(
+    APP_DIRS.user_cache_dir, 'timezones_user.sqlite3')
+TIMEZONES_SQLITE_FILE_DEFAULT = os.path.join(
+    APP_DIRS.user_cache_dir, 'timezones.sqlite3')
 TIMEZONES_SQL_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
 TIMEZONES_JSON_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json')
-
 
 TIME_DATETIME_FORMAT = '%A %B %d %Y %H:%M:%S'
 TIME_DATETIME_FORMAT_NUMBERS = '%Y-%m-%d %H:%M'
