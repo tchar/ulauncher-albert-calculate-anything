@@ -1,9 +1,14 @@
 '''Miscellaneous utility functions'''
 
 
+import sys
+if sys.version_info[:2] < (3, 8):
+    from typing_extensions import Protocol
+else:
+    from typing import Protocol
 from typing import (
     Any, Callable, Container, Iterator,
-    List, Optional, Protocol, Type, Union
+    List, Optional, Type, Union
 )
 from contextlib import contextmanager
 from functools import lru_cache, wraps
