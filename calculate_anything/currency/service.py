@@ -58,7 +58,8 @@ class UpdateThread(Thread):
         currency_rates = self._provider.request_currencies(
             *currencies, force=force)
         if not self._stopped_event.is_set():
-            self._cache.save(currency_rates, self._provider)
+            provider_name = self._provider.__class__.__name__
+            self._cache.save(currency_rates, provider_name)
         return currency_rates
 
     @with_lock
@@ -85,7 +86,7 @@ class UpdateThread(Thread):
             force = self._woke_event.is_set()
             next_update = self._run(force)
 
-        while self._stopped_event.is_set():
+        while not self._stopped_event.is_set():
             self._logger.info('Sleeping for {:.0f}s'.format(next_update))
 
             start = time.time()

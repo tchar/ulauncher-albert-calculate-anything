@@ -13,7 +13,7 @@ import logging as _logging
 import logging.handlers as _handlers
 import copy
 from typing import Callable, Dict
-from calculate_anything.constants import LOGS_DIR
+from calculate_anything.constants import APP_DIRS
 
 
 __all__ = []
@@ -151,7 +151,7 @@ class Logging:
         stdout_hdlr.setFormatter(ColorFormatter(use_color=True))
 
         file_hdlr = _handlers.RotatingFileHandler(
-            os.path.join(LOGS_DIR, 'runtime.log'),
+            os.path.join(APP_DIRS.user_log_dir, 'runtime.log'),
             maxBytes=1000000, backupCount=10, encoding='utf-8',
             delay=True
         )
