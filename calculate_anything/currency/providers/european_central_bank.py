@@ -3,6 +3,7 @@ from urllib.request import urlopen
 from urllib.error import HTTPError
 from datetime import datetime
 from xml.etree import ElementTree
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException
@@ -44,7 +45,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
 
         return xml_tree, timestamp
 
-    def request_currencies(self, *currencies, force=False):
+    def request_currencies(self, *currencies, force=False) -> CurrencyData:
         super().request_currencies(*currencies, force=force)
         try:
             request = self.get_request()

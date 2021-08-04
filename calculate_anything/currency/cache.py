@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import wraps
 from calculate_anything.constants import CURRENCY_DATA_FILE
 from calculate_anything import logging
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything.utils.loaders import CurrencyCacheLoader
 
 
@@ -58,7 +59,7 @@ class CurrencyCache:
         return self._data.get('last_update_timestamp', 0)
 
     @preload
-    def get_rates(self, *currencies):
+    def get_rates(self, *currencies) -> CurrencyData:
         if currencies:
             return {
                 currency: self._data['exchange_rates'][currency]

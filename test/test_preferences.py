@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from calculate_anything.currency.providers import (
     CoinbaseCurrencyProvider, MyCurrencyNetCurrencyProvider,
     ECBCurrencyProvider, FixerIOCurrencyProvider
@@ -11,10 +12,20 @@ from calculate_anything.preferences import Preferences
 from test.tutils import reset_instance
 
 
-def test_defaults():
+@contextmanager
+def mock_providers(mock_currency_provider):
+    with mock_currency_provider(CoinbaseCurrencyProvider, {}, True), \
+            mock_currency_provider(MyCurrencyNetCurrencyProvider, {}, False), \
+            mock_currency_provider(ECBCurrencyProvider, {}, True), \
+            mock_currency_provider(FixerIOCurrencyProvider, {}, True):
+        yield
+
+
+def test_defaults(mock_currency_provider):
     with reset_instance(Preferences, LanguageService,
                         TimezoneService, UnitsService,
-                        CurrencyService):
+                        CurrencyService), \
+            mock_providers(mock_currency_provider):
 
         preferences = Preferences()
         preferences.commit()
@@ -41,6 +52,7 @@ def test_defaults():
             )
             ))
         assert CurrencyService()._is_running is False
+        CurrencyService().stop()
 
 
 test_spec_normal_alts = [{
@@ -87,10 +99,11 @@ test_spec_normal_alts = [{
 
 
 @pytest.mark.parametrize('test_spec', test_spec_normal_alts)
-def test_normal(test_spec):
+def test_normal(test_spec, mock_currency_provider):
     with reset_instance(Preferences, LanguageService,
                         TimezoneService, UnitsService,
-                        CurrencyService):
+                        CurrencyService), \
+            mock_providers(mock_currency_provider):
 
         lang = test_spec['language']['lang']
         default_cities = test_spec['time']['default_cities']
@@ -163,3 +176,4 @@ def test_normal(test_spec):
         assert CurrencyService(
         )._provider._api_providers[FixerIOCurrencyProvider]._api_key == '12345'
         assert CurrencyService()._is_running is True
+        CurrencyService().stop()

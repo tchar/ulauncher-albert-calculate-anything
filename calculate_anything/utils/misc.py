@@ -1,12 +1,19 @@
 '''Miscellaneous utility functions'''
 
-from contextlib import contextmanager
-from functools import lru_cache, wraps
-import os
+
+import sys
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 from typing import (
     Any, Callable, Container, Iterator,
     List, Optional, Type, Union
 )
+from contextlib import contextmanager
+from functools import lru_cache, wraps
+import os
+from threading import RLock
 from types import ModuleType
 import importlib
 from calculate_anything import logging
@@ -15,7 +22,7 @@ from calculate_anything.exceptions import MissingSimpleevalException
 
 __all__ = [
     'get_module', 'is_types', 'is_not_types', 'get_or_default',
-    'is_integer', 'StupidEval', 'safe_operation', 'lock'
+    'is_integer', 'StupidEval', 'safe_operation', 'with_lock'
 ]
 
 
@@ -168,7 +175,11 @@ def safe_operation(message: str = '') -> Iterator[None]:
         pass
 
 
-def lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
+class Lockable(Protocol):
+    _lock: RLock
+
+
+def with_lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
     '''Method decorator for classes that use locks. The class should
     have a property called '_lock' and the lock should be a contextmanager.
     (i.e threading.RLock).
@@ -180,7 +191,7 @@ def lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
         func (Callable): The method decorated with lock.
     '''
     @ wraps(func)
-    def _wrapper(self, *args, **kwargs):
+    def _wrapper(self: Lockable, *args, **kwargs):
         with self._lock:
             return func(self, *args, **kwargs)
     return _wrapper

@@ -4,6 +4,7 @@ from json.decoder import JSONDecodeError
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from calculate_anything import logging
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers import ApiKeyCurrencyProvider
 from calculate_anything.utils import get_or_default
 from calculate_anything.exceptions import CurrencyProviderException
@@ -73,7 +74,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
             for currency, rate in rates.items()
         }
 
-    def request_currencies(self, *currencies, force=False):
+    def request_currencies(self, *currencies, force=False) -> CurrencyData:
         super().request_currencies(*currencies, force=force)
         params = {'access_key': self._api_key, 'base': 'EUR'}
         if currencies:

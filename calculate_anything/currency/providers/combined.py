@@ -8,6 +8,7 @@ from calculate_anything.currency.providers import (
     FreeCurrencyProvider, ApiKeyCurrencyProvider, ECBCurrencyProvider,
     MyCurrencyNetCurrencyProvider, CoinbaseCurrencyProvider
 )
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers.base import _MockCurrencyProvider
 from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException
@@ -99,7 +100,7 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 tasks.append(task)
         return tasks
 
-    def request_currencies(self, *currencies, force=False):
+    def request_currencies(self, *currencies, force=False) -> CurrencyData:
         super().request_currencies(*currencies, force=force)
 
         tasks_free = self._request_free(currencies, force)

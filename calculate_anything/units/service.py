@@ -8,7 +8,7 @@ except ImportError:  # pragma: no cover
 from calculate_anything.units.parser import PintDefinitionParser
 from calculate_anything.currency import CurrencyService
 from calculate_anything import logging
-from calculate_anything.utils import Singleton, lock
+from calculate_anything.utils import Singleton, with_lock
 from calculate_anything.constants import MAIN_DIR
 
 
@@ -34,9 +34,13 @@ class UnitsService(metaclass=Singleton):
         self._currency_timestamps = {}
         self._conversion_mode = UnitsService.ConversionMode.NORMAL
 
-    @lock
-    def _update_callback(self, data):
+    @with_lock
+    def _update_callback(self, data, error):
+        if error:
+            logger.warning('Provider had error, will not reset data')
+            return
         if not data:
+            logger.warning('Got empty data, will not reset data')
             return
         logger.info('Updating currency registry')
         ureg = self._unit_registry
@@ -89,7 +93,7 @@ class UnitsService(metaclass=Singleton):
         return self._base_currency
 
     @property
-    @lock
+    @with_lock
     def unit_registry(self):
         return self._unit_registry
 
@@ -116,7 +120,7 @@ class UnitsService(metaclass=Singleton):
         self._running = False
         return self
 
-    @lock
+    @with_lock
     def start(self, force=False):
         if pint is None:
             return
