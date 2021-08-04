@@ -23,7 +23,7 @@ What did you expect to happen.
 
 **Logs**
 
-If possible please provide the logs from the [log](../../docs/API.md#log-directories) directory
+If possible please provide the logs from the [log](../docs/API.md#log-directories) directory
 Supose your username is `username`:
 - Linux: `/home/username/.cache/com.github.tchar.calculate_anything/log`
 - Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate_anything\Logs`

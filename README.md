@@ -129,7 +129,7 @@ In order for the currency conversion to work for providers that need an API Key,
 
 ### Cache
 
-For currency conversion you can enable the cache (located by default at `~/.cache/extension_calculate_anything`) for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, not request is made.
+For currency conversion you can enable the cache for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, no request is made.
 
 - Ulauncher: Edit `Currency Cache` in the extension preferences
 - Albert: Edit `CACHE=86400` in `__init__.py` and set it to your interval in seconds
@@ -358,13 +358,22 @@ If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it 
     - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
 
 ## Known Issues
-If at any moment currency stops showing try removing the currency cache file
+If at any moment currency stops showing try removing the currency cache file and restart the Launcher/program
 
+Linux
 ```bash
-rm ~/.cache/extension_calculate_anything/currency_data.json
+rm ~/.cache/com.github.tchar.calculate_anything/currency_data.json
 ```
 
-and restart the Launcher
+Windows
+```powershell
+rm ~\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache\currency_data.json
+```
+macOS
+```zsh
+rm ~/Library/Caches/com.github.tchar.calculate_anything/currency_data.json
+```
+
 
 ## Extending and More
 
