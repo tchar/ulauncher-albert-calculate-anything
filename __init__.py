@@ -100,19 +100,21 @@ def finalize():
     CurrencyService().stop()
 
 
-def is_trigger(query, index):
-    try:
-        return TRIGGERS[index] == query.trigger
-    except IndexError:
-        return False
+def is_trigger(index):
+    def _is_trigger(query):
+        try:
+            return TRIGGERS[index] == query.trigger
+        except IndexError:
+            return False
+    return _is_trigger
 
 
-def is_calculator_trigger(query): return is_trigger(query, 0)
-def is_time_trigger(query): return is_trigger(query, 1)
-def is_dec_trigger(query): return is_trigger(query, 2)
-def is_bin_trigger(query): return is_trigger(query, 3)
-def is_hex_trigger(query): return is_trigger(query, 4)
-def is_oct_trigger(query): return is_trigger(query, 5)
+is_calculator_trigger = is_trigger(0)
+is_time_trigger = is_trigger(1)
+is_dec_trigger = is_trigger(2)
+is_bin_trigger = is_trigger(3)
+is_hex_trigger = is_trigger(4)
+is_oct_trigger = is_trigger(5)
 
 
 def handleQuery(query):
