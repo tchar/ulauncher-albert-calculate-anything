@@ -1,3 +1,5 @@
+#!/bin/sh
+
 python -m pybadges \
     --left-text="platforms" \
     --right-text="Linux | Windows | macOS " \

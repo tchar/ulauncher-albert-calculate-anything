@@ -27,11 +27,11 @@ class _Preferences:
         self._uncomitted_keys.add(key)
 
     @abstractmethod
-    def _commit_one(self) -> None:
+    def _commit_one(self, *args, **kwargs) -> None:
         pass
 
     @abstractmethod
-    def _pre_commit(self) -> None:
+    def _pre_commit(self, *args, **kwargs) -> None:
         pass
 
     def commit(self) -> None:
@@ -47,6 +47,7 @@ class _Preferences:
 
 
 class LanguagePreferences(_Preferences):
+
     '''The language preferences class
 
     Attributes:

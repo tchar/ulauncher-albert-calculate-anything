@@ -4,3 +4,4 @@ pytest-httpserver
 pytest-cov
 pytest-benchmark
 pytest-socket
+trustme

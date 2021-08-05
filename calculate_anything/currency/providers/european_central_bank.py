@@ -2,7 +2,10 @@ from urllib.parse import urljoin
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from datetime import datetime
-from xml.etree import ElementTree
+# Look I have taken every measure I can for this.
+# If you install a malicious cert and let them mitm
+# European Central Bank, that's on you.
+from xml.etree import ElementTree  # nosec
 from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers import FreeCurrencyProvider
 from calculate_anything import logging
@@ -25,7 +28,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
 
     def _validate_data(self, data):
         try:
-            xml_tree = ElementTree.fromstring(data)
+            xml_tree = ElementTree.fromstring(data)  # nosec
         except ElementTree.ParseError as e:
             msg = 'Could not parse ECB xml response: {}'.format(e)
             logger.exception(msg)
@@ -50,7 +53,7 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         try:
             request = self.get_request()
             logger.info('Making request to: {}'.format(request.full_url))
-            with urlopen(request) as response:
+            with urlopen(request) as response:  # nosec
                 data = response.read().decode()
                 response_code = response.getcode()
         except HTTPError as e:

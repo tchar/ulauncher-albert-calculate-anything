@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from queue import Queue
 from urllib.parse import urljoin
+import trustme
+import ssl
 import pytest
 from pytest_httpserver.httpserver import HTTPServer, Response
 from calculate_anything.units import UnitsService
@@ -17,6 +19,11 @@ from calculate_anything.currency.providers.base import (
 from test.tutils import osremove, random_str, currency_data, temp_filepath
 
 
+SERVER = 'localhost'
+PORT = 31137
+CERT_ISSUE = 'tchar.calculate-anything.com'
+
+
 @pytest.fixture(scope='session')
 def log_filepath():
     rand_name = random_str(5)
@@ -26,9 +33,26 @@ def log_filepath():
     osremove(rand_filepath)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def httpserver_listen_address():
-    return ('localhost', 31137)
+    return (SERVER, PORT)
+
+
+@pytest.fixture(scope='session')
+def httpserver_ssl_context():
+    ca = trustme.CA()
+    client_context = ssl.SSLContext()
+    server_context = ssl.SSLContext()
+    server_cert = ca.issue_cert(CERT_ISSUE)
+    ca.configure_trust(client_context)
+    server_cert.configure_cert(server_context)
+
+    def default_context():
+        return client_context
+
+    ssl._create_default_https_context = default_context
+
+    return server_context
 
 
 @pytest.fixture(scope='function')
@@ -115,8 +139,10 @@ def mock_currency_provider(httpserver: HTTPServer):
             klass.API_URL = info['api_url']
 
     def _handle_no_response(klasses):
-        base_url = 'http://localhost:1234/{}.{}'.format(
-            random_str(100), random_str(5))
+        path = random_str(100)
+        tld = random_str(5)
+        base_url = 'https://{}:{}/{}.{}'
+        base_url = base_url.format(SERVER, PORT + 1, path, tld)
 
         instances = []
         for klass in klasses:
@@ -135,7 +161,7 @@ def mock_currency_provider(httpserver: HTTPServer):
         for klass, data, use_json in zip(klasses, datas, use_jsons):
             api_url = urljoin('/', klass.__name__)
             klass.API_URL = api_url
-            base_url = httpserver.url_for(klasses[klass]['base_url'])
+            base_url = httpserver.url_for(klass.__name__)
             klass.BASE_URL = base_url
             request = httpserver.expect_request(api_url)
             if status != 200:
