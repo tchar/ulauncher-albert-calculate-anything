@@ -150,18 +150,20 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         parens_dict = {')': 1, '(': -1}
         signs = set(['+', '-'])
         parens = 0
+        index = None
         for i, c in enumerate(reversed(query)):
             parens += parens_dict.get(c, 0)
             if c in signs and parens == 0:
+                index = i
                 break
-        else:
+        if index is None:
             return None
 
-        i = len(query) - i - 1
+        index = len(query) - index - 1
 
-        amount = query[:i]
-        sign = 1 if query[i] == '+' else -1
-        percentage = query[i+1:-1]
+        amount = query[:index]
+        sign = 1 if query[index] == '+' else -1
+        percentage = query[index+1:-1]
         if not amount.strip() or not percentage.strip():
             return None
 
