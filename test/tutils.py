@@ -25,8 +25,8 @@ from calculate_anything.utils.singleton import Singleton
 def random_str(length=None):
     length = length if length else 100
     # To make it variable compliable
-    first = random.choice(string.ascii_letters)
-    return first + ''.join(
+    first = random.choice(string.ascii_letters)  # nosec
+    return first + ''.join(  # nosec
         random.choice(string.ascii_letters + string.digits)
         for _ in range(length - 1)
     )
@@ -34,7 +34,7 @@ def random_str(length=None):
 
 @lru_cache(maxsize=None)
 def mem_path():
-    mem_path_ = '/dev/shm'
+    mem_path_ = '/dev/shm'  # nosec
     fallback = tempfile.gettempdir()
     if not os.path.exists(mem_path_):
         return fallback

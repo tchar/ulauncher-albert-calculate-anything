@@ -3,12 +3,12 @@
 setup_launcher() {
 	launcher_info=$(xdotool search --onlyvisible --class "$launcher_class" getwindowgeometry --shell)
 	eval $launcher_info
-    launcher_screen=$SCREEN
+    # launcher_screen=$SCREEN
     launcher_id=$WINDOW
     launcher_x=$X
     launcher_y=$Y
     launcher_w=$WIDTH
-    launcher_h=$HEIGHT
+    # launcher_h=$HEIGHT
 }
 
 setup_peek() {
@@ -166,8 +166,6 @@ demo_time(){
 }
 
 demo_units() {
-    cmd="equal space"
-
     keys="= 38 c to f"
     run_xdotool
     sleep $sleep_big

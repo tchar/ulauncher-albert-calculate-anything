@@ -70,7 +70,9 @@ class TimezoneSqliteCache:
             GROUP BY id
             ORDER BY (name_alias = ?) DESC, population DESC
             LIMIT 10
-            '''.format(primary_query)
+            '''  # nosec
+
+        query = query.format(primary_query)
 
         cur = self._db.cursor()
         for row in cur.execute(query, (param, city_name_search)):
@@ -145,8 +147,10 @@ class TimezoneSqliteCache:
             WHERE country.id IS NOT NULL OR state.id IS NOT NULL OR
                 tz.city_id IS NOT NULL
             ORDER BY (city.name_alias = ?) DESC, city.population DESC
-            '''.format(cities_query, countries_query,
-                       states_query, timezones_query)
+            '''  # nosec
+
+        query = query.format(cities_query, countries_query,
+                             states_query, timezones_query)
 
         cur = self._db.cursor()
         for row in cur.execute(query, params):

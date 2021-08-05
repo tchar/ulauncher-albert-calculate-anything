@@ -81,7 +81,7 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         try:
             request = self.get_request(params)
             logger.info('Making request to: {}'.format(request.full_url))
-            with urlopen(request) as response:
+            with urlopen(request) as response:  # nosec
                 data = response.read().decode()
                 response_code = response.getcode()
         except HTTPError as e:

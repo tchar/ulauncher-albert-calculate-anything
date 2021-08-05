@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 from urllib.request import Request
 from calculate_anything.currency.data import CurrencyData
@@ -30,7 +31,14 @@ class CurrencyProvider:
         url = list(urlparse(url))
         url[4] = urlencode(params)
         url = urlunparse(url)
-        return Request(url, headers=headers)
+        request = Request(url, headers=headers)
+        # Only urls and only secure connections
+        # Don't fucking install untrusted certs unless you want
+        # a mitm xml bomb on your head
+        # and no I won't install extra dependencies for your stupidity
+        if not re.match(r'^https:\/\/', request.full_url):
+            raise Exception('Invalid request url: {}'.format(request.full_url))
+        return request
 
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
         timestamp = datetime.now().timestamp()
