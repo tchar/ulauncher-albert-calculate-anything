@@ -1,5 +1,6 @@
 ---
 engines:
+  bandit:
   pylint:
     exclude_paths:
       - "*"
@@ -8,6 +9,11 @@ engines:
     exclude_paths:
       - "*"
       - "**/**"
+  prospector:
+    exclude_paths:
+      - "*"
+      - "**/**"
+
 exclude_paths:
   - ".github/**"
   - "calculate_anything/appdirs.py"
