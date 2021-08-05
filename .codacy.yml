@@ -1,6 +1,7 @@
 ---
 exclude_paths:
   - ".github/**"
+  - "calculate_anything/appdirs.py"
   - "data/**"
   - "docs/**"
   - "misc/**"
