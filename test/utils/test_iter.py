@@ -57,10 +57,10 @@ test_spec = [{
 
 @pytest.mark.parametrize('test_spec', test_spec)
 def test_flatten(test_spec):
-    input = test_spec['input']
+    _input = test_spec['input']
     expected = test_spec['expected']
 
-    assert list(flatten(input)) == expected
+    assert list(flatten(_input)) == expected
 
 
 test_spec = [{

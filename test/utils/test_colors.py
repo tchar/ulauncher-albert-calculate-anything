@@ -4,7 +4,7 @@ from calculate_anything.utils.colors import (
 )
 
 
-@pytest.mark.parametrize('input,expected', [
+@pytest.mark.parametrize('_input,expected', [
     ('000000', (0, 0, 0)),
     ('FFFFFF', (255, 255, 255)),
     ('FF0000', (255, 0, 0)),
@@ -20,15 +20,15 @@ from calculate_anything.utils.colors import (
     ('A', ValueError),
     (None, TypeError),
 ])
-def test_hex_to_rgb(input, expected):
+def test_hex_to_rgb(_input, expected):
     if isinstance(expected, tuple):
-        assert hex_to_rgb(input)
+        assert hex_to_rgb(_input)
     else:
         with pytest.raises(expected):
-            hex_to_rgb(input)
+            hex_to_rgb(_input)
 
 
-@pytest.mark.parametrize('input,expected', [
+@pytest.mark.parametrize('_input,expected', [
     ((139, 0, 22), (0, 1, 0.8417, 0.4549)),
     ((178, 0, 31), (0, 1, 0.8258, 0.3020)),
     ((0, 174, 114), (1, 0, 0.3448, 0.3176)),
@@ -40,16 +40,16 @@ def test_hex_to_rgb(input, expected):
     ((1,), ValueError),
     (1, TypeError),
 ])
-def test_rgb_to_cmyk(input, expected):
+def test_rgb_to_cmyk(_input, expected):
     if isinstance(expected, tuple):
-        result = rgb_to_cmyk(input)
+        result = rgb_to_cmyk(_input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            rgb_to_cmyk(input)
+            rgb_to_cmyk(_input)
 
 
-@pytest.mark.parametrize('input,expected', [
+@pytest.mark.parametrize('_input,expected', [
     ((139, 0, 22), (350.5035, 1.0, 0.5450)),
     ((178, 0, 31), (349.5507, 1.0, 0.6980)),
     ((0, 174, 114), (159.3103, 1.0, 0.6823)),
@@ -61,16 +61,16 @@ def test_rgb_to_cmyk(input, expected):
     ((1,), ValueError),
     (1, TypeError),
 ])
-def test_rgb_to_hsv(input, expected):
+def test_rgb_to_hsv(_input, expected):
     if isinstance(expected, tuple):
-        result = rgb_to_hsv(input)
+        result = rgb_to_hsv(_input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            rgb_to_hsv(input)
+            rgb_to_hsv(_input)
 
 
-@pytest.mark.parametrize('input,expected', [
+@pytest.mark.parametrize('_input,expected', [
     ((139, 0, 22), (350.5036, 1.0, 0.2725)),
     ((178, 0, 31), (349.5506, 1.0, 0.3490)),
     ((0, 174, 114), (159.3103, 1.0, 0.3411)),
@@ -82,10 +82,10 @@ def test_rgb_to_hsv(input, expected):
     ((1,), ValueError),
     (1, TypeError),
 ])
-def test_rgb_to_hsl(input, expected):
+def test_rgb_to_hsl(_input, expected):
     if isinstance(expected, tuple):
-        result = rgb_to_hsl(input)
+        result = rgb_to_hsl(_input)
         assert result == pytest.approx(expected, 0.001)
     else:
         with pytest.raises(expected):
-            rgb_to_hsl(input)
+            rgb_to_hsl(_input)

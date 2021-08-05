@@ -50,7 +50,6 @@ class PintDefinitionParser:
             self._unit_registry.define(defstr)
 
     def _process_reverse_alias(self, line, translation_adder):
-        pass
         aliases = line.strip('@reverse.alias').split('=')
         aliases = list(map(str.strip, aliases))
         root_alias, aliases_to_define = aliases[0], aliases[1:]

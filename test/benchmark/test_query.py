@@ -165,7 +165,7 @@ ids_handlers = [t['id'] for t in test_spec_handlers]
     'test_spec',
     test_spec_handlers,
     ids=ids_handlers)
-def test_multihandler(benchmark, mock_currency_service, test_spec):
+def test_single_handler(benchmark, mock_currency_service, test_spec):
     with mock_currency_service(default_currencies, error=False,
                                **fixed_currency_data), \
             set_time_reference(time_reference):
@@ -174,7 +174,8 @@ def test_multihandler(benchmark, mock_currency_service, test_spec):
         query = test_spec['query']
         expected_values = test_spec['expected_values']
 
-        results = benchmark(lambda q: MultiHandler().handle(q), query)
+        handler = test_spec['handler']()
+        results = benchmark(handler.handle, query)
         results = sorted(results, key=lambda result: result.order)
         result_vals = map(lambda r: r.value, results)
 
@@ -186,7 +187,7 @@ def test_multihandler(benchmark, mock_currency_service, test_spec):
     'test_spec',
     test_spec_handlers,
     ids=ids_handlers)
-def test_single_handler(benchmark, mock_currency_service, test_spec):
+def test_multihandler(benchmark, mock_currency_service, test_spec):
     with mock_currency_service(default_currencies, error=False,
                                **fixed_currency_data), \
             set_time_reference(time_reference):
@@ -195,8 +196,8 @@ def test_single_handler(benchmark, mock_currency_service, test_spec):
         query = test_spec['query']
         expected_values = test_spec['expected_values']
 
-        handler = test_spec['handler']()
-        results = benchmark(lambda q: handler.handle(q), query)
+        multi_handler = MultiHandler()
+        results = benchmark(multi_handler.handle, query)
         results = sorted(results, key=lambda result: result.order)
         result_vals = map(lambda r: r.value, results)
 
