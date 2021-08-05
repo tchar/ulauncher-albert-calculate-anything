@@ -4,37 +4,37 @@ on:
     branches:
       - master
     paths-ignore:
-      - '.github/**'
-      - '!.github/workflows/benchmark-linux.yml'
-      - 'docs/**'
-      - 'misc/**'
-      - '__init__.py'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'main.py'
-      - 'manifest.json'
-      - 'README.md'
-      - 'versions.json'
+      - ".github/**"
+      - "!.github/workflows/benchmark-linux.yml"
+      - "docs/**"
+      - "misc/**"
+      - "__init__.py"
+      - ".gitignore"
+      - "LICENSE"
+      - "main.py"
+      - "manifest.json"
+      - "README.md"
+      - "versions.json"
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [ master ]
+    branches: [master]
     paths-ignore:
-      - '.github/**'
-      - '!.github/workflows/benchmark-linux.yml'
-      - 'docs/**'
-      - 'misc/**'
-      - '__init__.py'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'main.py'
-      - 'manifest.json'
-      - 'README.md'
-      - 'versions.json'
+      - ".github/**"
+      - "!.github/workflows/benchmark-linux.yml"
+      - "docs/**"
+      - "misc/**"
+      - "__init__.py"
+      - ".gitignore"
+      - "LICENSE"
+      - "main.py"
+      - "manifest.json"
+      - "README.md"
+      - "versions.json"
 jobs:
   benchmark:
     name: Performance regression check
     runs-on: ubuntu-latest
-    env: 
+    env:
       SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       BENCHMARKS_BRANCH: gh-pages
@@ -44,11 +44,11 @@ jobs:
         include:
           - os: ubuntu-latest
             path: ~/.cache
-        python-version: [ '3.9' ]
+        python-version: ["3.9"]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
-      # Load pip cache
+        # Load pip cache
         with:
           path: ${{ matrix.path }}/pip
           key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements/*requirements.txt') }}
@@ -82,19 +82,18 @@ jobs:
         uses: rhysd/github-action-benchmark@v1
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
-          tool: 'pytest'
+          tool: "pytest"
           output-file-path: benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
           fail-on-alert: true
           alert-threshold: 200%
           fail-threshold: 400%
-          alert-comment-cc-users: '@tchar'
+          alert-comment-cc-users: "@tchar"
           auto-push: false
           gh-pages-branch: ${{ env.BENCHMARKS_BRANCH }}
           benchmark-data-dir-path: benchmarks
         # Push results to gh-pages only when branch is master
       - name: Push benchmarks to gh-pages
         if: ${{ github.ref == 'refs/heads/master' }}
-        env: 
+        env:
           SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
         run: git push https://tchar:"$SECRETS_PERSONAL_GITHUB_TOKEN"@github.com/"$GITHUB_REPOSITORY".git "$BENCHMARKS_BRANCH":"$BENCHMARKS_BRANCH"
-

@@ -6,7 +6,7 @@ from typing import Tuple
 __all__ = ['hex_to_rgb', 'rgb_to_cmyk', 'rgb_to_hsv', 'rgb_to_hsl']
 
 
-def hex_to_rgb(hex: str) -> Tuple[int, int, int]:
+def hex_to_rgb(_hex: str) -> Tuple[int, int, int]:
     '''Converts hex to rgb
 
     Args:
@@ -15,7 +15,7 @@ def hex_to_rgb(hex: str) -> Tuple[int, int, int]:
     Returns:
         Tuple[int]: A tuple representing the rgb color
     '''
-    r, g, b = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
+    r, g, b = tuple(int(_hex[i:i + 2], 16) for i in (0, 2, 4))
     return r, g, b
 
 

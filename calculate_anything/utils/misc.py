@@ -67,7 +67,7 @@ def is_not_types(*types: List[Type[Any]]) -> bool:
     return lambda value: not is_types(*types)(value)
 
 
-def get_or_default(value: Any, type: Type[Any], default: Any,
+def get_or_default(value: Any, _type: Type[Any], default: Any,
                    allowed_values: Optional[Container] = None) -> Any:
     '''Return a value if it is of specified type and in allowed values
 
@@ -84,7 +84,7 @@ def get_or_default(value: Any, type: Type[Any], default: Any,
             value was not of the provided type, or in allowed types.
     '''
     try:
-        value = type(value)
+        value = _type(value)
         if allowed_values and value not in allowed_values:
             return default
         return value
@@ -121,9 +121,9 @@ class StupidEval:
         self.operators = {}
 
     @ staticmethod
-    def _try_parse(query, type):
+    def _try_parse(query, _type):
         try:
-            return type(query)
+            return _type(query)
         except (ValueError, TypeError):
             return None
 

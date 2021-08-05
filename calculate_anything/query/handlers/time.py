@@ -92,8 +92,8 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         locations = TimeQueryHandler._get_location_search_combinations(
             location)
 
-        for location, search_terms in locations:
-            found_locations = TimezoneService().get(location, *search_terms)
+        for city_name, search_terms in locations:
+            found_locations = TimezoneService().get(city_name, *search_terms)
             if found_locations:
                 return found_locations, False
 
@@ -158,7 +158,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
                 order=0
             )
             return [item1, item2]
-        elif overflow:
+        if overflow:
             item = TimedeltaCalculation(
                 query=parsed_query_kw,
                 error=DateOverflowException(),

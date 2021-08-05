@@ -51,9 +51,6 @@ class UnitsCalculation(_Calculation):
         return unit.dimensionality == '[currency]'
 
     def _format_babel(self):
-        # TODO: Fix translation with ratios
-        if not babel_units:
-            raise Exception('Babel Missing')
         _locale = locale.getlocale()[0]
 
         if not UnitsCalculation.is_strictly_dimensionless(self.value):
@@ -81,8 +78,10 @@ class UnitsCalculation(_Calculation):
             try:
                 name, description = self._format_babel()
                 use_translator = False
-            except Exception:
-                pass
+            except Exception as e:
+                msg = 'Babel: Could not translate units: {}'
+                msg = msg.format(e)
+                logger.exception(e)
 
         translator = LanguageService().get_translator('units')
         if use_translator:
@@ -156,8 +155,10 @@ class TemperatureUnitsCalculation(UnitsCalculation):
                     self.value.magnitude, unit_name,
                     locale=_locale, format='#,##0.##;-#')
                 parse_default = False
-            except Exception:
-                pass
+            except Exception as e:
+                msg = 'Babel: Could not translate temperature units "{}": {}'
+                msg = msg.format(self.value.units, e)
+                logger.exception(msg)
 
         if parse_default:
             unit_name = str(self.value.units)
@@ -177,11 +178,15 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
     @staticmethod
     def _currency_alias(currency_name):
+        if babel_numbers is None:
+            return currency_name
         try:
             if babel_numbers.is_currency(currency_name):
                 return babel_numbers.get_currency_name(currency_name)
-        except Exception:
-            pass
+        except Exception as e:
+            msg = 'Babel: Could not translate currency "{}": {}'
+            msg = msg.format(currency_name, e)
+            logger.exception(msg)
         return currency_name
 
     def format(self):

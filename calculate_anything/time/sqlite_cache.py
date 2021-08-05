@@ -57,8 +57,8 @@ class TimezoneSqliteCache:
 
     def _query_no_search_terms(self, city_name_search, exact):
         if not exact:
-            primary_query = 'name_alias LIKE ?'
-            param = city_name_search + '%'
+            primary_query = '''name_alias LIKE ? || '%' '''
+            param = city_name_search
         else:
             primary_query = 'name_alias = ?'
             param = city_name_search
@@ -107,8 +107,8 @@ class TimezoneSqliteCache:
         timezones_query = ' OR '.join(timezones_query)
 
         if not exact:
-            cities_query = 'name_alias LIKE ?'
-            cities_param = city_name_search + '%'
+            cities_query = '''name_alias LIKE ? || '%' '''
+            cities_param = city_name_search
         else:
             cities_query = 'name_alias = ?'
             cities_param = city_name_search

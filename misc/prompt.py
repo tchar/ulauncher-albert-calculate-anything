@@ -4,6 +4,7 @@ import sys
 import os
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
+from calculate_anything.currency import CurrencyService
 from calculate_anything.query.handlers import (
     TimeQueryHandler, Base10QueryHandler, Base16QueryHandler,
     Base2QueryHandler, Base8QueryHandler, UnitsQueryHandler,
@@ -148,7 +149,7 @@ class Program(Validator):
 
     def bottom_toolbar(self):
         if self._kw not in keywords:
-            keystr = ', '.join(map(lambda k: '"{}"'.format(k), keywords))
+            keystr = ', '.join(map('"{}"'.format, keywords))
             # tb_str = '<style fg="ansiblue">{}</style>'
             tb_str = '  Use one of the keywords followed by space\n  - [{}]'
             tb_str = tb_str.format(keystr)
@@ -183,7 +184,12 @@ session = PromptSession(
     # refresh_interval=0.01,
     style=style)
 
-with patch_stdout():
-    while True:
-        session.prompt('❯ ')
-        program.reset()
+try:
+    with patch_stdout():
+        while True:
+            session.prompt('❯ ')
+            program.reset()
+except KeyboardInterrupt as e:
+    print(e)
+finally:
+    CurrencyService().stop()

@@ -118,8 +118,6 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             else:
                 expression = expression_fmt.format(*expression)
                 yield expression
-        # TODO: To be removed
-        # yield unit_from
 
     def _get_only_one_unit(self, unit_from):
         translator = LanguageService().get_translator('units')
@@ -217,6 +215,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             for expression in self._get_possible_units(unit_from):
                 unit_from_ureg, parse_err = self._parse_safe(expression)
                 if parse_err:
+                    parse_err = (expression, parse_err)
                     break
                 if unit_from_ureg is None:
                     continue
@@ -229,9 +228,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 unit_set.add(unit_from_ureg_unit)
 
         if parse_err:
+            parse_err_expression, parse_err = parse_err
             suffix = ', '.join(units_to)
             suffix = ' to {}'.format(suffix) if suffix else ''
-            query = '{}{}'.format(expression, suffix)
+            query = '{}{}'.format(parse_err_expression, suffix)
             item = UnitsCalculation(query=query, error=parse_err)
             return [item]
 
@@ -248,8 +248,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 unit_from_ureg_currency_str = None
 
             units_to_curr = CurrencyService().default_currencies
-            units_to_curr = map(
-                lambda s: 'currency_{}'.format(s), units_to_curr)
+            units_to_curr = map('currency_{}'.format, units_to_curr)
             units_to_curr = filter(
                 lambda s: s != unit_from_ureg_currency_str, units_to_curr)
             units_to_curr = map(ureg.parse_unit_name, units_to_curr)

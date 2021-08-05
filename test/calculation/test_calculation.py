@@ -75,11 +75,6 @@ def test_get_description():
     assert description == translator('result-imaginary').capitalize()
 
 
-def test_format_query():
-    # TODO: Implement
-    pass
-
-
 def test_format():
     assert Calculation(0).format() == '0'
     assert Calculation(-1j).format() == '-i'

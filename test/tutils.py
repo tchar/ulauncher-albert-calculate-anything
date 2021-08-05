@@ -63,7 +63,7 @@ def calculator_no_simpleeval():
 def base_n_no_simpleeval():
     base_n_handler.SimpleEval = StupidEval
     get_simple_eval = base_n_handler.get_simple_eval
-    base_n_handler.get_simple_eval = lambda: StupidEval()
+    base_n_handler.get_simple_eval = StupidEval
     yield
     base_n_handler.get_simple_eval = get_simple_eval
     base_n_handler.SimpleEval = SimpleEval
@@ -135,8 +135,8 @@ def osremove(path):
         else:
             os.remove(path)
     # Fucking windows
-    except Exception:
-        pass
+    except Exception as e:
+        print('Could not remove "{}": {}'.format(path, e))
 
 
 def temp_filepath(*filenames):

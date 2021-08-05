@@ -1,4 +1,6 @@
-data=$(cat misc/python.svg | base64)
+#!/bin/sh
+
+data=`cat misc/python.svg | base64`
 
 python -m pybadges \
     --left-text="python" \

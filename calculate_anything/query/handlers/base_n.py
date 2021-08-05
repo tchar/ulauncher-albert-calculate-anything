@@ -106,7 +106,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
                 c_dec, n = re.subn(self._digits_re, convert_to_base_n, c)
                 if n == 0 and '.' not in c_dec:
                     raise WrongBaseException
-                elif n == 0:
+                if n == 0:
                     raise BaseFloatingPointException
                 expr += c_dec
                 expr_parsed += c
@@ -151,7 +151,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
         if len(results) == 0:
             return None
-        elif len(results) == 1:
+        if len(results) == 1:
             result = results[0]
             if not is_integer(result):
                 item = BaseNCalculation(error=BaseFloatingPointException())

@@ -39,7 +39,7 @@ class CurrencyCache:
     def _load(self):
         if self._loaded or self._use_only_memory:
             return True
-        elif not self.enabled:
+        if not self.enabled:
             return False
 
         loader = CurrencyCacheLoader(CURRENCY_DATA_FILE)
