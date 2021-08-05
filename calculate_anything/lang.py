@@ -83,7 +83,8 @@ class LanguageService(metaclass=Singleton):
                     'en_US does not exist, will not use any language '
                     'aliases: {}'.format(lang_filepath))
                 return  # pragma: no cover
-            return self.set('en_US')
+            self.set('en_US')
+            return
 
         self._lang = lang
         for callback in self._update_callbacks:

@@ -3,9 +3,33 @@ name: "CodeQL"
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - "**/*.gif"
+      - "**/*.svg"
+      - ".github/**"
+      - "!.github/workflows/codeql-analysis.yml"
+      - "!.github/codeql/*"
+      - "docs/**"
+      - ".gitignore"
+      - "LICENSE"
+      - "manifest.json"
+      - "README.md"
+      - "versions.json"
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [master]
+    paths-ignore:
+      - "**/*.gif"
+      - "**/*.svg"
+      - ".github/**"
+      - "!.github/workflows/codeql-analysis.yml"
+      - "!.github/codeql/*"
+      - "docs/**"
+      - ".gitignore"
+      - "LICENSE"
+      - "manifest.json"
+      - "README.md"
+      - "versions.json"
   schedule:
     - cron: "00 12 * * 5"
 

@@ -16,13 +16,16 @@ from typing import Callable, Dict
 from calculate_anything.constants import APP_DIRS
 
 
-__all__ = []
+__all__ = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'ColorFormatter',
+           'CustomHandler', 'Logging', 'getLogger', 'setLevel',
+           'disable_file_handler', 'set_file_handler',
+           'disable_stdout_handler', 'set_stdout_handler', 'getLogger']
 
 
 DEBUG = _logging.DEBUG
 INFO = _logging.INFO
 WARNING = _logging.WARNING
-ERRIR = _logging.ERROR
+ERROR = _logging.ERROR
 CRITICAL = _logging.CRITICAL
 
 

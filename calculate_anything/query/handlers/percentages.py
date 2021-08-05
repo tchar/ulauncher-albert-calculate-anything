@@ -104,8 +104,6 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             return None
 
         percentage_from, percentage_to = matches[0]
-
-        percentage_from, percentage_to = matches[0]
         result = self._find_amounts(percentage_from, percentage_to, query)
 
         if result is None:
@@ -208,6 +206,6 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             calculation = self._calculate_calc(query)
 
         if calculation is None:
-            return
+            return None
 
         return [calculation]

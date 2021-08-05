@@ -57,7 +57,7 @@ def rgb_to_hsv(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
         h = ((g - b) / delta) % 6
     elif cmax == g:
         h = ((b - r) / delta) + 2
-    elif cmax == b:
+    else:
         h = ((r - g) / delta) + 4
     h *= 60
     s = 0 if cmax == 0 else delta / cmax
@@ -84,7 +84,7 @@ def rgb_to_hsl(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
         h = ((g - b) / delta) % 6
     elif cmax == g:
         h = ((b - r) / delta) + 2
-    elif cmax == b:
+    else:
         h = ((r - g) / delta) + 4
     h *= 60
     l = (cmax + cmin) / 2.  # noqa: E741

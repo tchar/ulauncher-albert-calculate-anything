@@ -28,48 +28,55 @@ class Loader:
         self._status = status
 
     class Decorators:
+        @staticmethod
         def with_data(func):
             @wraps(func)
             def _wrapper(self: Loader, *args, **kwargs):
                 if self.data is None:
-                    return
+                    return None
                 return func(self, *args, **kwargs)
             return _wrapper
 
+        @staticmethod
         def with_mode(mode: IntFlag):
             def _decorator(func):
                 @wraps(func)
                 def _wrapper(self: Loader, *args, **kwargs):
                     if self._mode & mode:
                         return func(self, *args, **kwargs)
+                    return None
                 return _wrapper
             return _decorator
 
+        @staticmethod
         def without_mode(mode: IntFlag):
             def _decorator(func):
                 @wraps(func)
                 def _wrapper(self: Loader, *args, **kwargs):
                     if self._mode & mode:
-                        return
+                        return None
                     return func(self, *args, **kwargs)
                 return _wrapper
             return _decorator
 
+        @staticmethod
         def with_status(status: IntFlag):
             def _decorator(func):
                 @wraps(func)
                 def _wrapper(self: Loader, *args, **kwargs):
                     if self._status & status:
                         return func(self, *args, **kwargs)
+                    return None
                 return _wrapper
             return _decorator
 
+        @staticmethod
         def without_status(status: IntFlag):
             def _decorator(func):
                 @wraps(func)
                 def _wrapper(self: Loader, *args, **kwargs):
                     if self._status & status:
-                        return
+                        return None
                     return func(self, *args, **kwargs)
                 return _wrapper
             return _decorator

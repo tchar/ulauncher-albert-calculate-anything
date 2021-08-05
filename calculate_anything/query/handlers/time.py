@@ -64,6 +64,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         td = date - reference_datetime
         return date, td, parsed_query, match, overflow
 
+    @staticmethod
     def _get_location_search_combinations(location):
         location = location.strip()
         locations_tmp = TIME_LOCATION_REPLACE_REGEX.sub(' ', location)
@@ -85,7 +86,6 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         return locations
 
     def _get_locations(self, location):
-        search_terms = []
         if len(location) < 2:
             return TimezoneService().default_cities, True
 

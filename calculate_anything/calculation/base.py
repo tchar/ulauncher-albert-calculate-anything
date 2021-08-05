@@ -182,6 +182,7 @@ _HANDLERS = {
 
 class _Calculation:
     class Decorators:
+        @staticmethod
         def handle_error_results(func):
             @wraps(func)
             def _wrapper(self: '_Calculation', *args, **kwargs):

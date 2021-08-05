@@ -3,6 +3,7 @@ from functools import wraps
 
 class QueryHandler:
     class Decorators:
+        @staticmethod
         def can_handle(func):
             @wraps(func)
             def _wrapper(self, query, *args, **kwargs):

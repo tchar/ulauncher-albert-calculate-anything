@@ -78,12 +78,12 @@ class PintDefinitionParser:
             if line.startswith('#'):
                 return
             if line.startswith('@alias '):
-                return self._process_alias(line,
-                                           translation_adder,
-                                           is_currency)
+                self._process_alias(line, translation_adder, is_currency)
+                return
             if line.startswith('@reverse.alias'):
-                return self._process_reverse_alias(line, translation_adder)
-            return self._process_definition(line, is_currency)
+                self._process_reverse_alias(line, translation_adder)
+                return
+            self._process_definition(line, is_currency)
         except Exception as e:
             logger.exception(
                 'Got exception when parsing line {} in {}: {}'

@@ -1,4 +1,3 @@
-from calculate_anything.utils.singleton import Singleton
 from typing import List, Tuple, Union
 import re
 import cmath
@@ -15,7 +14,7 @@ except ImportError:  # pragma: no cover
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything import logging
 from calculate_anything.calculation import Calculation, BooleanCalculation
-from calculate_anything.utils import is_types
+from calculate_anything.utils import is_types, Singleton
 from calculate_anything.exceptions import (
     MissingSimpleevalException, ZeroDivisionException,
     BooleanComparisonException
@@ -101,6 +100,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             lambda r: r.group(0).replace('0', ''), expr)
         return expr, has_imaginary
 
+    @staticmethod
     def _calculate_boolean_result(values: Union[int, float, complex],
                                   operators: List[str],
                                   subqueries: List[str]) -> BooleanCalculation:
@@ -121,7 +121,6 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             )
             fixed_precisions.append(fixed_precision)
         values = tuple(fixed_precisions)
-        operators = operators
 
         op_dict = {
             '<': op.lt,

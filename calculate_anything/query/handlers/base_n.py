@@ -163,7 +163,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
                     order=0
                 )
         # Boolean result
-        elif len(results) > 1:
+        else:
             item = CalculatorQueryHandler._calculate_boolean_result(
                 results, operators, expr_parsed)
 

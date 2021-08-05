@@ -81,7 +81,7 @@ class UnitsCalculation(_Calculation):
             except Exception as e:
                 msg = 'Babel: Could not translate units: {}'
                 msg = msg.format(e)
-                logger.exception(e)
+                logger.exception(msg)
 
         translator = LanguageService().get_translator('units')
         if use_translator:
@@ -116,7 +116,6 @@ class UnitsCalculation(_Calculation):
         replace_re = multi_re.compile({'**': '^', '_': ' '}, sort=False)
         name = replace_re.sub_dict(name)
         description = replace_re.sub_dict(description)
-        description = description
 
         return name, description
 
