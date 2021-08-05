@@ -80,8 +80,8 @@ test_spec = [{
 
 @pytest.mark.parametrize('test_spec', test_spec)
 def test_deduplicate(test_spec):
-    input = test_spec['input']
+    _input = test_spec['input']
     expected = test_spec['expected']
 
-    _t = type(input)
-    assert _t(deduplicate(input)) == expected
+    _t = type(_input)
+    assert _t(deduplicate(_input)) == expected

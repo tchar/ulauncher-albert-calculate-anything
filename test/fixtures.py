@@ -124,16 +124,15 @@ def mock_currency_provider(httpserver: HTTPServer):
             instances.append(klasses[klass]['instance'])
         if len(instances) == 1:
             return instances[0]
-        else:
-            return instances
+        return instances
 
-    def _handle_response(klasses, data, status, use_jsons):
+    def _handle_response(klasses, datas, status, use_jsons):
         if isinstance(use_jsons, bool):
             use_jsons = [use_jsons] * len(klasses)
-        if not isinstance(data, (list, tuple)):
-            data = [data] * len(klasses)
+        if not isinstance(datas, (list, tuple)):
+            datas = [datas] * len(klasses)
         instances = []
-        for klass, data, use_json in zip(klasses, data, use_jsons):
+        for klass, data, use_json in zip(klasses, datas, use_jsons):
             api_url = urljoin('/', klass.__name__)
             klass.API_URL = api_url
             base_url = httpserver.url_for(klasses[klass]['base_url'])

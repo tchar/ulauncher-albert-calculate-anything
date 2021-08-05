@@ -48,43 +48,43 @@ def test_is_types(reverse):
 
 
 def test_get_or_default():
-    value, type, default, allowed, expected = (1, int, 0, [], 1)
-    assert get_or_default(value, type, default) == expected
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (1.1, int, True, [], 1)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('1.1', int, 'True', [], 'True')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('1', int, 'True', [], 1)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('some_text', int, 4, [], 4)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    value, _type, default, allowed, expected = (1, int, 0, [], 1)
+    assert get_or_default(value, _type, default) == expected
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (1.1, int, True, [], 1)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('1.1', int, 'True', [], 'True')
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('1', int, 'True', [], 1)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('some_text', int, 4, [], 4)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         'some text', int, 'some other text', [], 'some other text')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         'some text', int, 'other text', [], 'other text')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('0', str, 0, [], '0')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('1.1', float, 0, [], 1.1)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = ('True', bool, 2, [], True)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (1, int, 2, [1], 1)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('0', str, 0, [], '0')
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('1.1', float, 0, [], 1.1)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = ('True', bool, 2, [], True)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (1, int, 2, [1], 1)
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         1, int, 'some value', ['Test', 1], 1)
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         '1', str, 'some other value', ['1'], '1')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         'Test', bool, 'some other value', [2], 'some other value')
-    assert get_or_default(value, type, default, allowed) == expected
-    value, type, default, allowed, expected = (
+    assert get_or_default(value, _type, default, allowed) == expected
+    value, _type, default, allowed, expected = (
         'True', bool, 'some other value', [True], True)
-    assert get_or_default(value, type, default, allowed) == expected
+    assert get_or_default(value, _type, default, allowed) == expected
 
 
 def test_safe_operation():
