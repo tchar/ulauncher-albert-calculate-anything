@@ -64,7 +64,8 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         self._simple_eval = get_simple_eval()
 
     def _parse_expression(self, expression, split_eq=True, sub_kw=True):
-        def convert_to_base_n(m): return str(int(m.group(0), self._base))
+        def convert_to_base_n(m):
+            return str(int(m.group(0), self._base))
 
         if sub_kw:
             expression = multi_re.sub_dict({
