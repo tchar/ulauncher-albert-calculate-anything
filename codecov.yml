@@ -1,0 +1,33 @@
+codecov:
+  bot: "codecov-io"
+  ci:
+    - "github.com"
+  strict_yaml_branch: "master"
+  max_report_age: off
+  disable_default_path_fixes: no
+  require_ci_to_pass: yes
+  notify:
+    # This is the number of ci builds from github actions
+    # 3 OS x 4 Python Versions = 12
+    after_n_builds: 12
+    wait_for_ci: yes
+coverage:
+  precision: 5
+  round: down
+  range: 90..100
+  status:
+    project:
+      default:
+        # Basic
+        target: 90%
+        threshold: 2%
+        flags:
+          - unittests
+        paths:
+          - "calculate_anything/"
+        # Advanced
+        branches:
+          - master
+        if_not_found: failure
+        only_pulls: false
+        if_ci_failed: error
