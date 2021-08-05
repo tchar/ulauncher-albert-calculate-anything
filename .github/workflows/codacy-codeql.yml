@@ -2,10 +2,10 @@ name: Codacy Security Scan
 
 on:
   push:
-    branches: [master]
+    branches: [master, development]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master]
+    branches: [master, development]
 
 jobs:
   codacy-security-scan:
