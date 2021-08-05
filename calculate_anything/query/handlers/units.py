@@ -34,8 +34,6 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
     def _items_for_currency_errors(self, units):
         dimensionalities = set(unit.dimensionality for unit in units)
         currency_service = CurrencyService()
-        currency_provider_had_error = currency_service.enabled and \
-            currency_service.provider_had_error
 
         currency_provider_had_error = (
             currency_service.enabled and
@@ -165,15 +163,13 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 CurrencyUnitsCalculation.has_currency(unit) and
                     not CurrencyUnitsCalculation.is_currency(unit)):
                 unit = None
-        except TypeError:
-            pass
         except ZeroDivisionError:
             extra = {'icon': images_dir('convert.svg')}
             error_to_show = ZeroDivisionException(extra=extra)
-        except (pint.errors.DimensionalityError,
+        except (TypeError, tokenize.TokenError,
+                pint.errors.DimensionalityError,
                 pint.errors.UndefinedUnitError,
-                pint.errors.DefinitionSyntaxError,
-                tokenize.TokenError) as e:
+                pint.errors.DefinitionSyntaxError) as e:
             logger.debug(
                 'Got pint exception when trying to parse {!r}: {}'
                 .format(expression, e))

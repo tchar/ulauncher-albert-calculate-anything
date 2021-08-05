@@ -138,7 +138,7 @@ class CurrencyService(metaclass=Singleton):
     def enable_cache(self, update_frequency):
         if not self._enabled:
             logger.warning('Service is disabled, cannot enable cache')
-            return
+            return self
         logger.info(
             'Enabling cache with update frequency = {}'
             .format(update_frequency))
@@ -190,12 +190,14 @@ class CurrencyService(metaclass=Singleton):
     @with_lock
     def add_update_callback(self, callback):
         self._update_callbacks.append(callback)
+        return self
 
     @with_lock
     def remove_update_callback(self, callback):
         callbacks = self._update_callbacks
         callbacks = [cb for cb in callbacks if cb != callback]
         self._update_callbacks = callbacks
+        return self
 
     def _stop_thread(self):
         if self._thread is None:
@@ -214,7 +216,7 @@ class CurrencyService(metaclass=Singleton):
         if force:
             pass
         elif not self._cache.enabled or self._is_running:
-            return
+            return self
         else:
             logger.info('Currency Service is running')
 
@@ -230,6 +232,7 @@ class CurrencyService(metaclass=Singleton):
         elif force and self._thread.is_sleeping:
             self._thread.wake()
         self._is_running = True
+        return self
 
     @with_lock
     def enable(self):

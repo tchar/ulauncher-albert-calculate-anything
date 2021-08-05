@@ -76,7 +76,7 @@ class PintDefinitionParser:
         try:
             line = line.strip()
             if line.startswith('#'):
-                return
+                return None
             if line.startswith('@alias '):
                 return self._process_alias(line,
                                            translation_adder,

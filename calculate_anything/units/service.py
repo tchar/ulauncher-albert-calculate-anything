@@ -83,6 +83,7 @@ class UnitsService(metaclass=Singleton):
 
     def set_conversion_mode(self, mode):
         self._conversion_mode = mode
+        return self
 
     @property
     def conversion_mode(self):
@@ -123,11 +124,11 @@ class UnitsService(metaclass=Singleton):
     @with_lock
     def start(self, force=False):
         if pint is None:
-            return
+            return self
         if force:
             pass
         elif self._running:
-            return
+            return self
 
         self._currencies_in_registry = set()
         self._unit_registry = pint.UnitRegistry(

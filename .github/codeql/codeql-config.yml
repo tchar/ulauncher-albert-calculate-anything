@@ -8,3 +8,4 @@ paths:
 paths-ignore:
   - "**/*.gif"
   - "**/*.svg"
+  - calculate_anything/appdirs.py 

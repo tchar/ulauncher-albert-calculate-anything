@@ -76,7 +76,7 @@ class SqliteLoader(Loader):
         except Exception as e:
             msg = 'Could not read database file: {}'
             msg = msg.format(e)
-            logger.exception(e)
+            logger.exception(msg)
             self._mode |= Loader.Mode.REMOVE
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
