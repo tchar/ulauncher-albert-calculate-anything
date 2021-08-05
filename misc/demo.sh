@@ -192,8 +192,6 @@ demo_units() {
 }
 
 demo_percentages() {
-    cmd="equal space"
-
     keys="= 10 + 50%"
     run_xdotool
     sleep $sleep_big
