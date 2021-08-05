@@ -29,7 +29,7 @@ You can get then in a zip file and post it with the issue.
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
 
-## Desktop (please complete the following information):
+## Desktop (please complete the following information)
  - OS: [e.g. Ubuntu Linux 20.04 ]
     - Linux: If you don't know the version, these commands may help: `cat /etc/os-release` `lsb_release -a` `hostnamectl`
 
