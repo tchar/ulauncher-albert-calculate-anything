@@ -84,7 +84,8 @@ class LanguageService(metaclass=Singleton):
             if lang == 'en_US':  # pragma: no cover
                 logger.error(  # pragma: no cover
                     'en_US does not exist, will not use any language '
-                    'aliases: {}'.format(lang_filepath))
+                    'aliases: {}'.format(lang_filepath)
+                )
                 return  # pragma: no cover
             self.set('en_US')
             return
