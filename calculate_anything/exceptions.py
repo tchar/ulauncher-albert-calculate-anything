@@ -14,9 +14,9 @@ class ExtendedException(Exception):
 
     def __init__(self, message='', extra: Optional[Any] = None):
         '''Args:
-            message (str): The message for this exception
-            extra (any, optional): Any extra information to be kept
-                and used later
+        message (str): The message for this exception
+        extra (any, optional): Any extra information to be kept
+            and used later
         '''
         super().__init__(message)
         self.extra = extra or {}
@@ -35,6 +35,7 @@ class CurrencyProviderException(CurrencyException):
 
 class UnitException(ExtendedException):
     order = -200
+
 
 # Calculator exceptions
 
@@ -62,6 +63,7 @@ class BaseFloatingPointException(CalculatorException):
 class BooleanComparisonException(CalculatorException):
     order = -350
 
+
 # Exceptions for Time conversion
 
 
@@ -75,6 +77,7 @@ class DateOverflowException(TimeException):
 
 class MisparsedDateTimeException(TimeException):
     order = -420
+
 
 # Exceptions for missing modules
 

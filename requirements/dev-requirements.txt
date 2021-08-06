@@ -1,7 +1,9 @@
 flake8
+pyproject-flake8 
 pytest
 pytest-httpserver
 pytest-cov
 pytest-benchmark
 pytest-socket
 trustme
+black

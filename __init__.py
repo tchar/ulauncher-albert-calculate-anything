@@ -36,6 +36,7 @@ __py_deps__ = ['requests', 'requests', 'pint', 'simpleeval', 'parsedatetime']
 import locale  # noqa: E402
 import os  # noqa: E402
 import sys  # noqa: E402
+
 try:
     from calculate_anything.constants import MAIN_DIR  # noqa: E402
 except ImportError:
@@ -49,20 +50,28 @@ from calculate_anything.time import TimezoneService  # noqa: E402
 from calculate_anything.currency import CurrencyService  # noqa: E402
 from calculate_anything.query import MultiHandler  # noqa: E402
 from calculate_anything.query.handlers import (  # noqa: E402
-    UnitsQueryHandler, CalculatorQueryHandler,
-    PercentagesQueryHandler, TimeQueryHandler, Base10QueryHandler,
-    Base2QueryHandler, Base8QueryHandler, Base16QueryHandler
+    UnitsQueryHandler,
+    CalculatorQueryHandler,
+    PercentagesQueryHandler,
+    TimeQueryHandler,
+    Base10QueryHandler,
+    Base2QueryHandler,
+    Base8QueryHandler,
+    Base16QueryHandler,
 )
 from calculate_anything.utils import images_dir  # noqa: E402
 from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402, E501
+
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Thanks albert for making me hack the shit out of logging
 handler = logging.CustomHandler(debug, info, warning, critical, critical)
-handler.setFormatter(logging.ColorFormatter(
-    fmt='[{BLUE}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}',
-    use_color=True
-))
+handler.setFormatter(
+    logging.ColorFormatter(
+        fmt='[{BLUE}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}',
+        use_color=True,
+    )
+)
 logging.set_stdout_handler(handler)
 
 CURRENCY_PROVIDER = globals().get('CURRENCY_PROVIDER', '').lower()
@@ -106,6 +115,7 @@ def is_trigger(index):
             return TRIGGERS[index] == query.trigger
         except IndexError:
             return False
+
     return _is_trigger
 
 
@@ -162,22 +172,27 @@ def handleQuery(query):
         icon = os.path.join(MAIN_DIR, icon)
 
         if result.clipboard is not None:
-            actions = [ClipAction(text=result.clipboard,
-                                  clipboardText=result.clipboard)]
+            actions = [
+                ClipAction(
+                    text=result.clipboard, clipboardText=result.clipboard
+                )
+            ]
         else:
             actions = []
 
-        items.append(Item(
-            id=__title__,
-            icon=icon,
-            text=result.name,
-            subtext=result.description,
-            actions=actions
-        ))
+        items.append(
+            Item(
+                id=__title__,
+                icon=icon,
+                text=result.name,
+                subtext=result.description,
+                actions=actions,
+            )
+        )
 
-    should_show_placeholder = (query_nokw.strip() == '' and TRIGGERS and
-                               len(items) == 0) or (len(items) == 0 and
-                                                    SHOW_EMPTY_PLACEHOLDER)
+    should_show_placeholder = (
+        query_nokw.strip() == '' and TRIGGERS and len(items) == 0
+    ) or (len(items) == 0 and SHOW_EMPTY_PLACEHOLDER)
 
     if should_show_placeholder:
         icon = os.path.join(MAIN_DIR, images_dir('icon.svg'))
@@ -187,7 +202,8 @@ def handleQuery(query):
                 icon=icon,
                 text=LanguageService().translate('no-result', 'misc'),
                 subtext=LanguageService().translate(
-                    'no-result-{}-description'.format(mode), 'misc')
+                    'no-result-{}-description'.format(mode), 'misc'
+                ),
             )
         )
     if not items:

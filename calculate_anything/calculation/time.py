@@ -3,19 +3,25 @@ from calculate_anything.calculation.base import _Calculation
 from calculate_anything.utils.datetime import is_leap_year
 from calculate_anything.utils import images_dir
 from calculate_anything.constants import (
-    FLAGS, TIME_DATETIME_FORMAT, TIME_DATE_FORMAT,
-    TIME_TIME_FORMAT
+    FLAGS,
+    TIME_DATETIME_FORMAT,
+    TIME_DATE_FORMAT,
+    TIME_TIME_FORMAT,
 )
 from calculate_anything.query.result import QueryResult
 
 
-__all__ = ['TimeCalculation',
-           'LocationTimeCalculation', 'TimedeltaCalculation']
+__all__ = [
+    'TimeCalculation',
+    'LocationTimeCalculation',
+    'TimedeltaCalculation',
+]
 
 
 class TimeCalculation(_Calculation):
-    def __init__(self, value=None, reference_date=None,
-                 query='', error=None, order=0):
+    def __init__(
+        self, value=None, reference_date=None, query='', error=None, order=0
+    ):
         super().__init__(value=value, query=query, error=error, order=order)
         self.reference_date = reference_date
 
@@ -88,13 +94,14 @@ class TimeCalculation(_Calculation):
             description=description,
             clipboard=value,
             value=self.value,
-            order=self.order
+            order=self.order,
         )
 
 
 class LocationTimeCalculation(TimeCalculation):
-    def __init__(self, value=None, location=None,
-                 query='', error=None, order=-1):
+    def __init__(
+        self, value=None, location=None, query='', error=None, order=-1
+    ):
         super().__init__(value=value, query=query, error=error, order=order)
         self.location = location
 
@@ -116,7 +123,8 @@ class LocationTimeCalculation(TimeCalculation):
 
         name = '{}: {}'.format(city_name, location_time)
         description = '{} • {} • {} ({})'.format(
-            location_date, country_name, timezone_name, utc)
+            location_date, country_name, timezone_name, utc
+        )
 
         if country_code in FLAGS:
             icon = FLAGS[country_code]
@@ -131,15 +139,27 @@ class LocationTimeCalculation(TimeCalculation):
             description=description,
             clipboard=name,
             value=self.value,
-            order=self.order
+            order=self.order,
         )
 
 
 class TimedeltaCalculation(TimeCalculation):
-    def __init__(self, value=None, reference_date=None,
-                 target_date=None, query='', error=None, order=0):
-        super().__init__(value=value, reference_date=reference_date,
-                         query=query, error=error, order=order)
+    def __init__(
+        self,
+        value=None,
+        reference_date=None,
+        target_date=None,
+        query='',
+        error=None,
+        order=0,
+    ):
+        super().__init__(
+            value=value,
+            reference_date=reference_date,
+            query=query,
+            error=error,
+            order=order,
+        )
         self.target_date = target_date
 
     def _calculate_diff(self):
@@ -155,8 +175,11 @@ class TimedeltaCalculation(TimeCalculation):
         old_value = target_date
         # Check if target date is february 29 before replacing years
         # If not reference is leap year move to March 1st
-        if target_date.month == 2 and target_date.day == 29 \
-                and not is_leap_year(reference.year):
+        if (
+            target_date.month == 2
+            and target_date.day == 29
+            and not is_leap_year(reference.year)
+        ):
             value = target_date.replace(year=reference.year, month=3, day=1)
         else:
             value = target_date.replace(year=reference.year)
@@ -214,7 +237,8 @@ class TimedeltaCalculation(TimeCalculation):
             is_on = '{} {}'.format(translator('was'), translator('on'))
 
         description = '"{}" {} {}'.format(
-            self.query.capitalize(), is_on, description_date)
+            self.query.capitalize(), is_on, description_date
+        )
 
         return QueryResult(
             icon=images_dir('time.svg'),
@@ -222,5 +246,5 @@ class TimedeltaCalculation(TimeCalculation):
             description=description,
             clipboard=name,
             value=self.value,
-            order=self.order
+            order=self.order,
         )

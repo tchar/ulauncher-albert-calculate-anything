@@ -6,11 +6,18 @@ from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import images_dir
 from calculate_anything.exceptions import (
-    BaseFloatingPointException, BooleanComparisonException,
-    CurrencyProviderException, DateOverflowException, ExtendedException,
-    MisparsedDateTimeException, WrongBaseException, ZeroDivisionException,
-    MissingSimpleevalException, MissingParsedatetimeException,
-    BooleanPercetageException, MissingPintException
+    BaseFloatingPointException,
+    BooleanComparisonException,
+    CurrencyProviderException,
+    DateOverflowException,
+    ExtendedException,
+    MisparsedDateTimeException,
+    WrongBaseException,
+    ZeroDivisionException,
+    MissingSimpleevalException,
+    MissingParsedatetimeException,
+    BooleanPercetageException,
+    MissingPintException,
 )
 
 
@@ -26,7 +33,7 @@ def missing_parsedatetime_query_result(calculation: '_Calculation'):
         description=translator('missing-parsedatetime-error-description'),
         clipboard='pip install parsedatetime',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -39,7 +46,7 @@ def missing_simpleeval_query_result(calculation: '_Calculation'):
         description=translator('missing-simpleeval-error-description'),
         clipboard='pip install simpleeval',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -52,7 +59,7 @@ def missing_pint_error_query_result(calculation: '_Calculation'):
         description=translator('missing-pint-error-description'),
         clipboard='pip install Pint',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -65,7 +72,7 @@ def boolean_comparison_error_query_result(calculation: '_Calculation'):
         description=translator('boolean-comparison-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -78,7 +85,7 @@ def boolean_percentage_error_query_result(calculation: '_Calculation'):
         description=translator('boolean-percentage-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -91,7 +98,7 @@ def base_floating_point_exception_query_result(calculation: '_Calculation'):
         description=translator('base-floating-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -104,7 +111,7 @@ def wrong_base_exception_query_result(calculation: '_Calculation'):
         description=translator('wrong-base-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -117,7 +124,7 @@ def date_overflow_error_query_result(calculation: '_Calculation'):
         description=translator('date-overflow-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -130,7 +137,7 @@ def currency_provider_error_query_result(calculation: '_Calculation'):
         description=translator('currency-provider-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -143,7 +150,7 @@ def zero_division_error_query_result(calculation: '_Calculation'):
         description=translator('zero-division-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -154,14 +161,15 @@ def misparsed_time_exception(calculation: '_Calculation'):
     name = '{}: "{}"'.format(name, calculation.error.extra['parsed_query'])
     description = translator('misparsed-datetime-description')
     description = '{}: "{}"'.format(
-        description, calculation.error.extra['original_query'])
+        description, calculation.error.extra['original_query']
+    )
     return QueryResult(
         icon=icon,
         name=name,
         description=description,
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order
+        order=calculation.error.order,
     )
 
 
@@ -176,7 +184,7 @@ _HANDLERS = {
     BooleanComparisonException: boolean_comparison_error_query_result,
     BooleanPercetageException: boolean_percentage_error_query_result,
     WrongBaseException: wrong_base_exception_query_result,
-    BaseFloatingPointException: base_floating_point_exception_query_result
+    BaseFloatingPointException: base_floating_point_exception_query_result,
 }
 
 
@@ -194,10 +202,16 @@ class _Calculation:
                     logger.exception(msg)  # pragma: no cover
                     raise self.error  # pragma: no cover
                 return func(self, *args, **kwargs)
+
             return _wrapper
 
-    def __init__(self, value: Optional[Any] = None, query: str = '',
-                 error: Optional[ExtendedException] = None, order: int = 0):
+    def __init__(
+        self,
+        value: Optional[Any] = None,
+        query: str = '',
+        error: Optional[ExtendedException] = None,
+        order: int = 0,
+    ):
         self.value = value
         self.query = query
         self.error = error

@@ -16,10 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class UpdateThread(Thread):
-    def __init__(self, cache: CurrencyCache,
-                 provider: CombinedCurrencyProvider,
-                 callback: Callable[[CurrencyData, bool], None],
-                 lock: RLock):
+    def __init__(
+        self,
+        cache: CurrencyCache,
+        provider: CombinedCurrencyProvider,
+        callback: Callable[[CurrencyData, bool], None],
+        lock: RLock,
+    ):
         super().__init__()
         self._cache = cache
         self._provider = provider
@@ -27,7 +30,6 @@ class UpdateThread(Thread):
         self._lock = lock
         self._stopped_event = Event()
         self._woke_event = Event()
-        self._ran = False
         self._thread_id = uuid.uuid4()
         name = 'UpdateThread(id={})'.format(self.thread_id)
         self._logger = logger.getChild(name)
@@ -56,7 +58,8 @@ class UpdateThread(Thread):
         self._logger.info('Will load currencies')
         self._cache.clear()
         currency_rates = self._provider.request_currencies(
-            *currencies, force=force)
+            *currencies, force=force
+        )
         if not self._stopped_event.is_set():
             provider_name = self._provider.__class__.__name__
             self._cache.save(currency_rates, provider_name)
@@ -82,28 +85,23 @@ class UpdateThread(Thread):
 
     def run(self):
         self._logger.info('Starting thread')
-        if not self._ran:
-            force = self._woke_event.is_set()
+
+        force = False
+        while not self._stopped_event.is_set():
             next_update = self._run(force)
 
-        while not self._stopped_event.is_set():
             self._logger.info('Sleeping for {:.0f}s'.format(next_update))
-
             start = time.time()
             self._woke_event.wait(next_update)
+            force = self._woke_event.is_set()
+            self._woke_event.clear()
             duration = time.time() - start
 
-            force = self._woke_event.is_set()
             if force:
                 msg = 'Forcefully woke up after {:.0f}s'.format(duration)
             else:
                 msg = 'Normally woke up after {:.0f}s'.format(duration)
             self._logger.info(msg)
-
-            if self._stopped_event.is_set():
-                break
-            next_update = self._run(force)
-            self._woke_event.clear()
 
         self._logger.info('Stopping thread')
 
@@ -140,8 +138,10 @@ class CurrencyService(metaclass=Singleton):
             logger.warning('Service is disabled, cannot enable cache')
             return self
         logger.info(
-            'Enabling cache with update frequency = {}'
-            .format(update_frequency))
+            'Enabling cache with update frequency = {}'.format(
+                update_frequency
+            )
+        )
         self._cache.enable(update_frequency)
         return self
 
@@ -163,22 +163,21 @@ class CurrencyService(metaclass=Singleton):
 
     @with_lock
     def add_provider(self, provider):
-        logger.info('Adding provider {}'.format(
-            provider.__class__.__name__))
+        logger.info('Adding provider {}'.format(provider.__class__.__name__))
         self._provider.add_provider(provider)
         return self
 
     @with_lock
     def remove_provider(self, provider):
-        logger.info('Removing provider {}'.format(
-            provider.__class__.__name__))
+        logger.info('Removing provider {}'.format(provider.__class__.__name__))
         self._provider.remove_provider(provider)
         return self
 
     @with_lock
     def set_default_currencies(self, default_currencies):
         logger.info(
-            'Updating default currencies = {}'.format(default_currencies))
+            'Updating default currencies = {}'.format(default_currencies)
+        )
         self._default_currencies = default_currencies
         return self
 

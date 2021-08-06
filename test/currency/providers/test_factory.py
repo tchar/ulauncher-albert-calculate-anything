@@ -1,7 +1,8 @@
 from calculate_anything.exceptions import CurrencyProviderException
 import pytest
 from calculate_anything.currency.providers import (
-    CurrencyProviderFactory, FixerIOCurrencyProvider
+    CurrencyProviderFactory,
+    FixerIOCurrencyProvider,
 )
 from calculate_anything.currency.providers.base import _MockCurrencyProvider
 

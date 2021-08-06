@@ -1,4 +1,5 @@
 from threading import RLock
+
 try:
     import sqlite3
 except ImportError:  # pragma: no cover
@@ -7,8 +8,9 @@ from calculate_anything import logging
 from calculate_anything.utils import with_lock
 from calculate_anything.utils.loaders import SqliteLoader
 from calculate_anything.constants import (
-    TIMEZONES_SQLITE_FILE_DEFAULT, TIMEZONES_SQLITE_FILE_USER,
-    TIMEZONES_SQL_FILE
+    TIMEZONES_SQLITE_FILE_DEFAULT,
+    TIMEZONES_SQLITE_FILE_USER,
+    TIMEZONES_SQL_FILE,
 )
 
 
@@ -29,8 +31,9 @@ class TimezoneSqliteCache:
         loader = SqliteLoader(TIMEZONES_SQLITE_FILE_USER)
 
         if not loader.load():
-            loader = SqliteLoader(TIMEZONES_SQLITE_FILE_DEFAULT,
-                                  TIMEZONES_SQL_FILE)
+            loader = SqliteLoader(
+                TIMEZONES_SQLITE_FILE_DEFAULT, TIMEZONES_SQL_FILE
+            )
 
         # If second time loading fails we can't do anything about it
         if not loader.load():
@@ -43,7 +46,8 @@ class TimezoneSqliteCache:
         try:
             cur = self._db.cursor()
             rows = cur.execute(
-                '''SELECT city_name_chunks_max FROM meta LIMIT 1''')
+                '''SELECT city_name_chunks_max FROM meta LIMIT 1'''
+            )
             self._city_name_chunks_max = next(iter(rows))[0]
         # This should not happen but capture it just in case
         # It is no fatal error
@@ -94,9 +98,11 @@ class TimezoneSqliteCache:
             search_term = '{}%'.format(search_term)
 
             countries_query.extend(
-                ['iso2 = ?', 'iso3 = ?', 'name_alias LIKE ?'])
+                ['iso2 = ?', 'iso3 = ?', 'name_alias LIKE ?']
+            )
             countries_params.extend(
-                [search_term_upper, search_term_upper, search_term])
+                [search_term_upper, search_term_upper, search_term]
+            )
 
             states_query.append('s.name LIKE ?')
             states_params.append(search_term)
@@ -115,8 +121,13 @@ class TimezoneSqliteCache:
             cities_query = 'name_alias = ?'
             cities_param = city_name_search
 
-        params = [cities_param, *countries_params, *
-                  states_params, *timezones_params, city_name_search]
+        params = [
+            cities_param,
+            *countries_params,
+            *states_params,
+            *timezones_params,
+            city_name_search,
+        ]
 
         query = '''SELECT
             city.id city_id, city.name city_name, city.state_name,
@@ -149,8 +160,9 @@ class TimezoneSqliteCache:
             ORDER BY (city.name_alias = ?) DESC, city.population DESC
             '''  # nosec
 
-        query = query.format(cities_query, countries_query,
-                             states_query, timezones_query)
+        query = query.format(
+            cities_query, countries_query, states_query, timezones_query
+        )
 
         cur = self._db.cursor()
         for row in cur.execute(query, params):
@@ -167,19 +179,22 @@ class TimezoneSqliteCache:
             gen = self._query_no_search_terms(city_name_search, exact=exact)
         else:
             gen = self._query_search_terms(
-                city_name_search, search_terms, exact=exact)
+                city_name_search, search_terms, exact=exact
+            )
 
         cities = []
         for row in gen:
             _id, name, state_name, country_name, country_iso, tz_name = row
-            cities.append({
-                'id': _id,
-                'name': name,
-                'country': country_name,
-                'cc': country_iso,
-                'state': state_name,
-                'timezone': tz_name
-            })
+            cities.append(
+                {
+                    'id': _id,
+                    'name': name,
+                    'country': country_name,
+                    'cc': country_iso,
+                    'state': state_name,
+                    'timezone': tz_name,
+                }
+            )
 
         return cities
 

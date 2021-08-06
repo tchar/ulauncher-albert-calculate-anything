@@ -33,9 +33,7 @@ def test_eur_not_in_rates(mock_currency_provider, fixerio_data):
     cls = FixerIOCurrencyProvider
     timestamp = datetime.now().timestamp()
     rates = {
-        k: v
-        for k, v in currency_data('USD')['rates'].items()
-        if k != 'EUR'
+        k: v for k, v in currency_data('USD')['rates'].items() if k != 'EUR'
     }
     data = fixerio_data('USD', rates, timestamp)
 
@@ -50,8 +48,9 @@ def test_eur_not_in_rates(mock_currency_provider, fixerio_data):
 @pytest.mark.parametrize('status_code', (300, 400, 500))
 def test_response_code(mock_currency_provider, status_code):
     cls = FixerIOCurrencyProvider
-    with mock_currency_provider(cls, None, use_json=False,
-                                status=status_code) as fixerio:
+    with mock_currency_provider(
+        cls, None, use_json=False, status=status_code
+    ) as fixerio:
         with pytest.raises(CurrencyProviderException) as excinfo:
             fixerio.request_currencies()
 
@@ -62,8 +61,9 @@ def test_response_code(mock_currency_provider, status_code):
 
 def test_no_response(mock_currency_provider):
     cls = FixerIOCurrencyProvider
-    with mock_currency_provider(cls, None, use_json=False,
-                                respond=False) as fixerio:
+    with mock_currency_provider(
+        cls, None, use_json=False, respond=False
+    ) as fixerio:
         with pytest.raises(CurrencyProviderException) as excinfo:
             fixerio.request_currencies()
 
@@ -71,12 +71,19 @@ def test_no_response(mock_currency_provider):
         assert fixerio.had_error is True
 
 
-@pytest.mark.parametrize('error_data, msg', (
-    ({'success': False, 'errors': {'error': 'Something went wrong'}},
-     'Something went wrong'),
-    ({'success': False, 'errors': 'Something else went wrong'},
-     'Something else went wrong')
-))
+@pytest.mark.parametrize(
+    'error_data, msg',
+    (
+        (
+            {'success': False, 'errors': {'error': 'Something went wrong'}},
+            'Something went wrong',
+        ),
+        (
+            {'success': False, 'errors': 'Something else went wrong'},
+            'Something else went wrong',
+        ),
+    ),
+)
 def test_error(mock_currency_provider, error_data, msg):
     cls = FixerIOCurrencyProvider
     with mock_currency_provider(cls, error_data, use_json=True) as fixerio:
@@ -89,13 +96,11 @@ def test_error(mock_currency_provider, error_data, msg):
 
 def test_malformed_json(mock_currency_provider):
     cls = FixerIOCurrencyProvider
-    malformed_jsondata = {
-        'some other fields': 'EUR',
-        'some fields': 1
-    }
+    malformed_jsondata = {'some other fields': 'EUR', 'some fields': 1}
 
-    with mock_currency_provider(cls, malformed_jsondata,
-                                use_json=True) as fixerio:
+    with mock_currency_provider(
+        cls, malformed_jsondata, use_json=True
+    ) as fixerio:
         with pytest.raises(CurrencyProviderException) as excinfo:
             fixerio.request_currencies()
 
@@ -103,10 +108,13 @@ def test_malformed_json(mock_currency_provider):
         assert fixerio.had_error is True
 
 
-@pytest.mark.parametrize('error_data,msg,use_json', (
-    ('Some malformed not json data', 'Data is not a JSON', True),
-    ('Some malformed not json data', 'Could not decode json data', False),
-))
+@pytest.mark.parametrize(
+    'error_data,msg,use_json',
+    (
+        ('Some malformed not json data', 'Data is not a JSON', True),
+        ('Some malformed not json data', 'Could not decode json data', False),
+    ),
+)
 def test_malformed_data(mock_currency_provider, error_data, msg, use_json):
     cls = FixerIOCurrencyProvider
     with mock_currency_provider(cls, error_data, use_json=use_json) as fixerio:
@@ -119,8 +127,9 @@ def test_malformed_data(mock_currency_provider, error_data, msg, use_json):
 
 def test_invalid_api_key(mock_currency_provider):
     cls = FixerIOCurrencyProvider
-    with mock_currency_provider(cls, 'some data',
-                                use_json=True, api_key=None) as fixerio:
+    with mock_currency_provider(
+        cls, 'some data', use_json=True, api_key=None
+    ) as fixerio:
         with pytest.raises(CurrencyProviderException) as excinfo:
             fixerio.request_currencies()
 

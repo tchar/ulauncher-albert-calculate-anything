@@ -1,5 +1,6 @@
 import os
 import shutil
+
 try:
     import sqlite3
 except ImportError:  # pragma: no cover
@@ -48,11 +49,17 @@ class SqliteLoader(Loader):
         else:
             self._sql_file_mtime = 0
 
-        if self._sqlite_file_exists and self._sql_file_exists and \
-                self._sqlite_file_mtime >= self._sql_file_mtime:
+        if (
+            self._sqlite_file_exists
+            and self._sql_file_exists
+            and self._sqlite_file_mtime >= self._sql_file_mtime
+        ):
             self._mode |= Loader.Mode.LOAD
-        elif self._sqlite_file_exists and self._sql_file_exists and \
-                self._sqlite_file_mtime < self._sql_file_mtime:
+        elif (
+            self._sqlite_file_exists
+            and self._sql_file_exists
+            and self._sqlite_file_mtime < self._sql_file_mtime
+        ):
             self._mode |= Loader.Mode.REMOVE
         elif not self._sqlite_file_exists:
             self._mode |= Loader.Mode.CREATE
@@ -66,7 +73,7 @@ class SqliteLoader(Loader):
             self.db = db = sqlite3.connect(
                 self.sqlite_filepath,
                 check_same_thread=False,
-                cached_statements=500
+                cached_statements=500,
             )
             db.cursor().execute('PRAGMA foreign_keys = ON;').close()
             self._status |= Loader.Status.SUCCESS
@@ -133,7 +140,7 @@ class SqliteLoader(Loader):
             self.db = sqlite3.connect(
                 self.sqlite_filepath,
                 check_same_thread=False,
-                cached_statements=500
+                cached_statements=500,
             )
             msg = 'Did not find sqlite db {}, created from scratch'
             msg = msg.format(self.sqlite_filepath)
@@ -154,9 +161,7 @@ class SqliteLoader(Loader):
     @Loader.Decorators.with_mode(Loader.Mode.MEMORY)
     def _create_memory(self):
         self.db = sqlite3.connect(
-            ':memory:',
-            check_same_thread=False,
-            cached_statements=500
+            ':memory:', check_same_thread=False, cached_statements=500
         )
         logger.info('Fell back to memory')
         self._execute_script()

@@ -16,10 +16,23 @@ from typing import Callable, Dict
 from calculate_anything.constants import APP_DIRS
 
 
-__all__ = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'ColorFormatter',
-           'CustomHandler', 'Logging', 'getLogger', 'setLevel',
-           'disable_file_handler', 'set_file_handler',
-           'disable_stdout_handler', 'set_stdout_handler', 'getLogger']
+__all__ = [
+    'DEBUG',
+    'INFO',
+    'WARNING',
+    'ERROR',
+    'CRITICAL',
+    'ColorFormatter',
+    'CustomHandler',
+    'Logging',
+    'getLogger',
+    'setLevel',
+    'disable_file_handler',
+    'set_file_handler',
+    'disable_stdout_handler',
+    'set_stdout_handler',
+    'getLogger',
+]
 
 
 DEBUG = _logging.DEBUG
@@ -54,23 +67,26 @@ class ColorFormatter(_logging.Formatter):
         'CRITICAL': 35,
     }
 
-    def __init__(self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S',
-                 use_color: bool = True):
+    def __init__(
+        self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S', use_color: bool = True
+    ):
         '''Args:
-            fmt (str): A '{' style format with the extra codes provided in
-                ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
-                should be put in single '{' formatting. Others should be put
-                in '{{' e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
-            date_fmt (str): A date format
-            use_color (bool): Wether to use colors or not
+        fmt (str): A '{' style format with the extra codes provided in
+            ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
+            should be put in single '{' formatting. Others should be put
+            in '{{' e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
+        date_fmt (str): A date format
+        use_color (bool): Wether to use colors or not
         '''
         if use_color:
             seqs = ColorFormatter.SEQS
         else:
             seqs = {k: '' for k in ColorFormatter.SEQS}
         if not fmt:
-            fmt = '{{asctime}}.{{msecs:03.0f}} | {{levelname}} | ' \
+            fmt = (
+                '{{asctime}}.{{msecs:03.0f}} | {{levelname}} | '
                 '[{BOLD}{{name}}.{{funcName}}:{{lineno}}{RESET}]: {{message}}'
+            )
 
         fmt = fmt.format(**seqs)
         _logging.Formatter.__init__(self, fmt, date_fmt, style='{')
@@ -87,9 +103,11 @@ class ColorFormatter(_logging.Formatter):
             # Copy record as we are changhing the levelname
             record = copy.copy(record)
             levelname = record.levelname
-            levelname = ColorFormatter.SEQS['COLOR'] % \
-                ColorFormatter.COLORS[levelname] + \
-                levelname + ColorFormatter.SEQS['RESET']
+            levelname = (
+                ColorFormatter.SEQS['COLOR'] % ColorFormatter.COLORS[levelname]
+                + levelname
+                + ColorFormatter.SEQS['RESET']
+            )
             record.levelname = levelname
         return _logging.Formatter.format(self, record)
 
@@ -97,19 +115,22 @@ class ColorFormatter(_logging.Formatter):
 class CustomHandler(_logging.Handler):
     '''A super special handler for fucking Albert'''
 
-    def __init__(self, debug: Callable[[str], None],
-                 info: Callable[[str], None],
-                 warning: Callable[[str], None],
-                 error: Callable[[str], None],
-                 critical: Callable[[str], None],
-                 level=_logging.NOTSET) -> None:
+    def __init__(
+        self,
+        debug: Callable[[str], None],
+        info: Callable[[str], None],
+        warning: Callable[[str], None],
+        error: Callable[[str], None],
+        critical: Callable[[str], None],
+        level=_logging.NOTSET,
+    ) -> None:
         '''Args:
-            debug (Callable[str]): Called when debug log is received.
-            info (Callable[str]): Called when info log is received.
-            warning (Callable[str]): Called when warning log is received.
-            error (Callable[str]): Called when error log is received.
-            critical (Callable[str]): Called when critical log is received.
-            level (int): Same as logging module's values.
+        debug (Callable[str]): Called when debug log is received.
+        info (Callable[str]): Called when info log is received.
+        warning (Callable[str]): Called when warning log is received.
+        error (Callable[str]): Called when error log is received.
+        critical (Callable[str]): Called when critical log is received.
+        level (int): Same as logging module's values.
         '''
         super().__init__(level=level)
         self._debug = debug
@@ -155,8 +176,10 @@ class Logging:
 
         file_hdlr = _handlers.RotatingFileHandler(
             os.path.join(APP_DIRS.user_log_dir, 'runtime.log'),
-            maxBytes=1000000, backupCount=10, encoding='utf-8',
-            delay=True
+            maxBytes=1000000,
+            backupCount=10,
+            encoding='utf-8',
+            delay=True,
         )
         file_hdlr.setFormatter(ColorFormatter(use_color=False))
 

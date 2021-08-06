@@ -1,6 +1,7 @@
 import math
 from itertools import product, chain
 import tokenize
+
 try:
     import pint
 except ImportError:  # pragma: no cover (covered artificially in tests)
@@ -9,15 +10,18 @@ from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
 from calculate_anything.calculation import (
-    UnitsCalculation, CurrencyUnitsCalculation,
-    TemperatureUnitsCalculation
+    UnitsCalculation,
+    CurrencyUnitsCalculation,
+    TemperatureUnitsCalculation,
 )
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.utils import Singleton, is_types, images_dir
 from calculate_anything.regex import UNIT_QUERY_SPLIT_RE, UNIT_SPLIT_RE
 from calculate_anything.exceptions import (
-    CurrencyProviderException, MissingPintException, ZeroDivisionException
+    CurrencyProviderException,
+    MissingPintException,
+    ZeroDivisionException,
 )
 
 
@@ -36,9 +40,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         currency_service = CurrencyService()
 
         currency_provider_had_error = (
-            currency_service.enabled and
-            currency_service.provider_had_error and
-            any(map(lambda d: '[currency]' in d, dimensionalities))
+            currency_service.enabled
+            and currency_service.provider_had_error
+            and any(map(lambda d: '[currency]' in d, dimensionalities))
         )
         if currency_provider_had_error:
             item = UnitsCalculation(
@@ -158,25 +162,34 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             unit = UnitsService().unit_registry.parse_expression(expression)
             if UnitsCalculation.is_strictly_dimensionless(unit):
                 unit = None
-            if (UnitsService().conversion_mode ==
-                UnitsService.ConversionMode.NORMAL and
-                CurrencyUnitsCalculation.has_currency(unit) and
-                    not CurrencyUnitsCalculation.is_currency(unit)):
+            if (
+                UnitsService().conversion_mode
+                == UnitsService.ConversionMode.NORMAL
+                and CurrencyUnitsCalculation.has_currency(unit)
+                and not CurrencyUnitsCalculation.is_currency(unit)
+            ):
                 unit = None
         except ZeroDivisionError:
             extra = {'icon': images_dir('convert.svg')}
             error_to_show = ZeroDivisionException(extra=extra)
-        except (TypeError, tokenize.TokenError,
-                pint.errors.DimensionalityError,
-                pint.errors.UndefinedUnitError,
-                pint.errors.DefinitionSyntaxError) as e:
+        except (
+            TypeError,
+            tokenize.TokenError,
+            pint.errors.DimensionalityError,
+            pint.errors.UndefinedUnitError,
+            pint.errors.DefinitionSyntaxError,
+        ) as e:
             logger.debug(
-                'Got pint exception when trying to parse {!r}: {}'
-                .format(expression, e))
+                'Got pint exception when trying to parse {!r}: {}'.format(
+                    expression, e
+                )
+            )
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
-                'Got exception when trying to parse: {!r}: {}'
-                .format(expression, e))
+                'Got exception when trying to parse: {!r}: {}'.format(
+                    expression, e
+                )
+            )
 
         return unit, error_to_show
 
@@ -239,25 +252,30 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             # and map them to units
             if unit_from_ureg_currency:
                 unit_from_ureg_currency_str = str(
-                    unit_from_ureg_currency.units)
+                    unit_from_ureg_currency.units
+                )
             else:
                 unit_from_ureg_currency_str = None
 
             units_to_curr = CurrencyService().default_currencies
             units_to_curr = map('currency_{}'.format, units_to_curr)
             units_to_curr = filter(
-                lambda s: s != unit_from_ureg_currency_str, units_to_curr)
+                lambda s: s != unit_from_ureg_currency_str, units_to_curr
+            )
             units_to_curr = map(ureg.parse_unit_name, units_to_curr)
-            units_to_curr = map(lambda u: ' '.join(
-                u[0]) if u else '', units_to_curr)
+            units_to_curr = map(
+                lambda u: ' '.join(u[0]) if u else '', units_to_curr
+            )
             units_to_curr = map(ureg.parse_units, units_to_curr)
             units_to_curr = filter(
-                base_currency.is_compatible_with, units_to_curr)
+                base_currency.is_compatible_with, units_to_curr
+            )
 
             # Add all units from
             units_to_rest = filter(
                 lambda u: not base_currency.is_compatible_with(u),
-                units_from_ureg)
+                units_from_ureg,
+            )
             units_to_rest = map(lambda u: u.units, units_to_rest)
             units_to_ureg = chain(units_to_curr, units_to_rest)
         else:
@@ -272,19 +290,20 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             units_to_ureg = map(lambda u: u.units, units_to_ureg)
 
         added_currency = False
-        for unit_from_ureg, unit_to_ureg in product(units_from_ureg,
-                                                    units_to_ureg):
+        for unit_from_ureg, unit_to_ureg in product(
+            units_from_ureg, units_to_ureg
+        ):
             try:
                 if not unit_from_ureg.is_compatible_with(unit_to_ureg):
                     continue
                 unit_converted = unit_from_ureg.to(unit_to_ureg, 'currency')
                 if math.isnan(unit_converted.magnitude):
                     logger.warning(
-                        'Converted magnitude is NaN'': from={} {}, to={}'
-                        .format(
+                        'Converted magnitude is NaN'
+                        ': from={} {}, to={}'.format(
                             unit_from_ureg.magnitude,
                             unit_from_ureg.units,
-                            unit_to_ureg
+                            unit_to_ureg,
                         )
                     )
                     continue
@@ -292,10 +311,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 rate = Q(1, unit_from_ureg.units)
                 rate = rate.to(Q(1, unit_converted.units), 'currency')
             except Exception as e:  # pragma: no cover
-                logger.exception(  # pragma: no cover
-                    'Unexpected exception uni units conversion: {!r}: {}'
-                    .format(original_query, e))
-                continue  # pragma: no cover
+                msg = 'Unexpected exception uni units conversion: {!r}: {}'
+                msg = msg.format(original_query, e)
+                logger.exception(msg)
+                continue
 
             kwargs = {}
             if UnitsCalculation.is_currency(unit_converted):
@@ -305,9 +324,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     continue
                 UnitClass = CurrencyUnitsCalculation
                 timestamp = UnitsService().get_rate_timestamp(unit_to_ureg)
-                kwargs = {
-                    'update_timestamp': timestamp
-                }
+                kwargs = {'update_timestamp': timestamp}
             elif UnitsCalculation.has_temperature(unit_converted):
                 UnitClass = TemperatureUnitsCalculation
             else:
@@ -322,7 +339,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     query='{} {} to {}'.format(
                         unit_from_ureg.magnitude,
                         unit_from_ureg.units,
-                        unit_to_ureg
+                        unit_to_ureg,
                     ),
                     order=len(items),
                     **kwargs
@@ -339,10 +356,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     unit_to=unit_from_ureg_currency.units,
                     query='{0} {1} to {1}'.format(
                         unit_from_ureg_currency.magnitude,
-                        unit_from_ureg_currency.units
+                        unit_from_ureg_currency.units,
                     ),
                     order=len(items),
-                    update_timestamp=None
+                    update_timestamp=None,
                 )
             )
         return items

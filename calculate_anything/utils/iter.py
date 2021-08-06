@@ -1,16 +1,22 @@
 '''Utility functions for iterable related operations.'''
 
 from typing import (
-    Collection, Any, Generator, Iterable,
-    Hashable, Optional, Tuple
+    Collection,
+    Any,
+    Generator,
+    Iterable,
+    Hashable,
+    Optional,
+    Tuple,
 )
 
 
 __all__ = ['partition', 'flatten', 'deduplicate']
 
 
-def partition(collection: Collection[Any], max_parts: Optional[int] = None) \
-        -> Generator[Tuple[Collection[Any]], None, None]:
+def partition(
+    collection: Collection[Any], max_parts: Optional[int] = None
+) -> Generator[Tuple[Collection[Any]], None, None]:
     '''Partitions a collection into head and tail for all possible partitions up
     to max_parts.
 
@@ -35,6 +41,7 @@ def partition(collection: Collection[Any], max_parts: Optional[int] = None) \
         else:
             yield head, tail
         yields += 1
+
 
 # https://stackoverflow.com/a/10824484
 
@@ -67,8 +74,9 @@ def flatten(iterable: Iterable[Any]) -> Generator[Any, None, None]:
                 iterator = new_iterator
 
 
-def deduplicate(iterable: Iterable[Hashable]) \
-        -> Generator[Hashable, None, None]:
+def deduplicate(
+    iterable: Iterable[Hashable],
+) -> Generator[Hashable, None, None]:
     '''Deduplicates an iterable without changing the order
 
     Args:

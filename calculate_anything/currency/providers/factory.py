@@ -9,7 +9,7 @@ __all__ = ['CurrencyProviderFactory']
 class CurrencyProviderFactory:
     providers = {
         'fixerio': FixerIOCurrencyProvider,
-        'internal': _MockCurrencyProvider
+        'internal': _MockCurrencyProvider,
     }
 
     @staticmethod
@@ -21,4 +21,5 @@ class CurrencyProviderFactory:
         if provider_name in CurrencyProviderFactory.providers:
             return CurrencyProviderFactory.providers[provider_name](api_key)
         raise CurrencyProviderException(
-            'No provider found with name "{}"'.format(provider_name))
+            'No provider found with name "{}"'.format(provider_name)
+        )

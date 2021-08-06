@@ -16,8 +16,10 @@ class TimezoneJsonCache:
                 self._data = json.loads(f.read())
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
-                'Could not load timezone data: {}: {}'
-                .format(TIMEZONES_JSON_FILE, e))
+                'Could not load timezone data: {}: {}'.format(
+                    TIMEZONES_JSON_FILE, e
+                )
+            )
             return False  # pragma: no cover
         return True
 

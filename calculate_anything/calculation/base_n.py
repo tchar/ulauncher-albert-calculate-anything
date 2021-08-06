@@ -3,21 +3,30 @@ from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import images_dir
 from calculate_anything.utils.colors import (
-    hex_to_rgb, rgb_to_hsv,
-    rgb_to_cmyk, rgb_to_hsl
+    hex_to_rgb,
+    rgb_to_hsv,
+    rgb_to_cmyk,
+    rgb_to_hsl,
 )
 
 
-__all__ = ['BaseNCalculation', 'Base16StringCalculation', 'Base10Calculation',
-           'Base2Calculation', 'Base8Calculation', 'Base16Calculation',
-           'ColorBase16Calculation']
+__all__ = [
+    'BaseNCalculation',
+    'Base16StringCalculation',
+    'Base10Calculation',
+    'Base2Calculation',
+    'Base8Calculation',
+    'Base16Calculation',
+    'ColorBase16Calculation',
+]
 
 
 class BaseNCalculation(Calculation):
     def to_base_calculation(self, base_calculation_class, order=None):
         order = order if order is not None else self.order
-        return base_calculation_class(value=self.value,
-                                      query=self.query, order=order)
+        return base_calculation_class(
+            value=self.value, query=self.query, order=order
+        )
 
     def format(self):
         return str(self.value)
@@ -35,7 +44,7 @@ class BaseNCalculation(Calculation):
             description=description,
             clipboard=name,
             value=self.value,
-            order=self.order
+            order=self.order,
         )
 
 
@@ -84,8 +93,15 @@ class Base16Calculation(BaseNCalculation):
 
 
 class ColorBase16Calculation(Base16Calculation):
-    def __init__(self, value=None, query='', error=None,
-                 order=0, color_code=None, color_format=None):
+    def __init__(
+        self,
+        value=None,
+        query='',
+        error=None,
+        order=0,
+        color_code=None,
+        color_format=None,
+    ):
         super().__init__(value=value, query=query, error=error, order=order)
         self.color_code = color_code
         self.color_format = color_format or '{:.2f}, {:.2f}, {:.2f}'
@@ -101,13 +117,15 @@ class ColorBase16Calculation(Base16Calculation):
         items = []
 
         rgb = hex_to_rgb(value)
-        items.append(ColorBase16Calculation(
-            value=rgb,
-            query=query,
-            order=order_offset,
-            color_code='rgb',
-            color_format='{:.0f}, {:.0f}, {:.0f}'
-        ))
+        items.append(
+            ColorBase16Calculation(
+                value=rgb,
+                query=query,
+                order=order_offset,
+                color_code='rgb',
+                color_format='{:.0f}, {:.0f}, {:.0f}',
+            )
+        )
 
         for func, color_code, color_format in formats:
             value = func(rgb)
@@ -117,7 +135,7 @@ class ColorBase16Calculation(Base16Calculation):
                     query=query,
                     order=len(items) + order_offset,
                     color_code=color_code,
-                    color_format=color_format
+                    color_format=color_format,
                 )
             )
         return items
@@ -128,8 +146,9 @@ class ColorBase16Calculation(Base16Calculation):
     def get_description(self):
         description = ''
         if self.color_code:
-            description = LanguageService().translate(self.color_code,
-                                                      'color').upper()
+            description = (
+                LanguageService().translate(self.color_code, 'color').upper()
+            )
         return description
 
     @Base16Calculation.Decorators.handle_error_results
@@ -145,5 +164,5 @@ class ColorBase16Calculation(Base16Calculation):
             name=name,
             description=description,
             clipboard=clipboard,
-            order=self.order
+            order=self.order,
         )

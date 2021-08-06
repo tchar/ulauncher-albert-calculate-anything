@@ -1,0 +1,37 @@
+[tool.pytest.ini_options]
+filterwarnings = ["error"]
+addopts = "--ignore-glob=test/benchmark/* --allow-hosts=127.0.0.1,127.0.1.1,::1"
+
+[tool.coverage.run]
+branch = false
+omit = [
+    "demo/*",
+    "test/*",
+    "main.py",
+    "__init__.py",
+    "calculate_anything/appdirs.py"
+]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover"
+]
+ignore_errors = false
+
+[tool.coverage.html]
+directory = "cover/html/"
+
+[tool.coverage.xml]
+output = "cover/xml/coverage.xml"
+
+[tool.flake8]
+ignore = [
+    "E203",
+    "W503"
+]
+
+[tool.black]
+line-length = 79
+skip-string-normalization = true

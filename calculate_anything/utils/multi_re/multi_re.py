@@ -9,16 +9,23 @@ class _MultiRe:
     COMPATIBILITY_ITER = 0
     COMPATIBILITY_DICT = 1
 
-    def __init__(self, value: Union[Dict[str, str], Iterable[str],
-                                    str, 'OrderedDict[str, str]'],
-                 sort: bool = True, include: bool = True, flags: int = 0):
+    def __init__(
+        self,
+        value: Union[
+            Dict[str, str], Iterable[str], str, 'OrderedDict[str, str]'
+        ],
+        sort: bool = True,
+        include: bool = True,
+        flags: int = 0,
+    ):
 
         if isinstance(value, dict):
             self._mode = _MultiRe.COMPATIBILITY_DICT
             if flags & re.IGNORECASE:
                 value = {k.lower(): v for k, v in value.items()}
-            if sys.version_info[:2] < (3, 7) and \
-                    not isinstance(value, OrderedDict):  # pragma: no cover
+            if sys.version_info[:2] < (3, 7) and not isinstance(
+                value, OrderedDict
+            ):  # pragma: no cover
                 sort = True  # pragma: no cover
             self._replace_dict = value
         elif isinstance(value, set):
@@ -60,17 +67,25 @@ class _MultiRe:
 
     def _sub_dict(self, s, count, func):
         if self._flags & re.IGNORECASE:
-            def repl(m): return self._replace_dict[m.group(0).lower()]
+
+            def repl(m):
+                return self._replace_dict[m.group(0).lower()]
+
         else:
-            def repl(m): return self._replace_dict[m.group(0)]
+
+            def repl(m):
+                return self._replace_dict[m.group(0)]
+
         return self._sub(repl, s, count, func)
 
-    def sub(self, repl: Union[str, Callable[[Match], str]],
-            s: str, count: int = 0) -> str:
+    def sub(
+        self, repl: Union[str, Callable[[Match], str]], s: str, count: int = 0
+    ) -> str:
         return self._sub(repl, s, count, self._re.sub)
 
-    def subn(self, repl: Union[str, Callable[[Match], str]],
-             s: str, count: int = 0) -> str:
+    def subn(
+        self, repl: Union[str, Callable[[Match], str]], s: str, count: int = 0
+    ) -> str:
         return self._sub(repl, s, count, self._re.subn)
 
     def sub_dict(self, s: str, count: int = 0) -> str:

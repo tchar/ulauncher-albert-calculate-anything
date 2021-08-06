@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from datetime import datetime
+
 # Look I have taken every measure I can for this.
 # If you install a malicious cert and let them mitm
 # European Central Bank, that's on you.
@@ -82,11 +83,15 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             try:
                 curr = child.attrib['currency']
                 rate = float(child.attrib['rate'])
-                currency_data[curr] = {'rate': rate,
-                                       'timestamp_refresh': timestamp}
+                currency_data[curr] = {
+                    'rate': rate,
+                    'timestamp_refresh': timestamp,
+                }
             except Exception as e:
                 logger.exception(
-                    'Could not read rate for currency at line {}: {}'
-                    .format(i, e))
+                    'Could not read rate for currency at line {}: {}'.format(
+                        i, e
+                    )
+                )
         self.had_error = False
         return currency_data

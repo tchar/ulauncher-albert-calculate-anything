@@ -35,10 +35,10 @@ def test_other_base_currency(mock_currency_provider, mycurrencynet_data):
 def test_missing_fields(mock_currency_provider, mycurrencynet_data):
     cls = MyCurrencyNetCurrencyProvider
     rates = [
-        {'currency_code': k, 'rate': v} if k != 'USD'
+        {'currency_code': k, 'rate': v}
+        if k != 'USD'
         else {'missing_code': k, 'rate': v}
         for k, v in currency_data()['rates'].items()
-
     ]
     data = mycurrencynet_data('EUR', rates)
 
@@ -68,8 +68,9 @@ def test_eur_not_in_rates(mock_currency_provider, mycurrencynet_data):
 @pytest.mark.parametrize('status_code', (300, 400, 500))
 def test_response_code(mock_currency_provider, status_code):
     cls = MyCurrencyNetCurrencyProvider
-    with mock_currency_provider(cls, None, use_json=False,
-                                status=status_code) as mycurrencynet:
+    with mock_currency_provider(
+        cls, None, use_json=False, status=status_code
+    ) as mycurrencynet:
         with pytest.raises(CurrencyProviderException) as excinfo:
             mycurrencynet.request_currencies()
 
@@ -80,8 +81,9 @@ def test_response_code(mock_currency_provider, status_code):
 
 def test_no_response(mock_currency_provider):
     cls = MyCurrencyNetCurrencyProvider
-    with mock_currency_provider(cls, None, use_json=False,
-                                respond=False) as mycurrencynet:
+    with mock_currency_provider(
+        cls, None, use_json=False, respond=False
+    ) as mycurrencynet:
         with pytest.raises(CurrencyProviderException) as excinfo:
             mycurrencynet.request_currencies()
 
@@ -91,13 +93,11 @@ def test_no_response(mock_currency_provider):
 
 def test_malformed_json(mock_currency_provider):
     cls = MyCurrencyNetCurrencyProvider
-    malformed_jsondata = {
-        'some other fields': 'EUR',
-        'some fields': 1
-    }
+    malformed_jsondata = {'some other fields': 'EUR', 'some fields': 1}
 
-    with mock_currency_provider(cls, malformed_jsondata,
-                                use_json=True) as mycurrencynet:
+    with mock_currency_provider(
+        cls, malformed_jsondata, use_json=True
+    ) as mycurrencynet:
         with pytest.raises(CurrencyProviderException) as excinfo:
             mycurrencynet.request_currencies()
 
@@ -105,14 +105,18 @@ def test_malformed_json(mock_currency_provider):
         assert mycurrencynet.had_error is True
 
 
-@pytest.mark.parametrize('error_data,msg,use_json', (
-    ('Some malformed not json data', 'Data is not a JSON', True),
-    ('Some malformed not json data', 'Could not decode json data', False),
-))
+@pytest.mark.parametrize(
+    'error_data,msg,use_json',
+    (
+        ('Some malformed not json data', 'Data is not a JSON', True),
+        ('Some malformed not json data', 'Could not decode json data', False),
+    ),
+)
 def test_malformed_data(mock_currency_provider, error_data, msg, use_json):
     cls = MyCurrencyNetCurrencyProvider
-    with mock_currency_provider(cls, error_data,
-                                use_json=use_json) as mycurrencynet:
+    with mock_currency_provider(
+        cls, error_data, use_json=use_json
+    ) as mycurrencynet:
         with pytest.raises(CurrencyProviderException) as excinfo:
             mycurrencynet.request_currencies()
 
