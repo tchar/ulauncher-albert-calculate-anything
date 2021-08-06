@@ -517,6 +517,9 @@ class MockLoader(Loader):
     def with_pending(self):
         assert False
 
+    def load(self) -> None:
+        pass
+
 
 def test_coverage():
     loader = MockLoader(status=Loader.Status.PENDING, mode=0)

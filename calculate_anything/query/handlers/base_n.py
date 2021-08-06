@@ -190,7 +190,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             )
 
         items = []
-        if item.is_error():
+        if item.is_error:
             items.append(item)
         elif isinstance(item, BooleanCalculation):
             items.append(item)

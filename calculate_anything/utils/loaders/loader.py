@@ -1,8 +1,9 @@
+from abc import ABC, abstractmethod
 from enum import IntFlag
 from functools import wraps
 
 
-class Loader:
+class Loader(ABC):
     class Status(IntFlag):
         SUCCESS = 1
         FAIL = SUCCESS << 1
@@ -31,7 +32,7 @@ class Loader:
         @staticmethod
         def with_data(func):
             @wraps(func)
-            def _wrapper(self: Loader, *args, **kwargs):
+            def _wrapper(self: 'Loader', *args, **kwargs):
                 if self.data is None:
                     return None
                 return func(self, *args, **kwargs)
@@ -42,7 +43,7 @@ class Loader:
         def with_mode(mode: IntFlag):
             def _decorator(func):
                 @wraps(func)
-                def _wrapper(self: Loader, *args, **kwargs):
+                def _wrapper(self: 'Loader', *args, **kwargs):
                     if self._mode & mode:
                         return func(self, *args, **kwargs)
                     return None
@@ -55,7 +56,7 @@ class Loader:
         def without_mode(mode: IntFlag):
             def _decorator(func):
                 @wraps(func)
-                def _wrapper(self: Loader, *args, **kwargs):
+                def _wrapper(self: 'Loader', *args, **kwargs):
                     if self._mode & mode:
                         return None
                     return func(self, *args, **kwargs)
@@ -68,7 +69,7 @@ class Loader:
         def with_status(status: IntFlag):
             def _decorator(func):
                 @wraps(func)
-                def _wrapper(self: Loader, *args, **kwargs):
+                def _wrapper(self: 'Loader', *args, **kwargs):
                     if self._status & status:
                         return func(self, *args, **kwargs)
                     return None
@@ -81,7 +82,7 @@ class Loader:
         def without_status(status: IntFlag):
             def _decorator(func):
                 @wraps(func)
-                def _wrapper(self: Loader, *args, **kwargs):
+                def _wrapper(self: 'Loader', *args, **kwargs):
                     if self._status & status:
                         return None
                     return func(self, *args, **kwargs)
@@ -101,3 +102,7 @@ class Loader:
     @property
     def data(self):
         return None  # pragma: no cover
+
+    @abstractmethod
+    def load(self) -> None:
+        pass

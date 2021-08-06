@@ -49,8 +49,8 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
 
         return xml_tree, timestamp
 
+    @FreeCurrencyProvider.Decorators.with_ratelimit
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
-        super().request_currencies(*currencies, force=force)
         try:
             request = self.get_request()
             logger.info('Making request to: {}'.format(request.full_url))

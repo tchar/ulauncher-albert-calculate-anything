@@ -1,5 +1,5 @@
 from functools import wraps
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Optional
 from calculate_anything import logging
 from calculate_anything.query.result import QueryResult
@@ -188,7 +188,7 @@ _HANDLERS = {
 }
 
 
-class _Calculation:
+class _Calculation(ABC):
     class Decorators:
         @staticmethod
         def handle_error_results(func):
@@ -196,7 +196,7 @@ class _Calculation:
             def _wrapper(self: '_Calculation', *args, **kwargs):
                 if isinstance(self.error, ExtendedException):
                     return _HANDLERS[self.error.__class__](self)
-                if self.is_error():
+                if self.is_error:
                     msg = 'Uknown error type: {}'  # pragma: no cover
                     msg = msg.format(self.error)  # pragma: no cover
                     logger.exception(msg)  # pragma: no cover
@@ -217,11 +217,10 @@ class _Calculation:
         self.error = error
         self.order = order if not error else error.order
 
-    def is_error(self, _type=None):
-        if _type is None:
-            return self.error is not None
-        return self.error == _type
+    @property
+    def is_error(self):
+        return self.error is not None
 
     @abstractmethod
     def to_query_result(self):
-        pass  # pragma: no cover
+        pass

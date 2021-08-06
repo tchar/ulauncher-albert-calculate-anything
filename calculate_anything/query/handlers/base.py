@@ -1,4 +1,6 @@
+from typing import Optional
 from functools import wraps
+from calculate_anything.calculation import Calculation
 
 
 class QueryHandler:
@@ -6,7 +8,7 @@ class QueryHandler:
         @staticmethod
         def can_handle(func):
             @wraps(func)
-            def _wrapper(self, query, *args, **kwargs):
+            def _wrapper(self: 'QueryHandler', query: str, *args, **kwargs):
                 if not self.can_handle(query):
                     return None
                 query = self.query_without_keyword(query)
@@ -35,9 +37,9 @@ class QueryHandler:
             return False
         return True
 
-    def handle_raw(self, query, *args, **kwargs):
-        pass  # pragma: no cover
+    def handle_raw(self, query, *args, **kwargs) -> Optional[Calculation]:
+        pass
 
     @Decorators.can_handle
-    def handle(self, query, *args, **kwargs):
+    def handle(self, query, *args, **kwargs) -> Optional[Calculation]:
         return self.handle_raw(query, *args, **kwargs)
