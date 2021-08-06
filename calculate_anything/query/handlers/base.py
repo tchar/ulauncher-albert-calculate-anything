@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from functools import wraps
 from calculate_anything.calculation import Calculation
 
@@ -37,9 +37,11 @@ class QueryHandler:
             return False
         return True
 
-    def handle_raw(self, query, *args, **kwargs) -> Optional[Calculation]:
+    def handle_raw(
+        self, query, *args, **kwargs
+    ) -> Optional[List[Calculation]]:
         pass
 
     @Decorators.can_handle
-    def handle(self, query, *args, **kwargs) -> Optional[Calculation]:
+    def handle(self, query, *args, **kwargs) -> Optional[List[Calculation]]:
         return self.handle_raw(query, *args, **kwargs)

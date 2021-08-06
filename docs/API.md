@@ -96,15 +96,16 @@ queries = [
 
 # Get the results
 for query in queries:
-    result = MultiHandler().handle(query)
-    # Result is of QueryResult type with following attributes
-    result.icon # relative path of icon
-    result.name # result text (formatted)
-    result.description # result description
-    result.clipboard # value to copy to clipboard if any
-    result.value # result value (not formatted)
-    result.error # If error or None
-    result.order # Order of result
+    results = MultiHandler().handle(query)
+    for result in results:
+        # Result is of QueryResult type with following attributes
+        result.icon # relative path of icon
+        result.name # result text (formatted)
+        result.description # result description
+        result.clipboard # value to copy to clipboard if any
+        result.value # result value (not formatted)
+        result.error # If error or None
+        result.order # Order of result
 
 
 # If you want to handle the query using one or more
@@ -122,8 +123,10 @@ from calculate_anything.query.handlers import (
 handlers = [UnitsQueryHandler, TimeQueryHandler]
 
 for query in queries:
-    result = MultiHandler().handle(query, *handlers)
-    # Do something with the result
+    results = MultiHandler().handle(query, *handlers)
+    for result in results:
+        # Do something with the result
+        pass
 ```
 
 ## The QueryResult object
