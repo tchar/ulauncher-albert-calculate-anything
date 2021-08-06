@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1628242250407,
+  "lastUpdate": 1628275223878,
   "repoUrl": "https://github.com/tchar/ulauncher-albert-calculate-anything",
   "entries": {
     "Benchmark": [
@@ -5568,6 +5568,198 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.000006515759854374309",
             "extra": "mean: 292.27895148383516 usec\nrounds: 2123"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tilemachos.charalampous@gmail.com",
+            "name": "tchar",
+            "username": "tchar"
+          },
+          "committer": {
+            "email": "tilemachos.charalampous@gmail.com",
+            "name": "tchar",
+            "username": "tchar"
+          },
+          "distinct": true,
+          "id": "aa29613ce4336aaa3a386c9aaa5455e794078f0d",
+          "message": "Merge branch 'development'",
+          "timestamp": "2021-08-06T21:39:13+03:00",
+          "tree_id": "5c9e40624afb3254949745739d8bb3b56fd7b288",
+          "url": "https://github.com/tchar/ulauncher-albert-calculate-anything/commit/aa29613ce4336aaa3a386c9aaa5455e794078f0d"
+        },
+        "date": 1628275222678,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[calculator]",
+            "value": 4167.250327240451,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003721028322089542",
+            "extra": "mean: 239.96638585956964 usec\nrounds: 2164"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[percentage]",
+            "value": 2899.7594098978507,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00009145879655852634",
+            "extra": "mean: 344.85619620257626 usec\nrounds: 2212"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[dec]",
+            "value": 6609.461223240383,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00005417813713158891",
+            "extra": "mean: 151.2982626305107 usec\nrounds: 2296"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[hex]",
+            "value": 5262.343449378069,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000050218479028568134",
+            "extra": "mean: 190.02940602787626 usec\nrounds: 4081"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[bin]",
+            "value": 6611.46375389754,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000038060563958393024",
+            "extra": "mean: 151.25243625671962 usec\nrounds: 3569"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[oct]",
+            "value": 6406.780493137867,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00011694087373614159",
+            "extra": "mean: 156.08463581217953 usec\nrounds: 5110"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[color]",
+            "value": 24476.647924876474,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000033901968704865366",
+            "extra": "mean: 40.85526756233908 usec\nrounds: 9452"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[currency_no_target]",
+            "value": 13.3273036920794,
+            "unit": "iter/sec",
+            "range": "stddev: 0.004180158783443671",
+            "extra": "mean: 75.03393207692218 msec\nrounds: 13"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[curency_target]",
+            "value": 10.423998666471022,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0044306604135101535",
+            "extra": "mean: 95.93247581818271 msec\nrounds: 11"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[units]",
+            "value": 10.61641257930325,
+            "unit": "iter/sec",
+            "range": "stddev: 0.002549227881543447",
+            "extra": "mean: 94.19377709090782 msec\nrounds: 11"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[time_calculation]",
+            "value": 27.50677292392993,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013728715755304368",
+            "extra": "mean: 36.3546826363639 msec\nrounds: 22"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_single_handler[time_until]",
+            "value": 3681.684949321142,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00009079460462126074",
+            "extra": "mean: 271.61476708765855 usec\nrounds: 2692"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[calculator]",
+            "value": 85.96805673683328,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006049321464808679",
+            "extra": "mean: 11.632227573332443 msec\nrounds: 75"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[percentage]",
+            "value": 2520.823799074898,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00004943654500962224",
+            "extra": "mean: 396.695715252682 usec\nrounds: 2216"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[dec]",
+            "value": 5095.5987183768775,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000060463488336113334",
+            "extra": "mean: 196.24779251034394 usec\nrounds: 3605"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[hex]",
+            "value": 4116.043649683545,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00005852326525521893",
+            "extra": "mean: 242.9517481129928 usec\nrounds: 3577"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[bin]",
+            "value": 5048.576189078537,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006579420148109959",
+            "extra": "mean: 198.07564797442808 usec\nrounds: 4369"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[oct]",
+            "value": 5105.439871544883,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000039943908654258065",
+            "extra": "mean: 195.86950882988353 usec\nrounds: 3341"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[color]",
+            "value": 10498.750946515866,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006187367661891096",
+            "extra": "mean: 95.24942586926132 usec\nrounds: 7190"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[currency_no_target]",
+            "value": 12.489194289057467,
+            "unit": "iter/sec",
+            "range": "stddev: 0.004673622322436653",
+            "extra": "mean: 80.06921638461179 msec\nrounds: 13"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[curency_target]",
+            "value": 10.694253412401624,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0017192006319997465",
+            "extra": "mean: 93.50816381818174 msec\nrounds: 11"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[units]",
+            "value": 10.563270963332073,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0018053837541305985",
+            "extra": "mean: 94.66764636363739 msec\nrounds: 11"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[time_calculation]",
+            "value": 28.17715976773835,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009448119745610881",
+            "extra": "mean: 35.489737370370364 msec\nrounds: 27"
+          },
+          {
+            "name": "test/benchmark/test_query.py::test_multihandler[time_until]",
+            "value": 2940.2560381085327,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00012715459634319172",
+            "extra": "mean: 340.10643530326706 usec\nrounds: 2589"
           }
         ]
       }
