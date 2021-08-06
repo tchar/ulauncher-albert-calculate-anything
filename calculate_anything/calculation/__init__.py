@@ -1,27 +1,49 @@
 from calculate_anything.calculation.calculation import (
-    Calculation, BooleanCalculation
+    Calculation,
+    BooleanCalculation,
 )
 from calculate_anything.calculation.time import (
-    TimeCalculation, TimedeltaCalculation, LocationTimeCalculation
+    TimeCalculation,
+    TimedeltaCalculation,
+    LocationTimeCalculation,
 )
 from calculate_anything.calculation.percentage import (
-    PercentageCalculation, NormalPercentageCalculation,
-    InversePercentageCalculation
+    PercentageCalculation,
+    NormalPercentageCalculation,
+    InversePercentageCalculation,
 )
 from calculate_anything.calculation.base_n import (
-    BaseNCalculation, Base16StringCalculation, Base16Calculation,
-    Base10Calculation, Base2Calculation, Base8Calculation,
-    ColorBase16Calculation
+    BaseNCalculation,
+    Base16StringCalculation,
+    Base16Calculation,
+    Base10Calculation,
+    Base2Calculation,
+    Base8Calculation,
+    ColorBase16Calculation,
 )
 from calculate_anything.calculation.units import (
-    UnitsCalculation, CurrencyUnitsCalculation, TemperatureUnitsCalculation
+    UnitsCalculation,
+    CurrencyUnitsCalculation,
+    TemperatureUnitsCalculation,
 )
 
-__all__ = ['Calculation', 'BooleanCalculation', 'TimeCalculation',
-           'LocationTimeCalculation', 'TimedeltaCalculation',
-           'PercentageCalculation', 'NormalPercentageCalculation',
-           'InversePercentageCalculation', 'BaseNCalculation',
-           'Base16StringCalculation', 'Base10Calculation',
-           'Base2Calculation', 'Base8Calculation', 'Base16Calculation',
-           'ColorBase16Calculation', 'UnitsCalculation',
-           'CurrencyUnitsCalculation', 'TemperatureUnitsCalculation']
+__all__ = [
+    'Calculation',
+    'BooleanCalculation',
+    'TimeCalculation',
+    'LocationTimeCalculation',
+    'TimedeltaCalculation',
+    'PercentageCalculation',
+    'NormalPercentageCalculation',
+    'InversePercentageCalculation',
+    'BaseNCalculation',
+    'Base16StringCalculation',
+    'Base10Calculation',
+    'Base2Calculation',
+    'Base8Calculation',
+    'Base16Calculation',
+    'ColorBase16Calculation',
+    'UnitsCalculation',
+    'CurrencyUnitsCalculation',
+    'TemperatureUnitsCalculation',
+]

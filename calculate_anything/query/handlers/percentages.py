@@ -2,16 +2,21 @@ from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything import logging
 from calculate_anything.calculation import (
-    Calculation, InversePercentageCalculation,
-    NormalPercentageCalculation, PercentageCalculation
+    Calculation,
+    InversePercentageCalculation,
+    NormalPercentageCalculation,
+    PercentageCalculation,
 )
 from calculate_anything.exceptions import (
-    BooleanPercetageException, ZeroDivisionException
+    BooleanPercetageException,
+    ZeroDivisionException,
 )
 from calculate_anything.utils import Singleton, images_dir
 from calculate_anything.regex import (
-    PERCENTAGES_REGEX_MATCH_NORMAL, PERCENTAGES_REGEX_MATCH_INVERSE,
-    PERCENTAGES_REGEX_CALC_MATCH, PLUS_MINUS_REGEX,
+    PERCENTAGES_REGEX_MATCH_NORMAL,
+    PERCENTAGES_REGEX_MATCH_INVERSE,
+    PERCENTAGES_REGEX_CALC_MATCH,
+    PLUS_MINUS_REGEX,
 )
 
 
@@ -56,8 +61,10 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 query=query,
             )
 
-        if amount1.value_type == Calculation.VALUE_BOOLEAN or \
-                amount2.value_type == Calculation.VALUE_BOOLEAN:
+        if (
+            amount1.value_type == Calculation.VALUE_BOOLEAN
+            or amount2.value_type == Calculation.VALUE_BOOLEAN
+        ):
             icon = images_dir('percent.svg')
             return PercentageCalculation(
                 error=BooleanPercetageException(extra={'icon': icon}),
@@ -85,17 +92,20 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             query_percentage_from = percentage_from.query
             query_percentage_to = percentage_to.query
             query = '({})% of ({})'.format(
-                query_percentage_from, query_percentage_to)
+                query_percentage_from, query_percentage_to
+            )
             return NormalPercentageCalculation(
                 value=result,
                 query=query,
-                amounts=(percentage_from, percentage_to)
+                amounts=(percentage_from, percentage_to),
             )
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
-                'with values {}, {}: {}'.format(percentage_from.value,
-                                                percentage_to.value, e))
+                'with values {}, {}: {}'.format(
+                    percentage_from.value, percentage_to.value, e
+                )
+            )
             return None  # pragma: no cover
 
     def _calculate_convert_inverse(self, query):
@@ -121,7 +131,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
                 value=result,
                 query=query,
                 amounts=(percentage_from, percentage_to),
-                order=0
+                order=0,
             )
         except ZeroDivisionError:
             icon = images_dir('percent.svg')
@@ -133,8 +143,10 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
-                'with values {}, {}: {}'.format(percentage_from.value,
-                                                percentage_to.value, e))
+                'with values {}, {}: {}'.format(
+                    percentage_from.value, percentage_to.value, e
+                )
+            )
             return None  # pragma: no cover
 
     def _calculate_calc(self, query):
@@ -161,7 +173,7 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
 
         amount = query[:index]
         sign = 1 if query[index] == '+' else -1
-        percentage = query[index+1:-1]
+        percentage = query[index + 1 : -1]
         if not amount.strip() or not percentage.strip():
             return None
 
@@ -180,15 +192,15 @@ class PercentagesQueryHandler(QueryHandler, metaclass=Singleton):
             query_percentage = percentage.query
             query = '({}) + ({})%'.format(query_amount, query_percentage)
             return PercentageCalculation(
-                value=result,
-                query=query,
-                amounts=(amount, percentage)
+                value=result, query=query, amounts=(amount, percentage)
             )
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
                 'Got exception when calculating inverse percentage '
-                'with values {}, {}: {}'.format(amount.value,
-                                                percentage.value, e))
+                'with values {}, {}: {}'.format(
+                    amount.value, percentage.value, e
+                )
+            )
             return None  # pragma: no cover
 
     def handle_raw(self, query):

@@ -24,18 +24,26 @@ if not os.path.exists(APP_DIRS.user_log_dir):
     os.makedirs(APP_DIRS.user_log_dir)
 
 
-MAIN_DIR = os.path.dirname(os.path.dirname(
-    os.path.realpath(calculate_anything.__file__)))
-FLAGS = {f.split('.')[0]: f for f in os.listdir(
-    os.path.join(MAIN_DIR, 'calculate_anything', 'images', 'flags'))}
+MAIN_DIR = os.path.dirname(
+    os.path.dirname(os.path.realpath(calculate_anything.__file__))
+)
+FLAGS = {
+    f.split('.')[0]: f
+    for f in os.listdir(
+        os.path.join(MAIN_DIR, 'calculate_anything', 'images', 'flags')
+    )
+}
 
 
 CURRENCY_DATA_FILE = os.path.join(
-    APP_DIRS.user_cache_dir, 'currency_data.json')
+    APP_DIRS.user_cache_dir, 'currency_data.json'
+)
 TIMEZONES_SQLITE_FILE_USER = os.path.join(
-    APP_DIRS.user_cache_dir, 'timezones_user.sqlite3')
+    APP_DIRS.user_cache_dir, 'timezones_user.sqlite3'
+)
 TIMEZONES_SQLITE_FILE_DEFAULT = os.path.join(
-    APP_DIRS.user_cache_dir, 'timezones.sqlite3')
+    APP_DIRS.user_cache_dir, 'timezones.sqlite3'
+)
 TIMEZONES_SQL_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.sql')
 TIMEZONES_JSON_FILE = os.path.join(MAIN_DIR, 'data', 'time', 'timezones.json')
 

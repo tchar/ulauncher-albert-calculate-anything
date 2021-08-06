@@ -48,7 +48,8 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         if not found_eur or not found_base:
             self.had_error = True
             raise CurrencyProviderException(
-                'EUR not base currency or not in rates')
+                'EUR not base currency or not in rates'
+            )
 
         base_rate = rates_ret['EUR']['rate']
         request_base_rate = rates_ret[base_currency]['rate']
@@ -58,7 +59,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         rates_ret = {
             currency: {
                 'rate': rate['rate'] * request_base_rate / base_rate,
-                'timestamp_refresh': rate['timestamp_refresh']
+                'timestamp_refresh': rate['timestamp_refresh'],
             }
             for currency, rate in rates_ret.items()
         }

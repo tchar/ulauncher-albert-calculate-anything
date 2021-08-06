@@ -2,12 +2,17 @@ from typing import List, Tuple, Union
 import re
 import cmath
 import operator as op
+
 try:
     from simpleeval import (
-        SimpleEval, NameNotDefined, FeatureNotAvailable, FunctionNotDefined
+        SimpleEval,
+        NameNotDefined,
+        FeatureNotAvailable,
+        FunctionNotDefined,
     )
 except ImportError:  # pragma: no cover
     from calculate_anything.utils import StupidEval  # pragma: no cover
+
     SimpleEval = StupidEval  # pragma: no cover
     NameNotDefined = TypeError  # pragma: no cover
     FeatureNotAvailable = TypeError
@@ -16,12 +21,15 @@ from calculate_anything import logging
 from calculate_anything.calculation import Calculation, BooleanCalculation
 from calculate_anything.utils import is_types, Singleton
 from calculate_anything.exceptions import (
-    MissingSimpleevalException, ZeroDivisionException,
-    BooleanComparisonException
+    MissingSimpleevalException,
+    ZeroDivisionException,
+    BooleanComparisonException,
 )
 from calculate_anything.regex import (
-    CALCULATOR_REGEX_REJECT, CALCULATOR_QUERY_REGEX_REPLACE,
-    CALCULATOR_REPLACE_LEADING_ZEROS, CALCULATOR_QUERY_SPLIT_EQUALITIES
+    CALCULATOR_REGEX_REJECT,
+    CALCULATOR_QUERY_REGEX_REPLACE,
+    CALCULATOR_REPLACE_LEADING_ZEROS,
+    CALCULATOR_QUERY_SPLIT_EQUALITIES,
 )
 
 
@@ -55,8 +63,9 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         self._keywords_regex = re.compile(keywords_regex)
         self._keywords_set = set(keywords)
 
-    def _parse_expression(self, expression: str) \
-            -> Tuple[Union[None, str], int]:
+    def _parse_expression(
+        self, expression: str
+    ) -> Tuple[Union[None, str], int]:
         """Parses the expression and changes i(imaginary unit) to j.
         Returns str or None (parsed expression), int if it has imaginary
         number.
@@ -97,13 +106,16 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             prev_space = is_space
             prev = prev if is_space else c
         expr = CALCULATOR_REPLACE_LEADING_ZEROS.sub(
-            lambda r: r.group(0).replace('0', ''), expr)
+            lambda r: r.group(0).replace('0', ''), expr
+        )
         return expr, has_imaginary
 
     @staticmethod
-    def _calculate_boolean_result(values: Union[int, float, complex],
-                                  operators: List[str],
-                                  subqueries: List[str]) -> BooleanCalculation:
+    def _calculate_boolean_result(
+        values: Union[int, float, complex],
+        operators: List[str],
+        subqueries: List[str],
+    ) -> BooleanCalculation:
         """Calculates result form expression with equality/inequality
         and returns a BooleanCalculation
 
@@ -117,7 +129,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             # We consider it as 1 so it can be comparable with real numbers
             fixed_precision = complex(
                 Calculation.fix_number_precision(value.real),
-                Calculation.fix_number_precision(value.imag)
+                Calculation.fix_number_precision(value.imag),
             )
             fixed_precisions.append(fixed_precision)
         values = tuple(fixed_precisions)
@@ -127,7 +139,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             '>': op.gt,
             '==': op.eq,
             '>=': op.ge,
-            '<=': op.le
+            '<=': op.le,
         }
         inequalities = set(['>', '<', '>=', '<='])
         inequality_error = False
@@ -190,8 +202,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
 
         try:
             results = [
-                self._simple_eval.eval(subquery)
-                for subquery in subqueries
+                self._simple_eval.eval(subquery) for subquery in subqueries
             ]
         except MissingSimpleevalException:
             item = Calculation(
@@ -207,15 +218,19 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return [item]
         except (SyntaxError, TypeError):
             return None
-        except(NameNotDefined, FeatureNotAvailable, FunctionNotDefined) as e:
+        except (NameNotDefined, FeatureNotAvailable, FunctionNotDefined) as e:
             logger.debug(
-                'Got simpleval Exception: when calculating {!r}: {}'
-                .format(query, e))
+                'Got simpleval Exception: when calculating {!r}: {}'.format(
+                    query, e
+                )
+            )
             return None
         except Exception as e:  # pragma: no cover
             logger.exception(  # pragma: no cover
-                'Got exception when trying to calculate {!r}: {}'
-                .format(query, e))
+                'Got exception when trying to calculate {!r}: {}'.format(
+                    query, e
+                )
+            )
             return None  # pragma: no cover
 
         if not any(map(is_types(int, float, complex), results)):
@@ -224,7 +239,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
 
         if len(results) != 1:
             result = CalculatorQueryHandler._calculate_boolean_result(
-                results, operators, subqueries)
+                results, operators, subqueries
+            )
         else:
             result = Calculation(value=results[0], query=subqueries[0])
 

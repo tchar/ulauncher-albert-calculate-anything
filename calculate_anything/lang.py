@@ -46,7 +46,8 @@ class LanguageService(metaclass=Singleton):
             str: A string with accents stripped.
         '''
         return ''.join(
-            c for c in unicodedata.normalize('NFD', s)
+            c
+            for c in unicodedata.normalize('NFD', s)
             if unicodedata.category(c) != 'Mn'
         )
 
@@ -62,20 +63,22 @@ class LanguageService(metaclass=Singleton):
             return
         fallback = False
         lang_filepath = os.path.join(
-            MAIN_DIR, 'data', 'lang', '{}.json'.format(lang))
+            MAIN_DIR, 'data', 'lang', '{}.json'.format(lang)
+        )
         if not os.path.exists(lang_filepath):
             logger.error(
-                'Language file does not exist: {}'.format(lang_filepath))
+                'Language file does not exist: {}'.format(lang_filepath)
+            )
             fallback = True
         if not fallback:
             try:
                 with open(lang_filepath, 'r', encoding='utf-8') as f:
                     self._data = json.loads(f.read())
             except Exception as e:  # pragma: no cover
-                logger.exception(  # pragma: no cover
-                    'Could not load language, falling back to en_US: {}: {}'
-                    .format(lang_filepath, e))
-                fallback = True  # pragma: no cover
+                msg = 'Could not load language, falling back to en_US: {}: {}'
+                msg = msg.format(lang_filepath, e)
+                logger.exception(msg)
+                fallback = True
 
         if fallback:
             if lang == 'en_US':  # pragma: no cover
@@ -115,12 +118,15 @@ class LanguageService(metaclass=Singleton):
                 and returns the translated word (str) if there is any or the
                 word itself.
         '''
+
         def _translator(word):
             return self.translate(word, mode)
+
         return _translator
 
-    def add_translation(self, word: str,
-                        translated_word: str, mode: str) -> None:
+    def add_translation(
+        self, word: str, translated_word: str, mode: str
+    ) -> None:
         '''Adds a word/key to the translations in runtime (only kept in memory).
 
         Args:
@@ -143,12 +149,15 @@ class LanguageService(metaclass=Singleton):
             str and its translation str and puts it in the translations data to
             be used later.
         '''
+
         def _translation_adder(word, translated_word):
             self.add_translation(word, translated_word, mode)
+
         return _translation_adder
 
-    def replace_all(self, string: str, mode: str,
-                    ignorecase: bool = True) -> str:
+    def replace_all(
+        self, string: str, mode: str, ignorecase: bool = True
+    ) -> str:
         '''Replaces all substrings in the provided string with the translated
         ones if any.
 
@@ -169,11 +178,12 @@ class LanguageService(metaclass=Singleton):
             self._data[mode],
             string,
             flags=re.IGNORECASE if ignorecase else 0,
-            sort=True
+            sort=True,
         )
 
-    def get_replacer(self, mode: str,
-                     ignorecase: bool = True) -> Callable[[str], str]:
+    def get_replacer(
+        self, mode: str, ignorecase: bool = True
+    ) -> Callable[[str], str]:
         '''Get a translator replacer function with the provided mode.
 
         Args:
@@ -184,8 +194,10 @@ class LanguageService(metaclass=Singleton):
                 string  and replaces any substring with the corresponding
                 translation.
         '''
+
         def _replacer(string):
             return self.replace_all(string, mode, ignorecase)
+
         return _replacer
 
     def add_update_callback(self, callback: Callable[[str], None]) -> None:

@@ -21,9 +21,11 @@ class PintDefinitionParser:
 
         if currency_upper not in self._unit_registry:
             self._unit_registry.define(
-                '{} = {}'.format(currency_upper, definition))
+                '{} = {}'.format(currency_upper, definition)
+            )
         self._unit_registry.define(
-            '@alias {} = {}'.format(currency_upper, currency_norm))
+            '@alias {} = {}'.format(currency_upper, currency_norm)
+        )
 
     def _process_alias(self, line, translation_adder, is_currency):
         aliases = line.lstrip('@alias').split('=')
@@ -71,8 +73,9 @@ class PintDefinitionParser:
         else:
             self._unit_registry.define('{} = {}'.format(root_unit, rest_units))
 
-    def _process_line(self, line, line_n, file_path,
-                      translation_adder, is_currency):
+    def _process_line(
+        self, line, line_n, file_path, translation_adder, is_currency
+    ):
         try:
             line = line.strip()
             if line.startswith('#'):
@@ -86,21 +89,27 @@ class PintDefinitionParser:
             self._process_definition(line, is_currency)
         except Exception as e:
             logger.exception(
-                'Got exception when parsing line {} in {}: {}'
-                .format(line_n, file_path, e))
+                'Got exception when parsing line {} in {}: {}'.format(
+                    line_n, file_path, e
+                )
+            )
 
     def load_file(self, file_path, mode, is_currency=True):
         translation_adder = LanguageService().translation_adder(mode)
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 for i, line in enumerate(f):
-                    self._process_line(line, i + 1, file_path,
-                                       translation_adder, is_currency)
+                    self._process_line(
+                        line, i + 1, file_path, translation_adder, is_currency
+                    )
             logger.info('Loaded unit definitions: {}'.format(file_path))
         except FileNotFoundError:
             logger.warning(
-                'Unit definitions file not found: {}'.format(file_path))
+                'Unit definitions file not found: {}'.format(file_path)
+            )
         except Exception as e:
             logger.exception(
-                'Exception when loading unit definitons file {}: {}'
-                .format(file_path, e))
+                'Exception when loading unit definitons file {}: {}'.format(
+                    file_path, e
+                )
+            )

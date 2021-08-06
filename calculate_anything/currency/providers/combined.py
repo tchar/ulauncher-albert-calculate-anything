@@ -1,12 +1,16 @@
 import sys
+
 if sys.version_info[:2] < (3, 7):
     from collections import OrderedDict
 else:
     OrderedDict = dict
 from concurrent.futures import ThreadPoolExecutor
 from calculate_anything.currency.providers import (
-    FreeCurrencyProvider, ApiKeyCurrencyProvider, ECBCurrencyProvider,
-    MyCurrencyNetCurrencyProvider, CoinbaseCurrencyProvider
+    FreeCurrencyProvider,
+    ApiKeyCurrencyProvider,
+    ECBCurrencyProvider,
+    MyCurrencyNetCurrencyProvider,
+    CoinbaseCurrencyProvider,
 )
 from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers.base import _MockCurrencyProvider
@@ -64,12 +68,15 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             return provider.request_currencies(*currencies, force=force)
         except CurrencyProviderException as e:
             logger.exception(
-                'Got exception when requesting from provider {}: {}'
-                .format(provider_name, e))
+                'Got exception when requesting from provider {}: {}'.format(
+                    provider_name, e
+                )
+            )
         except Exception as e:
             logger.exception(
                 'An unexpected exception occured when requesting '
-                'from provider {}: {}'.format(provider_name, e))
+                'from provider {}: {}'.format(provider_name, e)
+            )
         return {}
 
     def _request_free(self, currencies, force):
@@ -81,8 +88,12 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             tasks = []
             for provider_cls, provider in self._free_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_cls,
-                    provider, *currencies, force=force)
+                    self._thread_request,
+                    provider_cls,
+                    provider,
+                    *currencies,
+                    force=force
+                )
                 tasks.append(task)
         return tasks
 
@@ -95,8 +106,12 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             tasks = []
             for provider_cls, provider in self._api_providers.items():
                 task = executor.submit(
-                    self._thread_request, provider_cls,
-                    provider, *currencies, force=force)
+                    self._thread_request,
+                    provider_cls,
+                    provider,
+                    *currencies,
+                    force=force
+                )
                 tasks.append(task)
         return tasks
 
@@ -118,14 +133,20 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             if result is not None:
                 providers_currencies.update(result)
 
-        self.had_error = (
-            all(map(lambda provider: provider.had_error,
-                    self._free_providers.values())) and
-            all(map(lambda provider: provider.had_error,
-                    self._api_providers.values()))
+        self.had_error = all(
+            map(
+                lambda provider: provider.had_error,
+                self._free_providers.values(),
+            )
+        ) and all(
+            map(
+                lambda provider: provider.had_error,
+                self._api_providers.values(),
+            )
         )
         if self.had_error:
             raise CurrencyProviderException(
-                'Could not fetch any currency data from any provider')
+                'Could not fetch any currency data from any provider'
+            )
 
         return providers_currencies

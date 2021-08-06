@@ -1,9 +1,13 @@
 import inspect
 from calculate_anything.query.handlers import (
-    UnitsQueryHandler, CalculatorQueryHandler,
-    PercentagesQueryHandler, TimeQueryHandler,
-    Base16QueryHandler, Base10QueryHandler,
-    Base2QueryHandler, Base8QueryHandler
+    UnitsQueryHandler,
+    CalculatorQueryHandler,
+    PercentagesQueryHandler,
+    TimeQueryHandler,
+    Base16QueryHandler,
+    Base10QueryHandler,
+    Base2QueryHandler,
+    Base8QueryHandler,
 )
 from calculate_anything import logging
 

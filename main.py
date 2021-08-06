@@ -2,32 +2,39 @@
 from calculate_anything.utils.misc import images_dir
 from calculate_anything import logging
 from ulauncher.api.shared.action.CopyToClipboardAction import (
-    CopyToClipboardAction
+    CopyToClipboardAction,
 )
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.RenderResultListAction import (
-    RenderResultListAction
+    RenderResultListAction,
 )
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.event import (
-    KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent,
-    SystemExitEvent
+    KeywordQueryEvent,
+    PreferencesEvent,
+    PreferencesUpdateEvent,
+    SystemExitEvent,
 )
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
 from calculate_anything.utils import safe_operation
 from calculate_anything.preferences import Preferences
 from calculate_anything.query.handlers import (
-    PercentagesQueryHandler, UnitsQueryHandler,
-    CalculatorQueryHandler, TimeQueryHandler,
-    Base10QueryHandler, Base16QueryHandler,
-    Base2QueryHandler, Base8QueryHandler
+    PercentagesQueryHandler,
+    UnitsQueryHandler,
+    CalculatorQueryHandler,
+    TimeQueryHandler,
+    Base10QueryHandler,
+    Base16QueryHandler,
+    Base2QueryHandler,
+    Base8QueryHandler,
 )
 from calculate_anything.query import MultiHandler
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
 from calculate_anything.currency import CurrencyService
 import locale
+
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # See what I did for Ulauncher.
@@ -36,13 +43,13 @@ logging.disable_stdout_handler()
 
 
 class CalculateAnythingExtension(Extension):
-
     def __init__(self):
         super(CalculateAnythingExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(PreferencesEvent, PreferencesEventListener())
-        self.subscribe(PreferencesUpdateEvent,
-                       PreferencesUpdateEventListener())
+        self.subscribe(
+            PreferencesUpdateEvent, PreferencesUpdateEventListener()
+        )
         self.subscribe(SystemExitEvent, SystemExitEventListener())
 
 
@@ -88,28 +95,35 @@ class KeywordQueryEventListener(EventListener):
             else:
                 on_enter = HideWindowAction()
 
-            items.append(ExtensionResultItem(
-                icon=result.icon or images_dir('icon.svg'),
-                name=result.name,
-                description=result.description,
-                highlightable=False,
-                on_enter=on_enter
-            ))
+            items.append(
+                ExtensionResultItem(
+                    icon=result.icon or images_dir('icon.svg'),
+                    name=result.name,
+                    description=result.description,
+                    highlightable=False,
+                    on_enter=on_enter,
+                )
+            )
 
         should_show_placeholder = (
-            query_nokw.strip() == '' and len(items) == 0) or \
-            (len(items) == 0 and
-             extension.preferences['show_empty_placeholder'] == 'y')
+            query_nokw.strip() == '' and len(items) == 0
+        ) or (
+            len(items) == 0
+            and extension.preferences['show_empty_placeholder'] == 'y'
+        )
 
         if should_show_placeholder:
-            items.append(ExtensionResultItem(
-                icon=images_dir('icon.svg'),
-                name=LanguageService().translate('no-result', 'misc'),
-                description=LanguageService().translate(
-                    'no-result-{}-description'.format(mode), 'misc'),
-                highlightable=False,
-                on_enter=HideWindowAction()
-            ))
+            items.append(
+                ExtensionResultItem(
+                    icon=images_dir('icon.svg'),
+                    name=LanguageService().translate('no-result', 'misc'),
+                    description=LanguageService().translate(
+                        'no-result-{}-description'.format(mode), 'misc'
+                    ),
+                    highlightable=False,
+                    on_enter=HideWindowAction(),
+                )
+            )
 
         return RenderResultListAction(items)
 
@@ -161,7 +175,8 @@ class PreferencesUpdateEventListener(EventListener):
         elif event.id == 'api_key':
             currency_provider = extension.preferences['currency_provider']
             preferences.currency.add_provider(
-                currency_provider, event.new_value)
+                currency_provider, event.new_value
+            )
         elif event.id == 'currency_provider':
             old_provider = event.old_value
             preferences.currency.remove_provider(old_provider)

@@ -24,9 +24,7 @@ class CurrencyProvider:
 
     def get_request(self, params={}):
         cls = self.__class__
-        headers = {
-            'user-agent': 'Calculate Anything'
-        }
+        headers = {'user-agent': 'Calculate Anything'}
         url = urljoin(cls.BASE_URL, cls.API_URL)
         url = list(urlparse(url))
         url[4] = urlencode(params)
@@ -42,8 +40,11 @@ class CurrencyProvider:
 
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
         timestamp = datetime.now().timestamp()
-        if not force and self.had_error and \
-                timestamp - 60 <= self.last_request_timestamp:
+        if (
+            not force
+            and self.had_error
+            and timestamp - 60 <= self.last_request_timestamp
+        ):
             raise CurrencyProviderException('Too many requests')
         self.last_request_timestamp = timestamp
         return {}

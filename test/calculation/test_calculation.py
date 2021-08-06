@@ -31,10 +31,10 @@ def test_value_type():
     assert Calculation(True).value_type == Calculation.VALUE_BOOLEAN
     assert Calculation(1245).value_type == Calculation.VALUE_INT
     assert Calculation(0.4564).value_type == Calculation.VALUE_FLOAT
-    assert Calculation(1+0j).value_type == Calculation.VALUE_INT
-    assert Calculation(1.5+0j).value_type == Calculation.VALUE_FLOAT
-    assert Calculation(0+11j).value_type == Calculation.VALUE_IMAGINARY
-    assert Calculation(2+2j).value_type == Calculation.VALUE_COMPLEX
+    assert Calculation(1 + 0j).value_type == Calculation.VALUE_INT
+    assert Calculation(1.5 + 0j).value_type == Calculation.VALUE_FLOAT
+    assert Calculation(0 + 11j).value_type == Calculation.VALUE_IMAGINARY
+    assert Calculation(2 + 2j).value_type == Calculation.VALUE_COMPLEX
 
 
 def test_fix_number_presicion():
@@ -82,8 +82,10 @@ def test_format():
     assert Calculation(121.77j).format() == '{:g}i'.format(121.77)
     assert Calculation(11.125 + 0j).format() == '{:g}'.format(11.125)
     assert Calculation(12 - 1j).format() == '{:g} - i'.format(12)
-    assert Calculation(15.77555121551 - 11j).format() == \
-        '{:g} - {:g}i'.format(15.77555121551, 11)
+    assert Calculation(15.77555121551 - 11j).format() == '{:g} - {:g}i'.format(
+        15.77555121551, 11
+    )
     assert Calculation(77.95 + 1j).format() == '{:g} + i'.format(77.95)
-    assert Calculation(2 + 0.4555754554j).format() == \
-        '{:g} + {:g}i'.format(2, 0.4555754554)
+    assert Calculation(2 + 0.4555754554j).format() == '{:g} + {:g}i'.format(
+        2, 0.4555754554
+    )

@@ -14,7 +14,7 @@ def get_value_type(value):
     if isinstance(value, complex):
         value = complex(
             Calculation.fix_number_precision(value.real),
-            Calculation.fix_number_precision(value.imag)
+            Calculation.fix_number_precision(value.imag),
         )
         value = value.real if value.imag == 0 else value
 
@@ -88,13 +88,14 @@ class Calculation(_Calculation):
             'sqrt': '√',
             'pi': 'π',
             'tau': 'τ',
-            '==': '='
+            '==': '=',
         }
 
         query = self.query
         query = re.sub(r'\d+j', sub_i, query)
         query = re.split(
-            r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query)
+            r'(\/\/|\*\*|\=\=|\>\=|\<\=|[\+\-\/\*\%\^\>\<])', query
+        )
         query = map(str.strip, query)
         query = ' '.join(query)
         query = multi_re.sub_dict(replace_special, query, sort=True)
@@ -140,7 +141,7 @@ class Calculation(_Calculation):
             description=description,
             clipboard=name,
             value=self.value,
-            order=self.order
+            order=self.order,
         )
 
 
@@ -159,5 +160,5 @@ class BooleanCalculation(Calculation):
             name=result,
             description=description,
             clipboard=result,
-            value=self.value
+            value=self.value,
         )

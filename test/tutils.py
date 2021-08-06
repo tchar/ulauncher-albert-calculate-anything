@@ -247,8 +247,10 @@ class ApproxUnits(Approx):
         self.tol = tol
 
     def __eq__(self, other):
-        return self.data.units == other.units and \
-            pytest.approx(self.data.magnitude, self.tol) == other.magnitude
+        return (
+            self.data.units == other.units
+            and pytest.approx(self.data.magnitude, self.tol) == other.magnitude
+        )
 
 
 def approxunits(unit, tol=0.01):
@@ -260,17 +262,15 @@ def test_query_result(item, query_result):
     assert item['query_result']['name'] == query_result.name
     assert item['query_result']['description'] == query_result.description
     assert item['query_result']['clipboard'] == query_result.clipboard
-    assert (
-        item['query_result']['error'] == query_result.error or
-        isinstance(query_result.error, item['query_result']['error'])
+    assert item['query_result']['error'] == query_result.error or isinstance(
+        query_result.error, item['query_result']['error']
     )
     assert item['query_result']['order'] == query_result.order
     assert item['query_result']['value'] == query_result.value
     # Although seems stupid we use this to distinguish between equalities
     # in floats and ints. For example 3.0 is not equal to 3 we want the
     # type to be correct
-    assert isinstance(query_result.value,
-                      item['query_result']['value_type'])
+    assert isinstance(query_result.value, item['query_result']['value_type'])
 
 
 def query_test_helper(cls, test_spec, raw=False, only_qr=False):
@@ -295,9 +295,8 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
 
         assert item['result']['value'] == result.value
         assert item['result']['query'] == result.query
-        assert (
-            item['result']['error'] is None or
-            isinstance(result.error, item['result']['error'])
+        assert item['result']['error'] is None or isinstance(
+            result.error, item['result']['error']
         )
         assert item['result']['order'] == result.order
 
@@ -320,10 +319,7 @@ def currency_data(base_currency='EUR', **extra_rates):
     rates = {**rates, **extra_rates}
     return {
         'base_currency': base_currency,
-        'rates': {
-            k: v / rates[base_currency]
-            for k, v in rates.items()
-        }
+        'rates': {k: v / rates[base_currency] for k, v in rates.items()},
     }
 
 
@@ -332,7 +328,7 @@ def expected_currencies(timestamp=None, filterc=set()):
     return {
         k: {
             'rate': pytest.approx(v),
-            'timestamp_refresh': pytest.approx(timestamp)
+            'timestamp_refresh': pytest.approx(timestamp),
         }
         for k, v in currency_data('EUR')['rates'].items()
         if k not in filterc

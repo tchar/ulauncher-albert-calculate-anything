@@ -2,13 +2,20 @@
 
 
 import sys
+
 if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     from typing_extensions import Protocol
 from typing import (
-    Any, Callable, Container, Iterator,
-    List, Optional, Type, Union
+    Any,
+    Callable,
+    Container,
+    Iterator,
+    List,
+    Optional,
+    Type,
+    Union,
 )
 from contextlib import contextmanager
 from functools import lru_cache, wraps
@@ -21,8 +28,14 @@ from calculate_anything.exceptions import MissingSimpleevalException
 
 
 __all__ = [
-    'get_module', 'is_types', 'is_not_types', 'get_or_default',
-    'is_integer', 'StupidEval', 'safe_operation', 'with_lock'
+    'get_module',
+    'is_types',
+    'is_not_types',
+    'get_or_default',
+    'is_integer',
+    'StupidEval',
+    'safe_operation',
+    'with_lock',
 ]
 
 
@@ -67,8 +80,12 @@ def is_not_types(*types: List[Type[Any]]) -> bool:
     return lambda value: not is_types(*types)(value)
 
 
-def get_or_default(value: Any, _type: Type[Any], default: Any,
-                   allowed_values: Optional[Container] = None) -> Any:
+def get_or_default(
+    value: Any,
+    _type: Type[Any],
+    default: Any,
+    allowed_values: Optional[Container] = None,
+) -> Any:
     '''Return a value if it is of specified type and in allowed values
 
     Args:
@@ -120,7 +137,7 @@ class StupidEval:
     def __init__(self, *args: Any, **kwargs: Any):
         self.operators = {}
 
-    @ staticmethod
+    @staticmethod
     def _try_parse(query, _type):
         try:
             return _type(query)
@@ -190,10 +207,12 @@ def with_lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
     Returns:
         func (Callable): The method decorated with lock.
     '''
-    @ wraps(func)
+
+    @wraps(func)
     def _wrapper(self: Lockable, *args, **kwargs):
         with self._lock:
             return func(self, *args, **kwargs)
+
     return _wrapper
 
 

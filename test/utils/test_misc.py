@@ -1,7 +1,12 @@
 import pytest
 from calculate_anything.utils import (
-    get_module, is_types, is_not_types, StupidEval, get_or_default,
-    safe_operation, is_integer
+    get_module,
+    is_types,
+    is_not_types,
+    StupidEval,
+    get_or_default,
+    safe_operation,
+    is_integer,
 )
 from calculate_anything.exceptions import MissingSimpleevalException
 
@@ -44,7 +49,9 @@ def test_is_types(reverse):
         func('object')('object')
         func('object')(object)
         func(object)(object)
-        func(1, )(int, object)
+        func(
+            1,
+        )(int, object)
 
 
 def test_get_or_default():
@@ -60,10 +67,20 @@ def test_get_or_default():
     value, _type, default, allowed, expected = ('some_text', int, 4, [], 4)
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        'some text', int, 'some other text', [], 'some other text')
+        'some text',
+        int,
+        'some other text',
+        [],
+        'some other text',
+    )
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        'some text', int, 'other text', [], 'other text')
+        'some text',
+        int,
+        'other text',
+        [],
+        'other text',
+    )
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = ('0', str, 0, [], '0')
     assert get_or_default(value, _type, default, allowed) == expected
@@ -74,16 +91,36 @@ def test_get_or_default():
     value, _type, default, allowed, expected = (1, int, 2, [1], 1)
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        1, int, 'some value', ['Test', 1], 1)
+        1,
+        int,
+        'some value',
+        ['Test', 1],
+        1,
+    )
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        '1', str, 'some other value', ['1'], '1')
+        '1',
+        str,
+        'some other value',
+        ['1'],
+        '1',
+    )
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        'Test', bool, 'some other value', [2], 'some other value')
+        'Test',
+        bool,
+        'some other value',
+        [2],
+        'some other value',
+    )
     assert get_or_default(value, _type, default, allowed) == expected
     value, _type, default, allowed, expected = (
-        'True', bool, 'some other value', [True], True)
+        'True',
+        bool,
+        'some other value',
+        [True],
+        True,
+    )
     assert get_or_default(value, _type, default, allowed) == expected
 
 
@@ -120,9 +157,16 @@ def test_stupid_eval():
         assert stupid_eval.eval(str(i + 0.5j)) == pytest.approx(i + 0.5j)
 
     with_exception = [
-        'some-text', 'True', '1 + 1',
-        True, 1, 1.2, 1 + 2j, StupidEval,
-        stupid_eval, None
+        'some-text',
+        'True',
+        '1 + 1',
+        True,
+        1,
+        1.2,
+        1 + 2j,
+        StupidEval,
+        stupid_eval,
+        None,
     ]
     for v in with_exception:
         with pytest.raises(MissingSimpleevalException):

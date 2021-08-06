@@ -45,16 +45,19 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         except KeyError:
             raise CurrencyProviderException('Missing keys from JSON response')
 
-        rates = map(lambda r: (r[0], get_or_default(
-            r[1], float, None)), rates.items())
+        rates = map(
+            lambda r: (r[0], get_or_default(r[1], float, None)), rates.items()
+        )
         rates = filter(lambda r: r[1] is not None, rates)
 
         rates = {currency: rate for currency, rate in rates}
 
-        if base_currency != 'EUR' and ('EUR' not in rates or
-                                       base_currency not in rates):
+        if base_currency != 'EUR' and (
+            'EUR' not in rates or base_currency not in rates
+        ):
             raise CurrencyProviderException(
-                'EUR not base currency or not in rates')
+                'EUR not base currency or not in rates'
+            )
 
         return base_currency, rates
 
@@ -62,15 +65,20 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
 
         if base_currency != 'EUR':
             eur_rate = rates['EUR']
-            def rate_conv(r): return r / eur_rate
+
+            def rate_conv(r):
+                return r / eur_rate
+
         else:
-            def rate_conv(r): return r
+
+            def rate_conv(r):
+                return r
 
         timestamp = datetime.now().timestamp()
         return {
             currency: {
                 'rate': rate_conv(rate) if currency != 'EUR' else 1.0,
-                'timestamp_refresh': timestamp
+                'timestamp_refresh': timestamp,
             }
             for currency, rate in rates.items()
         }

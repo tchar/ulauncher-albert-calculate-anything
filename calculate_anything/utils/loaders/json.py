@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class JsonLoader(Loader):
-
     def __init__(self, filepath, default_data, mode=0):
         super().__init__(Loader.Status.PENDING, mode)
         self.filepath = filepath
@@ -129,8 +128,9 @@ class CurrencyCacheLoader(JsonLoader):
             raise Exception(msg)
         if not isinstance(currency_data.get('rate'), (int, float)):
             raise Exception('Currency rate is not a number')
-        if not isinstance(currency_data.get('timestamp_refresh'),
-                          (int, float, type(None))):
+        if not isinstance(
+            currency_data.get('timestamp_refresh'), (int, float, type(None))
+        ):
             raise Exception('timestamp_refresh is not a number or None')
 
     def _validate_cache(self):

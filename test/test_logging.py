@@ -11,8 +11,10 @@ from calculate_anything import logging
 def get_file_handler(filepath):
     file_hdlr = RotatingFileHandler(
         filepath,
-        maxBytes=1000000, backupCount=10, encoding='utf-8',
-        delay=False
+        maxBytes=1000000,
+        backupCount=10,
+        encoding='utf-8',
+        delay=False,
     )
     file_hdlr.setFormatter(logging.ColorFormatter(use_color=False))
     return file_hdlr
@@ -20,18 +22,20 @@ def get_file_handler(filepath):
 
 @lru_cache(maxsize=None)
 def get_stdout_handler():
-    hdlr = logging.CustomHandler(
-        print, print, print, print, print)
+    hdlr = logging.CustomHandler(print, print, print, print, print)
     return hdlr
 
 
-@pytest.mark.parametrize('level', [
-    _logging.DEBUG,
-    _logging.INFO,
-    _logging.WARNING,
-    _logging.ERROR,
-    _logging.CRITICAL,
-])
+@pytest.mark.parametrize(
+    'level',
+    [
+        _logging.DEBUG,
+        _logging.INFO,
+        _logging.WARNING,
+        _logging.ERROR,
+        _logging.CRITICAL,
+    ],
+)
 def test_logging(caplog, level):
     with caplog.at_level(level):
         logging.setLevel(level)
@@ -62,13 +66,16 @@ def test_logging(caplog, level):
         assert (msg in caplog.text) == (level <= _logging.CRITICAL)
 
 
-@pytest.mark.parametrize('level', [
-    _logging.DEBUG,
-    _logging.INFO,
-    _logging.WARNING,
-    _logging.ERROR,
-    _logging.CRITICAL,
-])
+@pytest.mark.parametrize(
+    'level',
+    [
+        _logging.DEBUG,
+        _logging.INFO,
+        _logging.WARNING,
+        _logging.ERROR,
+        _logging.CRITICAL,
+    ],
+)
 def test_logging_custom_stdout_hannler(caplog, level):
     hdlr = get_stdout_handler()
     with caplog.at_level(level):
@@ -101,13 +108,16 @@ def test_logging_custom_stdout_hannler(caplog, level):
         assert (msg in caplog.text) == (level <= _logging.CRITICAL)
 
 
-@pytest.mark.parametrize('level', [
-    _logging.DEBUG,
-    _logging.INFO,
-    _logging.WARNING,
-    _logging.ERROR,
-    _logging.CRITICAL,
-])
+@pytest.mark.parametrize(
+    'level',
+    [
+        _logging.DEBUG,
+        _logging.INFO,
+        _logging.WARNING,
+        _logging.ERROR,
+        _logging.CRITICAL,
+    ],
+)
 def test_logging_no_stdout_handler(caplog, level):
     with caplog.at_level(level):
         logging.setLevel(level)
@@ -118,14 +128,16 @@ def test_logging_no_stdout_handler(caplog, level):
         assert not logger.handlers
 
 
-@pytest.mark.parametrize('level', [
-    _logging.DEBUG,
-    _logging.INFO,
-    _logging.WARNING,
-    _logging.ERROR,
-    _logging.CRITICAL,
-
-])
+@pytest.mark.parametrize(
+    'level',
+    [
+        _logging.DEBUG,
+        _logging.INFO,
+        _logging.WARNING,
+        _logging.ERROR,
+        _logging.CRITICAL,
+    ],
+)
 def test_logging_file(log_filepath, level):
     hdlr = get_file_handler(log_filepath)
     print('Saving logs to {}'.format(log_filepath))

@@ -10,11 +10,14 @@ from pytest_httpserver.httpserver import HTTPServer, Response
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
 from calculate_anything.currency.providers import (
-    CoinbaseCurrencyProvider, ECBCurrencyProvider,
-    MyCurrencyNetCurrencyProvider, FixerIOCurrencyProvider
+    CoinbaseCurrencyProvider,
+    ECBCurrencyProvider,
+    MyCurrencyNetCurrencyProvider,
+    FixerIOCurrencyProvider,
 )
 from calculate_anything.currency.providers.base import (
-    CurrencyProvider, ApiKeyCurrencyProvider
+    CurrencyProvider,
+    ApiKeyCurrencyProvider,
 )
 from test.tutils import osremove, random_str, currency_data, temp_filepath
 
@@ -58,12 +61,8 @@ def httpserver_ssl_context():
 @pytest.fixture(scope='function')
 def coinbase_data():
     def _coinbase_data(base_currency, rates):
-        return {
-            'data': {
-                'currency': base_currency,
-                'rates': rates
-            }
-        }
+        return {'data': {'currency': base_currency, 'rates': rates}}
+
     return _coinbase_data
 
 
@@ -74,18 +73,17 @@ def fixerio_data():
             'success': True,
             'timestamp': timestamp,
             'base': base_currency,
-            'rates': rates
+            'rates': rates,
         }
+
     return _fixerio_data
 
 
 @pytest.fixture(scope='function')
 def mycurrencynet_data():
     def _mycurrencynet_data(base_currency, rates):
-        return {
-            'baseCurrency': base_currency,
-            'rates': rates
-        }
+        return {'baseCurrency': base_currency, 'rates': rates}
+
     return _mycurrencynet_data
 
 
@@ -94,8 +92,7 @@ def ecb_data():
     def _ecb_data(rates, time=datetime.today().strftime('%Y-%m-%d')):
         rates = ((k, v) for k, v in rates.items() if k != 'EUR')
         rates = [
-            '<Cube currency="{}" rate="{}"/>'.format(c, r)
-            for c, r in rates
+            '<Cube currency="{}" rate="{}"/>'.format(c, r) for c, r in rates
         ]
         rates = '\n'.join(rates)
 
@@ -112,7 +109,10 @@ def ecb_data():
             </Cube>
         </Cube>
         </gesmes:Envelope>
-        '''.format(time, rates)
+        '''.format(
+            time, rates
+        )
+
     return _ecb_data
 
 
@@ -129,7 +129,7 @@ def mock_currency_provider(httpserver: HTTPServer):
             storage[klass] = {
                 'instance': instance,
                 'base_url': klass.BASE_URL,
-                'api_url': klass.API_URL
+                'api_url': klass.API_URL,
             }
         return storage
 
@@ -176,10 +176,9 @@ def mock_currency_provider(httpserver: HTTPServer):
         return instances
 
     @contextmanager
-    def _mock_currency_provider(klasses, data,
-                                use_json, status=200,
-                                respond=True,
-                                api_key='mockey'):
+    def _mock_currency_provider(
+        klasses, data, use_json, status=200, respond=True, api_key='mockey'
+    ):
         if not isinstance(klasses, (list, tuple)):
             klasses = [klasses]
         klasses = store_data(klasses, api_key)
@@ -188,6 +187,7 @@ def mock_currency_provider(httpserver: HTTPServer):
         else:
             yield _handle_response(klasses, data, status, use_json)
         restore_data(klasses)
+
     return _mock_currency_provider
 
 
@@ -205,6 +205,7 @@ def in_memory_cache():
         if CurrencyService()._thread is not None:
             CurrencyService()._thread._cache = old_cache
         CurrencyService()._cache = old_cache
+
     return _in_memory_cache
 
 
@@ -212,13 +213,18 @@ _mock_currency_service_data = {}
 
 
 @pytest.fixture(scope='function')
-def mock_currency_service(mock_currency_provider, coinbase_data,
-                          mycurrencynet_data, fixerio_data, ecb_data,
-                          in_memory_cache):
-
+def mock_currency_service(
+    mock_currency_provider,
+    coinbase_data,
+    mycurrencynet_data,
+    fixerio_data,
+    ecb_data,
+    in_memory_cache,
+):
     def callback(queue: Queue):
         def _callback(data, _):
             queue.put_nowait(data)
+
         return _callback
 
     @contextmanager
@@ -228,23 +234,27 @@ def mock_currency_service(mock_currency_provider, coinbase_data,
         timestamp = datetime.now().timestamp()
         fixerdata = fixerio_data('EUR', rates, timestamp)
 
-        mycurrdata = mycurrencynet_data('EUR', [
-            {'currency_code': k, 'rate': v}
-            for k, v in rates.items()
-        ])
+        mycurrdata = mycurrencynet_data(
+            'EUR', [{'currency_code': k, 'rate': v} for k, v in rates.items()]
+        )
 
         ecbdata = ecb_data(rates)
 
-        klasses = [CoinbaseCurrencyProvider, FixerIOCurrencyProvider,
-                   MyCurrencyNetCurrencyProvider, ECBCurrencyProvider]
+        klasses = [
+            CoinbaseCurrencyProvider,
+            FixerIOCurrencyProvider,
+            MyCurrencyNetCurrencyProvider,
+            ECBCurrencyProvider,
+        ]
         data = [coindata, fixerdata, mycurrdata, ecbdata]
         use_json = [True, True, True, False]
         if error:
             status = 500
         else:
             status = 200
-        with in_memory_cache(), \
-                mock_currency_provider(klasses, data, use_json, status=status):
+        with in_memory_cache(), mock_currency_provider(
+            klasses, data, use_json, status=status
+        ):
             data_queue = Queue()
             cb = callback(data_queue)
             UnitsService().start(force=True)

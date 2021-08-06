@@ -35,6 +35,7 @@ class Loader:
                 if self.data is None:
                     return None
                 return func(self, *args, **kwargs)
+
             return _wrapper
 
         @staticmethod
@@ -45,7 +46,9 @@ class Loader:
                     if self._mode & mode:
                         return func(self, *args, **kwargs)
                     return None
+
                 return _wrapper
+
             return _decorator
 
         @staticmethod
@@ -56,7 +59,9 @@ class Loader:
                     if self._mode & mode:
                         return None
                     return func(self, *args, **kwargs)
+
                 return _wrapper
+
             return _decorator
 
         @staticmethod
@@ -67,7 +72,9 @@ class Loader:
                     if self._status & status:
                         return func(self, *args, **kwargs)
                     return None
+
                 return _wrapper
+
             return _decorator
 
         @staticmethod
@@ -78,7 +85,9 @@ class Loader:
                     if self._status & status:
                         return None
                     return func(self, *args, **kwargs)
+
                 return _wrapper
+
             return _decorator
 
     @property

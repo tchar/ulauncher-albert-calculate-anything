@@ -1,27 +1,34 @@
 from calculate_anything.currency.providers.base import (
-    ApiKeyCurrencyProvider, FreeCurrencyProvider
+    ApiKeyCurrencyProvider,
+    FreeCurrencyProvider,
 )
 from calculate_anything.currency.providers.fixerio import (
-    FixerIOCurrencyProvider
+    FixerIOCurrencyProvider,
 )
 from calculate_anything.currency.providers.european_central_bank import (
-    ECBCurrencyProvider
+    ECBCurrencyProvider,
 )
 from calculate_anything.currency.providers.mycurrencynet import (
-    MyCurrencyNetCurrencyProvider
+    MyCurrencyNetCurrencyProvider,
 )
 from calculate_anything.currency.providers.coinbase import (
-    CoinbaseCurrencyProvider
+    CoinbaseCurrencyProvider,
 )
 from calculate_anything.currency.providers.combined import (
-    CombinedCurrencyProvider
+    CombinedCurrencyProvider,
 )
 from calculate_anything.currency.providers.factory import (
-    CurrencyProviderFactory
+    CurrencyProviderFactory,
 )
 
 
-__all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider',
-           'FixerIOCurrencyProvider', 'ECBCurrencyProvider',
-           'MyCurrencyNetCurrencyProvider', 'CoinbaseCurrencyProvider',
-           'CombinedCurrencyProvider', 'CurrencyProviderFactory']
+__all__ = [
+    'ApiKeyCurrencyProvider',
+    'FreeCurrencyProvider',
+    'FixerIOCurrencyProvider',
+    'ECBCurrencyProvider',
+    'MyCurrencyNetCurrencyProvider',
+    'CoinbaseCurrencyProvider',
+    'CombinedCurrencyProvider',
+    'CurrencyProviderFactory',
+]

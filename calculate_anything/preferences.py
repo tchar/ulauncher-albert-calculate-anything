@@ -9,7 +9,10 @@ from calculate_anything.currency import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.time import TimezoneService
 from calculate_anything.utils import (
-    Singleton, get_or_default, is_not_types, safe_operation
+    Singleton,
+    get_or_default,
+    is_not_types,
+    safe_operation,
 )
 
 
@@ -53,6 +56,7 @@ class LanguagePreferences(_Preferences):
     Attributes:
         lang (str): The language currently in use
     '''
+
     @property
     def lang(self) -> str:
         return LanguageService().lang
@@ -83,12 +87,14 @@ class TimePreferences(_Preferences):
     Attributes:
         default_cities (str): The default cities currently in use
     '''
+
     @property
     def default_cities(self) -> str:
         return TimezoneService().default_cities
 
-    def set_default_cities(self,
-                           default_cities: Union[str, Iterable[str]]) -> None:
+    def set_default_cities(
+        self, default_cities: Union[str, Iterable[str]]
+    ) -> None:
         '''Default cities to be set. The cities are not set immediately,
         but only after 'commit()' is called
 
@@ -101,7 +107,8 @@ class TimePreferences(_Preferences):
         if not isinstance(default_cities, str):
             default_cities = ','.join(default_cities)
         default_cities = TimezoneService().parse_default_cities_str(
-            default_cities, save=False)
+            default_cities, save=False
+        )
         super()._to_commit('default_cities', default_cities)
 
     def _commit_one(self, key, value):
@@ -125,6 +132,7 @@ class CurrencyPreferences(_Preferences):
         providers (tuple of str): A tuple of currently enabled currency
             providers.
     '''
+
     @property
     def default_currencies(self) -> List[str]:
         return CurrencyService().default_currencies
@@ -143,9 +151,9 @@ class CurrencyPreferences(_Preferences):
         api_providers = CurrencyService()._provider._api_providers
         return tuple([*free_providers, *api_providers])
 
-    def set_default_currencies(self,
-                               default_currencies: Union[str, Iterable[str]]) \
-            -> None:
+    def set_default_currencies(
+        self, default_currencies: Union[str, Iterable[str]]
+    ) -> None:
         '''Default currencies to set. The currencies are not set immediately,
         but only after 'commit()' is called
 
@@ -186,14 +194,17 @@ class CurrencyPreferences(_Preferences):
         if is_not_types(CurrencyProvider)(provider):
             provider = str(provider).lower()
             provider = get_or_default(
-                provider, str, 'internal',
-                CurrencyProviderFactory.get_available_providers()
+                provider,
+                str,
+                'internal',
+                CurrencyProviderFactory.get_available_providers(),
             )
             provider = CurrencyProviderFactory.get_provider(provider, api_key)
         return provider
 
-    def add_provider(self, provider: Union[str, CurrencyProvider],
-                     api_key: str = '') -> None:
+    def add_provider(
+        self, provider: Union[str, CurrencyProvider], api_key: str = ''
+    ) -> None:
         '''A currency provider to be added with an asociated api_key.
         The provider is not set immediately, but only after 'commit()' is
         called
@@ -251,13 +262,14 @@ class UnitsPreferences(_Preferences):
         conversion_mode (UnitsService.ConversionMode): The conversion mode
             currently in use as in UnitsService.ConversionMode.
     '''
+
     @property
     def conversion_mode(self) -> UnitsService.ConversionMode:
         return UnitsService().conversion_mode
 
-    def set_conversion_mode(self,
-                            mode: Union[str, UnitsService.ConversionMode]) \
-            -> None:
+    def set_conversion_mode(
+        self, mode: Union[str, UnitsService.ConversionMode]
+    ) -> None:
         '''A conversion mode to be set. The mode is not removed immediately,
         but only after 'commit()' is called
 
@@ -276,10 +288,13 @@ class UnitsPreferences(_Preferences):
                 mode = UnitsService.ConversionMode.NORMAL
 
         mode = get_or_default(
-            mode, UnitsService.ConversionMode,
+            mode,
+            UnitsService.ConversionMode,
             UnitsService.ConversionMode.NORMAL,
-            [UnitsService.ConversionMode.NORMAL,
-             UnitsService.ConversionMode.CRAZY]
+            [
+                UnitsService.ConversionMode.NORMAL,
+                UnitsService.ConversionMode.CRAZY,
+            ],
         )
         super()._to_commit('units_conversion_mode', mode)
 

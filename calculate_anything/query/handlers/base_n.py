@@ -2,9 +2,12 @@ import re
 import operator
 import ast
 from calculate_anything.utils import (
-    multi_re, Singleton, StupidEval,
-    is_integer
+    multi_re,
+    Singleton,
+    StupidEval,
+    is_integer,
 )
+
 try:
     from simpleeval import SimpleEval
 except ImportError:
@@ -12,19 +15,30 @@ except ImportError:
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.query.handlers import CalculatorQueryHandler
 from calculate_anything.calculation import (
-    BooleanCalculation, BaseNCalculation, Base16StringCalculation,
-    Base10Calculation, Base2Calculation, Base8Calculation, Base16Calculation,
-    ColorBase16Calculation
+    BooleanCalculation,
+    BaseNCalculation,
+    Base16StringCalculation,
+    Base10Calculation,
+    Base2Calculation,
+    Base8Calculation,
+    Base16Calculation,
+    ColorBase16Calculation,
 )
 from calculate_anything import logging
 from calculate_anything.exceptions import (
-    BaseFloatingPointException, MissingSimpleevalException,
-    WrongBaseException, ZeroDivisionException
+    BaseFloatingPointException,
+    MissingSimpleevalException,
+    WrongBaseException,
+    ZeroDivisionException,
 )
 
 
-__all__ = ['Base10QueryHandler', 'Base2QueryHandler',
-           'Base8QueryHandler', 'Base16QueryHandler']
+__all__ = [
+    'Base10QueryHandler',
+    'Base2QueryHandler',
+    'Base8QueryHandler',
+    'Base16QueryHandler',
+]
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +46,8 @@ logger = logging.getLogger(__name__)
 space_in_middle_re = re.compile(r'\S\s+\S')
 
 expression_eq_split = multi_re.compile(
-    ['==', '>', '>=', '<', '<='], include=True)
+    ['==', '>', '>=', '<', '<='], include=True
+)
 
 keyword_set = set(['^', '|', '&', '%', '//', '+', '-', '*', '/', '(', ')'])
 expression_split_re = multi_re.compile(keyword_set, include=True)
@@ -54,8 +69,9 @@ def get_simple_eval():
 
 
 class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
-    def __init__(self, keyword, base, digits_re,
-                 base_class, convert_classes=[]):
+    def __init__(
+        self, keyword, base, digits_re, base_class, convert_classes=[]
+    ):
         super().__init__(keyword)
         self._base = base
         self._digits_re = digits_re
@@ -68,11 +84,17 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             return str(int(m.group(0), self._base))
 
         if sub_kw:
-            expression = multi_re.sub_dict({
-                'mod': '%', 'div': '//',
-                'and': '&', 'or': '|',
-                'xor': '^', '=': '=='
-            }, expression)
+            expression = multi_re.sub_dict(
+                {
+                    'mod': '%',
+                    'div': '//',
+                    'and': '&',
+                    'or': '|',
+                    'xor': '^',
+                    '=': '==',
+                },
+                expression,
+            )
 
         if split_eq:
             expression = expression_eq_split.split(expression)
@@ -83,7 +105,8 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
             for subexp in expression:
                 expr_dec, _, expr_parsed = self._parse_expression(
-                    subexp, split_eq=False, sub_kw=False)
+                    subexp, split_eq=False, sub_kw=False
+                )
                 if not expr_dec:
                     return [], [], []
                 exprs.append(expr_dec[0])
@@ -127,9 +150,9 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             item = BaseNCalculation(error=e, query=original_query)
             return [item]
         except Exception as e:
-            logger.exception(
-                'Got exception when trying to parse expression: {!r}: {}'
-                .format(query, e))
+            msg = 'Got exception when trying to parse expression: {!r}: {}'
+            msg = msg.format(query, e)
+            logger.exception(msg)
             return None
 
         results = []
@@ -158,14 +181,13 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
                 item = BaseNCalculation(error=BaseFloatingPointException())
             else:
                 item = BaseNCalculation(
-                    value=results[0],
-                    query=original_query,
-                    order=0
+                    value=results[0], query=original_query, order=0
                 )
         # Boolean result
         else:
             item = CalculatorQueryHandler._calculate_boolean_result(
-                results, operators, expr_parsed)
+                results, operators, expr_parsed
+            )
 
         items = []
         if item.is_error():
@@ -179,7 +201,8 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
                 items.append(item_base)
             for convert_class in self._convert_classes:
                 item_base = item.to_base_calculation(
-                    convert_class, order=len(items))
+                    convert_class, order=len(items)
+                )
                 items.append(item_base)
 
         return items
@@ -187,23 +210,35 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
 class Base2QueryHandler(BaseNQueryHandler):
     def __init__(self):
-        super().__init__('bin', 2, digits_base2_re, Base2Calculation,
-                         (Base10Calculation, Base16Calculation,
-                          Base8Calculation))
+        super().__init__(
+            'bin',
+            2,
+            digits_base2_re,
+            Base2Calculation,
+            (Base10Calculation, Base16Calculation, Base8Calculation),
+        )
 
 
 class Base8QueryHandler(BaseNQueryHandler):
     def __init__(self):
-        super().__init__('oct', 8, digits_base8_re, Base8Calculation,
-                         (Base10Calculation, Base2Calculation,
-                          Base16Calculation))
+        super().__init__(
+            'oct',
+            8,
+            digits_base8_re,
+            Base8Calculation,
+            (Base10Calculation, Base2Calculation, Base16Calculation),
+        )
 
 
 class Base16QueryHandler(BaseNQueryHandler):
     def __init__(self):
-        super().__init__('hex', 16, digits_base16_re, Base16Calculation,
-                         (Base10Calculation, Base2Calculation,
-                          Base8Calculation))
+        super().__init__(
+            'hex',
+            16,
+            digits_base16_re,
+            Base16Calculation,
+            (Base10Calculation, Base2Calculation, Base8Calculation),
+        )
 
     def handle_raw(self, query):
         original_query = query.strip()
@@ -214,9 +249,13 @@ class Base16QueryHandler(BaseNQueryHandler):
         if is_color:
             color_query = color_query[1:].strip()
             if self._digits_re.match(color_query) and len(color_query) == 6:
-                items.extend(ColorBase16Calculation.get_color_calculations(
-                    color_query, query=original_query, order_offset=len(items)
-                ))
+                items.extend(
+                    ColorBase16Calculation.get_color_calculations(
+                        color_query,
+                        query=original_query,
+                        order_offset=len(items),
+                    )
+                )
         else:
             items_super = super().handle_raw(query)
             if items_super:
@@ -225,9 +264,7 @@ class Base16QueryHandler(BaseNQueryHandler):
         if query != '':
             non_errors = sum(map(lambda item: not item.error, items))
             item = Base16StringCalculation(
-                value=query,
-                query=original_query,
-                order=non_errors
+                value=query, query=original_query, order=non_errors
             )
             items.append(item)
 
@@ -236,6 +273,10 @@ class Base16QueryHandler(BaseNQueryHandler):
 
 class Base10QueryHandler(BaseNQueryHandler):
     def __init__(self):
-        super().__init__('dec', 10, digits_base10_re, Base10Calculation,
-                         (Base16Calculation, Base2Calculation,
-                          Base8Calculation))
+        super().__init__(
+            'dec',
+            10,
+            digits_base10_re,
+            Base10Calculation,
+            (Base16Calculation, Base2Calculation, Base8Calculation),
+        )
