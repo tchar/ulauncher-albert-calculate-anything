@@ -1,4 +1,4 @@
-# <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="icon" width="25"/> Ulauncher/Albert Calculate Anything
+# <img src="https://github.com/tchar/ulauncher-albert-calculate-anything/raw/master/calculate_anything/images/icon.svg" alt="drawing" width="25"/> Ulauncher/Albert Calculate Anything
 
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20Windows%20%7C%20macOS-%23818181)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions)
 [![Python Versions](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-%23007ec6?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4gIDxkZWZzPiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InB5WWVsbG93IiBncmFkaWVudFRyYW5zZm9ybT0icm90YXRlKDQ1KSI+ICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZlNSIgb2Zmc2V0PSIwLjYiLz4gICAgICA8c3RvcCBzdG9wLWNvbG9yPSIjZGExIiBvZmZzZXQ9IjEiLz4gICAgPC9saW5lYXJHcmFkaWVudD4gICAgPGxpbmVhckdyYWRpZW50IGlkPSJweUJsdWUiIGdyYWRpZW50VHJhbnNmb3JtPSJyb3RhdGUoNDUpIj4gICAgICA8c3RvcCBzdG9wLWNvbG9yPSIjNjlmIiBvZmZzZXQ9IjAuNCIvPiAgICAgIDxzdG9wIHN0b3AtY29sb3I9IiM0NjgiIG9mZnNldD0iMSIvPiAgICA8L2xpbmVhckdyYWRpZW50PiAgPC9kZWZzPiAgPHBhdGggZD0iTTI3LDE2YzAtNyw5LTEzLDI0LTEzYzE1LDAsMjMsNiwyMywxM2wwLDIyYzAsNy01LDEyLTExLDEybC0yNCwwYy04LDAtMTQsNi0xNCwxNWwwLDEwbC05LDBjLTgsMC0xMy05LTEzLTI0YzAtMTQsNS0yMywxMy0yM2wzNSwwbDAtM2wtMjQsMGwwLTlsMCwweiBNODgsNTB2MSIgZmlsbD0idXJsKCNweUJsdWUpIi8+ICA8cGF0aCBkPSJNNzQsODdjMCw3LTgsMTMtMjMsMTNjLTE1LDAtMjQtNi0yNC0xM2wwLTIyYzAtNyw2LTEyLDEyLTEybDI0LDBjOCwwLDE0LTcsMTQtMTVsMC0xMGw5LDBjNywwLDEzLDksMTMsMjNjMCwxNS02LDI0LTEzLDI0bC0zNSwwbDAsM2wyMywwbDAsOWwwLDB6IE0xNDAsNTB2MSIgZmlsbD0idXJsKCNweVllbGxvdykiLz4gIDxjaXJjbGUgcj0iNCIgY3g9IjY0IiBjeT0iODgiIGZpbGw9IiNGRkYiLz4gIDxjaXJjbGUgcj0iNCIgY3g9IjM3IiBjeT0iMTUiIGZpbGw9IiNGRkYiLz48L3N2Zz4=)](https://www.python.org/)
@@ -14,6 +14,7 @@
 [![Codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
 
 [![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
+
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
 
@@ -131,7 +132,7 @@ In order for the currency conversion to work for providers that need an API Key,
 
 ### Cache
 
-For currency conversion you can enable the cache (located by default at `~/.cache/extension_calculate_anything`) for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, not request is made.
+For currency conversion you can enable the cache for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, no request is made.
 
 - Ulauncher: Edit `Currency Cache` in the extension preferences
 - Albert: Edit `CACHE=86400` in `__init__.py` and set it to your interval in seconds
@@ -360,21 +361,30 @@ If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it 
     - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
 
 ## Known Issues
-If at any moment currency stops showing try removing the currency cache file
+If at any moment currency stops showing try removing the currency cache file and restart the Launcher/program
 
+Linux
 ```bash
-rm ~/.cache/extension_calculate_anything/currency_data.json
+rm ~/.cache/com.github.tchar.calculate_anything/currency_data.json
 ```
 
-and restart the Launcher
+Windows
+```powershell
+rm ~\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache\currency_data.json
+```
+macOS
+```zsh
+rm ~/Library/Caches/com.github.tchar.calculate_anything/currency_data.json
+```
+
 
 ## Extending and More
 
 The calculate_anything module does not depend on ulauncher or albert, only the `main.py` (for Ulauncher) and `__init__.py` (for albert) do. You can extend it for other cases.
 
-See the [documentation](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/docs/API.md) for API call examples
+See the [documentation](docs/API.md) for API call examples
 
-You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/misc/prompt.py) file.
+You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](https://github.com/tchar/ulauncher-albert-calculate-anything/tree/master/misc/prompt.py) file.
 
 Here is a demo
 
