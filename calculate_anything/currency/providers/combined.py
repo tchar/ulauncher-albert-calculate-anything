@@ -115,9 +115,8 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 tasks.append(task)
         return tasks
 
+    @FreeCurrencyProvider.Decorators.with_ratelimit
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
-        super().request_currencies(*currencies, force=force)
-
         tasks_free = self._request_free(currencies, force)
         tasks_api = self._request_api(currencies, force)
 

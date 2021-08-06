@@ -83,8 +83,8 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
             for currency, rate in rates.items()
         }
 
+    @FreeCurrencyProvider.Decorators.with_ratelimit
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
-        super().request_currencies(*currencies, force=force)
         params = {'currency': 'EUR'}
         try:
             request = self.get_request(params)

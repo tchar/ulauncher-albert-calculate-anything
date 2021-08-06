@@ -82,8 +82,9 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
             for currency, rate in rates.items()
         }
 
+    @ApiKeyCurrencyProvider.Decorators.with_valid_api_key
+    @ApiKeyCurrencyProvider.Decorators.with_ratelimit
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
-        super().request_currencies(*currencies, force=force)
         params = {'access_key': self._api_key, 'base': 'EUR'}
         if currencies:
             params['symbols'] = ','.join(currencies)

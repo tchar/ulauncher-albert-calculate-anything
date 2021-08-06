@@ -1,3 +1,4 @@
+from typing import Tuple
 from calculate_anything.calculation import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
@@ -14,15 +15,12 @@ __all__ = [
 class PercentageCalculation(Calculation):
     def __init__(self, value=None, query='', amounts=(), error=None, order=0):
         super().__init__(value, query=query, error=error, order=order)
-        self.amounts = amounts
+        self.amounts: Tuple[Calculation, Calculation] = amounts
 
-    def is_error(self, _type=None):
-        if _type is None:
-            return super().is_error() or all(
-                map(lambda amount: amount.error is not None, self.amounts)
-            )
-        return super().is_error(_type) or any(
-            map(lambda amount: amount.error == _type, self.amounts)
+    @property
+    def is_error(self):
+        return super().is_error or all(
+            map(lambda amount: amount.error is not None, self.amounts)
         )
 
     def _get_extra_descriptions(self):

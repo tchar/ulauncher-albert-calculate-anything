@@ -14,16 +14,16 @@ __all__ = ['CurrencyCache']
 logger = logging.getLogger(__name__)
 
 
-def preload(func):
-    @wraps(func)
-    def _wrapper(self, *args, **kwargs):
-        self.load()
-        return func(self, *args, **kwargs)
-
-    return _wrapper
-
-
 class CurrencyCache:
+    class Decorators:
+        def preload(func):
+            @wraps(func)
+            def _wrapper(self: 'CurrencyCache', *args, **kwargs):
+                self.load()
+                return func(self, *args, **kwargs)
+
+            return _wrapper
+
     def __init__(self, update_frequency=0):
         self._update_frequency = update_frequency
         self._data = {
@@ -50,16 +50,16 @@ class CurrencyCache:
         return loaded
 
     @property
-    @preload
+    @Decorators.preload
     def provider(self):
         return self._data.get('provider', '')
 
     @property
-    @preload
+    @Decorators.preload
     def last_update_timestamp(self):
         return self._data.get('last_update_timestamp', 0)
 
-    @preload
+    @Decorators.preload
     def get_rates(self, *currencies) -> CurrencyData:
         if currencies:
             return {

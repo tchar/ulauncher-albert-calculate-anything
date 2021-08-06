@@ -1,5 +1,8 @@
+from abc import ABC, abstractmethod
 from datetime import datetime
+from functools import wraps
 import re
+from typing import Any, Iterable
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 from urllib.request import Request
 from calculate_anything.currency.data import CurrencyData
@@ -14,16 +17,33 @@ class _MockCurrencyProvider:
         pass
 
 
-class CurrencyProvider:
-    BASE_URL = ''
-    API_URL = ''
+class CurrencyProvider(ABC):
+    class Decorators:
+        def with_ratelimit(func):
+            @wraps(func)
+            def _wrapper(
+                self: 'CurrencyProvider',
+                *currencies: Iterable[str],
+                force: bool = False
+            ):
+                timestamp = datetime.now().timestamp()
+                if (
+                    not force
+                    and self.had_error
+                    and timestamp - 60 <= self.last_request_timestamp
+                ):
+                    raise CurrencyProviderException('Too many requests')
+                self.last_request_timestamp = timestamp
+                return func(self, *currencies, force=force)
+
+            return _wrapper
 
     def __init__(self):
         self.last_request_timestamp = 0
         self.had_error = False
 
-    def get_request(self, params={}):
-        cls = self.__class__
+    @classmethod
+    def get_request(cls, params={}):
         headers = {'user-agent': 'Calculate Anything'}
         url = urljoin(cls.BASE_URL, cls.API_URL)
         url = list(urlparse(url))
@@ -38,16 +58,9 @@ class CurrencyProvider:
             raise Exception('Invalid request url: {}'.format(request.full_url))
         return request
 
+    @abstractmethod
     def request_currencies(self, *currencies, force=False) -> CurrencyData:
-        timestamp = datetime.now().timestamp()
-        if (
-            not force
-            and self.had_error
-            and timestamp - 60 <= self.last_request_timestamp
-        ):
-            raise CurrencyProviderException('Too many requests')
-        self.last_request_timestamp = timestamp
-        return {}
+        pass
 
 
 class FreeCurrencyProvider(CurrencyProvider):
@@ -55,6 +68,19 @@ class FreeCurrencyProvider(CurrencyProvider):
 
 
 class ApiKeyCurrencyProvider(CurrencyProvider):
+    class Decorators(CurrencyProvider.Decorators):
+        def with_valid_api_key(func):
+            @wraps(func)
+            def _wrapper(
+                self: 'ApiKeyCurrencyProvider', *args: Any, **kwargs: Any
+            ):
+                if not self.api_key_valid:
+                    self.had_error = True
+                    raise CurrencyProviderException('API Key is not valid')
+                return func(self, *args, **kwargs)
+
+            return _wrapper
+
     def __init__(self, api_key=''):
         super().__init__()
         self._api_key = api_key
@@ -65,10 +91,3 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
 
     def set_api_key(self, api_key):
         self._api_key = api_key
-
-    def request_currencies(self, *currencies, force) -> CurrencyData:
-        super_result = super().request_currencies(*currencies, force)
-        if not self.api_key_valid:
-            self.had_error = True
-            raise CurrencyProviderException('API Key is not valid')
-        return super_result
