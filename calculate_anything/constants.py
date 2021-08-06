@@ -8,7 +8,7 @@ import os
 import calculate_anything
 from calculate_anything.appdirs import AppDirs
 
-APP_NAME = 'com.github.tchar.calculate_anything'
+APP_NAME = 'com.github.tchar.calculate-anything'
 APP_AUTHOR = 'tchar'
 
 APP_DIRS = AppDirs(APP_NAME, APP_AUTHOR)
