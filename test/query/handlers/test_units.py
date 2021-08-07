@@ -4,7 +4,7 @@ from datetime import datetime
 from calculate_anything.lang import LanguageService
 from calculate_anything.units import UnitsService
 from calculate_anything.preferences import Preferences
-from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query.handlers import MultiHandler
 from calculate_anything.query.handlers import UnitsQueryHandler
 from calculate_anything.utils import images_dir
 from calculate_anything.exceptions import (

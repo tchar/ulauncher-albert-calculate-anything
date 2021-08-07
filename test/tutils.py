@@ -55,7 +55,10 @@ def mem_path():
 @contextmanager
 def calculator_no_simpleeval():
     calculator_handler.SimpleEval = StupidEval
+    get_simple_eval = calculator_handler.get_simple_eval
+    calculator_handler.get_simple_eval = StupidEval
     yield
+    calculator_handler.get_simple_eval = get_simple_eval
     calculator_handler.SimpleEval = SimpleEval
 
 

@@ -12,7 +12,7 @@ import sys
 import logging as _logging
 import logging.handlers as _handlers
 import copy
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 from calculate_anything.constants import APP_DIRS
 
 
@@ -68,15 +68,21 @@ class ColorFormatter(_logging.Formatter):
     }
 
     def __init__(
-        self, fmt=None, date_fmt='%Y-%m-%d:%H:%M:%S', use_color: bool = True
+        self,
+        fmt: Optional[str] = None,
+        date_fmt: str = '%Y-%m-%d:%H:%M:%S',
+        use_color: bool = True,
     ):
         '''Args:
-        fmt (str): A '{' style format with the extra codes provided in
-            ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
+        fmt (str, optional): A '{' style format with the extra codes provided
+            in ColorFormatter.SEQS. Any related codes from ColorFormatter.SEQS
             should be put in single '{' formatting. Others should be put
-            in '{{' e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'
-        date_fmt (str): A date format
-        use_color (bool): Wether to use colors or not
+            in '{{' e.g '{{asctime}} {BOLD}{{name}}{RESET}: {{message}}'.
+            If None the default format is used '{{asctime}}.{{msecs:03.0f}} |
+            {{levelname}} | [{BOLD}{{name}}.{{funcName}}:{{lineno}}{RESET}]:
+            {{message}}'
+        date_fmt (str): A date format, default '%Y-%m-%d:%H:%M:%S'
+        use_color (bool): Wether to use colors or not, default True
         '''
         if use_color:
             seqs = ColorFormatter.SEQS

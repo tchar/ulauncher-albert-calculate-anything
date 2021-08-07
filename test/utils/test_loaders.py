@@ -520,6 +520,10 @@ class MockLoader(Loader):
     def load(self) -> None:
         pass
 
+    @property
+    def data(self) -> None:
+        return None
+
 
 def test_coverage():
     loader = MockLoader(status=Loader.Status.PENDING, mode=0)

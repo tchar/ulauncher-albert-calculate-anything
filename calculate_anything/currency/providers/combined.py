@@ -1,10 +1,11 @@
 import sys
+from typing import Iterable, List, Type
 
 if sys.version_info[:2] < (3, 7):
     from collections import OrderedDict
 else:
     OrderedDict = dict
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future
 from calculate_anything.currency.providers import (
     FreeCurrencyProvider,
     ApiKeyCurrencyProvider,
@@ -13,7 +14,10 @@ from calculate_anything.currency.providers import (
     CoinbaseCurrencyProvider,
 )
 from calculate_anything.currency.data import CurrencyData
-from calculate_anything.currency.providers.base import _MockCurrencyProvider
+from calculate_anything.currency.providers.base import (
+    CurrencyProvider,
+    _MockCurrencyProvider,
+)
 from calculate_anything import logging
 from calculate_anything.exceptions import CurrencyProviderException
 
@@ -25,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         free_providers = [
             ECBCurrencyProvider(),
@@ -39,18 +43,22 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         self._api_providers = OrderedDict()
 
     @property
-    def api_key_valid(self):
+    def api_key_valid(self) -> bool:
         return True
 
-    def add_provider(self, provider):
-        # No need to add MockCurrencyProvider or FreeCurrencyProvider
-        if isinstance(provider, (_MockCurrencyProvider, FreeCurrencyProvider)):
+    def add_provider(
+        self, provider: CurrencyProvider
+    ) -> 'CombinedCurrencyProvider':
+        # No need to add MockCurrencyProvider
+        if isinstance(provider, _MockCurrencyProvider):
             pass
         elif isinstance(provider, ApiKeyCurrencyProvider):
             self._api_providers[provider.__class__] = provider
         return self
 
-    def remove_provider(self, provider):
+    def remove_provider(
+        self, provider: CurrencyProvider
+    ) -> 'CombinedCurrencyProvider':
         provider_cls = provider.__class__
         if isinstance(provider, _MockCurrencyProvider):
             pass
@@ -62,7 +70,13 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 del self._api_providers[provider_cls]
         return self
 
-    def _thread_request(self, provider_cls, provider, *currencies, force):
+    def _thread_request(
+        self,
+        provider_cls: Type[CurrencyProvider],
+        provider: CurrencyProvider,
+        *currencies: str,
+        force: bool
+    ) -> CurrencyData:
         provider_name = provider_cls.__name__
         try:
             return provider.request_currencies(*currencies, force=force)
@@ -79,7 +93,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
             )
         return {}
 
-    def _request_free(self, currencies, force):
+    def _request_free(
+        self, currencies: Iterable[str], force: bool
+    ) -> List[Future]:
         if not self._free_providers:
             return []
 
@@ -97,7 +113,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
                 tasks.append(task)
         return tasks
 
-    def _request_api(self, currencies, force):
+    def _request_api(
+        self, currencies: Iterable[str], force: bool
+    ) -> List[Future]:
         if not self._api_providers:
             return []
 
@@ -116,7 +134,9 @@ class CombinedCurrencyProvider(ApiKeyCurrencyProvider):
         return tasks
 
     @FreeCurrencyProvider.Decorators.with_ratelimit
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
         tasks_free = self._request_free(currencies, force)
         tasks_api = self._request_api(currencies, force)
 

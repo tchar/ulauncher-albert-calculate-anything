@@ -1,6 +1,13 @@
-from functools import wraps
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+import cmath
+from enum import Enum
+
+try:
+    import pint
+except ImportError:
+    pint = None
+from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, Tuple, Type, Union
 from calculate_anything import logging
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
@@ -19,12 +26,113 @@ from calculate_anything.exceptions import (
     BooleanPercetageException,
     MissingPintException,
 )
-
+from calculate_anything.constants import CALCULATOR_ERROR
 
 logger = logging.getLogger(__name__)
 
+CalculationValue = Union[
+    None,
+    complex,
+    float,
+    int,
+    bool,
+    str,
+    datetime,
+    timedelta,
+    'pint.Quantity',
+    Any,
+]
 
-def missing_parsedatetime_query_result(calculation: '_Calculation'):
+
+def get_value_type(
+    value: CalculationValue,
+) -> Tuple[CalculationValue, 'Calculation.ValueType']:
+    if isinstance(value, complex):
+        value = complex(
+            Calculation.fix_number_precision(value.real),
+            Calculation.fix_number_precision(value.imag),
+        )
+        value = value.real if value.imag == 0 else value
+
+    if isinstance(value, float):
+        value = Calculation.fix_number_precision(value)
+
+    if value is None:
+        return value, Calculation.ValueType.NONE
+    if isinstance(value, bool):
+        return value, Calculation.ValueType.BOOLEAN
+    if isinstance(value, float):
+        return value, Calculation.ValueType.FLOAT
+    if isinstance(value, int):
+        return value, Calculation.ValueType.INT
+    if isinstance(value, str):
+        return value, Calculation.ValueType.STRING
+    if isinstance(value, complex) and value.real == 0:
+        return value, Calculation.ValueType.IMAGINARY
+    if isinstance(value, complex):
+        return value, Calculation.ValueType.COMPLEX
+    if isinstance(value, datetime):
+        return value, Calculation.ValueType.DATETIME
+    if isinstance(value, timedelta):
+        return value, Calculation.ValueType.TIMEDELTA
+    if pint and isinstance(value, pint.Quantity):
+        return value, Calculation.ValueType.UNIT
+
+    return value, Calculation.ValueType.UNKNOWN
+
+
+class Calculation(ABC):
+    class ValueType(Enum):
+        UNKNOWN = -1
+        NONE = 0
+        BOOLEAN = 1
+        INT = 2
+        FLOAT = 3
+        IMAGINARY = 5
+        COMPLEX = 6
+        STRING = 7
+        DATETIME = 8
+        TIMEDELTA = 9
+        UNIT = 10
+
+    def __init__(
+        self,
+        value,
+        query: str,
+        order: int,
+    ):
+        self.value, self.value_type = get_value_type(value)
+        self.query = query
+        self.order = order
+
+    @staticmethod
+    def fix_number_precision(
+        number: Union[float, int, complex]
+    ) -> Union[float, int, complex]:
+        number_dec = number % 1
+        if cmath.isclose(number_dec, 0, abs_tol=CALCULATOR_ERROR):
+            return int(number)
+        if cmath.isclose(number_dec, 1, abs_tol=CALCULATOR_ERROR):
+            return int(number) + 1
+        return number
+
+    @abstractmethod
+    def to_query_result(self):
+        ...
+
+
+class CalculationError(Calculation):
+    def __init__(self, error: ExtendedException, query: str = '') -> None:
+        super().__init__(None, query, error.order)
+        self.error = error
+
+    def to_query_result(self):
+        return _HANDLERS[self.error.__class__](self)
+
+
+def missing_parsedatetime_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -33,11 +141,13 @@ def missing_parsedatetime_query_result(calculation: '_Calculation'):
         description=translator('missing-parsedatetime-error-description'),
         clipboard='pip install parsedatetime',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def missing_simpleeval_query_result(calculation: '_Calculation'):
+def missing_simpleeval_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -46,11 +156,13 @@ def missing_simpleeval_query_result(calculation: '_Calculation'):
         description=translator('missing-simpleeval-error-description'),
         clipboard='pip install simpleeval',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def missing_pint_error_query_result(calculation: '_Calculation'):
+def missing_pint_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -59,11 +171,13 @@ def missing_pint_error_query_result(calculation: '_Calculation'):
         description=translator('missing-pint-error-description'),
         clipboard='pip install Pint',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def boolean_comparison_error_query_result(calculation: '_Calculation'):
+def boolean_comparison_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -72,11 +186,13 @@ def boolean_comparison_error_query_result(calculation: '_Calculation'):
         description=translator('boolean-comparison-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def boolean_percentage_error_query_result(calculation: '_Calculation'):
+def boolean_percentage_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -85,11 +201,13 @@ def boolean_percentage_error_query_result(calculation: '_Calculation'):
         description=translator('boolean-percentage-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def base_floating_point_exception_query_result(calculation: '_Calculation'):
+def base_floating_point_exception_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -98,11 +216,13 @@ def base_floating_point_exception_query_result(calculation: '_Calculation'):
         description=translator('base-floating-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def wrong_base_exception_query_result(calculation: '_Calculation'):
+def wrong_base_exception_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -111,11 +231,13 @@ def wrong_base_exception_query_result(calculation: '_Calculation'):
         description=translator('wrong-base-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def date_overflow_error_query_result(calculation: '_Calculation'):
+def date_overflow_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -124,11 +246,13 @@ def date_overflow_error_query_result(calculation: '_Calculation'):
         description=translator('date-overflow-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def currency_provider_error_query_result(calculation: '_Calculation'):
+def currency_provider_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('convert.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -137,11 +261,13 @@ def currency_provider_error_query_result(calculation: '_Calculation'):
         description=translator('currency-provider-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def zero_division_error_query_result(calculation: '_Calculation'):
+def zero_division_error_query_result(
+    calculation: CalculationError,
+) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('icon.svg')
     translator = LanguageService().get_translator('errors')
     return QueryResult(
@@ -150,11 +276,11 @@ def zero_division_error_query_result(calculation: '_Calculation'):
         description=translator('zero-division-error-description'),
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-def misparsed_time_exception(calculation: '_Calculation'):
+def misparsed_time_exception(calculation: CalculationError) -> QueryResult:
     icon = calculation.error.extra.get('icon') or images_dir('time.svg')
     translator = LanguageService().get_translator('errors')
     name = translator('misparsed-datetime')
@@ -169,11 +295,13 @@ def misparsed_time_exception(calculation: '_Calculation'):
         description=description,
         clipboard='',
         error=calculation.error,
-        order=calculation.error.order,
+        order=calculation.order,
     )
 
 
-_HANDLERS = {
+_HANDLERS: Dict[
+    Type[ExtendedException], Callable[[CalculationError], QueryResult]
+] = {
     MissingPintException: missing_pint_error_query_result,
     MissingSimpleevalException: missing_simpleeval_query_result,
     MissingParsedatetimeException: missing_parsedatetime_query_result,
@@ -186,41 +314,3 @@ _HANDLERS = {
     WrongBaseException: wrong_base_exception_query_result,
     BaseFloatingPointException: base_floating_point_exception_query_result,
 }
-
-
-class _Calculation(ABC):
-    class Decorators:
-        @staticmethod
-        def handle_error_results(func):
-            @wraps(func)
-            def _wrapper(self: '_Calculation', *args, **kwargs):
-                if isinstance(self.error, ExtendedException):
-                    return _HANDLERS[self.error.__class__](self)
-                if self.is_error:
-                    msg = 'Uknown error type: {}'  # pragma: no cover
-                    msg = msg.format(self.error)  # pragma: no cover
-                    logger.exception(msg)  # pragma: no cover
-                    raise self.error  # pragma: no cover
-                return func(self, *args, **kwargs)
-
-            return _wrapper
-
-    def __init__(
-        self,
-        value: Optional[Any] = None,
-        query: str = '',
-        error: Optional[ExtendedException] = None,
-        order: int = 0,
-    ):
-        self.value = value
-        self.query = query
-        self.error = error
-        self.order = order if not error else error.order
-
-    @property
-    def is_error(self):
-        return self.error is not None
-
-    @abstractmethod
-    def to_query_result(self):
-        pass

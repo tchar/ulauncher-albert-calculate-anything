@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from json.decoder import JSONDecodeError
+from typing import Dict
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from calculate_anything.currency.data import CurrencyData
@@ -19,7 +20,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
     BASE_URL = 'https://www.mycurrency.net'
     API_URL = '/US.json'
 
-    def _convert_rates(self, data):
+    def _convert_rates(self, data: Dict) -> CurrencyData:
         try:
             base_currency = data['baseCurrency']
             rates = data['rates']
@@ -65,7 +66,9 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         }
         return rates_ret
 
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
         super().request_currencies(*currencies, force=force)
         try:
             request = self.get_request()

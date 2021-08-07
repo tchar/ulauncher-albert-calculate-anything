@@ -1,5 +1,5 @@
-from calculate_anything.calculation.calculation import (
-    Calculation,
+from calculate_anything.calculation.calculator import (
+    CalculatorCalculation,
     BooleanCalculation,
 )
 from calculate_anything.calculation.time import (
@@ -28,7 +28,7 @@ from calculate_anything.calculation.units import (
 )
 
 __all__ = [
-    'Calculation',
+    'CalculatorCalculation',
     'BooleanCalculation',
     'TimeCalculation',
     'LocationTimeCalculation',

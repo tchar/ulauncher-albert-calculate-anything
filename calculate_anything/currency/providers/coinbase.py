@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from json.decoder import JSONDecodeError
+from typing import Any, Dict, Tuple
 from urllib.parse import urljoin
 from urllib.request import urlopen
 from urllib.error import HTTPError
@@ -22,11 +23,11 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
     API_URL = '/v2/exchange-rates'
 
     @property
-    def url(self):
+    def url(self) -> str:
         cls = CoinbaseCurrencyProvider
         return urljoin(cls.BASE_URL, cls.API_URL)
 
-    def _validate_data(self, data):
+    def _validate_data(self, data: Any) -> Tuple[str, Dict]:
         if not isinstance(data, dict):
             raise CurrencyProviderException('Data is not a JSON')
 
@@ -61,7 +62,7 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
 
         return base_currency, rates
 
-    def _convert_rates(self, base_currency, rates):
+    def _convert_rates(self, base_currency: str, rates: Dict) -> CurrencyData:
 
         if base_currency != 'EUR':
             eur_rate = rates['EUR']
@@ -84,7 +85,9 @@ class CoinbaseCurrencyProvider(FreeCurrencyProvider):
         }
 
     @FreeCurrencyProvider.Decorators.with_ratelimit
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
         params = {'currency': 'EUR'}
         try:
             request = self.get_request(params)

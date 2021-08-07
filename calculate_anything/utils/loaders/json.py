@@ -1,3 +1,12 @@
+from typing import Dict, TYPE_CHECKING
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+if TYPE_CHECKING:
+    from calculate_anything.currency.data import CurrencyData
 import os
 import shutil
 import json
@@ -12,14 +21,16 @@ logger = logging.getLogger(__name__)
 
 
 class JsonLoader(Loader):
-    def __init__(self, filepath, default_data, mode=0):
+    def __init__(
+        self, filepath: str, default_data: Dict, mode: Loader.Mode = 0
+    ) -> None:
         super().__init__(Loader.Status.PENDING, mode)
         self.filepath = filepath
         self.default_data = default_data
         self._data = None
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
-    def _pre_load(self):
+    def _pre_load(self) -> None:
         self._file_exists = os.path.exists(self.filepath)
         if not self._file_exists:
             self._mode |= Loader.Mode.FALLBACK
@@ -28,7 +39,7 @@ class JsonLoader(Loader):
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.LOAD)
-    def _load(self):
+    def _load(self) -> None:
         try:
             with open(self.filepath, 'r', encoding='utf-8') as f:
                 self._data = f.read()
@@ -48,7 +59,7 @@ class JsonLoader(Loader):
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.without_mode(Loader.Mode.NO_REMOVE)
     @Loader.Decorators.with_mode(Loader.Mode.REMOVE)
-    def _remove(self):
+    def _remove(self) -> None:
         if os.path.isdir(self.filepath):
             self._status |= Loader.Status.FILE_IS_DIR
             try:
@@ -73,12 +84,12 @@ class JsonLoader(Loader):
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.VALIDATE)
-    def _validate(self):
+    def _validate(self) -> None:
         self._status |= Loader.Status.SUCCESS
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.FALLBACK)
-    def _fallback(self):
+    def _fallback(self) -> None:
         if self.default_data is None:
             self._status |= Loader.Status.FAIL
             return
@@ -97,10 +108,10 @@ class JsonLoader(Loader):
             self._status |= Loader.Status.CANNOT_WRITE_FILE
 
     @property
-    def data(self):
+    def data(self) -> Dict:
         return self._data
 
-    def load(self):
+    def load(self) -> None:
         self._pre_load()
         self._load()
         self._remove()
@@ -116,12 +127,20 @@ class JsonLoader(Loader):
         return self.status & Loader.Status.SUCCESS == 1
 
 
+class JsonCurrencyData(TypedDict):
+    provider: str
+    exchange_rates: 'CurrencyData'
+    last_update_timestamp: float
+
+
 class CurrencyCacheLoader(JsonLoader):
-    def __init__(self, filepath):
+    def __init__(self, filepath: str) -> None:
         default_data = {'exchange_rates': {}, 'last_update_timestamp': 0}
         super().__init__(filepath, default_data, mode=0)
 
-    def _validate_exchange_rate(self, currency, currency_data):
+    def _validate_exchange_rate(
+        self, currency: str, currency_data: JsonCurrencyData
+    ) -> None:
         if not isinstance(currency_data, dict):
             msg = 'Rate for "{}" is not a dict {}'
             msg = msg.format(currency, currency_data)
@@ -133,7 +152,7 @@ class CurrencyCacheLoader(JsonLoader):
         ):
             raise Exception('timestamp_refresh is not a number or None')
 
-    def _validate_cache(self):
+    def _validate_cache(self) -> None:
         data = self.data
         if not isinstance(data, dict):
             raise Exception('data is not a dict')
@@ -147,7 +166,7 @@ class CurrencyCacheLoader(JsonLoader):
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.VALIDATE)
-    def _validate(self):
+    def _validate(self) -> None:
         try:
             self._validate_cache()
         except Exception as e:

@@ -15,7 +15,7 @@ from calculate_anything.query.handlers import (
     Base2QueryHandler,
     Base8QueryHandler,
 )
-from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query.handlers import MultiHandler
 from test.tutils import (
     approxdt,
     currency_data,

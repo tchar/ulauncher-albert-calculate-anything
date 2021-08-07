@@ -30,12 +30,12 @@ class _Preferences:
         self._uncomitted_keys.add(key)
 
     @abstractmethod
-    def _commit_one(self, *args, **kwargs) -> None:
-        pass
+    def _commit_one(self, *args: Any, **kwargs: Any) -> None:
+        ...
 
     @abstractmethod
-    def _pre_commit(self, *args, **kwargs) -> None:
-        pass
+    def _pre_commit(self, *args: Any, **kwargs: Any) -> None:
+        ...
 
     def commit(self) -> None:
         cls_name = self.__class__.__name__
@@ -71,11 +71,11 @@ class LanguagePreferences(_Preferences):
         '''
         super()._to_commit('lang', lang)
 
-    def _commit_one(self, key, value):
+    def _commit_one(self, key: str, value: Any) -> None:
         if key == 'lang':
             LanguageService().set(value)
 
-    def _pre_commit(self):
+    def _pre_commit(self) -> None:
         # Set en_US if no lang has been specified and its first start
         if self._commits == 0 and 'lang' not in self._uncomitted_keys:
             LanguageService().set('en_US')
@@ -111,11 +111,11 @@ class TimePreferences(_Preferences):
         )
         super()._to_commit('default_cities', default_cities)
 
-    def _commit_one(self, key, value):
+    def _commit_one(self, key: str, value: Any) -> None:
         if key == 'default_cities':
             TimezoneService().set_default_cities(value)
 
-    def _pre_commit(self):
+    def _pre_commit(self) -> None:
         if self._commits == 0:
             TimezoneService().start()
 
@@ -190,7 +190,9 @@ class CurrencyPreferences(_Preferences):
         '''Disables the cache after 'commit()' is called.'''
         super()._to_commit('cache_update_frequency', 0)
 
-    def _get_provider(self, provider, api_key):
+    def _get_provider(
+        self, provider: Union[str, CurrencyProvider], api_key: str
+    ) -> CurrencyProvider:
         if is_not_types(CurrencyProvider)(provider):
             provider = str(provider).lower()
             provider = get_or_default(
@@ -232,7 +234,7 @@ class CurrencyPreferences(_Preferences):
         provider = self._get_provider(provider, '')
         super()._to_commit('remove_provider', provider)
 
-    def _commit_one(self, key, value):
+    def _commit_one(self, key: str, value: Any) -> None:
         if key == 'default_currencies':
             CurrencyService().set_default_currencies(value)
         elif key == 'cache_update_frequency':
@@ -246,7 +248,7 @@ class CurrencyPreferences(_Preferences):
         elif key == 'remove_provider':
             CurrencyService().remove_provider(value)
 
-    def _pre_commit(self):
+    def _pre_commit(self) -> None:
         # If first start, start service
         if self._commits == 0:
             CurrencyService().start()
@@ -298,11 +300,11 @@ class UnitsPreferences(_Preferences):
         )
         super()._to_commit('units_conversion_mode', mode)
 
-    def _commit_one(self, key, value):
+    def _commit_one(self, key: str, value: Any) -> None:
         if key == 'units_conversion_mode':
             UnitsService().set_conversion_mode(value)
 
-    def _pre_commit(self):
+    def _pre_commit(self) -> None:
         if self._commits == 0:
             UnitsService().start()
 

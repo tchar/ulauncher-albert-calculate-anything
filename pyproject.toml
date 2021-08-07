@@ -17,7 +17,10 @@ omit = [
 exclude_lines = [
     # Have to re-enable the standard pragma
     "# pragma: no cover",
-    "^\\s*pass\\s*$"
+    # Ignore pass
+    "^\\s*pass\\s*$",
+    # Ignore Ellipsis (...)
+    "^\\s*\\.\\.\\.\\s*$"
 ]
 ignore_errors = false
 

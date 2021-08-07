@@ -5,20 +5,22 @@ import re
 from calculate_anything.utils.iter import deduplicate
 
 
+MultiRePattern = Union[
+    Dict[str, str], Iterable[str], str, 'OrderedDict[str, str]'
+]
+
+
 class _MultiRe:
     COMPATIBILITY_ITER = 0
     COMPATIBILITY_DICT = 1
 
     def __init__(
         self,
-        value: Union[
-            Dict[str, str], Iterable[str], str, 'OrderedDict[str, str]'
-        ],
+        value: MultiRePattern,
         sort: bool = True,
         include: bool = True,
         flags: int = 0,
-    ):
-
+    ) -> None:
         if isinstance(value, dict):
             self._mode = _MultiRe.COMPATIBILITY_DICT
             if flags & re.IGNORECASE:

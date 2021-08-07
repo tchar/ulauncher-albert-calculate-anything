@@ -124,7 +124,7 @@ def mock_currency_provider(httpserver: HTTPServer):
         for klass in klasses:
             instance = klass()
             if isinstance(instance, ApiKeyCurrencyProvider):
-                instance.set_api_key(api_key)
+                instance.api_key = api_key
             instances.append(instance)
             storage[klass] = {
                 'instance': instance,

@@ -1,12 +1,18 @@
 from threading import Event, RLock, Thread
-from typing import Callable
+from typing import Callable, List
 import time
 import uuid
-from calculate_anything.currency.providers import CombinedCurrencyProvider
+from calculate_anything.currency.data import CurrencyData
+from calculate_anything.currency.providers.base import (
+    CurrencyProvider,
+)
+from calculate_anything.currency.providers.combined import (
+    CombinedCurrencyProvider,
+)
 from calculate_anything.currency.cache import CurrencyCache
-from calculate_anything.utils import Singleton, safe_operation, with_lock
+from calculate_anything.utils.singleton import Singleton
+from calculate_anything.utils.misc import safe_operation, with_lock
 from calculate_anything import logging
-from calculate_anything.currency.providers.base import CurrencyData
 
 
 __all__ = ['CurrencyService']
@@ -22,7 +28,7 @@ class UpdateThread(Thread):
         provider: CombinedCurrencyProvider,
         callback: Callable[[CurrencyData, bool], None],
         lock: RLock,
-    ):
+    ) -> None:
         super().__init__()
         self._cache = cache
         self._provider = provider
@@ -35,21 +41,25 @@ class UpdateThread(Thread):
         self._logger = logger.getChild(name)
 
     @property
-    def thread_id(self):
+    def lock(self) -> RLock:
+        return self._lock
+
+    @property
+    def thread_id(self) -> str:
         return str(self._thread_id).split('-')[-1]
 
     @property
-    def is_sleeping(self):
+    def is_sleeping(self) -> bool:
         return not self._woke_event.is_set()
 
-    def wake(self):
+    def wake(self) -> None:
         self._woke_event.set()
 
-    def stop(self):
+    def stop(self) -> None:
         self._stopped_event.set()
         self.wake()
 
-    def _get_currencies(self, *currencies, force) -> CurrencyData:
+    def _get_currencies(self, *currencies: str, force: bool) -> CurrencyData:
         if force:
             pass
         elif self._cache.enabled and not self._cache.should_update():
@@ -66,8 +76,8 @@ class UpdateThread(Thread):
         return currency_rates
 
     @with_lock
-    def _run(self, force) -> int:
-        next_update = 60
+    def _run(self, force: bool) -> float:
+        next_update = 60.0
 
         currency_rates = {}
         try:
@@ -83,7 +93,7 @@ class UpdateThread(Thread):
             next_update = max(next_update, cache_next_update)
         return next_update
 
-    def run(self):
+    def run(self) -> None:
         self._logger.info('Starting thread')
 
         force = False
@@ -107,7 +117,7 @@ class UpdateThread(Thread):
 
 
 class CurrencyService(metaclass=Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self._default_currencies = []
         self._lock = RLock()
         self._cache = CurrencyCache()
@@ -118,22 +128,26 @@ class CurrencyService(metaclass=Singleton):
         self._update_callbacks = []
 
     @property
+    def lock(self) -> RLock:
+        return self._lock
+
+    @property
     @with_lock
-    def is_running(self):
+    def is_running(self) -> bool:
         return self._is_running
 
     @is_running.setter
     @with_lock
-    def is_running(self, is_running):
+    def is_running(self, is_running: bool) -> None:
         self._is_running = is_running
 
     @property
     @with_lock
-    def provider_had_error(self):
+    def provider_had_error(self) -> bool:
         return self._provider.had_error
 
     @with_lock
-    def enable_cache(self, update_frequency):
+    def enable_cache(self, update_frequency: float) -> 'CurrencyService':
         if not self._enabled:
             logger.warning('Service is disabled, cannot enable cache')
             return self
@@ -146,35 +160,37 @@ class CurrencyService(metaclass=Singleton):
         return self
 
     @with_lock
-    def disable_cache(self):
+    def disable_cache(self) -> 'CurrencyService':
         logger.info('Disabling cache')
         self._cache.disable()
         return self
 
     @property
     @with_lock
-    def cache_enabled(self):
+    def cache_enabled(self) -> bool:
         return self._cache.enabled
 
     @property
     @with_lock
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @with_lock
-    def add_provider(self, provider):
+    def add_provider(self, provider: CurrencyProvider) -> 'CurrencyService':
         logger.info('Adding provider {}'.format(provider.__class__.__name__))
         self._provider.add_provider(provider)
         return self
 
     @with_lock
-    def remove_provider(self, provider):
+    def remove_provider(self, provider: CurrencyProvider) -> 'CurrencyService':
         logger.info('Removing provider {}'.format(provider.__class__.__name__))
         self._provider.remove_provider(provider)
         return self
 
     @with_lock
-    def set_default_currencies(self, default_currencies):
+    def set_default_currencies(
+        self, default_currencies: List[str]
+    ) -> 'CurrencyService':
         logger.info(
             'Updating default currencies = {}'.format(default_currencies)
         )
@@ -183,22 +199,26 @@ class CurrencyService(metaclass=Singleton):
 
     @property
     @with_lock
-    def default_currencies(self):
+    def default_currencies(self) -> List[str]:
         return self._default_currencies
 
     @with_lock
-    def add_update_callback(self, callback):
+    def add_update_callback(
+        self, callback: Callable[[CurrencyData, bool], None]
+    ) -> 'CurrencyService':
         self._update_callbacks.append(callback)
         return self
 
     @with_lock
-    def remove_update_callback(self, callback):
+    def remove_update_callback(
+        self, callback: Callable[[CurrencyData, bool], None]
+    ) -> 'CurrencyService':
         callbacks = self._update_callbacks
         callbacks = [cb for cb in callbacks if cb != callback]
         self._update_callbacks = callbacks
         return self
 
-    def _stop_thread(self):
+    def _stop_thread(self) -> None:
         if self._thread is None:
             return
         self._thread.stop()
@@ -211,7 +231,7 @@ class CurrencyService(metaclass=Singleton):
                 callback(data, had_error)
 
     @with_lock
-    def start(self, force=False):
+    def start(self, force: bool = False) -> 'CurrencyService':
         if force:
             pass
         elif not self._cache.enabled or self._is_running:
@@ -234,18 +254,18 @@ class CurrencyService(metaclass=Singleton):
         return self
 
     @with_lock
-    def enable(self):
+    def enable(self) -> 'CurrencyService':
         self._enabled = True
         return self
 
     @with_lock
-    def disable(self):
+    def disable(self) -> 'CurrencyService':
         self.disable_cache()
         self._enabled = False
         return self
 
     # Don't use a lock because it blocks the thread if it is just before run
-    def stop(self):
+    def stop(self) -> 'CurrencyService':
         self._stop_thread()
         self.is_running = False
         return self

@@ -178,8 +178,8 @@ class LanguageService(metaclass=Singleton):
         return multi_re.sub_dict(
             self._data[mode],
             string,
-            flags=re.IGNORECASE if ignorecase else 0,
             sort=True,
+            flags=re.IGNORECASE if ignorecase else 0,
         )
 
     def get_replacer(

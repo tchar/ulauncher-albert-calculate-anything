@@ -4,7 +4,7 @@ import pytest
 from pytz import timezone
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
-from calculate_anything.query.multi_handler import MultiHandler
+from calculate_anything.query.handlers import MultiHandler
 from calculate_anything.query.handlers import TimeQueryHandler
 from calculate_anything.constants import (
     TIME_DATETIME_FORMAT,

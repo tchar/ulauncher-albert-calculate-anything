@@ -1,3 +1,4 @@
+from calculate_anything.query.handlers.multi_handler import MultiHandler
 from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.query.handlers.units import UnitsQueryHandler
 from calculate_anything.query.handlers.percentages import (
@@ -14,6 +15,7 @@ from calculate_anything.query.handlers.base_n import (
 
 
 __all__ = [
+    'MultiHandler',
     'CalculatorQueryHandler',
     'UnitsQueryHandler',
     'PercentagesQueryHandler',

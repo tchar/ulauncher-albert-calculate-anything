@@ -1,6 +1,7 @@
 import math
 from itertools import product, chain
 import tokenize
+from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 try:
     import pint
@@ -9,6 +10,7 @@ except ImportError:  # pragma: no cover (covered artificially in tests)
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything.units import UnitsService
 from calculate_anything.currency import CurrencyService
+from calculate_anything.calculation.base import CalculationError
 from calculate_anything.calculation import (
     UnitsCalculation,
     CurrencyUnitsCalculation,
@@ -20,6 +22,7 @@ from calculate_anything.utils import Singleton, is_types, images_dir
 from calculate_anything.regex import UNIT_QUERY_SPLIT_RE, UNIT_SPLIT_RE
 from calculate_anything.exceptions import (
     CurrencyProviderException,
+    ExtendedException,
     MissingPintException,
     ZeroDivisionException,
 )
@@ -32,10 +35,12 @@ logger = logging.getLogger(__name__)
 
 
 class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('=')
 
-    def _items_for_currency_errors(self, units):
+    def _items_for_currency_errors(
+        self, units: Iterable['pint.Unit']
+    ) -> List[CalculationError]:
         dimensionalities = set(unit.dimensionality for unit in units)
         currency_service = CurrencyService()
 
@@ -45,14 +50,12 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             and any(map(lambda d: '[currency]' in d, dimensionalities))
         )
         if currency_provider_had_error:
-            item = UnitsCalculation(
-                error=CurrencyProviderException(),
-            )
+            item = CalculationError(CurrencyProviderException())
             return [item]
         return []
 
     @staticmethod
-    def _extract_query(query):
+    def _extract_query(query: str) -> Tuple[str, List[str]]:
         query = UNIT_QUERY_SPLIT_RE.split(query, maxsplit=1)
 
         unit_from = query[0].strip()
@@ -67,7 +70,9 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         return unit_from, units_to
 
-    def _get_all_possible_units(self, unit_from):
+    def _get_all_possible_units(
+        self, unit_from: str
+    ) -> Generator[str, None, None]:
         ureg = UnitsService().unit_registry
         replacer = LanguageService().get_replacer('units', ignorecase=True)
 
@@ -121,7 +126,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 expression = expression_fmt.format(*expression)
                 yield expression
 
-    def _get_only_one_unit(self, unit_from):
+    def _get_only_one_unit(self, unit_from: str) -> Generator[str, None, None]:
         translator = LanguageService().get_translator('units')
         replacer = LanguageService().get_replacer('units', ignorecase=True)
 
@@ -150,12 +155,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             yield unit_from_alt
         yield unit_from
 
-    def _get_possible_units(self, unit_from):
+    def _get_possible_units(
+        self, unit_from: str
+    ) -> Generator[str, None, None]:
         if UnitsService().conversion_mode == UnitsService.ConversionMode.CRAZY:
             return self._get_all_possible_units(unit_from)
         return self._get_only_one_unit(unit_from)
 
-    def _parse_safe(self, expression):
+    def _parse_safe(
+        self, expression: str
+    ) -> Tuple[Optional['pint.Quantity'], Optional[ExtendedException]]:
         unit = None
         error_to_show = None
         try:
@@ -185,7 +194,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                 )
             )
         except Exception as e:  # pragma: no cover
-            logger.exception(  # pragma: no cover
+            logger.exception(
                 'Got exception when trying to parse: {!r}: {}'.format(
                     expression, e
                 )
@@ -193,33 +202,41 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
         return unit, error_to_show
 
-    def can_handle(self, query):
+    def can_handle(self, query: str) -> bool:
         if not super().can_handle(query):
             return False
         if '%' in query:
             return False
         return True
 
-    def handle_raw(self, query):
+    def handle_raw(
+        self, query: str
+    ) -> Optional[
+        List[
+            Union[
+                UnitsCalculation,
+                TemperatureUnitsCalculation,
+                CurrencyUnitsCalculation,
+                CalculationError,
+            ]
+        ]
+    ]:
         if pint is None:
-            item = UnitsCalculation(
-                error=MissingPintException(),
-            )
+            item = CalculationError(MissingPintException())
             return [item]
         if not UnitsService().running:
             return None
 
         original_query = query
-        query = UnitsQueryHandler._extract_query(query)
 
         ureg = UnitsService().unit_registry
         base_currency = UnitsService().base_currency
-        unit_from, units_to = query
+        unit_from, units_to = UnitsQueryHandler._extract_query(query)
 
         parse_err = None
         unit_from_ureg_currency = None
         unit_set = set()
-        units_from_ureg = []
+        units_from_ureg: List['pint.Quantity'] = []
         with ureg.context('currency'):
             for expression in self._get_possible_units(unit_from):
                 unit_from_ureg, parse_err = self._parse_safe(expression)
@@ -228,7 +245,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
                     break
                 if unit_from_ureg is None:
                     continue
-                unit_from_ureg_unit = unit_from_ureg.units
+                unit_from_ureg_unit: 'pint.Unit' = unit_from_ureg.units
                 if unit_from_ureg_unit in unit_set:
                     continue
                 if UnitsCalculation.is_currency(unit_from_ureg):
@@ -241,7 +258,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             suffix = ', '.join(units_to)
             suffix = ' to {}'.format(suffix) if suffix else ''
             query = '{}{}'.format(parse_err_expression, suffix)
-            item = UnitsCalculation(query=query, error=parse_err)
+            item = CalculationError(parse_err, query)
             return [item]
 
         items = []
@@ -332,10 +349,10 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
 
             items.append(
                 UnitClass(
-                    value=unit_converted,
-                    rate=rate,
-                    unit_from=unit_from_ureg.units,
-                    unit_to=unit_to_ureg,
+                    unit_converted,
+                    unit_from_ureg.units,
+                    unit_to_ureg,
+                    rate,
                     query='{} {} to {}'.format(
                         unit_from_ureg.magnitude,
                         unit_from_ureg.units,
@@ -350,16 +367,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             Q = ureg.Quantity
             items.append(
                 CurrencyUnitsCalculation(
-                    value=unit_from_ureg_currency,
-                    rate=Q(1.0, unit_from_ureg_currency.units),
-                    unit_from=unit_from_ureg_currency.units,
-                    unit_to=unit_from_ureg_currency.units,
-                    query='{0} {1} to {1}'.format(
+                    unit_from_ureg_currency,
+                    unit_from_ureg_currency.units,
+                    unit_from_ureg_currency.units,
+                    Q(1.0, unit_from_ureg_currency.units),
+                    None,
+                    '{0} {1} to {1}'.format(
                         unit_from_ureg_currency.magnitude,
                         unit_from_ureg_currency.units,
                     ),
-                    order=len(items),
-                    update_timestamp=None,
+                    len(items),
                 )
             )
         return items

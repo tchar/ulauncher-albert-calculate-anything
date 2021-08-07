@@ -1,5 +1,7 @@
 import json
+from typing import List
 from calculate_anything import logging
+from calculate_anything.time.data import CityData
 from calculate_anything.constants import TIMEZONES_JSON_FILE
 
 
@@ -7,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class TimezoneJsonCache:
-    def __init__(self):
+    def __init__(self) -> None:
         self._data = {}
 
-    def load(self):
+    def load(self) -> bool:
         try:
             with open(TIMEZONES_JSON_FILE, 'r', encoding='utf-8') as f:
                 self._data = json.loads(f.read())
@@ -23,7 +25,7 @@ class TimezoneJsonCache:
             return False  # pragma: no cover
         return True
 
-    def get(self, city_name, *search_terms):
+    def get(self, city_name: str, *search_terms: str) -> List[CityData]:
         city_code = city_name.strip().lower()
         if city_code not in self._data:
             return []

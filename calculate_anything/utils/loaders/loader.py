@@ -1,6 +1,13 @@
 from abc import ABC, abstractmethod
 from enum import IntFlag
 from functools import wraps
+from typing import Any, Callable, TypeVar
+
+
+__all__ = ['Loader']
+
+
+RT = TypeVar('RT')
 
 
 class Loader(ABC):
@@ -24,15 +31,11 @@ class Loader(ABC):
         VALIDATE = LOAD << 5
         FALLBACK = LOAD << 6
 
-    def __init__(self, status=0, mode=0):
-        self._mode = mode
-        self._status = status
-
     class Decorators:
         @staticmethod
-        def with_data(func):
+        def with_data(func: Callable[..., RT]) -> RT:
             @wraps(func)
-            def _wrapper(self: 'Loader', *args, **kwargs):
+            def _wrapper(self: 'Loader', *args: Any, **kwargs: Any) -> Any:
                 if self.data is None:
                     return None
                 return func(self, *args, **kwargs)
@@ -40,10 +43,12 @@ class Loader(ABC):
             return _wrapper
 
         @staticmethod
-        def with_mode(mode: IntFlag):
-            def _decorator(func):
+        def with_mode(
+            mode: 'Loader.Mode',
+        ) -> Callable[[Callable[..., RT]], Callable[..., RT]]:
+            def _decorator(func: Callable[..., RT]) -> RT:
                 @wraps(func)
-                def _wrapper(self: 'Loader', *args, **kwargs):
+                def _wrapper(self: 'Loader', *args: Any, **kwargs: Any) -> Any:
                     if self._mode & mode:
                         return func(self, *args, **kwargs)
                     return None
@@ -53,10 +58,12 @@ class Loader(ABC):
             return _decorator
 
         @staticmethod
-        def without_mode(mode: IntFlag):
-            def _decorator(func):
+        def without_mode(
+            mode: 'Loader.Mode',
+        ) -> Callable[[Callable[..., RT]], Callable[..., RT]]:
+            def _decorator(func: Callable[..., RT]) -> RT:
                 @wraps(func)
-                def _wrapper(self: 'Loader', *args, **kwargs):
+                def _wrapper(self: 'Loader', *args: Any, **kwargs: Any) -> Any:
                     if self._mode & mode:
                         return None
                     return func(self, *args, **kwargs)
@@ -66,10 +73,12 @@ class Loader(ABC):
             return _decorator
 
         @staticmethod
-        def with_status(status: IntFlag):
-            def _decorator(func):
+        def with_status(
+            status: 'Loader.Status',
+        ) -> Callable[[Callable[..., RT]], Callable[..., RT]]:
+            def _decorator(func: Callable[..., RT]) -> RT:
                 @wraps(func)
-                def _wrapper(self: 'Loader', *args, **kwargs):
+                def _wrapper(self: 'Loader', *args: Any, **kwargs: Any) -> Any:
                     if self._status & status:
                         return func(self, *args, **kwargs)
                     return None
@@ -79,10 +88,12 @@ class Loader(ABC):
             return _decorator
 
         @staticmethod
-        def without_status(status: IntFlag):
-            def _decorator(func):
+        def without_status(
+            status: 'Loader.Status',
+        ) -> Callable[[Callable[..., RT]], Callable[..., RT]]:
+            def _decorator(func: Callable[..., RT]) -> RT:
                 @wraps(func)
-                def _wrapper(self: 'Loader', *args, **kwargs):
+                def _wrapper(self: 'Loader', *args: Any, **kwargs: Any) -> Any:
                     if self._status & status:
                         return None
                     return func(self, *args, **kwargs)
@@ -90,19 +101,24 @@ class Loader(ABC):
                 return _wrapper
 
             return _decorator
+
+    def __init__(self, status: Status = 0, mode: Mode = 0) -> None:
+        self._mode = mode
+        self._status = status
 
     @property
-    def status(self):
+    def status(self) -> Status:
         return self._status
 
     @property
-    def mode(self):
+    def mode(self) -> Mode:
         return self._mode
 
     @property
-    def data(self):
-        return None  # pragma: no cover
+    @abstractmethod
+    def data(self) -> Any:
+        ...
 
     @abstractmethod
     def load(self) -> None:
-        pass
+        ...

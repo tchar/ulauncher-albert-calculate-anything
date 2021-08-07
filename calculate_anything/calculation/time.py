@@ -1,5 +1,6 @@
+from typing import Tuple, Union
 from calculate_anything.lang import LanguageService
-from calculate_anything.calculation.base import _Calculation
+from calculate_anything.calculation.base import Calculation
 from calculate_anything.utils.datetime import is_leap_year
 from calculate_anything.utils import images_dir
 from calculate_anything.constants import (
@@ -8,7 +9,9 @@ from calculate_anything.constants import (
     TIME_DATE_FORMAT,
     TIME_TIME_FORMAT,
 )
+from calculate_anything.time.data import CityData
 from calculate_anything.query.result import QueryResult
+from datetime import datetime, timedelta
 
 
 __all__ = [
@@ -18,15 +21,18 @@ __all__ = [
 ]
 
 
-class TimeCalculation(_Calculation):
+class TimeCalculation(Calculation):
     def __init__(
-        self, value=None, reference_date=None, query='', error=None, order=0
+        self,
+        value: Union[datetime, timedelta],
+        reference_date: datetime,
+        query: str,
+        order: int = 0,
     ):
-        super().__init__(value=value, query=query, error=error, order=order)
+        super().__init__(value, query, order)
         self.reference_date = reference_date
 
-    @_Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         translator = LanguageService().get_translator('time')
 
         now = self.reference_date
@@ -100,13 +106,12 @@ class TimeCalculation(_Calculation):
 
 class LocationTimeCalculation(TimeCalculation):
     def __init__(
-        self, value=None, location=None, query='', error=None, order=-1
+        self, value: datetime, location: CityData, query: str, order: int = 0
     ):
-        super().__init__(value=value, query=query, error=error, order=order)
+        super().__init__(value, None, query, order)
         self.location = location
 
-    @TimeCalculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         timezone_name = self.value.tzname()
         utc = int(self.value.utcoffset().total_seconds() / 60 / 60)
         utc = 'UTC{:+}'.format(utc)
@@ -146,23 +151,16 @@ class LocationTimeCalculation(TimeCalculation):
 class TimedeltaCalculation(TimeCalculation):
     def __init__(
         self,
-        value=None,
-        reference_date=None,
-        target_date=None,
-        query='',
-        error=None,
-        order=0,
-    ):
-        super().__init__(
-            value=value,
-            reference_date=reference_date,
-            query=query,
-            error=error,
-            order=order,
-        )
+        value: timedelta,
+        reference_date: datetime,
+        target_date: datetime,
+        query: str,
+        order: int = 0,
+    ) -> None:
+        super().__init__(value, reference_date, query, order=order)
         self.target_date = target_date
 
-    def _calculate_diff(self):
+    def _calculate_diff(self) -> Tuple[int, int, int, int, int, int]:
         target_date = self.target_date
         reference = self.reference_date
         if target_date < reference:
@@ -192,8 +190,7 @@ class TimedeltaCalculation(TimeCalculation):
         dmins, dsecs = divmod(remainder, 60)
         return sign, dyears, ddays, dhours, dmins, dsecs
 
-    @TimeCalculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         sign, dyears, ddays, dhours, dmins, dsecs = self._calculate_diff()
 
         translator = LanguageService().get_translator('time')
