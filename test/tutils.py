@@ -365,10 +365,7 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
         assert len(test_spec['results']) == 0
         return
 
-    assert len(test_spec['results']) == len(results)
-
     results = sorted(results, key=lambda result: result.order)
-    assert len(test_spec['results']) == len(results)
 
     for result, item in zip(results, test_spec['results']):
         if only_qr:
@@ -385,6 +382,8 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
 
         query_result = result.to_query_result()
         test_query_result(item, query_result)
+
+    assert len(test_spec['results']) == len(results)
 
 
 @lru_cache(maxsize=None)

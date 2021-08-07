@@ -226,7 +226,7 @@ class CurrencyUnitsCalculation(UnitsCalculation):
         return currency_name
 
     def format(self) -> Tuple[str, str]:
-        def currency_alias_f(m: re.Match) -> str:
+        def currency_alias_f(m: 're.Match') -> str:
             currency = m.group(0)[9:]
             currency_alias = CurrencyUnitsCalculation._currency_alias(currency)
             if currency == currency_alias:

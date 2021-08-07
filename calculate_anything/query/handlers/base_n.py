@@ -89,7 +89,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
     def _parse_expression(
         self, expression: str, split_eq: bool = True, sub_kw: bool = True
     ) -> Tuple[List[str], List[str], List[str]]:
-        def convert_to_base_n(m: re.Match) -> str:
+        def convert_to_base_n(m: 're.Match') -> str:
             return str(int(m.group(0), self._base))
 
         if sub_kw:

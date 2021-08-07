@@ -29,7 +29,7 @@ class CalculatorCalculation(Calculation):
         return ''
 
     def format_query(self) -> str:
-        def sub_i(match: re.Match) -> str:
+        def sub_i(match: 're.Match') -> str:
             group = match.group(0).lstrip()
             if group.startswith('1j'):
                 return 'i'
