@@ -20,6 +20,7 @@ RT = TypeVar('RT')
 
 class CurrencyCache:
     class Decorators:
+        @staticmethod
         def preload(func: Callable[..., RT]) -> Callable[..., RT]:
             @wraps(func)
             def _wrapper(

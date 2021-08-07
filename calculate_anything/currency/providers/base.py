@@ -20,6 +20,7 @@ class CurrencyProvider(ABC):
     API_URL: str
 
     class Decorators:
+        @staticmethod
         def with_ratelimit(func: Callable[..., RT]) -> RT:
             @wraps(func)
             def _wrapper(
@@ -82,6 +83,7 @@ class FreeCurrencyProvider(CurrencyProvider):
 
 class ApiKeyCurrencyProvider(CurrencyProvider):
     class Decorators(CurrencyProvider.Decorators):
+        @staticmethod
         def with_valid_api_key(func: Callable[..., RT]) -> RT:
             @wraps(func)
             def _wrapper(

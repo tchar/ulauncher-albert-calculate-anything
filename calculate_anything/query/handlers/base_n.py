@@ -75,7 +75,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         self,
         keyword: str,
         base: int,
-        digits_re: re.Pattern,
+        digits_re: 're.Pattern',
         base_class: Type['BaseNQueryHandler'],
         convert_classes: List[Type['BaseNQueryHandler']] = [],
     ) -> None:
