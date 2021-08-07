@@ -48,7 +48,7 @@ from calculate_anything.preferences import Preferences  # noqa: E402
 from calculate_anything.lang import LanguageService  # noqa: E402
 from calculate_anything.time import TimezoneService  # noqa: E402
 from calculate_anything.currency import CurrencyService  # noqa: E402
-from calculate_anything.query import MultiHandler  # noqa: E402
+from calculate_anything.query.handlers import MultiHandler  # noqa: E402
 from calculate_anything.query.handlers import (  # noqa: E402
     UnitsQueryHandler,
     CalculatorQueryHandler,

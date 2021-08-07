@@ -195,8 +195,9 @@ class MyHandler(QyeryHandler):
             return [calculation]
         
         value = calculation.value
-        calculation1 = Calculation(value=value + 1, order=0)
-        calculation2 = Calculation(value=value + 1.2, order=1)
+        parsed_query = calculation.query
+        calculation1 = Calculation(value + 1, parsed_query, order=0)
+        calculation2 = Calculation(value + 1.2, parsed_query, order=1)
         return [calculation1, calculation2]
 
 

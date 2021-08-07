@@ -12,7 +12,7 @@ class ExtendedException(Exception):
     holds extra information
     '''
 
-    def __init__(self, message='', extra: Optional[Any] = None):
+    def __init__(self, message: str = '', extra: Optional[Any] = None) -> None:
         '''Args:
         message (str): The message for this exception
         extra (any, optional): Any extra information to be kept

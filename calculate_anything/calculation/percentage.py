@@ -1,5 +1,7 @@
-from typing import Tuple
-from calculate_anything.calculation import Calculation
+from typing import List, Tuple, Union
+from calculate_anything.exceptions import ExtendedException
+from calculate_anything.calculation.base import CalculationError
+from calculate_anything.calculation import CalculatorCalculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import images_dir
@@ -12,35 +14,42 @@ __all__ = [
 ]
 
 
-class PercentageCalculation(Calculation):
-    def __init__(self, value=None, query='', amounts=(), error=None, order=0):
-        super().__init__(value, query=query, error=error, order=order)
-        self.amounts: Tuple[Calculation, Calculation] = amounts
+class PercentageCalculationError(CalculationError):
+    def __init__(
+        self, error: ExtendedException, query: str, amounts=()
+    ) -> None:
+        super().__init__(error, query)
+        self.amounts = amounts
 
-    @property
-    def is_error(self):
-        return super().is_error or all(
-            map(lambda amount: amount.error is not None, self.amounts)
-        )
 
-    def _get_extra_descriptions(self):
+class PercentageCalculation(CalculatorCalculation):
+    def __init__(
+        self,
+        value: Union[float, int, complex, bool],
+        query: str,
+        amounts: Tuple[CalculatorCalculation, CalculatorCalculation] = (),
+        order: int = 0,
+    ):
+        super().__init__(value, query=query, order=order)
+        self.amounts = amounts
+
+    def _get_extra_descriptions(self) -> List[str]:
         translator = LanguageService().get_translator('calculator')
 
         value_type = self.value_type
         extra_descriptions = []
-        if value_type == Calculation.VALUE_COMPLEX:
+        if value_type == CalculatorCalculation.ValueType.COMPLEX:
             extra_descriptions.append(
                 translator('result-complex').capitalize()
             )
-        elif value_type == Calculation.VALUE_IMAGINARY:
+        elif value_type == CalculatorCalculation.ValueType.IMAGINARY:
             extra_descriptions.append(
                 translator('result-imaginary').capitalize()
             )
 
         return extra_descriptions
 
-    @Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         name = self.format()
         description = '({}) + ({:})%'.format(
             self.amounts[0].format(), self.amounts[1].format()
@@ -62,16 +71,15 @@ class PercentageCalculation(Calculation):
 
 
 class NormalPercentageCalculation(PercentageCalculation):
-    @PercentageCalculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         translator = LanguageService().get_translator('calculator')
         result_formatted = self.format()
         name = result_formatted
 
         amount1 = self.amounts[0]
         if (
-            amount1.value_type == Calculation.VALUE_IMAGINARY
-            or amount1.value_type == Calculation.VALUE_COMPLEX
+            amount1.value_type == CalculatorCalculation.ValueType.IMAGINARY
+            or amount1.value_type == CalculatorCalculation.ValueType.COMPLEX
         ):
             amount1 = '({})'.format(amount1.format())
         else:
@@ -98,14 +106,13 @@ class NormalPercentageCalculation(PercentageCalculation):
 
 
 class InversePercentageCalculation(PercentageCalculation):
-    @PercentageCalculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         translator = LanguageService().get_translator('calculator')
         result_formatted = self.format()
 
         if (
-            self.value_type == Calculation.VALUE_IMAGINARY
-            or self.value_type == Calculation.VALUE_COMPLEX
+            self.value_type == CalculatorCalculation.ValueType.IMAGINARY
+            or self.value_type == CalculatorCalculation.ValueType.COMPLEX
         ):
             result_formatted = '({})'.format(result_formatted)
 

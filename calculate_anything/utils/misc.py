@@ -1,12 +1,5 @@
 '''Miscellaneous utility functions'''
 
-
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
 from typing import (
     Any,
     Callable,
@@ -15,8 +8,15 @@ from typing import (
     List,
     Optional,
     Type,
+    TypeVar,
     Union,
 )
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 from contextlib import contextmanager
 from functools import lru_cache, wraps
 import os
@@ -37,6 +37,9 @@ __all__ = [
     'safe_operation',
     'with_lock',
 ]
+
+
+RT = TypeVar('RT')
 
 
 def get_module(name: str) -> Union[None, ModuleType]:
@@ -134,7 +137,7 @@ def is_integer(value: Any) -> bool:
 class StupidEval:
     '''Mock class replacement for SimpleEval if simpleeval is not installed.'''
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.operators = {}
 
     @staticmethod
@@ -188,29 +191,27 @@ def safe_operation(message: str = '') -> Iterator[None]:
         if message:
             msg = '{}: {}'.format(message, e)
         logger.exception('Got error in safe operation: {}'.format(msg))
-    finally:
-        pass
 
 
-class Lockable(Protocol):
-    _lock: RLock
+class LockableClass(Protocol):
+    lock: RLock
 
 
-def with_lock(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
+def with_lock(func: Callable[..., RT]) -> Callable[..., RT]:
     '''Method decorator for classes that use locks. The class should
-    have a property called '_lock' and the lock should be a contextmanager.
+    have a property called 'lock' and the lock should be a contextmanager.
     (i.e threading.RLock).
 
     Args:
-        func (Callable): A method to decorate
+        func (LockableCallable): A method to decorate
 
     Returns:
-        func (Callable): The method decorated with lock.
+        LockableCallable: The method decorated with lock.
     '''
 
     @wraps(func)
-    def _wrapper(self: Lockable, *args, **kwargs):
-        with self._lock:
+    def _wrapper(self: LockableClass, *args: Any, **kwargs: Any) -> Any:
+        with self.lock:
             return func(self, *args, **kwargs)
 
     return _wrapper

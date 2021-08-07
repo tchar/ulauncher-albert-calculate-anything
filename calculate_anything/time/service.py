@@ -1,4 +1,6 @@
 import re
+from typing import List
+from calculate_anything.time.data import CityData
 from calculate_anything.time.sqlite_cache import TimezoneSqliteCache
 from calculate_anything.time.json_cache import TimezoneJsonCache
 from calculate_anything.utils import Singleton
@@ -8,23 +10,28 @@ __all__ = ['TimezoneService']
 
 
 class TimezoneService(metaclass=Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self._default_cities = []
         self._default_cities_search = []
         self._running = False
         self._cache = TimezoneSqliteCache()
 
-    def get(self, name, *search_terms):
+    def get(self, name: str, *search_terms: str) -> List[CityData]:
         return self._cache.get(name, *search_terms)
 
     @property
-    def default_cities(self):
+    def default_cities(self) -> List[CityData]:
         return self._default_cities
 
-    def set_default_cities(self, default_cities):
+    def set_default_cities(
+        self, default_cities: List[CityData]
+    ) -> 'TimezoneService':
         self._default_cities_search = default_cities
+        return self
 
-    def parse_default_cities_str(self, default_cities_str, save=False):
+    def parse_default_cities_str(
+        self, default_cities_str: str, save: bool = False
+    ) -> List[CityData]:
         regex = re.compile(r'^(.*)\s+([a-z]{2,3})$', flags=re.IGNORECASE)
 
         default_cities = default_cities_str.strip().split(',')
@@ -49,7 +56,7 @@ class TimezoneService(metaclass=Singleton):
             self._default_cities_from_parsed()
         return cities
 
-    def _default_cities_from_parsed(self):
+    def _default_cities_from_parsed(self) -> None:
         cities = []
         for city, country_code in self._default_cities_search:
             search_terms = (country_code,) if country_code else ()
@@ -59,7 +66,7 @@ class TimezoneService(metaclass=Singleton):
                 cities.extend(self._cache.get(city, *search_terms))
         self._default_cities = cities
 
-    def start(self):
+    def start(self) -> 'TimezoneService':
         if self._running:
             return
         if not self._cache.load():
@@ -68,7 +75,9 @@ class TimezoneService(metaclass=Singleton):
             self._cache = fallback
         self._default_cities_from_parsed()
         self._running = True
+        return self
 
-    def stop(self):
+    def stop(self) -> 'TimezoneService':
         if isinstance(self._cache, TimezoneSqliteCache):
             self._cache.close_db()
+        return self

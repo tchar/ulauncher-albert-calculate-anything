@@ -1,3 +1,4 @@
+from typing import Tuple
 from urllib.parse import urljoin
 from urllib.request import urlopen
 from urllib.error import HTTPError
@@ -27,7 +28,9 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
         cls = ECBCurrencyProvider
         return urljoin(cls.BASE_URL, cls.API_URL)
 
-    def _validate_data(self, data):
+    def _validate_data(
+        self, data: str
+    ) -> Tuple[ElementTree.ElementTree, float]:
         try:
             xml_tree = ElementTree.fromstring(data)  # nosec
         except ElementTree.ParseError as e:
@@ -49,8 +52,40 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
 
         return xml_tree, timestamp
 
+    def _convert_data(
+        self, xml_tree: ElementTree.Element, timestamp: float
+    ) -> CurrencyData:
+        currency_data = {'EUR': {'rate': 1.0, 'timestamp_refresh': timestamp}}
+
+        valid_cnt = 0
+        all_cnt = 0
+        for i, child in enumerate(xml_tree[2][0]):
+            try:
+                curr = child.attrib['currency']
+                rate = float(child.attrib['rate'])
+                currency_data[curr] = {
+                    'rate': rate,
+                    'timestamp_refresh': timestamp,
+                }
+                valid_cnt += 1
+            except Exception as e:
+                logger.exception(
+                    'Could not read rate for currency at line {}: {}'.format(
+                        i, e
+                    )
+                )
+            all_cnt += 1
+
+        if valid_cnt == 0 and all_cnt != 0:
+            self.had_error = True
+            raise CurrencyProviderException('Could not get any data')
+
+        return currency_data
+
     @FreeCurrencyProvider.Decorators.with_ratelimit
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
         try:
             request = self.get_request()
             logger.info('Making request to: {}'.format(request.full_url))
@@ -78,20 +113,6 @@ class ECBCurrencyProvider(FreeCurrencyProvider):
             logger.exception(e)
             raise e
 
-        currency_data = {'EUR': {'rate': 1.0, 'timestamp_refresh': timestamp}}
-        for i, child in enumerate(xml_tree[2][0]):
-            try:
-                curr = child.attrib['currency']
-                rate = float(child.attrib['rate'])
-                currency_data[curr] = {
-                    'rate': rate,
-                    'timestamp_refresh': timestamp,
-                }
-            except Exception as e:
-                logger.exception(
-                    'Could not read rate for currency at line {}: {}'.format(
-                        i, e
-                    )
-                )
+        currency_data = self._convert_data(xml_tree, timestamp)
         self.had_error = False
         return currency_data

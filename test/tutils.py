@@ -55,8 +55,19 @@ def mem_path():
 @contextmanager
 def calculator_no_simpleeval():
     calculator_handler.SimpleEval = StupidEval
-    yield
+    get_simple_eval = calculator_handler.get_simple_eval
+    calculator_handler.get_simple_eval = StupidEval
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
+    calculator_handler.get_simple_eval = get_simple_eval
     calculator_handler.SimpleEval = SimpleEval
+    if exc:
+        raise exc
 
 
 @contextmanager
@@ -64,53 +75,103 @@ def base_n_no_simpleeval():
     base_n_handler.SimpleEval = StupidEval
     get_simple_eval = base_n_handler.get_simple_eval
     base_n_handler.get_simple_eval = StupidEval
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     base_n_handler.get_simple_eval = get_simple_eval
     base_n_handler.SimpleEval = SimpleEval
+    if exc:
+        raise exc
 
 
 @contextmanager
 def no_parsedatetime():
     time_handler.parsedatetime = None
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     time_handler.parsedatetime = parsedatetime
+    if exc:
+        raise exc
 
 
 @contextmanager
 def no_pint(units_service=True):
     pint = units_handler.pint
     units_handler.pint = None
+    exc = None
     if units_service:
-        yield
+        try:
+            yield
+        except Exception as e:
+            exc = e
     else:
         UnitsService()._running = False
-        yield
+        try:
+            yield
+        except Exception as e:
+            exc = e
         UnitsService()._running = True
+
     units_handler.pint = pint
+    if exc:
+        raise exc
 
 
 @contextmanager
 def no_default_currencies():
     default_currencies = CurrencyService().default_currencies
     CurrencyService().set_default_currencies([])
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     CurrencyService().set_default_currencies(default_currencies)
+    if exc:
+        raise exc
 
 
 @contextmanager
 def no_default_cities():
     default_cities = TimezoneService().default_cities
     TimezoneService().set_default_cities([])
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     TimezoneService().set_default_cities(default_cities)
+    if exc:
+        raise exc
 
 
 @contextmanager
 def set_time_reference(datetime):
     now = time_handler.TimeQueryHandler.now
     time_handler.TimeQueryHandler.now = lambda: datetime
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     time_handler.TimeQueryHandler.now = now
+    if exc:
+        raise exc
 
 
 @contextmanager
@@ -120,8 +181,16 @@ def extra_translations(mode, translations):
         LanguageService()._data[mode] = {}
     for k, v in translations.items():
         LanguageService()._data[mode][k] = v
-    yield
+
+    exc = None
+    try:
+        yield
+    except Exception as e:
+        exc = e
+
     LanguageService()._data = old_data
+    if exc:
+        raise exc
 
 
 def osremove(path):
@@ -157,25 +226,32 @@ def temp_filepath(*filenames):
 def temp_file(*filenames, sleep=0):
     filepaths = []
     filenames = filter(None, filenames)
-    try:
-        for filename, data in filenames:
-            filepath = temp_filepath(filename)
-            if isinstance(data, str):
-                with open(filepath, 'w', encoding='utf-8') as f:
-                    f.write(data)
-            else:
-                os.mkdir(filepath)
-            time.sleep(sleep)
-            filepaths.append(filepath)
-        if len(filepaths) == 1:
-            yield filepaths[0]
-        elif len(filepaths) > 1:
-            yield filepaths
+    for filename, data in filenames:
+        filepath = temp_filepath(filename)
+        if isinstance(data, str):
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(data)
         else:
-            yield
-    finally:
-        for filepath in filepaths:
-            osremove(filepath)
+            os.mkdir(filepath)
+        time.sleep(sleep)
+        filepaths.append(filepath)
+    if len(filepaths) == 1:
+        yield_val = filepaths[0]
+    elif len(filepaths) > 1:
+        yield_val = filepaths
+    else:
+        yield_val = None
+
+    exc = None
+    try:
+        yield yield_val
+    except Exception as e:
+        exc = e
+    for filepath in filepaths:
+        osremove(filepath)
+
+    if exc:
+        raise exc
 
 
 @contextmanager
@@ -188,7 +264,11 @@ def reset_instance(*classes):
             del Singleton._instances[cls]
 
     tmp_classes = tuple(cls() for cls in classes)
-    yield tmp_classes
+    exc = None
+    try:
+        yield tmp_classes
+    except Exception as e:
+        exc = e
 
     for cls in classes:
         del Singleton._instances[cls]
@@ -196,6 +276,9 @@ def reset_instance(*classes):
             Singleton._instances[cls] = old_instances[cls]
         else:
             cls()
+
+    if exc:
+        raise exc
 
 
 class Approx:
@@ -282,10 +365,7 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
         assert len(test_spec['results']) == 0
         return
 
-    assert len(test_spec['results']) == len(results)
-
     results = sorted(results, key=lambda result: result.order)
-    assert len(test_spec['results']) == len(results)
 
     for result, item in zip(results, test_spec['results']):
         if only_qr:
@@ -302,6 +382,8 @@ def query_test_helper(cls, test_spec, raw=False, only_qr=False):
 
         query_result = result.to_query_result()
         test_query_result(item, query_result)
+
+    assert len(test_spec['results']) == len(results)
 
 
 @lru_cache(maxsize=None)

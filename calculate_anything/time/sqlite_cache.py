@@ -1,10 +1,12 @@
-from threading import RLock
+from typing import Generator, Iterable, List, Tuple
 
 try:
     import sqlite3
 except ImportError:  # pragma: no cover
     sqlite3 = None  # pragma: no cover
+from threading import RLock
 from calculate_anything import logging
+from calculate_anything.time.data import CityData
 from calculate_anything.utils import with_lock
 from calculate_anything.utils.loaders import SqliteLoader
 from calculate_anything.constants import (
@@ -18,13 +20,17 @@ logger = logging.getLogger(__name__)
 
 
 class TimezoneSqliteCache:
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._db = None
         self._lock = RLock()
 
+    @property
+    def lock(self) -> RLock:
+        return self._lock
+
     @with_lock
-    def load(self):
+    def load(self) -> bool:
         if sqlite3 is None:
             return False  # pragma: no cover
 
@@ -42,7 +48,7 @@ class TimezoneSqliteCache:
         self._post_init()
         return True
 
-    def _post_init(self):
+    def _post_init(self) -> None:
         try:
             cur = self._db.cursor()
             rows = cur.execute(
@@ -59,7 +65,9 @@ class TimezoneSqliteCache:
         finally:
             cur.close()
 
-    def _query_no_search_terms(self, city_name_search, exact):
+    def _query_no_search_terms(
+        self, city_name_search: str, exact: bool
+    ) -> Generator[Tuple[int, str, str, str, str], None, None]:
         if not exact:
             primary_query = '''name_alias LIKE ? || '%' '''
             param = city_name_search
@@ -83,7 +91,9 @@ class TimezoneSqliteCache:
             yield row
         cur.close()
 
-    def _query_search_terms(self, city_name_search, search_terms, exact):
+    def _query_search_terms(
+        self, city_name_search: str, search_terms: Iterable[str], exact: bool
+    ) -> Generator[Tuple[int, str, str, str, str], None, None]:
         countries_query = []
         countries_params = []
 
@@ -169,7 +179,9 @@ class TimezoneSqliteCache:
             yield row
         cur.close()
 
-    def get(self, city_name_search, *search_terms, exact=False):
+    def get(
+        self, city_name_search: str, *search_terms: str, exact: bool = False
+    ) -> List[CityData]:
         # Allow user to use underscore in LIKE
         city_name_search = city_name_search.replace('?', '')
         search_terms = map(lambda s: s.replace('?', ''), search_terms)

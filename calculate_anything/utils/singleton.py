@@ -1,10 +1,13 @@
 '''Singleton class.'''
 
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, TypeVar
 from functools import wraps
 
 
 __all__ = ['Singleton']
+
+
+RT = TypeVar('RT')
 
 
 class Singleton(type):
@@ -14,7 +17,7 @@ class Singleton(type):
     _functions = {}
 
     @classmethod
-    def function(cls, func: Callable[[Any], Any]) -> Callable[[Any], Any]:
+    def function(cls, func: Callable[..., RT]) -> Callable[..., RT]:
         '''Singleton function decorator.
 
         Args:
@@ -25,7 +28,7 @@ class Singleton(type):
         '''
 
         @wraps(func)
-        def _wrapper(*args, **kwargs):
+        def _wrapper(*args: Any, **kwargs: Any) -> Any:
             if func not in cls._functions:
                 cls._functions[func] = func(*args, **kwargs)
             return cls._functions[func]

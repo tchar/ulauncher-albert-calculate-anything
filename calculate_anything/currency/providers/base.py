@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import wraps
 import re
-from typing import Any, Iterable
+from typing import Any, Callable, Dict, Iterable, TypeVar
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 from urllib.request import Request
 from calculate_anything.currency.data import CurrencyData
@@ -12,20 +12,22 @@ from calculate_anything.exceptions import CurrencyProviderException
 __all__ = ['ApiKeyCurrencyProvider', 'FreeCurrencyProvider']
 
 
-class _MockCurrencyProvider:
-    def __init__(self, *args, **kwargs):
-        pass
+RT = TypeVar('RT')
 
 
 class CurrencyProvider(ABC):
+    BASE_URL: str
+    API_URL: str
+
     class Decorators:
-        def with_ratelimit(func):
+        @staticmethod
+        def with_ratelimit(func: Callable[..., RT]) -> RT:
             @wraps(func)
             def _wrapper(
                 self: 'CurrencyProvider',
                 *currencies: Iterable[str],
                 force: bool = False
-            ):
+            ) -> Any:
                 timestamp = datetime.now().timestamp()
                 if (
                     not force
@@ -38,12 +40,12 @@ class CurrencyProvider(ABC):
 
             return _wrapper
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_request_timestamp = 0
         self.had_error = False
 
     @classmethod
-    def get_request(cls, params={}):
+    def get_request(cls, params: Dict[str, str] = {}) -> Request:
         headers = {'user-agent': 'Calculate Anything'}
         url = urljoin(cls.BASE_URL, cls.API_URL)
         url = list(urlparse(url))
@@ -59,7 +61,19 @@ class CurrencyProvider(ABC):
         return request
 
     @abstractmethod
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
+        ...
+
+
+class _MockCurrencyProvider(CurrencyProvider):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def request_currencies(
+        self, *currencies: str, force: bool
+    ) -> CurrencyData:
         pass
 
 
@@ -69,7 +83,8 @@ class FreeCurrencyProvider(CurrencyProvider):
 
 class ApiKeyCurrencyProvider(CurrencyProvider):
     class Decorators(CurrencyProvider.Decorators):
-        def with_valid_api_key(func):
+        @staticmethod
+        def with_valid_api_key(func: Callable[..., RT]) -> RT:
             @wraps(func)
             def _wrapper(
                 self: 'ApiKeyCurrencyProvider', *args: Any, **kwargs: Any
@@ -81,13 +96,18 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
 
             return _wrapper
 
-    def __init__(self, api_key=''):
+    def __init__(self, api_key: str = '') -> None:
         super().__init__()
         self._api_key = api_key
 
     @property
-    def api_key_valid(self):
+    def api_key_valid(self) -> bool:
         return isinstance(self._api_key, str) and self._api_key.strip() != ''
 
-    def set_api_key(self, api_key):
+    @property
+    def api_key(self) -> str:
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, api_key: str) -> None:
         self._api_key = api_key

@@ -1,4 +1,5 @@
-from calculate_anything.calculation import Calculation
+from typing import Tuple, Type, Union
+from calculate_anything.calculation import CalculatorCalculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import images_dir
@@ -21,21 +22,22 @@ __all__ = [
 ]
 
 
-class BaseNCalculation(Calculation):
-    def to_base_calculation(self, base_calculation_class, order=None):
+class BaseNCalculation(CalculatorCalculation):
+    def to_base_calculation(
+        self,
+        base_calculation_class: Type['BaseNCalculation'],
+        order: bool = None,
+    ) -> 'BaseNCalculation':
         order = order if order is not None else self.order
-        return base_calculation_class(
-            value=self.value, query=self.query, order=order
-        )
+        return base_calculation_class(self.value, self.query, order)
 
-    def format(self):
+    def format(self) -> str:
         return str(self.value)
 
-    def get_description(self):
+    def get_description(self) -> str:
         return ''
 
-    @Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         name = self.format()
         description = self.get_description()
         return QueryResult(
@@ -49,60 +51,56 @@ class BaseNCalculation(Calculation):
 
 
 class Base16StringCalculation(BaseNCalculation):
-    def __init__(self, value=None, query='', error=None, order=0):
+    def __init__(self, value: str, query: str, order: int = 0) -> None:
         value = ':'.join('{:02x}'.format(ord(c)) for c in value)
-        super().__init__(value=value, query=query, error=error, order=order)
+        super().__init__(value, query, order)
 
-    def format(self):
+    def format(self) -> str:
         return self.value
 
-    def get_description(self):
+    def get_description(self) -> str:
         return LanguageService().translate('bytes', 'calculator').upper()
 
 
 class Base10Calculation(BaseNCalculation):
-    def format(self):
-        return str(self.value)
-
-    def get_description(self):
+    def get_description(self) -> str:
         return LanguageService().translate('dec', 'calculator').upper()
 
 
 class Base2Calculation(BaseNCalculation):
-    def format(self):
+    def format(self) -> str:
         return bin(int(self.value))[2:]
 
-    def get_description(self):
+    def get_description(self) -> str:
         return LanguageService().translate('bin', 'calculator').upper()
 
 
 class Base8Calculation(BaseNCalculation):
-    def format(self):
+    def format(self) -> str:
         return oct(int(self.value))[2:]
 
-    def get_description(self):
+    def get_description(self) -> str:
         return LanguageService().translate('oct', 'calculator').upper()
 
 
 class Base16Calculation(BaseNCalculation):
-    def format(self):
+    def format(self) -> str:
         return hex(int(self.value))[2:]
 
-    def get_description(self):
+    def get_description(self) -> str:
         return LanguageService().translate('hex', 'calculator').upper()
 
 
 class ColorBase16Calculation(Base16Calculation):
     def __init__(
         self,
-        value=None,
-        query='',
-        error=None,
-        order=0,
-        color_code=None,
-        color_format=None,
+        value: Tuple[Union[float, int], ...],
+        color_code: str,
+        color_format: str,
+        query: str,
+        order: int = 0,
     ):
-        super().__init__(value=value, query=query, error=error, order=order)
+        super().__init__(value, query, order)
         self.color_code = color_code
         self.color_format = color_format or '{:.2f}, {:.2f}, {:.2f}'
 
@@ -119,11 +117,11 @@ class ColorBase16Calculation(Base16Calculation):
         rgb = hex_to_rgb(value)
         items.append(
             ColorBase16Calculation(
-                value=rgb,
-                query=query,
-                order=order_offset,
-                color_code='rgb',
-                color_format='{:.0f}, {:.0f}, {:.0f}',
+                rgb,
+                'rgb',
+                '{:.0f}, {:.0f}, {:.0f}',
+                query,
+                order_offset,
             )
         )
 
@@ -131,19 +129,19 @@ class ColorBase16Calculation(Base16Calculation):
             value = func(rgb)
             items.append(
                 ColorBase16Calculation(
-                    value=value,
-                    query=query,
-                    order=len(items) + order_offset,
-                    color_code=color_code,
-                    color_format=color_format,
+                    value,
+                    color_code,
+                    color_format,
+                    query,
+                    len(items) + order_offset,
                 )
             )
         return items
 
-    def format(self):
+    def format(self) -> str:
         return self.color_format.format(*self.value)
 
-    def get_description(self):
+    def get_description(self) -> str:
         description = ''
         if self.color_code:
             description = (
@@ -151,8 +149,7 @@ class ColorBase16Calculation(Base16Calculation):
             )
         return description
 
-    @Base16Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         icon = images_dir('color.svg')
         name = self.format()
         description = self.get_description()

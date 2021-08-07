@@ -1,13 +1,15 @@
 import os
 from threading import RLock
 from enum import Enum
+from typing import Union
 
 try:
     import pint
 except ImportError:  # pragma: no cover
-    pint = None  # pragma: no cover
+    pint = None
 from calculate_anything.units.parser import PintDefinitionParser
 from calculate_anything.currency import CurrencyService
+from calculate_anything.currency.data import CurrencyData
 from calculate_anything import logging
 from calculate_anything.utils import Singleton, with_lock
 from calculate_anything.constants import MAIN_DIR
@@ -35,8 +37,12 @@ class UnitsService(metaclass=Singleton):
         self._currency_timestamps = {}
         self._conversion_mode = UnitsService.ConversionMode.NORMAL
 
+    @property
+    def lock(self):
+        return self._lock
+
     @with_lock
-    def _update_callback(self, data, error):
+    def _update_callback(self, data: CurrencyData, error: bool) -> None:
         if error:
             logger.warning('Provider had error, will not reset data')
             return
@@ -78,46 +84,48 @@ class UnitsService(metaclass=Singleton):
             'Updated currency registry with {} currencies'.format(len(data))
         )
 
-    def get_rate_timestamp(self, unit):
+    def get_rate_timestamp(
+        self, unit: Union['pint.Quantity', 'pint.Unit']
+    ) -> float:
         if isinstance(unit, pint.Quantity):
             unit = unit.units
         unit_name = str(unit)
         return self._currency_timestamps.get(unit_name)
 
-    def set_conversion_mode(self, mode):
+    def set_conversion_mode(self, mode: ConversionMode) -> 'UnitsService':
         self._conversion_mode = mode
         return self
 
     @property
-    def conversion_mode(self):
+    def conversion_mode(self) -> ConversionMode:
         return self._conversion_mode
 
     @property
-    def base_currency(self):
+    def base_currency(self) -> 'pint.Quantity':
         return self._base_currency
 
     @property
     @with_lock
-    def unit_registry(self):
+    def unit_registry(self) -> 'pint.UnitRegistry':
         return self._unit_registry
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @property
-    def running(self):
+    def running(self) -> bool:
         return self._running
 
-    def enable(self):
+    def enable(self) -> 'UnitsService':
         self._enabled = True
         return self
 
-    def disable(self):
+    def disable(self) -> 'UnitsService':
         self._enabled = False
         return self
 
-    def stop(self):
+    def stop(self) -> 'UnitsService':
         CurrencyService().remove_update_callback(self._update_callback)
         self._unit_registry = None
         self._base_currency = None
@@ -125,7 +133,7 @@ class UnitsService(metaclass=Singleton):
         return self
 
     @with_lock
-    def start(self, force=False):
+    def start(self, force: bool = False) -> 'UnitsService':
         if pint is None:
             return self
         if force:

@@ -29,7 +29,7 @@ from calculate_anything.query.handlers import (
     Base2QueryHandler,
     Base8QueryHandler,
 )
-from calculate_anything.query import MultiHandler
+from calculate_anything.query.handlers import MultiHandler
 from calculate_anything.time import TimezoneService
 from calculate_anything.lang import LanguageService
 from calculate_anything.currency import CurrencyService

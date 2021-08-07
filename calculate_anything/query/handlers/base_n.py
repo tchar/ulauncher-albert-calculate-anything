@@ -1,6 +1,7 @@
 import re
 import operator
 import ast
+from typing import List, Tuple, Type, Union
 from calculate_anything.utils import (
     multi_re,
     Singleton,
@@ -13,7 +14,8 @@ try:
 except ImportError:
     SimpleEval = StupidEval
 from calculate_anything.query.handlers.base import QueryHandler
-from calculate_anything.query.handlers import CalculatorQueryHandler
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.calculation.base import CalculationError
 from calculate_anything.calculation import (
     BooleanCalculation,
     BaseNCalculation,
@@ -59,7 +61,7 @@ digits_base10_re = re.compile(r'^\s*([0-9]+)\s*$')
 
 
 @Singleton.function
-def get_simple_eval():
+def get_simple_eval() -> Union['SimpleEval', StupidEval]:
     simple_eval = SimpleEval()
     if not isinstance(simple_eval, StupidEval):
         simple_eval.operators[ast.BitOr] = operator.or_
@@ -70,8 +72,13 @@ def get_simple_eval():
 
 class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
     def __init__(
-        self, keyword, base, digits_re, base_class, convert_classes=[]
-    ):
+        self,
+        keyword: str,
+        base: int,
+        digits_re: 're.Pattern',
+        base_class: Type['BaseNQueryHandler'],
+        convert_classes: List[Type['BaseNQueryHandler']] = [],
+    ) -> None:
         super().__init__(keyword)
         self._base = base
         self._digits_re = digits_re
@@ -79,8 +86,10 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         self._convert_classes = convert_classes
         self._simple_eval = get_simple_eval()
 
-    def _parse_expression(self, expression, split_eq=True, sub_kw=True):
-        def convert_to_base_n(m):
+    def _parse_expression(
+        self, expression: str, split_eq: bool = True, sub_kw: bool = True
+    ) -> Tuple[List[str], List[str], List[str]]:
+        def convert_to_base_n(m: 're.Match') -> str:
             return str(int(m.group(0), self._base))
 
         if sub_kw:
@@ -138,7 +147,9 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             return [], [], []
         return [expr], [], [expr_parsed]
 
-    def handle_raw(self, query):
+    def handle_raw(
+        self, query: str
+    ) -> Union[None, List[Union[BaseNCalculation, CalculationError]]]:
         query = query.strip()
         original_query = query
         query = query.lower()
@@ -147,7 +158,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         try:
             expr_dec, operators, expr_parsed = self._parse_expression(query)
         except (WrongBaseException, BaseFloatingPointException) as e:
-            item = BaseNCalculation(error=e, query=original_query)
+            item = CalculationError(e, original_query)
             return [item]
         except Exception as e:
             msg = 'Got exception when trying to parse expression: {!r}: {}'
@@ -159,16 +170,10 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         try:
             results = [self._simple_eval.eval(exp) for exp in expr_dec]
         except MissingSimpleevalException as e:
-            item = BaseNCalculation(
-                error=e,
-                query=original_query,
-            )
+            item = CalculationError(e, original_query)
             return [item]
         except ZeroDivisionError:
-            item = BaseNCalculation(
-                error=ZeroDivisionException(),
-                query=original_query,
-            )
+            item = CalculationError(ZeroDivisionException(), original_query)
             return [item]
         except Exception:
             return None
@@ -178,11 +183,9 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
         if len(results) == 1:
             result = results[0]
             if not is_integer(result):
-                item = BaseNCalculation(error=BaseFloatingPointException())
+                item = CalculationError(BaseFloatingPointException())
             else:
-                item = BaseNCalculation(
-                    value=results[0], query=original_query, order=0
-                )
+                item = BaseNCalculation(results[0], original_query)
         # Boolean result
         else:
             item = CalculatorQueryHandler._calculate_boolean_result(
@@ -190,9 +193,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
             )
 
         items = []
-        if item.is_error:
-            items.append(item)
-        elif isinstance(item, BooleanCalculation):
+        if isinstance(item, (CalculationError, BooleanCalculation)):
             items.append(item)
         else:
             # Add item to original base if original query is not just a number
@@ -209,7 +210,7 @@ class BaseNQueryHandler(QueryHandler, metaclass=Singleton):
 
 
 class Base2QueryHandler(BaseNQueryHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             'bin',
             2,
@@ -220,7 +221,7 @@ class Base2QueryHandler(BaseNQueryHandler):
 
 
 class Base8QueryHandler(BaseNQueryHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             'oct',
             8,
@@ -231,7 +232,7 @@ class Base8QueryHandler(BaseNQueryHandler):
 
 
 class Base16QueryHandler(BaseNQueryHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             'hex',
             16,
@@ -240,7 +241,7 @@ class Base16QueryHandler(BaseNQueryHandler):
             (Base10Calculation, Base2Calculation, Base8Calculation),
         )
 
-    def handle_raw(self, query):
+    def handle_raw(self, query: str) -> List[BaseNCalculation]:
         original_query = query.strip()
         items = []
 
@@ -262,17 +263,17 @@ class Base16QueryHandler(BaseNQueryHandler):
                 items.extend(items_super)
 
         if query != '':
-            non_errors = sum(map(lambda item: not item.error, items))
-            item = Base16StringCalculation(
-                value=query, query=original_query, order=non_errors
+            non_errors = sum(
+                map(lambda item: not isinstance(item, CalculationError), items)
             )
+            item = Base16StringCalculation(query, original_query, non_errors)
             items.append(item)
 
         return items
 
 
 class Base10QueryHandler(BaseNQueryHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             'dec',
             10,

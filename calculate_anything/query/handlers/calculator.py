@@ -3,6 +3,8 @@ import re
 import cmath
 import operator as op
 
+from calculate_anything.utils import is_types, Singleton, StupidEval
+
 try:
     from simpleeval import (
         SimpleEval,
@@ -11,15 +13,16 @@ try:
         FunctionNotDefined,
     )
 except ImportError:  # pragma: no cover
-    from calculate_anything.utils import StupidEval  # pragma: no cover
-
-    SimpleEval = StupidEval  # pragma: no cover
-    NameNotDefined = TypeError  # pragma: no cover
+    SimpleEval = StupidEval
+    NameNotDefined = TypeError
     FeatureNotAvailable = TypeError
 from calculate_anything.query.handlers.base import QueryHandler
 from calculate_anything import logging
-from calculate_anything.calculation import Calculation, BooleanCalculation
-from calculate_anything.utils import is_types, Singleton
+from calculate_anything.calculation.base import CalculationError
+from calculate_anything.calculation.calculator import (
+    CalculatorCalculation,
+    BooleanCalculation,
+)
 from calculate_anything.exceptions import (
     MissingSimpleevalException,
     ZeroDivisionException,
@@ -39,12 +42,20 @@ __all__ = ['CalculatorQueryHandler']
 logger = logging.getLogger(__name__)
 
 
+@Singleton.function
+def get_simple_eval(functions) -> Union['SimpleEval', StupidEval]:
+    simple_eval = SimpleEval()
+    if not isinstance(simple_eval, StupidEval):
+        simple_eval.functions = functions
+    return simple_eval
+
+
 class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     """Class that handles Calculation expressions for numbers, complex numbers,
     equalities and inequalities.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('=')
         # Cmath to set for simpleeval
         functions = {
@@ -52,7 +63,7 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             for name in dir(cmath)
             if not name.startswith('_') and not name.endswith('_')
         }
-        self._simple_eval = SimpleEval(functions=functions)
+        self._simple_eval = get_simple_eval(functions)
         self._function_names = list(functions.keys())
 
         keywords = [name.lower() for name in self._function_names]
@@ -128,8 +139,8 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             # like 1 + 0.00000000001j
             # We consider it as 1 so it can be comparable with real numbers
             fixed_precision = complex(
-                Calculation.fix_number_precision(value.real),
-                Calculation.fix_number_precision(value.imag),
+                CalculatorCalculation.fix_number_precision(value.real),
+                CalculatorCalculation.fix_number_precision(value.imag),
             )
             fixed_precisions.append(fixed_precision)
         values = tuple(fixed_precisions)
@@ -159,15 +170,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             query += ' ' + operator + ' ' + subqueries[i + 1].strip()
 
         if inequality_error:
-            return BooleanCalculation(
-                value=None,
-                query=query,
-                error=BooleanComparisonException(),
-            )
+            return CalculationError(BooleanComparisonException(), query)
 
-        return BooleanCalculation(value=result, query=query, order=0)
+        return BooleanCalculation(result, query)
 
-    def can_handle(self, query):
+    def can_handle(self, query: str) -> bool:
         if not super().can_handle(query):
             return False
 
@@ -175,7 +182,9 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             return False
         return True
 
-    def handle_raw(self, query: str) -> Union[List[Calculation], None]:
+    def handle_raw(
+        self, query: str
+    ) -> Union[None, List[Union[CalculationError, CalculatorCalculation]]]:
         """Handles a calculation query
 
         Parameters
@@ -205,16 +214,10 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 self._simple_eval.eval(subquery) for subquery in subqueries
             ]
         except MissingSimpleevalException:
-            item = Calculation(
-                query=query,
-                error=MissingSimpleevalException(),
-            )
+            item = CalculationError(MissingSimpleevalException(), query)
             return [item]
         except ZeroDivisionError:
-            item = Calculation(
-                query=query,
-                error=ZeroDivisionException(),
-            )
+            item = CalculationError(ZeroDivisionException(), query)
             return [item]
         except (SyntaxError, TypeError):
             return None
@@ -242,6 +245,6 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
                 results, operators, subqueries
             )
         else:
-            result = Calculation(value=results[0], query=subqueries[0])
+            result = CalculatorCalculation(results[0], subqueries[0])
 
         return [result]

@@ -1,80 +1,35 @@
 import re
-import cmath
-from calculate_anything.calculation.base import _Calculation
+from typing import Union
+from calculate_anything.calculation.base import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
-from calculate_anything.regex import CALCULATOR_ERROR
 from calculate_anything.utils import multi_re, images_dir
 
 
-__all__ = ['Calculation', 'BooleanCalculation']
+__all__ = ['CalculatorCalculation', 'BooleanCalculation']
 
 
-def get_value_type(value):
-    if isinstance(value, complex):
-        value = complex(
-            Calculation.fix_number_precision(value.real),
-            Calculation.fix_number_precision(value.imag),
-        )
-        value = value.real if value.imag == 0 else value
+class CalculatorCalculation(Calculation):
+    def __init__(
+        self,
+        value: Union[int, float, complex, bool],
+        query: str,
+        order: int = 0,
+    ) -> None:
+        super().__init__(value, query, order)
 
-    if isinstance(value, float):
-        value = Calculation.fix_number_precision(value)
-
-    if value is None:
-        return value, Calculation.VALUE_NONE
-    if isinstance(value, bool):
-        return value, Calculation.VALUE_BOOLEAN
-    if isinstance(value, float):
-        return value, Calculation.VALUE_FLOAT
-    if isinstance(value, int):
-        return value, Calculation.VALUE_INT
-    if isinstance(value, str):
-        return value, Calculation.VALUE_STRING
-    if isinstance(value, complex) and value.real == 0:
-        return value, Calculation.VALUE_IMAGINARY
-    if isinstance(value, complex):
-        return value, Calculation.VALUE_COMPLEX
-
-    return value, Calculation.VALUE_UNKNOWN
-
-
-class Calculation(_Calculation):
-    VALUE_UNKNOWN = -1
-    VALUE_NONE = 0
-    VALUE_BOOLEAN = 1
-    VALUE_INT = 2
-    VALUE_FLOAT = 3
-    VALUE_IMAGINARY = 5
-    VALUE_COMPLEX = 6
-    VALUE_STRING = 7
-
-    def __init__(self, value=None, query='', error=None, order=0):
-        value, value_type = get_value_type(value)
-        self.value_type = value_type
-        super().__init__(value=value, query=query, error=error, order=order)
-
-    @staticmethod
-    def fix_number_precision(number):
-        number_dec = number % 1
-        if cmath.isclose(number_dec, 0, abs_tol=CALCULATOR_ERROR):
-            return int(number)
-        if cmath.isclose(number_dec, 1, abs_tol=CALCULATOR_ERROR):
-            return int(number) + 1
-        return number
-
-    def get_description(self):
+    def get_description(self) -> str:
         translator = LanguageService().get_translator('calculator')
 
         value_type = self.value_type
-        if value_type == Calculation.VALUE_IMAGINARY:
+        if value_type == Calculation.ValueType.IMAGINARY:
             return translator('result-imaginary').capitalize()
-        if value_type == Calculation.VALUE_COMPLEX:
+        if value_type == Calculation.ValueType.COMPLEX:
             return translator('result-complex').capitalize()
         return ''
 
-    def format_query(self):
-        def sub_i(match):
+    def format_query(self) -> str:
+        def sub_i(match: 're.Match') -> str:
             group = match.group(0).lstrip()
             if group.startswith('1j'):
                 return 'i'
@@ -101,7 +56,7 @@ class Calculation(_Calculation):
         query = multi_re.sub_dict(replace_special, query, sort=True)
         return query
 
-    def format(self):
+    def format(self) -> str:
         real, imag = self.value.real, self.value.imag
 
         if real == 0 and imag == 0:
@@ -127,8 +82,7 @@ class Calculation(_Calculation):
                 name = '{:g} + {:g}i'.format(real, imag)
         return name
 
-    @_Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         name = self.format()
         description = self.format_query()
         description_paren = self.get_description()
@@ -145,9 +99,8 @@ class Calculation(_Calculation):
         )
 
 
-class BooleanCalculation(Calculation):
-    @Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+class BooleanCalculation(CalculatorCalculation):
+    def to_query_result(self) -> QueryResult:
         translator = LanguageService().get_translator('calculator')
         result = str(self.value).lower()
 

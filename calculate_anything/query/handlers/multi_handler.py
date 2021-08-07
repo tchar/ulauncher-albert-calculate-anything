@@ -1,9 +1,15 @@
+from calculate_anything.query.handlers.base import QueryHandler
 import inspect
-from calculate_anything.query.handlers import (
-    UnitsQueryHandler,
-    CalculatorQueryHandler,
+from typing import List, Type, Union
+from calculate_anything.calculation.base import Calculation
+from calculate_anything.query.result import QueryResult
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
+from calculate_anything.query.handlers.percentages import (
     PercentagesQueryHandler,
-    TimeQueryHandler,
+)
+from calculate_anything.query.handlers.units import UnitsQueryHandler
+from calculate_anything.query.handlers.time import TimeQueryHandler
+from calculate_anything.query.handlers.base_n import (
     Base16QueryHandler,
     Base10QueryHandler,
     Base2QueryHandler,
@@ -19,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class MultiHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         self._handlers = [
             UnitsQueryHandler,
             CalculatorQueryHandler,
@@ -31,7 +37,12 @@ class MultiHandler:
             Base8QueryHandler,
         ]
 
-    def _handle(self, query, *handlers, return_raw):
+    def _handle(
+        self,
+        query: str,
+        *handlers: Union[Type[QueryHandler], QueryHandler],
+        return_raw: bool
+    ) -> List[Union[Calculation, QueryResult]]:
         results = []
 
         if not handlers:
@@ -57,8 +68,12 @@ class MultiHandler:
 
         return sorted(results, key=lambda result: result.order)
 
-    def handle_raw(self, query, *handlers):
+    def handle_raw(
+        self, query: str, *handlers: Union[Type[QueryHandler], QueryHandler]
+    ) -> List[Calculation]:
         return self._handle(query, *handlers, return_raw=True)
 
-    def handle(self, query, *handlers):
+    def handle(
+        self, query: str, *handlers: Union[Type[QueryHandler], QueryHandler]
+    ) -> List[QueryResult]:
         return self._handle(query, *handlers, return_raw=False)

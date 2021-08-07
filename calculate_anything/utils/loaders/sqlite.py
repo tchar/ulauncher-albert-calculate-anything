@@ -16,13 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class SqliteLoader(Loader):
-    def __init__(self, sqlite_filepath, sql_filepath=None, mode=0):
+    def __init__(
+        self, sqlite_filepath: str, sql_filepath: str = None, mode: int = 0
+    ) -> None:
         super().__init__(Loader.Status.PENDING, mode)
         self.sqlite_filepath = sqlite_filepath
         self.sql_filepath = sql_filepath
         self._reset()
 
-    def _reset(self):
+    def _reset(self) -> None:
         self.db = None
         self._sqlite_file_exists = None
         self._sql_file_exists = None
@@ -32,7 +34,7 @@ class SqliteLoader(Loader):
         self._sql_data_loaded = False
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
-    def _pre_load(self):
+    def _pre_load(self) -> None:
         self._sqlite_file_exists = False
         if self.sqlite_filepath is not None:
             self._sqlite_file_exists = os.path.exists(self.sqlite_filepath)
@@ -68,7 +70,7 @@ class SqliteLoader(Loader):
 
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.LOAD)
-    def _load(self):
+    def _load(self) -> None:
         try:
             self.db = db = sqlite3.connect(
                 self.sqlite_filepath,
@@ -89,7 +91,7 @@ class SqliteLoader(Loader):
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.without_mode(Loader.Mode.NO_REMOVE)
     @Loader.Decorators.with_mode(Loader.Mode.REMOVE)
-    def _remove(self):
+    def _remove(self) -> None:
         if os.path.isdir(self.sqlite_filepath):
             self._status |= Loader.Status.FILE_IS_DIR
             try:
@@ -115,7 +117,7 @@ class SqliteLoader(Loader):
 
     @Loader.Decorators.with_data
     @Loader.Decorators.without_status(Loader.Status.FAIL)
-    def _execute_script(self):
+    def _execute_script(self) -> None:
         db = self.db
         data = self.data
         try:
@@ -135,7 +137,7 @@ class SqliteLoader(Loader):
     @Loader.Decorators.with_data
     @Loader.Decorators.with_mode(Loader.Mode.CREATE)
     @Loader.Decorators.without_status(Loader.Status.FAIL)
-    def _create(self):
+    def _create(self) -> None:
         try:
             self.db = sqlite3.connect(
                 self.sqlite_filepath,
@@ -159,7 +161,7 @@ class SqliteLoader(Loader):
     @Loader.Decorators.with_data
     @Loader.Decorators.without_status(Loader.Status.FAIL)
     @Loader.Decorators.with_mode(Loader.Mode.MEMORY)
-    def _create_memory(self):
+    def _create_memory(self) -> None:
         self.db = sqlite3.connect(
             ':memory:', check_same_thread=False, cached_statements=500
         )
@@ -168,7 +170,7 @@ class SqliteLoader(Loader):
 
     @property
     @Loader.Decorators.without_status(Loader.Status.FAIL)
-    def data(self):
+    def data(self) -> None:
         if self._sql_data_loaded:
             return self._sql_data
         if self.sql_filepath is None or not self._sql_file_exists:
@@ -187,7 +189,7 @@ class SqliteLoader(Loader):
         self._sql_data_loaded = True
         return data
 
-    def load(self):
+    def load(self) -> None:
         if sqlite3 is None:
             return False  # pragma: no cover
 
@@ -205,7 +207,7 @@ class SqliteLoader(Loader):
             self._status |= Loader.Status.FAIL
         return self.status & Loader.Status.SUCCESS == 1
 
-    def close(self):
+    def close(self) -> None:
         if self.db is not None:
             self.db.close()
         self._reset()

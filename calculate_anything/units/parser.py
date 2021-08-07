@@ -2,6 +2,7 @@ try:
     import pint
 except ImportError:
     pint = None
+from typing import Callable, Optional
 from calculate_anything.lang import LanguageService
 from calculate_anything import logging
 from calculate_anything.regex import UNIT_ALIASES_RE
@@ -11,10 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class PintDefinitionParser:
-    def __init__(self, unit_registry: 'pint.registry.UnitRegistry'):
+    def __init__(self, unit_registry: 'pint.registry.UnitRegistry') -> None:
         self._unit_registry = unit_registry
 
-    def _define_currency(self, currency, definition=None):
+    def _define_currency(
+        self, currency: str, definition: Optional[str] = None
+    ) -> None:
         currency_norm = currency.lstrip('currency_')
         currency_upper = 'currency_{}'.format(currency_norm.upper())
         definition = definition or 'nan currency EUR'
@@ -27,7 +30,12 @@ class PintDefinitionParser:
             '@alias {} = {}'.format(currency_upper, currency_norm)
         )
 
-    def _process_alias(self, line, translation_adder, is_currency):
+    def _process_alias(
+        self,
+        line: str,
+        translation_adder: Callable[[str, str], None],
+        is_currency: bool,
+    ) -> None:
         aliases = line.lstrip('@alias').split('=')
         aliases = map(str.strip, aliases)
         root_alias = None
@@ -51,7 +59,9 @@ class PintDefinitionParser:
             defstr = '@alias {} = {}'.format(root_alias, defstr)
             self._unit_registry.define(defstr)
 
-    def _process_reverse_alias(self, line, translation_adder):
+    def _process_reverse_alias(
+        self, line: str, translation_adder: Callable[[str, str], None]
+    ) -> None:
         aliases = line.strip('@reverse.alias').split('=')
         aliases = list(map(str.strip, aliases))
         root_alias, aliases_to_define = aliases[0], aliases[1:]
@@ -60,7 +70,7 @@ class PintDefinitionParser:
         for alias in aliases_to_define:
             translation_adder(alias.lower(), root_alias)
 
-    def _process_definition(self, line, is_currency):
+    def _process_definition(self, line: str, is_currency: bool) -> None:
         line = line.split('=')
         if len(line) == 1:
             return
@@ -74,8 +84,13 @@ class PintDefinitionParser:
             self._unit_registry.define('{} = {}'.format(root_unit, rest_units))
 
     def _process_line(
-        self, line, line_n, file_path, translation_adder, is_currency
-    ):
+        self,
+        line: str,
+        line_n: int,
+        file_path: str,
+        translation_adder: Callable[[str, str], None],
+        is_currency: bool,
+    ) -> None:
         try:
             line = line.strip()
             if line.startswith('#'):
@@ -94,7 +109,9 @@ class PintDefinitionParser:
                 )
             )
 
-    def load_file(self, file_path, mode, is_currency=True):
+    def load_file(
+        self, file_path: str, mode: str, is_currency: bool = True
+    ) -> None:
         translation_adder = LanguageService().translation_adder(mode)
         try:
             with open(file_path, 'r', encoding='utf-8') as f:

@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from json.decoder import JSONDecodeError
+from typing import Any, Dict, Tuple
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from calculate_anything import logging
@@ -20,7 +21,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
     BASE_URL = 'http://data.fixer.io'
     API_URL = '/api/latest'
 
-    def _validate_data(self, data):
+    def _validate_data(self, data: Any) -> Tuple[str, Dict]:
         if not isinstance(data, dict):
             raise CurrencyProviderException('Data is not a JSON')
 
@@ -61,7 +62,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
 
         return base_currency, rates
 
-    def _convert_rates(self, base_currency, rates):
+    def _convert_rates(self, base_currency: str, rates: Dict) -> CurrencyData:
         if base_currency != 'EUR':
             eur_rate = rates['EUR']
 
@@ -84,7 +85,9 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
 
     @ApiKeyCurrencyProvider.Decorators.with_valid_api_key
     @ApiKeyCurrencyProvider.Decorators.with_ratelimit
-    def request_currencies(self, *currencies, force=False) -> CurrencyData:
+    def request_currencies(
+        self, *currencies: str, force: bool = False
+    ) -> CurrencyData:
         params = {'access_key': self._api_key, 'base': 'EUR'}
         if currencies:
             params['symbols'] = ','.join(currencies)

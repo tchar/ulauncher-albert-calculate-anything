@@ -1,7 +1,12 @@
 import locale
 from datetime import datetime
 import re
+from typing import Tuple, Union
 
+try:
+    import pint
+except ImportError:
+    pint = None
 try:
     import babel.units as babel_units
 except ImportError:
@@ -11,7 +16,7 @@ try:
 except ImportError:
     babel_numbers = None
 from calculate_anything import logging
-from calculate_anything.calculation.base import _Calculation
+from calculate_anything.calculation.base import Calculation
 from calculate_anything.query.result import QueryResult
 from calculate_anything.lang import LanguageService
 from calculate_anything.utils import multi_re, images_dir
@@ -29,39 +34,43 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class UnitsCalculation(_Calculation):
+class UnitsCalculation(Calculation):
     def __init__(
         self,
-        value=None,
-        error=None,
-        query='',
-        order=0,
-        rate=None,
-        unit_from=None,
-        unit_to=None,
-    ):
-        super().__init__(value=value, query=query, error=error, order=order)
+        value: 'pint.Quantity',
+        unit_from: 'pint.Unit',
+        unit_to: 'pint.Unit',
+        rate: 'pint.Quantity',
+        query: str,
+        order: int = 0,
+    ) -> None:
+        super().__init__(value, query, order)
         self.rate = rate
         self.unit_from = unit_from
         self.unit_to = unit_to
 
     @staticmethod
-    def is_strictly_dimensionless(unit):
+    def is_strictly_dimensionless(unit: 'pint.Quantity') -> bool:
         return unit.unitless and unit.dimensionless
 
     @staticmethod
-    def has_temperature(unit):
+    def has_temperature(unit: Union['pint.Quantity', 'pint.Unit']) -> bool:
         return '[temperature]' in unit.dimensionality
 
     @staticmethod
-    def has_currency(unit):
+    def has_currency(unit: Union['pint.Quantity', 'pint.Unit']) -> bool:
         return '[currency]' in unit.dimensionality
 
     @staticmethod
-    def is_currency(unit):
-        return unit.dimensionality == '[currency]'
+    def is_currency(unit: Union['pint.Quantity', 'pint.Unit']) -> bool:
+        dimensionality = unit.dimensionality
+        return (
+            '[currency]' in dimensionality
+            and len(dimensionality) == 1
+            and dimensionality['[currency]'] == 1
+        )
 
-    def _format_babel(self):
+    def _format_babel(self) -> Tuple[str, str]:
         _locale = locale.getlocale()[0]
 
         if not UnitsCalculation.is_strictly_dimensionless(self.value):
@@ -84,7 +93,7 @@ class UnitsCalculation(_Calculation):
 
         return name, description
 
-    def format(self):
+    def format(self) -> Tuple[str, str]:
         use_translator = True
         if babel_units:
             try:
@@ -133,8 +142,7 @@ class UnitsCalculation(_Calculation):
 
         return name, description
 
-    @_Calculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         name, description = self.format()
 
         descriptions = [description]
@@ -160,7 +168,7 @@ class UnitsCalculation(_Calculation):
 
 
 class TemperatureUnitsCalculation(UnitsCalculation):
-    def format(self):
+    def format(self) -> Tuple[str, str]:
         parse_default = True
         if babel_units:
             try:
@@ -193,28 +201,19 @@ class TemperatureUnitsCalculation(UnitsCalculation):
 class CurrencyUnitsCalculation(UnitsCalculation):
     def __init__(
         self,
-        value=None,
-        error=None,
-        query='',
-        order=0,
-        rate=None,
-        unit_from=None,
-        unit_to=None,
-        update_timestamp=None,
-    ):
-        super().__init__(
-            value=value,
-            error=error,
-            query=query,
-            order=order,
-            rate=rate,
-            unit_from=unit_from,
-            unit_to=unit_to,
-        )
+        value: 'pint.Quantity',
+        unit_from: 'pint.Unit',
+        unit_to: 'pint.Unit',
+        rate: 'pint.Quantity',
+        update_timestamp,
+        query: str,
+        order: int = 0,
+    ) -> None:
+        super().__init__(value, unit_from, unit_to, rate, query, order)
         self.update_timestamp = update_timestamp
 
     @staticmethod
-    def _currency_alias(currency_name):
+    def _currency_alias(currency_name: str) -> str:
         if babel_numbers is None:
             return currency_name
         try:
@@ -226,8 +225,8 @@ class CurrencyUnitsCalculation(UnitsCalculation):
             logger.exception(msg)
         return currency_name
 
-    def format(self):
-        def currency_alias_f(m):
+    def format(self) -> Tuple[str, str]:
+        def currency_alias_f(m: 're.Match') -> str:
             currency = m.group(0)[9:]
             currency_alias = CurrencyUnitsCalculation._currency_alias(currency)
             if currency == currency_alias:
@@ -277,8 +276,7 @@ class CurrencyUnitsCalculation(UnitsCalculation):
 
         return name, description, clipboard
 
-    @UnitsCalculation.Decorators.handle_error_results
-    def to_query_result(self):
+    def to_query_result(self) -> QueryResult:
         name, description, clipboard = self.format()
 
         if self.unit_from == self.unit_to:
