@@ -365,16 +365,16 @@ If at any moment currency stops showing try removing the currency cache file and
 
 Linux
 ```bash
-rm ~/.cache/com.github.tchar.calculate_anything/currency_data.json
+rm ~/.cache/com.github.tchar.calculate-anything/currency_data.json
 ```
 
 Windows
 ```powershell
-rm ~\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache\currency_data.json
+rm ~\AppData\Local\tchar\com.github.tchar.calculate-anything\Cache\currency_data.json
 ```
 macOS
 ```zsh
-rm ~/Library/Caches/com.github.tchar.calculate_anything/currency_data.json
+rm ~/Library/Caches/com.github.tchar.calculate-anything/currency_data.json
 ```
 
 
