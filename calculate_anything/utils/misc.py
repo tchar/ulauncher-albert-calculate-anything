@@ -7,11 +7,16 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Protocol,
     Type,
     TypeVar,
     Union,
 )
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 from contextlib import contextmanager
 from functools import lru_cache, wraps
 import os
