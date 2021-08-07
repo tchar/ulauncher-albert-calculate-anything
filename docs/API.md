@@ -33,15 +33,15 @@ There is also a cache to store results in a cache directory which you can enable
 
 ### Cache directories
 Suppose your username is `username`:
-- Linux: `/home/username/.cache/com.github.tchar.calculate_anything`
-- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate_anything\Cache`
-- macOS: `/Users/username/Library/Caches/com.github.tchar.calculate_anything`
+- Linux: `/home/username/.cache/com.github.tchar.calculate-anything`
+- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate-anything\Cache`
+- macOS: `/Users/username/Library/Caches/com.github.tchar.calculate-anything`
 
 ### Log directories
 Supose your username is `username`:
-- Linux: `/home/username/.cache/com.github.tchar.calculate_anything/log`
-- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate_anything\Logs`
-- macOS: `/Users/username/Library/Logs/com.github.tchar.calculate_anything`
+- Linux: `/home/username/.cache/com.github.tchar.calculate-anything/log`
+- Windows: `'C:\Users\username\AppData\Local\tchar\com.github.tchar.calculate-anything\Logs`
+- macOS: `/Users/username/Library/Logs/com.github.tchar.calculate-anything`
 
 
 You can enable/disable the services manually but the prefered way is to use the `calculate_anything.preferences.Preferences` class
