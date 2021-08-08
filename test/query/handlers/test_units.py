@@ -677,7 +677,7 @@ def test_provider_had_error(mock_currency_service, test_spec):
         query_test_helper(MultiHandler, test_spec, raw=False, only_qr=True)
 
 
-test_special_cases = [
+test_special_cases_spec = [
     lambda _: {'query': '= 10', 'results': []},
     lambda _: {'query': '= 10 cm / cm', 'results': []},
     lambda _: {
@@ -712,7 +712,7 @@ test_special_cases = [
 ]
 
 
-@pytest.mark.parametrize('test_spec', test_special_cases)
+@pytest.mark.parametrize('test_spec', test_special_cases_spec)
 def test_special_cases(mock_currency_service, test_spec):
     with mock_currency_service(default_currencies, error=False):
         Q = UnitsService().unit_registry.Quantity
