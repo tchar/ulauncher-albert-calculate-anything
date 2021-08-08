@@ -118,7 +118,7 @@ class Calculation(ABC):
 
     @abstractmethod
     def to_query_result(self):
-        ...
+        pass
 
 
 class CalculationError(Calculation):
