@@ -68,7 +68,7 @@ class TimezoneService(metaclass=Singleton):
 
     def start(self) -> 'TimezoneService':
         if self._running:
-            return
+            return self
         if not self._cache.load():
             fallback = TimezoneJsonCache()
             fallback.load()

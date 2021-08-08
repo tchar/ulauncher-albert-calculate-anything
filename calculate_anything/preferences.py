@@ -31,11 +31,11 @@ class _Preferences:
 
     @abstractmethod
     def _commit_one(self, *args: Any, **kwargs: Any) -> None:
-        ...
+        pass
 
     @abstractmethod
     def _pre_commit(self, *args: Any, **kwargs: Any) -> None:
-        ...
+        pass
 
     def commit(self) -> None:
         cls_name = self.__class__.__name__

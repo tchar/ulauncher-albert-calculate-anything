@@ -6,7 +6,7 @@ from typing import Tuple, Union
 try:
     import pint
 except ImportError:
-    pint = None
+    pass
 try:
     import babel.units as babel_units
 except ImportError:

@@ -117,8 +117,8 @@ class Loader(ABC):
     @property
     @abstractmethod
     def data(self) -> Any:
-        ...
+        pass
 
     @abstractmethod
     def load(self) -> None:
-        ...
+        pass

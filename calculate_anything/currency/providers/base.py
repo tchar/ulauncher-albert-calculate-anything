@@ -64,7 +64,7 @@ class CurrencyProvider(ABC):
     def request_currencies(
         self, *currencies: str, force: bool = False
     ) -> CurrencyData:
-        ...
+        pass
 
 
 class _MockCurrencyProvider(CurrencyProvider):
