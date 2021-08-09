@@ -43,14 +43,29 @@ jobs:
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
+      VERSION: v1
     steps:
+      - uses: actions/github-script@v4
+        id: toxpy
+        with:
+          result-encoding: string
+          script: |
+            return process.env.PYTHON.split('.').join('')
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - name: Restore pip requirements
+        uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements/*requirements.txt') }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}-pip-
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
+      # - name: Restore tox requirements
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: .tox
+      #     key: ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-${{ hashFiles('requirements/*requirements.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -58,25 +73,22 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/requirements.txt
           pip install -r requirements/dev-requirements.txt
-          pip install tox-gh-actions
-      - name: Lint with flake8
+      - name: Linting
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          pflake8 . --count --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Check code style with black
+          tox -e linting
+      - name: Code style
         run: |
-          black --check ./
-      - name: Test with pytest and generate report
+          tox -e codestyle
+      - name: Test and generate report
+        env:
+          TOXPY: ${{steps.toxpy.outputs.result}}
         run: |
-          tox
+          tox -e clean,py${{ env.TOXPY }},babel_py${{ env.TOXPY }},coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
+          name: os:${{ runner.os }}-python:${{ matrix.python-version }}
           directory: ./cover/xml
           files: coverage.xml
           env_vars: OS,PYTHON

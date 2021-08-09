@@ -33,11 +33,7 @@ on:
 jobs:
   benchmark:
     name: Performance regression check
-    runs-on: ubuntu-latest
-    env:
-      SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
-      BENCHMARKS_BRANCH: gh-pages
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -45,15 +41,27 @@ jobs:
           - os: ubuntu-latest
             path: ~/.cache
         python-version: ["3.9"]
+    env:
+      SECRETS_PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      BENCHMARKS_BRANCH: gh-pages
+      VERSION: v1
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        # Load pip cache
+      - name: Restore pip requirements
+        uses: actions/cache@v2
         with:
-          path: ${{ matrix.path }}/pip
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements/*requirements.txt') }}
+          path: ${{ matrix.path }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
-            ${{ matrix.os }}-${{ matrix.python-version }}-pip-
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
+      # - name: Restore tox requirements
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: .tox
+      #     key: ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ hashFiles('requirements/*requirements.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-${{ matrix.python-version }}-tox-
       # Setup python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -62,28 +70,27 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/requirements.txt
           pip install -r requirements/dev-requirements.txt
         # Run benchmark
-      - name: Benchmark with pytest
+      - name: Run benchmark
         run: |
-          pytest test/benchmark/* --benchmark-json benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
+          tox -e benchmark
         # Download previous benchmark result from cache (if exists)
       - name: Download previous benchmark data
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: actions/cache@v2
         with:
-          path: ${{ matrix.path }}
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
+          path: ./cache
+          key: ${{ runner.os }}-${{ matrix.python-version }}-benchmark
           restore-keys: |
-            ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
+            ${{ runner.os }}-${{ matrix.python-version }}-benchmark
         # Store benchmark results only when branch is master
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tool: "pytest"
-          output-file-path: benchmark-${{ matrix.os }}-${{ matrix.python-version }}.json
+          output-file-path: benchmark-python${{ matrix.python-version }}.json
           fail-on-alert: true
           alert-threshold: 200%
           fail-threshold: 400%
