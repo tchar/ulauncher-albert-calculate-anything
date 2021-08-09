@@ -56,16 +56,16 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
-          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
+            ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
       # - name: Restore tox requirements
       #   uses: actions/cache@v2
       #   with:
       #     path: .tox
-      #     key: ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-${{ hashFiles('requirements/*requirements.txt') }}
+      #     key: ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-${{ hashFiles('requirements/*requirements.txt') }}
       #     restore-keys: |
-      #       ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-
+      #       ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -88,7 +88,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          name: os:${{ runner.os }}-python:${{ matrix.python-version }}
+          name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
           directory: ./cover/xml
           files: coverage.xml
           env_vars: OS,PYTHON

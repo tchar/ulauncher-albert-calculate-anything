@@ -52,16 +52,16 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ matrix.path }}
-          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
+            ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
       # - name: Restore tox requirements
       #   uses: actions/cache@v2
       #   with:
       #     path: .tox
-      #     key: ${{ runner.os }}-${{ matrix.python-version }}-tox-${{ hashFiles('requirements/*requirements.txt') }}
+      #     key: ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ hashFiles('requirements/*requirements.txt') }}
       #     restore-keys: |
-      #       ${{ runner.os }}-${{ matrix.python-version }}-tox-
+      #       ${{ matrix.os }}-${{ matrix.python-version }}-tox-
       # Setup python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -81,9 +81,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./cache
-          key: ${{ runner.os }}-${{ matrix.python-version }}-benchmark
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-benchmark
+            ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
         # Store benchmark results only when branch is master
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
