@@ -1,7 +1,7 @@
 name: Windows
 on:
   push:
-    branches: [master]
+    branches: [master, development]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/ci-windows.yml"
@@ -16,7 +16,7 @@ on:
       - "versions.json"
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master]
+    branches: [master, development]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/ci-windows.yml"
@@ -60,6 +60,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements/requirements.txt
           pip install -r requirements/dev-requirements.txt
+          pip install tox-gh-actions
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -71,7 +72,7 @@ jobs:
           black --check ./
       - name: Test with pytest and generate report
         run: |
-          pytest --cov=./ --cov-report=xml
+          tox
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
