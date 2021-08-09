@@ -47,8 +47,7 @@ skip-string-normalization = true
 legacy_tox_ini = """
 [tox]
 skipsdist = true
-envlist = py36,py37,py38,py39,babel_py36,babel_py37,babel_py38,babel_py39
-skip_missing_interpreters = false
+envlist = py{36,37,38,39}-{linux,windows,macos},babel_py{36,37,38,39}-{linux,macos}
 
 [gh-actions]
 python =
@@ -57,7 +56,14 @@ python =
     3.8: py38, babel_py38
     3.9: py39, babel_py39
 
+[gh-actions:env]
+PLATFORM =
+    ubuntu-latest: linux
+    macos-latest: macos
+    windows-latest: windows
+
 [testenv:babel_py36]
+platform = linux2?|darwin
 basepython = python3.6
 deps = 
     -rrequirements/requirements.txt
@@ -67,6 +73,7 @@ commands =
     pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
 
 [testenv:babel_py37]
+platform = linux2?|darwin
 basepython = python3.7
 deps = 
     -rrequirements/requirements.txt
@@ -76,6 +83,7 @@ commands =
     pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
 
 [testenv:babel_py38]
+platform = linux2?|darwin
 basepython = python3.8
 deps = 
     -rrequirements/requirements.txt
@@ -85,6 +93,7 @@ commands =
     pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
 
 [testenv:babel_py39]
+platform = linux2?|darwin
 basepython = python3.9
 deps = 
     -rrequirements/requirements.txt
