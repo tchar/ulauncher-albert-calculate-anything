@@ -1,10 +1,1 @@
-flake8
-pyproject-flake8 
-pytest
-pytest-httpserver
-pytest-cov
-pytest-benchmark
-pytest-socket
-trustme
-black
-tox
+tox==3.24.1
