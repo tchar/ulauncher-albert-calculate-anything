@@ -17,7 +17,7 @@ on:
       - "versions.json"
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master, development]
+    branches: [master]
     paths-ignore:
       - "**/*.gif"
       - "**/*.svg"

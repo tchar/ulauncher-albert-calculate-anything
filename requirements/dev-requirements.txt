@@ -7,3 +7,4 @@ pytest-benchmark
 pytest-socket
 trustme
 black
+tox
