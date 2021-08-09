@@ -261,9 +261,15 @@ def mock_currency_service(
             CurrencyService().add_update_callback(cb)
             CurrencyService().start(force=True)
             data = data_queue.get(block=True, timeout=None)
-            yield data
+            exc = None
+            try:
+                yield data
+            except Exception as e:
+                exc = e
             CurrencyService().remove_update_callback(cb)
             CurrencyService().stop()
+            if exc:
+                raise exc
 
     @contextmanager
     def cached_data(default_currencies, error=False, **extra_rates):

@@ -1,10 +1,13 @@
 [tool.pytest.ini_options]
 filterwarnings = ["error"]
-addopts = "--ignore-glob=test/benchmark/* --allow-hosts=127.0.0.1,127.0.1.1,::1"
+addopts = """--ignore=test/benchmark \
+    --ignore=test/query/handlers/babel \
+    --allow-hosts=127.0.0.1,127.0.1.1,::1"""
 
 [tool.coverage.run]
 branch = false
 omit = [
+    ".tox/*",
     "demo/*",
     "test/*",
     "main.py",
@@ -39,3 +42,62 @@ ignore = [
 [tool.black]
 line-length = 79
 skip-string-normalization = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+skipsdist = true
+envlist = py36,py37,py38,py39,babel_py36,babel_py37,babel_py38,babel_py39
+skip_missing_interpreters = false
+
+[gh-actions]
+python =
+    3.6: py36, babel_py36
+    3.7: py37, babel_py37
+    3.8: py38, babel_py38
+    3.9: py39, babel_py39
+
+[testenv:babel_py36]
+basepython = python3.6
+deps = 
+    -rrequirements/requirements.txt
+    -rrequirements/dev-requirements.txt
+    -rrequirements/optional-requirements.txt
+commands = 
+    pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
+
+[testenv:babel_py37]
+basepython = python3.7
+deps = 
+    -rrequirements/requirements.txt
+    -rrequirements/dev-requirements.txt
+    -rrequirements/optional-requirements.txt
+commands = 
+    pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
+
+[testenv:babel_py38]
+basepython = python3.8
+deps = 
+    -rrequirements/requirements.txt
+    -rrequirements/dev-requirements.txt
+    -rrequirements/optional-requirements.txt
+commands = 
+    pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
+
+[testenv:babel_py39]
+basepython = python3.9
+deps = 
+    -rrequirements/requirements.txt
+    -rrequirements/dev-requirements.txt
+    -rrequirements/optional-requirements.txt
+commands = 
+    pytest test/query/handlers/babel/ --cov=./ --cov-append --cov-report=xml
+
+[testenv]
+platform = linux2?|darwin|win32
+deps =
+    -rrequirements/requirements.txt
+    -rrequirements/dev-requirements.txt
+commands = 
+    pytest --cov=./ --cov-append --cov-report=xml
+"""
