@@ -33,7 +33,6 @@ __authors__ = 'Tilemachos Charalampous'
 __py_deps__ = ['requests', 'requests', 'pint', 'simpleeval', 'parsedatetime']
 
 
-import locale  # noqa: E402
 import os  # noqa: E402
 import sys  # noqa: E402
 
@@ -62,7 +61,6 @@ from calculate_anything.query.handlers import (  # noqa: E402
 from calculate_anything.utils import images_dir  # noqa: E402
 from albert import ClipAction, Item, debug, info, warning, critical  # type: ignore # noqa: E402, E501
 
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Thanks albert for making me hack the shit out of logging
 handler = logging.CustomHandler(debug, info, warning, critical, critical)
