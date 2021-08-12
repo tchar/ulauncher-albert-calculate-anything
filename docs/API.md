@@ -53,9 +53,6 @@ Example
 import locale
 from calculate_anything.preferences import Preferences
 
-# Set your locale
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
 preferences = Preferences()
 # Set the language
 preferences.language.set('en_US')

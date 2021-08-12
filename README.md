@@ -105,7 +105,7 @@ You can double click it to open module's location and edit `__init__.py` to add 
 
 ### Albert
 
-If you ar using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES`, `DEFAULT_CITIES`, `SHOW_EMPTY_PLACEHOLDER` or `__triggers__` for the keyword
+If you are using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES`, `DEFAULT_CITIES`, `SHOW_EMPTY_PLACEHOLDER` or `__triggers__` for the keyword
 
 The extension can work in albert without keywords if you comment out the `__triggers__` option, however if another extension has the keyword you type, `Calculate Anything won't trigger` (see [relevant issue](https://github.com/albertlauncher/albert/issues/978))
 
@@ -223,7 +223,7 @@ If you select one results it will be copied to clipboard.
     - `10 EUR to USD,canadian,bitcoin,mexican`
 
 #### **Crazy Conversion**
-If `crazy` mode is enabled in preferences you can convert any currency unit
+`crazy` mode must be enabled in preferences
 - Convert 1 us dollar per pound to euros per kilogram
     - `1 $ / pound to EUR / kg`
 - Convert 10 us dollars  per square foot squared to canadian dollars per meter squared
@@ -265,8 +265,8 @@ In the following examples you can specify a specific date and time or say for ex
 
 Keywords such as `a/next/last/previous/ago`, `years/months/weeks/days/hours/minutes/seconds`, `morning/noon/afternoon/evening/night/midnight`, `tomorrow/yesterday` and the combination of those will work like in the normal mode.
 
-- `time until December 31 midnight`: Prints remaining days, hours minutes until January 00:00:00 (end of day for December)
-- `time until midnight`: Prints remaining hours minutes seconds until midnight for this day (midnight is at 00:00:00)
+- `time until December 31 midnight`: Returns remaining days, hours minutes until January 00:00:00 (end of day for December)
+- `time until midnight`: Returns remaining hours minutes seconds until midnight for this day (midnight is at 00:00:00)
 - `time until tomorrow`: Day starts at 09:00
 - `time until tomorrow evening`: Hours/Days until tomorrow at 18:00 
 - `time until a year ago`: Negative result
@@ -279,7 +279,7 @@ And many more combinations
 The units supported are all units that [pint](https://github.com/hgrecco/pint) supports (which is quite a lot)
 
 #### **Simple Conversion**
-- Convert 100 fahrenheit to celsius, which is  37.7778 Celcius
+- Convert 100 fahrenheit to celsius
    - `100 f to c`
 
 #### **Multiple Conversion**
@@ -302,25 +302,26 @@ The units supported are all units that [pint](https://github.com/hgrecco/pint) s
     - `10 km * cm * s / gb to inches * meter * hour / mb`
 
 #### **Crazy Conversion**
+`crazy` mode must be enabled in preferences
 - `1 m to cm` may have two compatible units `meter` and `mole`, so it will return both results
 
 ### Percentages
 
 #### **Simple Cases**
-- Calculate what is 10% of 40 (Answer is 4)
-    - `10% of 40`
-- To calculate what percentage of 30 is 5 (Answer is 16.6667%) any of the following works
-    - `5 is what % of 30`
+- Calculate what is 10% of 40
+    - `10% of 40`: Answer is 4
+- To calculate what percentage of 30 is 5, any of the following works
+    - `5 is what % of 30`: Answer is 16.6667%
     - `5 is what % 30`
     - `5 as % of 30`
     - `5 in % of 30`
     - `5 in % 30`
 
 #### **Advanced Cases**
-- `10% of cos(pi) + 5`: Returns 0.4
-- `3 + 2 * pi % of cos(pi) + 5`: Returns 0.371328
-- ``5 as % sqrt(2) + 5`: Returns 77.9519%
-- `1 + sin(pi) as % sqrt(2) + 5`: Returns 15.5904%
+- `10% of cos(pi) + 5`: Answer is 0.4
+- `3 + 2 * pi % of cos(pi) + 5`: Answer is 0.371328
+- `5 as % sqrt(2) + 5`: Answer is 77.9519%
+- `1 + sin(pi) as % sqrt(2) + 5`: Answer is 15.5904%
 
 ### Calculator
 
@@ -335,29 +336,29 @@ The following functions exist: `phase`, `polar`, `rect`, `exp`, `log`, `log10`, 
 - `10 + cos(pi) + 30 * e ^ 2`: Answer is 230.672
 
 #### **Complex Numbers**
-Use j or i as the imaginary unit
-- `10 + sqrt(2) + j`: Answer is 11.4142 + j
-- `cos(1 + j)`: Answer is 0.83373 - 0.988898j
-- `e ^ (pi * j) + 1`: Answer is 0 (Euler's identity)
+Use i as the imaginary unit
+- `10 + sqrt(2) + i`: Answer is 11.4142 + i
+- `cos(1 + i)`: Answer is 0.83373 - 0.988898i
+- `e ^ (pi * i) + 1`: Answer is 0 (Euler's identity)
 
 ### Base N Calculator
 
 Use with the keywords `hex`, `dec`, `bin`, `oct` by default.
 
 #### **Simple Cases**
-- `dec 1000`: Produces result in `hex`, `bin`, `oct`
-- `hex ffa12`: Produces result in `dec`, `bin`, `oct` as well as `bytes` representation of the input query (including spaces)
-- `bin 10101`: Produces result in `dec`, `hex`, `oct`
+- `dec 1000`: Returns result in `hex`, `bin`, `oct`
+- `hex ffa12`: Returns result in `dec`, `bin`, `oct` as well as `bytes` representation of the input query (including spaces)
+- `bin 10101`: Returns result in `dec`, `hex`, `oct`
 
 #### **Special cases with `hex`**
 The hex calculator will always produce the `byte` representation of its input query.
 
 #### **Color Conversion with `hex`**
 If the input is in the format of #xxxxxx where xxxxxx is a valid hex number, it will convert the number representing a color to other color formats.
-- `hex #fa1234`: Produces colors result in `rgb`, `hsv`, `hsl`, `cmyk`.
+- `hex #fa1234`: Returns colors result in `rgb`, `hsv`, `hsl`, `cmyk`.
 
 #### **Advanced Cases**
-- `dec/hex/bin/oct 10101 and 10110 xor 10 + 1010 - 1010 div 10 and 10101`: Produces the result in all available base-n (`dec`, `hex`, `oct`, `bin`)
+- `dec/hex/bin/oct 10101 and 10110 xor 10 + 1010 - 1010 div 10 and 10101`: Returns the result in all available base-n (`dec`, `hex`, `oct`, `bin`)
     - Digits must be valid in the base you are using (e.g 2012 is invalid for `bin`)
 
 ## Known Issues
