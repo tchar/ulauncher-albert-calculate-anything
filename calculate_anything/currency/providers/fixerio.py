@@ -92,7 +92,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
         if currencies:
             params['symbols'] = ','.join(currencies)
         try:
-            request = self.get_request(params)
+            request = self.get_request(params, validate_uri=False)
             logger.info('Making request to: {}'.format(request.full_url))
             with urlopen(request) as response:  # nosec
                 data = response.read().decode()

@@ -45,7 +45,9 @@ class CurrencyProvider(ABC):
         self.had_error = False
 
     @classmethod
-    def get_request(cls, params: Dict[str, str] = {}) -> Request:
+    def get_request(
+        cls, params: Dict[str, str] = {}, validate_uri: bool = True
+    ) -> Request:
         headers = {'user-agent': 'Calculate Anything'}
         url = urljoin(cls.BASE_URL, cls.API_URL)
         url = list(urlparse(url))
@@ -56,7 +58,7 @@ class CurrencyProvider(ABC):
         # Don't fucking install untrusted certs unless you want
         # a mitm xml bomb on your head
         # and no I won't install extra dependencies for your stupidity
-        if not re.match(r'^https:\/\/', request.full_url):
+        if validate_uri and not re.match(r'^https:\/\/', request.full_url):
             raise Exception('Invalid request url: {}'.format(request.full_url))
         return request
 
