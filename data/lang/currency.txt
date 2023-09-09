@@ -36,6 +36,5 @@
 @alias PEN = S/. 
 @alias TTD = TT$ 
 @alias UAH = ₴ 
-@alias ZWD = Z$ 
 @alias BTC = bitcoin = bitcoins
 @alias ETH = ether = ehterium
