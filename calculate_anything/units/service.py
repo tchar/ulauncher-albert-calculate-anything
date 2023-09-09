@@ -55,10 +55,20 @@ class UnitsService(metaclass=Singleton):
 
         updated_currencies = set()
         for currency, currency_info in data.items():
+            if 'currency_' + currency in updated_currencies:
+                logger.info('Skip currency that already exists: {}'.format(currency))
+                continue
             if 'currency_' + currency not in ureg:
+                if len(currency) < 3 or not currency.isalpha():
+                    logger.info('Skip currency with unsupported name: {}'.format(currency))
+                    continue
+                if currency in ureg and currency not in ('ETH'): # Allow ETH to override 'exathou'
+                    logger.info('Skip currency with colliding name: {} ("{}")'.format(currency, ureg(currency)))
+                    continue
                 ureg.define('currency_{} = nan currency_EUR'.format(currency))
                 ureg.define('@alias currency_{0} = {0}'.format(currency))
 
+            logger.debug('Add currency: {} {}'.format(currency, str(currency_info)))
             updated_currencies.add('currency_' + currency)
             currency_units = ureg('currency_' + currency)
 
