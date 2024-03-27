@@ -1,10 +1,10 @@
-name: Linux
+name: macOS
 on:
   push:
     branches: [master, development]
     paths-ignore:
       - ".github/**"
-      - "!.github/workflows/ci-linux.yml"
+      - "!.github/workflows/ci-macos.yml"
       - "docs/**"
       - "misc/**"
       - "__init__.py"
@@ -19,7 +19,7 @@ on:
     branches: [master, development]
     paths-ignore:
       - ".github/**"
-      - "!.github/workflows/ci-linux.yml"
+      - "!.github/workflows/ci-macos.yml"
       - "docs/**"
       - "misc/**"
       - "__init__.py"
@@ -34,10 +34,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
         include:
-          - os: ubuntu-latest
-            path: ~/.cache/pip
+          - os: macos-latest
+            path: ~/Library/Caches/pip
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     name: OS ${{ matrix.os }} - Python ${{ matrix.python-version }}
     env:

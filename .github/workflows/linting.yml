@@ -1,10 +1,10 @@
-name: macOS
+name: Linting
 on:
   push:
     branches: [master, development]
     paths-ignore:
       - ".github/**"
-      - "!.github/workflows/ci-macos.yml"
+      - "!.github/workflows/ci-linux.yml"
       - "docs/**"
       - "misc/**"
       - "__init__.py"
@@ -19,7 +19,7 @@ on:
     branches: [master, development]
     paths-ignore:
       - ".github/**"
-      - "!.github/workflows/ci-macos.yml"
+      - "!.github/workflows/ci-linux.yml"
       - "docs/**"
       - "misc/**"
       - "__init__.py"
@@ -34,11 +34,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest]
         include:
-          - os: macos-latest
-            path: ~/Library/Caches/pip
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+          - os: ubuntu-latest
+            path: ~/.cache/pip
+        python-version: ["3.10"]
     name: OS ${{ matrix.os }} - Python ${{ matrix.python-version }}
     env:
       OS: ${{ matrix.os }}
@@ -80,20 +80,3 @@ jobs:
       - name: Code style
         run: |
           tox -e codestyle
-      - name: Test and generate report
-        env:
-          TOXPY: ${{steps.toxpy.outputs.result}}
-        # run: |
-        #   tox -e clean,py${{ env.TOXPY }},babel_py${{ env.TOXPY }},coverage
-        run: |
-          tox -e clean,py${{ env.TOXPY }},coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
-          directory: ./cover/xml
-          files: coverage.xml
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          flags: unittests
-          verbose: true
