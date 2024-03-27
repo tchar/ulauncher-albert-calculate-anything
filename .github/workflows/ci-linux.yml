@@ -38,7 +38,7 @@ jobs:
         include:
           - os: ubuntu-latest
             path: ~/.cache/pip
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     name: OS ${{ matrix.os }} - Python ${{ matrix.python-version }}
     env:
       OS: ${{ matrix.os }}
