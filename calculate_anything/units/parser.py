@@ -20,7 +20,7 @@ class PintDefinitionParser:
     ) -> None:
         currency_norm = currency.lstrip('currency_')
         currency_upper = 'currency_{}'.format(currency_norm.upper())
-        definition = definition or 'nan currency EUR'
+        definition = definition or 'nan currency_EUR'
 
         if currency_upper not in self._unit_registry:
             self._unit_registry.define(
