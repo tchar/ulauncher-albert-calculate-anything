@@ -48,13 +48,14 @@ directory = "cover/html/"
 output = "cover/xml/coverage.xml"
 
 [tool.flake8]
+max-line-length = 80
 ignore = [
     "E203",
     "W503"
 ]
 
 [tool.black]
-line-length = 79
+line-length = 80
 skip-string-normalization = true
 
 [tool.tox]
@@ -63,7 +64,7 @@ legacy_tox_ini = """
 skipsdist = true
 minversion = 3.24.1
 recreate = false
-envlist = clean,linting,codestyle,py{36,37,38,39},babel_py{36,37,38,39},coverage,benchmark
+envlist = clean,linting,codestyle,py{37,38,39,310,311},babel_py{37,38,39,310,311},coverage,benchmark
 
 [testenv:clean]
 deps = -r{toxinidir}/requirements/test-requirements.txt
@@ -93,15 +94,6 @@ deps =
     -r{toxinidir}/requirements/test-requirements.txt
 commands = coverage run
 
-[testenv:babel_py36]
-platform = linux2?|darwin
-basepython = python3.6
-deps = 
-    -r{toxinidir}/requirements/requirements.txt
-    -r{toxinidir}/requirements/test-requirements.txt
-    -r{toxinidir}/requirements/optional-requirements.txt
-commands = coverage run -m pytest {toxinidir}/test/query/handlers/babel
-
 [testenv:babel_py37]
 platform = linux2?|darwin
 basepython = python3.7
@@ -114,6 +106,24 @@ commands = coverage run -m pytest {toxinidir}/test/query/handlers/babel
 [testenv:babel_py38]
 platform = linux2?|darwin
 basepython = python3.8
+deps = 
+    -r{toxinidir}/requirements/requirements.txt
+    -r{toxinidir}/requirements/test-requirements.txt
+    -r{toxinidir}/requirements/optional-requirements.txt
+commands = coverage run -m pytest {toxinidir}/test/query/handlers/babel
+
+[testenv:babel_py310]
+platform = linux2?|darwin
+basepython = python3.10
+deps = 
+    -r{toxinidir}/requirements/requirements.txt
+    -r{toxinidir}/requirements/test-requirements.txt
+    -r{toxinidir}/requirements/optional-requirements.txt
+commands = coverage run -m pytest {toxinidir}/test/query/handlers/babel
+
+[testenv:babel_py311]
+platform = linux2?|darwin
+basepython = python3.11
 deps = 
     -r{toxinidir}/requirements/requirements.txt
     -r{toxinidir}/requirements/test-requirements.txt

@@ -107,9 +107,7 @@ def test_malformed_json(mock_currency_provider):
 )
 def test_malformed_data(mock_currency_provider, error_data, msg, use_json):
     cls = CoinbaseCurrencyProvider
-    with mock_currency_provider(
-        cls, error_data, use_json=use_json
-    ) as coinbase:
+    with mock_currency_provider(cls, error_data, use_json=use_json) as coinbase:
         with pytest.raises(CurrencyProviderException) as excinfo:
             coinbase.request_currencies()
 

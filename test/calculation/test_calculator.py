@@ -116,9 +116,7 @@ def test_format():
     assert CalculatorCalculation(0, '').format() == '0'
     assert CalculatorCalculation(-1j, '').format() == '-i'
     assert CalculatorCalculation(1j, '').format() == 'i'
-    assert CalculatorCalculation(121.77j, '').format() == '{:g}i'.format(
-        121.77
-    )
+    assert CalculatorCalculation(121.77j, '').format() == '{:g}i'.format(121.77)
     assert CalculatorCalculation(11.125 + 0j, '').format() == '{:g}'.format(
         11.125
     )

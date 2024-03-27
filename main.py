@@ -45,9 +45,7 @@ class CalculateAnythingExtension(Extension):
         super(CalculateAnythingExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(PreferencesEvent, PreferencesEventListener())
-        self.subscribe(
-            PreferencesUpdateEvent, PreferencesUpdateEventListener()
-        )
+        self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self.subscribe(SystemExitEvent, SystemExitEventListener())
 
 

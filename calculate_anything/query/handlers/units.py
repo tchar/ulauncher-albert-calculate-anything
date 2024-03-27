@@ -155,9 +155,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             yield unit_from_alt
         yield unit_from
 
-    def _get_possible_units(
-        self, unit_from: str
-    ) -> Generator[str, None, None]:
+    def _get_possible_units(self, unit_from: str) -> Generator[str, None, None]:
         if UnitsService().conversion_mode == UnitsService.ConversionMode.CRAZY:
             return self._get_all_possible_units(unit_from)
         return self._get_only_one_unit(unit_from)
@@ -209,9 +207,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             return False
         return True
 
-    def handle_raw(
-        self, query: str
-    ) -> Optional[
+    def handle_raw(self, query: str) -> Optional[
         List[
             Union[
                 UnitsCalculation,
@@ -268,9 +264,7 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
             # Add currency units if compattible with units from
             # and map them to units
             if unit_from_ureg_currency:
-                unit_from_ureg_currency_str = str(
-                    unit_from_ureg_currency.units
-                )
+                unit_from_ureg_currency_str = str(unit_from_ureg_currency.units)
             else:
                 unit_from_ureg_currency_str = None
 

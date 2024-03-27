@@ -229,11 +229,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
             )
             return None
         except Exception as e:  # pragma: no cover
-            logger.exception(  # pragma: no cover
+            logger.exception(
                 'Got exception when trying to calculate {!r}: {}'.format(
                     query, e
                 )
-            )
+            )  # pragma: no cover
             return None  # pragma: no cover
 
         if not any(map(is_types(int, float, complex), results)):

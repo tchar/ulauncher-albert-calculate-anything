@@ -104,9 +104,7 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
         if len(location) < 2:
             return TimezoneService().default_cities, True
 
-        locations = TimeQueryHandler._get_location_search_combinations(
-            location
-        )
+        locations = TimeQueryHandler._get_location_search_combinations(location)
 
         for city_name, search_terms in locations:
             found_locations = TimezoneService().get(city_name, *search_terms)
@@ -128,9 +126,9 @@ class TimeQueryHandler(QueryHandler, metaclass=Singleton):
             try:
                 tz = pytz.timezone(location['timezone'])
             except pytz.UnknownTimeZoneError as e:  # pragma: no cover
-                logger.exception(  # pragma: no cover
+                logger.exception(
                     'Could not find time zone: {}: {}'.format(location, e)
-                )
+                )  # pragma: no cover
                 continue  # pragma: no cover
 
             location_datetime = date.astimezone(tz)

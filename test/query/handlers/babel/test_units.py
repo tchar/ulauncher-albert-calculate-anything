@@ -538,9 +538,7 @@ test_spec_currency = [
             get_unit_result(Q)(
                 '0.1 currency_BTC to currency_USD',
                 approxunits(currency_amount(Q, data)(0.1, 'BTC', 'USD', True)),
-                currency_amount(Q, data)(
-                    0.1, 'BTC', 'USD', False, 'US Dollar'
-                ),
+                currency_amount(Q, data)(0.1, 'BTC', 'USD', False, 'US Dollar'),
                 currency_description(Q, data)('BTC', 'USD'),
                 clipboard=currency_amount(Q, data)(0.1, 'BTC', 'USD', False),
                 order=2,

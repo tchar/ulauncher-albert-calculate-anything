@@ -1,6 +1,6 @@
-pytest==6.2.4
-pytest-httpserver==1.0.1
-pytest-benchmark==3.4.1
-pytest-socket==0.4.0
-trustme==0.8.0
-coverage[toml]==5.5
+pytest>=7.4.4,<=8.1.1
+pytest-httpserver>=1.0.6,<=1.0.10
+pytest-benchmark==4.0.0
+pytest-socket>=0.6,<=0.7.0
+trustme>=1.0.0,<=1.1.0
+coverage[toml]>=7.2.7,<=7.4.4

@@ -20,7 +20,7 @@ DEFAULT_CURRENCIES = 'USD,EUR,GBP,CAD'
 DEFAULT_CITIES = 'New York City US, London GB, Madrid ES, Vancouver CA, Athens GR'  # noqa: E501
 # Units conversion mode (normal or crazy)
 UNITS_CONVERSION_MODE = 'normal'
-# Set the following to True if you want to enable placeholder for empty results
+# Set the following to True if you want to enable placeholder for empty results # noqa: E501
 SHOW_EMPTY_PLACEHOLDER = False
 # Below line is the trigger keywords to your choice (put a space after your keyword) # noqa: E501
 # Order of triggers: 'Calculator, Time, Decimal, Hexadecimal, Binary, Octal

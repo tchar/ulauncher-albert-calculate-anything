@@ -39,9 +39,7 @@ class PercentageCalculation(CalculatorCalculation):
         value_type = self.value_type
         extra_descriptions = []
         if value_type == CalculatorCalculation.ValueType.COMPLEX:
-            extra_descriptions.append(
-                translator('result-complex').capitalize()
-            )
+            extra_descriptions.append(translator('result-complex').capitalize())
         elif value_type == CalculatorCalculation.ValueType.IMAGINARY:
             extra_descriptions.append(
                 translator('result-imaginary').capitalize()

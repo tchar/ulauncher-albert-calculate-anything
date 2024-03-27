@@ -35,9 +35,11 @@ def test_other_base_currency(mock_currency_provider, mycurrencynet_data):
 def test_missing_fields(mock_currency_provider, mycurrencynet_data):
     cls = MyCurrencyNetCurrencyProvider
     rates = [
-        {'currency_code': k, 'rate': v}
-        if k != 'USD'
-        else {'missing_code': k, 'rate': v}
+        (
+            {'currency_code': k, 'rate': v}
+            if k != 'USD'
+            else {'missing_code': k, 'rate': v}
+        )
         for k, v in currency_data()['rates'].items()
     ]
     data = mycurrencynet_data('EUR', rates)
