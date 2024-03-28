@@ -311,7 +311,7 @@ test_spec_missing_simpleeval = [
                     'description': tr_err(
                         'missing-simpleeval-error-description'
                     ),
-                    'clipboard': 'pip install simpleeval',
+                    'clipboard': '/usr/bin/python3 -m pip install simpleeval',
                     'error': MissingSimpleevalException,
                     'order': MissingSimpleevalException.order,
                     'value': None,

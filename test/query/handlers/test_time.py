@@ -629,7 +629,8 @@ test_spec_parsedatetime_missing = [
                     'description': tr_err(
                         'missing-parsedatetime-error-description'
                     ),
-                    'clipboard': 'pip install parsedatetime',
+                    'clipboard': '/usr/bin/python3 -m pip install '
+                    'parsedatetime',
                     'error': MissingParsedatetimeException,
                     'value': None,
                     'value_type': type(None),

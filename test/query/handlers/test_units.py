@@ -615,7 +615,7 @@ test_spec_missing_pint = [
                     'icon': images_dir('convert.svg'),
                     'name': tr_err('missing-pint-error'),
                     'description': tr_err('missing-pint-error-description'),
-                    'clipboard': 'pip install Pint',
+                    'clipboard': '/usr/bin/python3 -m pip install Pint',
                     'error': MissingPintException,
                     'order': MissingPintException.order,
                     'value': None,

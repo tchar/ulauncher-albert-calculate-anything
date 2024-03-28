@@ -181,7 +181,7 @@ def missing_simpleeval_result(query):
             'icon': images_dir('icon.svg'),
             'name': tr_err('missing-simpleeval-error'),
             'description': tr_err('missing-simpleeval-error-description'),
-            'clipboard': 'pip install simpleeval',
+            'clipboard': '/usr/bin/python3 -m pip install simpleeval',
             'error': MissingSimpleevalException,
             'order': MissingSimpleevalException.order,
             'value': None,
