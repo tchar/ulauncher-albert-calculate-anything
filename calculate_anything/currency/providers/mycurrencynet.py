@@ -59,7 +59,11 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
 
         rates_ret = {
             currency: {
-                'rate': rate['rate'] * request_base_rate / base_rate,
+                'rate': (
+                    rate['rate'] * request_base_rate / base_rate
+                    if base_rate
+                    else float('inf')
+                ),
                 'timestamp_refresh': rate['timestamp_refresh'],
             }
             for currency, rate in rates_ret.items()

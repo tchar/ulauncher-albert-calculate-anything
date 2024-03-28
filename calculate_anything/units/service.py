@@ -1,4 +1,5 @@
 import os
+import math
 from threading import RLock
 from enum import Enum
 from typing import Union
@@ -68,6 +69,8 @@ class UnitsService(metaclass=Singleton):
             if currency_units.units == self._base_currency.units:
                 continue
             rate = currency_info['rate']
+            if rate == 0 or not math.isfinite(rate) or math.isnan(rate):
+                continue
             ctx.redefine(
                 'currency_{} = {} currency_EUR'.format(currency, 1 / rate)
             )
