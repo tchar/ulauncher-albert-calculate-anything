@@ -21,9 +21,7 @@ class CurrencyProviderFactory:
         return list(CurrencyProviderFactory.providers.keys())
 
     @staticmethod
-    def get_provider(
-        provider_name: str, api_key: str = ''
-    ) -> CurrencyProvider:
+    def get_provider(provider_name: str, api_key: str = '') -> CurrencyProvider:
         if provider_name in CurrencyProviderFactory.providers:
             return CurrencyProviderFactory.providers[provider_name](api_key)
         raise CurrencyProviderException(

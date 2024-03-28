@@ -7,6 +7,7 @@ For other launchers (i.e Albert) that doesn't let us use logging we use a
 CustomHandler instead of a StreamHandler. It is a fucking dirty hack, but
 what can we do about it?
 '''
+
 import os
 import sys
 import logging as _logging
@@ -99,8 +100,8 @@ class ColorFormatter(_logging.Formatter):
         self._use_color = use_color
 
     def format(self, record: _logging.LogRecord) -> str:
-        '''Formats the record. If coloring is used record is copied and levelname
-        is changed to use colors
+        '''Formats the record. If coloring is used record is copied and
+        levelname is changed to use colors
 
         Returns:
             str: A formatted string

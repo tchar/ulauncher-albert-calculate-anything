@@ -1,4 +1,4 @@
-Pint==0.17
-simpleeval==0.9.10
+Pint>=0.17,<=0.23
+simpleeval==0.9.13
 parsedatetime==2.6
 pytz==2021.1

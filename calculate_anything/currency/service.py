@@ -152,9 +152,7 @@ class CurrencyService(metaclass=Singleton):
             logger.warning('Service is disabled, cannot enable cache')
             return self
         logger.info(
-            'Enabling cache with update frequency = {}'.format(
-                update_frequency
-            )
+            'Enabling cache with update frequency = {}'.format(update_frequency)
         )
         self._cache.enable(update_frequency)
         return self

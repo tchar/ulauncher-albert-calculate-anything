@@ -20,9 +20,7 @@ def hex_to_rgb(_hex: str) -> Tuple[int, int, int]:
 
 
 # https://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html
-def rgb_to_cmyk(
-    rgb: Tuple[int, int, int]
-) -> Tuple[float, float, float, float]:
+def rgb_to_cmyk(rgb: Tuple[int, int, int]) -> Tuple[float, float, float, float]:
     '''Converts rbg to cmyk
 
     Args:

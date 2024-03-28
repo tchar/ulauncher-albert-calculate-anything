@@ -144,8 +144,6 @@ class CurrencyCache:
                 f.write(json.dumps(self._data))
         except Exception as e:  # pragma: no cover
             logger.exception(
-                'Could not save cache data {}: {}'.format(
-                    CURRENCY_DATA_FILE, e
-                )
+                'Could not save cache data {}: {}'.format(CURRENCY_DATA_FILE, e)
             )
         return self

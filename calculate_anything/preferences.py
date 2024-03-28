@@ -50,7 +50,6 @@ class _Preferences:
 
 
 class LanguagePreferences(_Preferences):
-
     '''The language preferences class
 
     Attributes:
@@ -222,8 +221,8 @@ class CurrencyPreferences(_Preferences):
         super()._to_commit('add_provider', provider)
 
     def remove_provider(self, provider: Union[str, CurrencyProvider]) -> None:
-        '''A currency provider to be removed. The provider is not removed immediately,
-        but only after 'commit()' is called
+        '''A currency provider to be removed. The provider is not removed
+        immediately, but only after 'commit()' is called
 
         Args:
             provider (Union[str, CurrencyProvider]): If str is provided it

@@ -60,9 +60,9 @@ def merge_dates(
 def parsedatetime_str(
     reference_date: datetime, dates: Iterable[datetime], signs: Iterable[int]
 ) -> Tuple[int, int, int, int, int, int]:
-    '''Merges dates together along with signs based on a reference date and returns
-    a string to be parsed from parsedatetime. If a sign is negative for a
-    datetime the equivalent string for that datetime will be 'x years ago y
+    '''Merges dates together along with signs based on a reference date and
+    returns a string to be parsed from parsedatetime. If a sign is negative for
+    a datetime the equivalent string for that datetime will be 'x years ago y
     months ago...'
 
     Args:
@@ -80,8 +80,6 @@ def parsedatetime_str(
 
     vals = zip(vals, info)
     vals = filter(lambda v: v[0], vals)
-    vals = map(
-        lambda v: (abs(v[0]), v[1] if v[0] > 0 else v[1] + ' ago'), vals
-    )
+    vals = map(lambda v: (abs(v[0]), v[1] if v[0] > 0 else v[1] + ' ago'), vals)
     vals = map(lambda v: '{} {}'.format(v[0], v[1]), vals)
     return ' '.join(vals)

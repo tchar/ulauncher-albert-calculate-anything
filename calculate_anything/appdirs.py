@@ -149,8 +149,7 @@ def site_data_dir(appname=None, appauthor=None, version=None, multipath=False):
             os.pathsep.join(['/usr/local/share', '/usr/share']),
         )
         pathlist = [
-            os.path.expanduser(x.rstrip(os.sep))
-            for x in path.split(os.pathsep)
+            os.path.expanduser(x.rstrip(os.sep)) for x in path.split(os.pathsep)
         ]
         if appname:
             if version:
@@ -257,8 +256,7 @@ def site_config_dir(
         # only first, if multipath is False
         path = os.getenv('XDG_CONFIG_DIRS', '/etc/xdg')
         pathlist = [
-            os.path.expanduser(x.rstrip(os.sep))
-            for x in path.split(os.pathsep)
+            os.path.expanduser(x.rstrip(os.sep)) for x in path.split(os.pathsep)
         ]
         if appname:
             if version:
@@ -363,9 +361,7 @@ def user_state_dir(appname=None, appauthor=None, version=None, roaming=False):
     if system in ["win32", "darwin"]:
         path = user_data_dir(appname, appauthor, None, roaming)
     else:
-        path = os.getenv(
-            'XDG_STATE_HOME', os.path.expanduser("~/.local/state")
-        )
+        path = os.getenv('XDG_STATE_HOME', os.path.expanduser("~/.local/state"))
         if appname:
             path = os.path.join(path, appname)
     if appname and version:

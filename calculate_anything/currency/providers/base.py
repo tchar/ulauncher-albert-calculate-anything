@@ -71,9 +71,7 @@ class _MockCurrencyProvider(CurrencyProvider):
     def __init__(self, *args, **kwargs):
         pass
 
-    def request_currencies(
-        self, *currencies: str, force: bool
-    ) -> CurrencyData:
+    def request_currencies(self, *currencies: str, force: bool) -> CurrencyData:
         pass
 
 

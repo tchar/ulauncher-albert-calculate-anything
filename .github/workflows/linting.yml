@@ -1,4 +1,4 @@
-name: Linux
+name: Linting
 on:
   push:
     branches: [master]
@@ -38,7 +38,7 @@ jobs:
         include:
           - os: ubuntu-latest
             path: ~/.cache/pip
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.10"]
     name: OS ${{ matrix.os }} - Python ${{ matrix.python-version }}
     env:
       OS: ${{ matrix.os }}
@@ -74,20 +74,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements/dev-requirements.txt
-      - name: Test and generate report
-        env:
-          TOXPY: ${{steps.toxpy.outputs.result}}
-        # run: |
-        #   tox -e clean,py${{ env.TOXPY }},babel_py${{ env.TOXPY }},coverage
+      - name: Linting
         run: |
-          tox -e clean,py${{ env.TOXPY }},coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
-          directory: ./cover/xml
-          files: coverage.xml
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          flags: unittests
-          verbose: true
+          tox -e linting
+      - name: Code style
+        run: |
+          tox -e codestyle

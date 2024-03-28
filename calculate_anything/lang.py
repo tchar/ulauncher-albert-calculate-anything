@@ -96,8 +96,8 @@ class LanguageService(metaclass=Singleton):
                 callback(lang)
 
     def translate(self, word: str, mode: str) -> str:
-        '''Translates a word/key with the provided mode. If the word is not found
-        in the translations it is returned intact.
+        '''Translates a word/key with the provided mode. If the word is not
+        found in the translations it is returned intact.
 
         Args:
             word (str): A word/key to translate.

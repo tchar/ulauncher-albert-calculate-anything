@@ -35,9 +35,7 @@ FLAGS = {
 }
 
 
-CURRENCY_DATA_FILE = os.path.join(
-    APP_DIRS.user_cache_dir, 'currency_data.json'
-)
+CURRENCY_DATA_FILE = os.path.join(APP_DIRS.user_cache_dir, 'currency_data.json')
 TIMEZONES_SQLITE_FILE_USER = os.path.join(
     APP_DIRS.user_cache_dir, 'timezones_user.sqlite3'
 )

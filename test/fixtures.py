@@ -44,9 +44,10 @@ def httpserver_listen_address():
 @pytest.fixture(scope='session')
 def httpserver_ssl_context():
     ca = trustme.CA()
-    client_context = ssl.SSLContext()
-    server_context = ssl.SSLContext()
+    client_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     server_cert = ca.issue_cert(CERT_ISSUE)
+    server_cert = ca.issue_cert(SERVER)
     ca.configure_trust(client_context)
     server_cert.configure_cert(server_context)
 

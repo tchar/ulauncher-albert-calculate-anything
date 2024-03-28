@@ -322,9 +322,7 @@ test_spec_base16 = [
             result_for_colors((255, 171, 241), '#ffabf1', 0, 'RGB'),
             result_for_colors((310.0, 0.3294, 1.0), '#ffabf1', 1, 'HSV'),
             result_for_colors((310.0, 0.9999, 0.8353), '#ffabf1', 2, 'HSL'),
-            result_for_colors(
-                (0.0, 0.3294, 0.0549, 0.0), '#ffabf1', 3, 'CMYK'
-            ),
+            result_for_colors((0.0, 0.3294, 0.0549, 0.0), '#ffabf1', 3, 'CMYK'),
             result_for_base16_string('20:23:66:66:61:62:66:31', '#ffabf1', 4),
         ],
     },

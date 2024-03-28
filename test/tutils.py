@@ -26,10 +26,10 @@ def random_str(length=None):
     length = length if length else 100
     # To make it variable compliable
     first = random.choice(string.ascii_letters)  # nosec
-    return first + ''.join(  # nosec
+    return first + ''.join(
         random.choice(string.ascii_letters + string.digits)
         for _ in range(length - 1)
-    )
+    )  # nosec
 
 
 @lru_cache(maxsize=None)
