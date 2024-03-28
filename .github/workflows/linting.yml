@@ -1,7 +1,7 @@
 name: Linting
 on:
   push:
-    branches: [master, development]
+    branches: [master]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/ci-linux.yml"
@@ -16,7 +16,7 @@ on:
       - "versions.json"
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master, development]
+    branches: [master]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/ci-linux.yml"
