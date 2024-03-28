@@ -109,7 +109,7 @@ class Calculation(ABC):
     def fix_number_precision(
         number: Union[float, int, complex]
     ) -> Union[float, int, complex]:
-        number_dec = number % 1
+        number_dec = number % 1 if number >= 0 else -(-number % 1)
         if cmath.isclose(number_dec, 0, abs_tol=CALCULATOR_ERROR):
             return int(number)
         if cmath.isclose(number_dec, 1, abs_tol=CALCULATOR_ERROR):

@@ -196,7 +196,7 @@ test_spec_inverse = [
             {
                 'result': {
                     'value': pytest.approx(
-                        43.39697318543265 - 4.23601767706051j
+                        43.21391826377226 - 6.111370929190913j
                     ),
                     'query': '(10j + sqrt(2)) as % of '
                     '(tan(pi) + e ** pi * 1j)',
@@ -205,16 +205,16 @@ test_spec_inverse = [
                 },
                 'query_result': {
                     'icon': images_dir('percent.svg'),
-                    'name': '(43.397 - 4.23602i)%',
+                    'name': '(43.2139 - 6.11137i)%',
                     'description': '(1.41421 + 10i) is '
-                    '(43.397 - 4.23602i)% of (1 + 23.1407i) ({})'.format(
+                    '(43.2139 - 6.11137i)% of (23.1407i) ({})'.format(
                         tr_calc('result-complex').capitalize()
                     ),
-                    'clipboard': '(43.397 - 4.23602i)%',
+                    'clipboard': '(43.2139 - 6.11137i)%',
                     'error': None,
                     'order': 0,
                     'value': pytest.approx(
-                        43.39697318543265 - 4.23601767706051j
+                        43.21391826377226 - 6.111370929190913j
                     ),
                     'value_type': complex,
                 },

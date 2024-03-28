@@ -66,6 +66,7 @@ def test_value_type():
 
 def test_fix_number_presicion():
     assert CalculatorCalculation.fix_number_precision(0.000000000001) == 0
+    assert CalculatorCalculation.fix_number_precision(-10e-16) == 0
     assert isinstance(
         CalculatorCalculation.fix_number_precision(0.000000000001), int
     )
