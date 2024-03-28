@@ -67,7 +67,7 @@ class FixerIOCurrencyProvider(ApiKeyCurrencyProvider):
             eur_rate = rates['EUR']
 
             def rate_conv(r):
-                return r / eur_rate
+                return r / eur_rate if eur_rate else float('inf')
 
         else:
 
