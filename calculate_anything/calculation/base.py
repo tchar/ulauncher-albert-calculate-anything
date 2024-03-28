@@ -139,7 +139,7 @@ def missing_parsedatetime_query_result(
         icon=icon,
         name=translator('missing-parsedatetime-error'),
         description=translator('missing-parsedatetime-error-description'),
-        clipboard='pip install parsedatetime',
+        clipboard='/usr/bin/python3 -m pip install parsedatetime',
         error=calculation.error,
         order=calculation.order,
     )
@@ -154,7 +154,7 @@ def missing_simpleeval_query_result(
         icon=icon,
         name=translator('missing-simpleeval-error'),
         description=translator('missing-simpleeval-error-description'),
-        clipboard='pip install simpleeval',
+        clipboard='/usr/bin/python3 -m pip install simpleeval',
         error=calculation.error,
         order=calculation.order,
     )
@@ -169,7 +169,7 @@ def missing_pint_error_query_result(
         icon=icon,
         name=translator('missing-pint-error'),
         description=translator('missing-pint-error-description'),
-        clipboard='pip install Pint',
+        clipboard='/usr/bin/python3 -m pip install Pint',
         error=calculation.error,
         order=calculation.order,
     )

@@ -1,108 +1,107 @@
 {
-    "time": {
-        "is": "is",
-        "was": "was",
-        "on": "on",
-        "now": "now",
-        "year": "year",
-        "years": "years",
-        "months": "months",
-        "month": "month",
-        "weeks": "weeks",
-        "day": "day",
-        "days": "days",
-        "hour": "hour",
-        "hours": "hours",
-        "minute": "minute",
-        "minutes": "minutes",
-        "second": "second",
-        "seconds": "seconds",
+  "time": {
+    "is": "is",
+    "was": "was",
+    "on": "on",
+    "now": "now",
+    "year": "year",
+    "years": "years",
+    "months": "months",
+    "month": "month",
+    "weeks": "weeks",
+    "day": "day",
+    "days": "days",
+    "hour": "hour",
+    "hours": "hours",
+    "minute": "minute",
+    "minutes": "minutes",
+    "second": "second",
+    "seconds": "seconds",
 
-        "last-year": "last year",
-        "next-year": "next year",
-        "years-from-now": "years from now",
-        "years-ago": "years ago",
-        
-        "last-month": "last month",
-        "next-month": "next month",
-        "months-from-now": "months from now",
-        "months-ago": "months ago",
-        
-        "last-week": "last week",
-        "next-week": "next week",
-        "weeks-from-now": "weeks from now",
-        "weeks-ago": "weeks ago",
-        
-        "yesterday": "yesterday",
-        "tomorrow": "tomorrow",
-        "today": "today",
-        "days-from-now": "days from now",
-        "days-ago": "days ago"
-    },
-    "calculator": {
-        "query-boolean": "Query has boolean representation (1 = True, 0 = False)",
-        
-        "result-complex": "result is a complex number",
-        "result-imaginary": "result is an imaginary number",
-        "result-dimensionless": "result has no dimensions",
-        "result-boolean": "Result is a boolean",
+    "last-year": "last year",
+    "next-year": "next year",
+    "years-from-now": "years from now",
+    "years-ago": "years ago",
 
-        "infinity": "infinity",
+    "last-month": "last month",
+    "next-month": "next month",
+    "months-from-now": "months from now",
+    "months-ago": "months ago",
 
+    "last-week": "last week",
+    "next-week": "next week",
+    "weeks-from-now": "weeks from now",
+    "weeks-ago": "weeks ago",
 
-        "bytes": "bytes",
-        "dec": "dec",
-        "oct": "oct",
-        "bin": "bin",
-        "hex": "hex"
-    },
-    "color": {
-        "rgb": "rgb",
-        "hsv": "hsv",
-        "hsl": "hsl",
-        "cmyk": "cmyk"
-    },
-    "misc": {
-        "no-result": "Keep typing your query ...",
-        "no-result-calculator-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\"",
-        "no-result-time-description": "Try expressions like \"time +2 hours at Prague\", \"time until December\"",
-        "no-result-dec-description": "Try expressions like \"159 mod 2 + 1\"",
-        "no-result-bin-description": "Try expressions like \"101010 and xor 110111\"",
-        "no-result-oct-description": "Try expressions like \"157517 + 123\"",
-        "no-result-hex-description": "Try expressions like \"f1a2 + 2 mod 1\", \"# fd1234\""
-    },
-    "errors": {
-        "zero-division-error": "Creating a black hole aren't we?",
-        "zero-division-error-description": "Looks like you divided by zero somewhere",
+    "yesterday": "yesterday",
+    "tomorrow": "tomorrow",
+    "today": "today",
+    "days-from-now": "days from now",
+    "days-ago": "days ago"
+  },
+  "calculator": {
+    "query-boolean": "Query has boolean representation (1 = True, 0 = False)",
 
-        "boolean-comparison-error": "Complex numbers can't be inequally compared",
-        "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
+    "result-complex": "result is a complex number",
+    "result-imaginary": "result is an imaginary number",
+    "result-dimensionless": "result has no dimensions",
+    "result-boolean": "Result is a boolean",
 
-        "currency-provider-error": "Currency Provider error. Did you set your API key?",
-        "currency-provider-error-description": "Set your API key in the extension preferences",
+    "infinity": "infinity",
 
-        "date-overflow": "Hey I'm not a time machine",
-        "date-overflow-description": "I can't calculate dates in 1 million years, or March 32 ",
+    "bytes": "bytes",
+    "dec": "dec",
+    "oct": "oct",
+    "bin": "bin",
+    "hex": "hex"
+  },
+  "color": {
+    "rgb": "rgb",
+    "hsv": "hsv",
+    "hsl": "hsl",
+    "cmyk": "cmyk"
+  },
+  "misc": {
+    "no-result": "Keep typing your query ...",
+    "no-result-calculator-description": "Try expressions like \"10 euros to dollars\", \"sqrt(10) + 2 ^ 2.5\", \"20 cm to inches\"",
+    "no-result-time-description": "Try expressions like \"time +2 hours at Prague\", \"time until December\"",
+    "no-result-dec-description": "Try expressions like \"159 mod 2 + 1\"",
+    "no-result-bin-description": "Try expressions like \"101010 and xor 110111\"",
+    "no-result-oct-description": "Try expressions like \"157517 + 123\"",
+    "no-result-hex-description": "Try expressions like \"f1a2 + 2 mod 1\", \"# fd1234\""
+  },
+  "errors": {
+    "zero-division-error": "Creating a black hole aren't we?",
+    "zero-division-error-description": "Looks like you divided by zero somewhere",
 
-        "misparsed-datetime": "I understood",
-        "misparsed-datetime-description": "You typed",
+    "boolean-comparison-error": "Complex numbers can't be inequally compared",
+    "boolean-comparison-error-description": "You tried to compare a complex number with another number. That's illegal",
 
-        "boolean-percentage-error": "Boolean in percentage calculation",
-        "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",
-        
-        "wrong-base-error": "Invalid digits for this base",
-        "wrong-base-error-description": "Input contains digits not valid for this base",
+    "currency-provider-error": "Currency Provider error. Did you set your API key?",
+    "currency-provider-error-description": "Set your API key in the extension preferences",
 
-        "base-floating-error": "Result is a floating point number",
-        "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
+    "date-overflow": "Hey I'm not a time machine",
+    "date-overflow-description": "I can't calculate dates in 1 million years, or March 32 ",
 
-        "missing-simpleeval-error": "Looks like simpleeval is not installed",
-        "missing-simpleeval-error-description": "Install it with \"pip install simpleeval\" and restart launcher",
+    "misparsed-datetime": "I understood",
+    "misparsed-datetime-description": "You typed",
 
-        "missing-parsedatetime-error": "Looks like parsedatetime is not installed",
-        "missing-parsedatetime-error-description": "Install it with \"pip install parsedatetime\" and restart launcher",
+    "boolean-percentage-error": "Boolean in percentage calculation",
+    "boolean-percentage-error-description": "You cannot compute percentages of boolean variables",
 
-        "missing-pint-error": "Looks like pint is not installed",
-        "missing-pint-error-description": "Install it with \"pip install pint\" and restart launcher"
-    }
+    "wrong-base-error": "Invalid digits for this base",
+    "wrong-base-error-description": "Input contains digits not valid for this base",
+
+    "base-floating-error": "Result is a floating point number",
+    "base-floating-error-description": "Floating point numbers cannot be safely converted to other bases",
+
+    "missing-simpleeval-error": "Looks like simpleeval is not installed",
+    "missing-simpleeval-error-description": "Install it with \"/usr/bin/python3 -m pip install simpleeval\" and restart launcher",
+
+    "missing-parsedatetime-error": "Looks like parsedatetime is not installed",
+    "missing-parsedatetime-error-description": "Install it with \"/usr/bin/python3 -m pip install parsedatetime\" and restart launcher",
+
+    "missing-pint-error": "Looks like pint is not installed",
+    "missing-pint-error-description": "Install it with \"/usr/bin/python3 -m pip install pint\" and restart launcher"
+  }
 }

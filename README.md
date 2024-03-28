@@ -67,10 +67,10 @@ Optional Dependencies: [babel](https://github.com/python-babel/babel). Installin
 Thus extension depends on [Pint](https://github.com/hgrecco/pint), [simpleeval](https://github.com/danthedeckie/simpleeval) and [parsedatetime](https://github.com/bear/parsedatetime). Install them with:
 ```bash
 # You probably have some of them already installed
-pip install Pint simpleeval parsedatetime pytz
+/usr/bin/python3 -m pip install Pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
-pip install babel
+/usr/bin/python3 -m pip install babel
 ```
 
 Open `Ulauncher` go to `Extensions` > `Add extension` and paste https://github.com/tchar/ulauncher-albert-calculate-anything
@@ -82,10 +82,10 @@ Similarly to `Ulauncher` the same dependencies are are required.
 To install the extension for Albert run
 ```bash
 # You probably have some of them already installed
-pip install Pint simpleeval parsedatetime pytz
+/usr/bin/python3 -m pip install Pint simpleeval parsedatetime pytz
 
 # Optionally for translations and formatting to your locale
-pip install babel
+/usr/bin/python3 -m pip install babel
 
 # Determine Install location
 [ -z "$XDG_DATA_HOME" ] && INSTALL_DIR=~/.local/share || INSTALL_DIR=$XDG_DATA_HOME
