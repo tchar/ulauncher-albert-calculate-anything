@@ -15,21 +15,6 @@ on:
       - "manifest.json"
       - "README.md"
       - "versions.json"
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [master]
-    paths-ignore:
-      - ".github/**"
-      - "!.github/workflows/benchmark-linux.yml"
-      - "docs/**"
-      - "misc/**"
-      - "__init__.py"
-      - ".gitignore"
-      - "LICENSE"
-      - "main.py"
-      - "manifest.json"
-      - "README.md"
-      - "versions.json"
 jobs:
   benchmark:
     name: Performance regression check
