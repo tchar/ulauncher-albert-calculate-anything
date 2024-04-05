@@ -7,13 +7,15 @@
 <!-- [![Requirements Status](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements.svg?branch=master)](https://requires.io/github/tchar/ulauncher-albert-calculate-anything/requirements/?branch=master) -->
 
 [![Linux CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-linux.yml)
-<!-- [![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml) -->
-<!-- [![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml) -->
-<!-- [![Benchmark](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/) -->
+[![Benchmark](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/benchmark-linux.yml/badge.svg)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
 [![CodeQL](https://github.com/tchar/ulauncher-albert-calculate-anything/workflows/CodeQL/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/security/code-scanning)
 [![Codecov](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything/branch/master/graph/badge.svg?token=FDMWA8UDJW)](https://codecov.io/gh/tchar/ulauncher-albert-calculate-anything)
+<!-- [![Windows CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-windows.yml) -->
+<!-- [![macOS CI](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/tchar/ulauncher-albert-calculate-anything/actions/workflows/ci-macos.yml) -->
 
 [![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
+
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-blue)](https://tchar.github.io/ulauncher-albert-calculate-anything/benchmarks/)
 
 
 `Ulauncher/Albert Calculate Anything` is an extension for [Ulauncher](https://ulauncher.io/) and [Albert](https://github.com/albertlauncher/albert) to calculate things like currency, time, percentage, units, complex equations, base-n expressions and more.
