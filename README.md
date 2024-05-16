@@ -26,11 +26,11 @@ See [Features](#features) for supported features, [Contents](#contents) for inst
 
 ## Albert Demo
 
-![Albert Demo](misc/demo-albert.gif)
+![Albert Demo](https://raw.githubusercontent.com/tchar/ulauncher-albert-calculate-anything/master/misc/demo-albert.gif)
 
 ## Ulauncher Demo 
 
-![Ulauncher Demo](misc/demo-ulauncher.gif)
+![Ulauncher Demo](https://raw.githubusercontent.com/tchar/ulauncher-albert-calculate-anything/master/misc/demo-ulauncher.gif)
 
 ## Features
 
@@ -387,11 +387,11 @@ The calculate_anything module does not depend on ulauncher or albert, only the `
 
 See the [documentation](docs/API.md) for API call examples
 
-You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](misc/prompt.py) file.
+You can also find a sample usage of the API using [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) at the [prompt.py](https://github.com/tchar/ulauncher-albert-calculate-anything/blob/master/misc/prompt.py) file.
 
 Here is a demo
 
-![](misc/demo-prompt_toolkit.gif)
+![](https://raw.githubusercontent.com/tchar/ulauncher-albert-calculate-anything/master/misc/demo-prompt_toolkit.gif)
 
 ### Adding flags
 
