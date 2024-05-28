@@ -62,10 +62,21 @@
       ]
     },
     {
+      "id": "currency_provider_protocol",
+      "type": "select",
+      "name": "Currency provider protocol",
+      "description": "Your currency provider protocol",
+      "default_value": "http",
+      "options": [
+        {"value": "http", "text": "http"},
+        {"value": "https", "text": "https"}
+      ]
+    },
+    {
       "id": "api_key",
       "type": "input",
-      "name": "Currency API Key",
-      "description": "Your fixer.io API key",
+      "name": "Currency Provider API Key",
+      "description": "Your currency provider API key",
       "default_value": ""
     },
     {

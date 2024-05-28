@@ -141,6 +141,10 @@ class PreferencesEventListener(EventListener):
             mode = event.preferences['units_conversion_mode']
             preferences.units.set_conversion_mode(mode)
 
+        with safe_operation('Set currency provider protocol'):
+            protocol = event.preferences['currency_provider_protocol']
+            preferences.currency.set_currency_provider_protocol(protocol)
+
         with safe_operation('Set currency providers'):
             provider = event.preferences['currency_provider']
             api_key = event.preferences['api_key']
@@ -178,6 +182,8 @@ class PreferencesUpdateEventListener(EventListener):
             preferences.currency.remove_provider(old_provider)
             api_key = extension.preferences['api_key']
             preferences.currency.add_provider(event.new_value, api_key)
+        elif event.id == 'currency_provider_protocol':
+            preferences.currency.set_currency_provider_protocol(event.new_value)
         elif event.id == 'default_cities':
             preferences.time.set_default_cities(event.new_value)
         elif event.id == 'units_conversion_mode':

@@ -233,6 +233,15 @@ class CurrencyPreferences(_Preferences):
         provider = self._get_provider(provider, '')
         super()._to_commit('remove_provider', provider)
 
+    def set_currency_provider_protocol(self, protocol) -> None:
+        '''The protocol to be updated. The update happens after 'commit()' is
+        called.
+
+        Args:
+            protocol (str one of {http, https})
+        '''
+        super()._to_commit('set_currency_provider_protocol', protocol)
+
     def _commit_one(self, key: str, value: Any) -> None:
         if key == 'default_currencies':
             CurrencyService().set_default_currencies(value)
@@ -246,6 +255,8 @@ class CurrencyPreferences(_Preferences):
             CurrencyService().add_provider(value)
         elif key == 'remove_provider':
             CurrencyService().remove_provider(value)
+        elif key == 'set_currency_provider_protocol':
+            CurrencyService().set_currency_provider_protocol(value)
 
     def _pre_commit(self) -> None:
         # If first start, start service

@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
-    BASE_URL = 'https://www.mycurrency.net'
+    PROTOCOL = 'https'
+    HOSTNAME = 'www.mycurrency.net'
     API_URL = '/US.json'
 
     def _convert_rates(self, data: Dict) -> CurrencyData:

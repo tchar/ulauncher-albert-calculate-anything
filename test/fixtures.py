@@ -2,7 +2,7 @@ from calculate_anything.currency.cache import CurrencyCache
 from contextlib import contextmanager
 from datetime import datetime
 from queue import Queue
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import trustme
 import ssl
 import pytest
@@ -129,25 +129,29 @@ def mock_currency_provider(httpserver: HTTPServer):
             instances.append(instance)
             storage[klass] = {
                 'instance': instance,
-                'base_url': klass.BASE_URL,
+                'protocol': klass.PROTOCOL,
+                'hostname': klass.HOSTNAME,
                 'api_url': klass.API_URL,
             }
         return storage
 
     def restore_data(klasses: CurrencyProvider):
         for klass, info in klasses.items():
-            klass.BASE_URL = info['base_url']
+            klass.PROTOCOL = info['protocol']
+            klass.HOSTNAME = info['hostname']
             klass.API_URL = info['api_url']
 
     def _handle_no_response(klasses):
         path = random_str(100)
         tld = random_str(5)
-        base_url = 'https://{}:{}/{}.{}'
-        base_url = base_url.format(SERVER, PORT + 1, path, tld)
+        hostname = '{}:{}'.format(SERVER, PORT + 1)
+        api_url = '{}.{}'.format(path, tld)
 
         instances = []
         for klass in klasses:
-            klass.BASE_URL = base_url
+            klass.PROTOCOL = 'https'
+            klass.HOSTNAME = hostname
+            klass.API_URL = api_url
             instances.append(klasses[klass]['instance'])
         if len(instances) == 1:
             return instances[0]
@@ -162,8 +166,9 @@ def mock_currency_provider(httpserver: HTTPServer):
         for klass, data, use_json in zip(klasses, datas, use_jsons):
             api_url = urljoin('/', klass.__name__)
             klass.API_URL = api_url
-            base_url = httpserver.url_for(klass.__name__)
-            klass.BASE_URL = base_url
+            parsed_url = urlparse(httpserver.url_for(klass.__name__))
+            klass.PROTOCOL = parsed_url.scheme
+            klass.HOSTNAME = parsed_url.netloc
             request = httpserver.expect_request(api_url)
             if status != 200:
                 request.respond_with_response(Response(data, status=status))
