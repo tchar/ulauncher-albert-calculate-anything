@@ -239,7 +239,8 @@ logger = logging.getLogger(__name__)
 
 
 class CustomCurrencyProvider(ApiKeyCurrencyProvider):
-    BASE_URL = 'http://your-base-url'
+    PROTOCOL = 'https'
+    HOSTNAME = 'your-base-url'
     API_URL = '/the-path-to/api/some-version/whatever'
 
     def __init__(self, api_key=''):

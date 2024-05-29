@@ -20,13 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 class ECBCurrencyProvider(FreeCurrencyProvider):
-    BASE_URL = 'https://www.ecb.europa.eu'
+    PROTOCOL = 'https'
+    HOSTNAME = 'www.ecb.europa.eu'
     API_URL = '/stats/eurofxref/eurofxref-daily.xml'
 
     @property
     def url(self):
         cls = ECBCurrencyProvider
-        return urljoin(cls.BASE_URL, cls.API_URL)
+        return urljoin(cls.PROTOCOL + '://' + cls.HOSTNAME, cls.API_URL)
 
     def _validate_data(
         self, data: str
