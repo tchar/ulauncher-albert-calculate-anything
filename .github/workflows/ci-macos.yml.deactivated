@@ -45,29 +45,29 @@ jobs:
       PYTHON: ${{ matrix.python-version }}
       VERSION: v1
     steps:
-      - uses: actions/github-script@v4
+      - uses: actions/github-script@v7
         id: toxpy
         with:
           result-encoding: string
           script: |
             return process.env.PYTHON.split('.').join('')
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Restore pip requirements
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ matrix.path }}
           key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
       # - name: Restore tox requirements
-      #   uses: actions/cache@v2
+      #   uses: actions/cache@v4
       #   with:
       #     path: .tox
       #     key: ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-${{ hashFiles('requirements/*requirements.txt') }}
       #     restore-keys: |
       #       ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ env.VERSION }}-
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies

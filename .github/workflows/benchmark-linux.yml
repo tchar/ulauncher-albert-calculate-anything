@@ -32,16 +32,16 @@ jobs:
       BENCHMARKS_BRANCH: gh-pages
       VERSION: v1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Restore pip requirements
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ matrix.path }}
           key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-${{ hashFiles('requirements/dev-requirements.txt') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ env.VERSION }}-
       - name: Restore tox requirements
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: .tox
           key: ${{ matrix.os }}-${{ matrix.python-version }}-tox-${{ hashFiles('requirements/*requirements.txt') }}
@@ -49,7 +49,7 @@ jobs:
             ${{ matrix.os }}-${{ matrix.python-version }}-tox-
       # Setup python
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dev dependencies
@@ -63,7 +63,7 @@ jobs:
         # Download previous benchmark result from cache (if exists)
       - name: Download previous benchmark data
         if: ${{ github.ref == 'refs/heads/master' }}
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./cache
           key: ${{ matrix.os }}-${{ matrix.python-version }}-benchmark
