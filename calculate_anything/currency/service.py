@@ -6,6 +6,9 @@ from calculate_anything.currency.data import CurrencyData
 from calculate_anything.currency.providers.base import (
     CurrencyProvider,
 )
+from calculate_anything.currency.providers.fixerio import (
+    FixerIOCurrencyProvider,
+)
 from calculate_anything.currency.providers.combined import (
     CombinedCurrencyProvider,
 )
@@ -19,6 +22,9 @@ __all__ = ['CurrencyService']
 
 
 logger = logging.getLogger(__name__)
+
+
+API_CURRENCY_PROVIDERS = [FixerIOCurrencyProvider]
 
 
 class UpdateThread(Thread):
@@ -183,6 +189,15 @@ class CurrencyService(metaclass=Singleton):
     def remove_provider(self, provider: CurrencyProvider) -> 'CurrencyService':
         logger.info('Removing provider {}'.format(provider.__class__.__name__))
         self._provider.remove_provider(provider)
+        return self
+
+    @with_lock
+    def set_currency_provider_protocol(
+        self, protocol: str
+    ) -> 'CurrencyService':
+        logger.info('Setting protocol = {}'.format(protocol))
+        for provider_class in API_CURRENCY_PROVIDERS:
+            provider_class.PROTOCOL = protocol
         return self
 
     @with_lock

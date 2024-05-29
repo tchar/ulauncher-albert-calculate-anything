@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import wraps
-import re
 from typing import Any, Callable, Dict, Iterable, TypeVar
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 from urllib.request import Request
@@ -16,7 +15,8 @@ RT = TypeVar('RT')
 
 
 class CurrencyProvider(ABC):
-    BASE_URL: str
+    PROTOCOL: str
+    HOSTNAME: str
     API_URL: str
 
     class Decorators:
@@ -47,17 +47,13 @@ class CurrencyProvider(ABC):
     @classmethod
     def get_request(cls, params: Dict[str, str] = {}) -> Request:
         headers = {'user-agent': 'Calculate Anything'}
-        url = urljoin(cls.BASE_URL, cls.API_URL)
+        url = urljoin(cls.PROTOCOL + '://' + cls.HOSTNAME, cls.API_URL)
         url = list(urlparse(url))
         url[4] = urlencode(params)
         url = urlunparse(url)
         request = Request(url, headers=headers)
-        # Only urls and only secure connections
-        # Don't fucking install untrusted certs unless you want
-        # a mitm xml bomb on your head
-        # and no I won't install extra dependencies for your stupidity
-        if not re.match(r'^https:\/\/', request.full_url):
-            raise Exception('Invalid request url: {}'.format(request.full_url))
+        # if not re.match(r'^https:\/\/', request.full_url):
+        #     raise Exception('Invalid request url: {}'.format(request.full_url)) # noqa E502
         return request
 
     @abstractmethod
@@ -109,3 +105,11 @@ class ApiKeyCurrencyProvider(CurrencyProvider):
     @api_key.setter
     def api_key(self, api_key: str) -> None:
         self._api_key = api_key
+
+    @property
+    def protocol(self) -> str:
+        return self.__class__.PROTOCOL
+
+    @protocol.setter
+    def protocol(self, protocol: str) -> None:
+        self.__class__.PROTOCOL = protocol

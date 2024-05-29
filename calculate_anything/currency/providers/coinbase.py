@@ -19,13 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class CoinbaseCurrencyProvider(FreeCurrencyProvider):
-    BASE_URL = 'https://api.coinbase.com'
+    PROTOCOL = 'https'
+    HOSTNAME = 'api.coinbase.com'
     API_URL = '/v2/exchange-rates'
 
     @property
     def url(self) -> str:
         cls = CoinbaseCurrencyProvider
-        return urljoin(cls.BASE_URL, cls.API_URL)
+        return urljoin(cls.PROTOCOL + '://' + cls.HOSTNAME, cls.API_URL)
 
     def _validate_data(self, data: Any) -> Tuple[str, Dict]:
         if not isinstance(data, dict):
