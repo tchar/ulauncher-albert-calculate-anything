@@ -82,7 +82,7 @@ jobs:
         run: |
           tox -e clean,py${{ env.TOXPY }},coverage
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           name: os:${{ matrix.os }}-python:${{ matrix.python-version }}
           directory: ./cover/xml
@@ -91,3 +91,4 @@ jobs:
           fail_ci_if_error: true
           flags: unittests
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
