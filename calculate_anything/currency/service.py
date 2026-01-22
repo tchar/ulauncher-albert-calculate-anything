@@ -66,22 +66,27 @@ class UpdateThread(Thread):
         self.wake()
 
     def _get_currencies(self, *currencies: str, force: bool) -> CurrencyData:
-        if force:
-            pass
-        elif self._cache.enabled and not self._cache.should_update():
-            return self._cache.get_rates(*currencies)
+        if not force:
+            with self.lock:
+                cache_enabled = self._cache.enabled
+                should_update = (
+                    self._cache.should_update() if cache_enabled else False
+                )
+                if cache_enabled and not should_update:
+                    return self._cache.get_rates(*currencies)
 
         self._logger.info('Will load currencies')
-        self._cache.clear()
-        currency_rates = self._provider.request_currencies(
-            *currencies, force=force
-        )
+        with self.lock:
+            self._cache.clear()
+            provider = self._provider
+            cache = self._cache
+        currency_rates = provider.request_currencies(*currencies, force=force)
         if not self._stopped_event.is_set():
-            provider_name = self._provider.__class__.__name__
-            self._cache.save(currency_rates, provider_name)
+            with self.lock:
+                provider_name = provider.__class__.__name__
+                cache.save(currency_rates, provider_name)
         return currency_rates
 
-    @with_lock
     def _run(self, force: bool) -> float:
         next_update = 60.0
 
@@ -91,11 +96,15 @@ class UpdateThread(Thread):
         except Exception as e:
             self._logger.exception('Could not get currencies: {}'.format(e))
 
-        with safe_operation():
-            self._callback(currency_rates, self._provider.had_error)
+        with self.lock:
+            had_error = self._provider.had_error
 
-        if not self._provider.had_error:
-            cache_next_update = self._cache.next_update_seconds()
+        with safe_operation():
+            self._callback(currency_rates, had_error)
+
+        if not had_error:
+            with self.lock:
+                cache_next_update = self._cache.next_update_seconds()
             next_update = max(next_update, cache_next_update)
         return next_update
 
