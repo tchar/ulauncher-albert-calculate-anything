@@ -18,6 +18,7 @@ class CurrencyProvider(ABC):
     PROTOCOL: str
     HOSTNAME: str
     API_URL: str
+    REQUEST_TIMEOUT = 5
 
     class Decorators:
         @staticmethod

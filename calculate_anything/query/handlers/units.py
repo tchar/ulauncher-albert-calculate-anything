@@ -42,12 +42,16 @@ class UnitsQueryHandler(QueryHandler, metaclass=Singleton):
         self, units: Iterable['pint.Unit']
     ) -> List[CalculationError]:
         dimensionalities = set(unit.dimensionality for unit in units)
+        has_currency = any(
+            map(lambda d: '[currency]' in d, dimensionalities)
+        )
+        if not has_currency:
+            return []
         currency_service = CurrencyService()
 
         currency_provider_had_error = (
             currency_service.enabled
             and currency_service.provider_had_error
-            and any(map(lambda d: '[currency]' in d, dimensionalities))
         )
         if currency_provider_had_error:
             item = CalculationError(CurrencyProviderException())
