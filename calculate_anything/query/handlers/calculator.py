@@ -1,5 +1,6 @@
 from typing import List, Tuple, Union
 import re
+import math
 import cmath
 import operator as op
 
@@ -42,7 +43,6 @@ __all__ = ['CalculatorQueryHandler']
 logger = logging.getLogger(__name__)
 
 
-@Singleton.function
 def get_simple_eval(functions) -> Union['SimpleEval', StupidEval]:
     simple_eval = SimpleEval()
     if not isinstance(simple_eval, StupidEval):
@@ -55,16 +55,150 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
     equalities and inequalities.
     """
 
+    trig_mode = 'rad'
+    memory = [0] * 10
+    ans = None  # Last answer
+
+    @staticmethod
+    def mem_load(index, fn, num_args=1):
+        def load(*args):
+            memory = CalculatorQueryHandler.memory
+            if len(args) == num_args:
+                memory[index] = fn(*((memory[index],) + args))
+                return memory[index]
+            return None
+
+        return load
+
+    @staticmethod
+    def mem_clear():
+        CalculatorQueryHandler.memory = [0] * 10
+        return 0
+
+    @staticmethod
+    def _convert_args(name, args, conversion):
+        if any(arg.imag != 0 for arg in args):
+            return None
+        converted = []
+        for index, arg in enumerate(args):
+            if index in CalculatorQueryHandler.convert_exceptions.get(name, []):
+                converted.append(arg.real)
+            else:
+                converted.append(conversion(arg.real))
+        return converted
+
+    # Indices of args that should not be converted
+    convert_exceptions = {'rect': [0]}  # r is a distance in rect(r, phi)
+    convert_outputs = (
+        'asin',
+        'acos',
+        'atan',
+        'acsc',
+        'asec',
+        'acot',
+        'phase',
+    )
+    convert_inputs = ('sin', 'cos', 'tan', 'csc', 'sec', 'cot', 'rect')
+
     def __init__(self) -> None:
         super().__init__('=')
-        # Cmath to set for simpleeval
+        self._old_trig_mode, self._old_memory = None, None
+
+    def _initialize_fns(self) -> None:
+        """Initializes the calculator's functions, taking into account the
+        trig mode (deg, rad, grad) and memory values.
+        """
         functions = {
+            "mc": self.mem_clear,
+            "ans": lambda: getattr(self, 'ans', 0),
+        }
+        if self.trig_mode == 'grad':
+            functions.update(
+                {
+                    'deg': lambda x: x * 180 / 200,
+                    'rad': lambda x: x * cmath.pi / 200,
+                }
+            )
+        else:
+            functions.update({'deg': math.degrees, 'rad': math.radians})
+        for i in range(10):
+            functions.update(
+                {
+                    "m{}".format(i): self.memory[i],
+                    "m{}l".format(i): self.mem_load(i, lambda x, y: y),
+                    "m{}c".format(i): self.mem_load(i, lambda x: 0, 0),
+                    "m{}a".format(i): self.mem_load(i, op.add),
+                    "m{}s".format(i): self.mem_load(i, op.sub),
+                    "m{}m".format(i): self.mem_load(i, op.mul),
+                    "m{}d".format(i): self.mem_load(i, op.truediv),
+                    "m{}e".format(i): self.mem_load(i, op.pow),
+                    "m{}r".format(i): self.mem_load(
+                        i, lambda x, y: op.pow(x, 1 / y)
+                    ),
+                }
+            )
+
+        math_fns = {
             name: getattr(cmath, name)
             for name in dir(cmath)
-            if not name.startswith('_') and not name.endswith('_')
+            if not (name.startswith('_') or name.endswith('_'))
         }
+        math_fns.update(
+            {
+                "atan2": lambda x, y: math.atan2(y, x),
+                "csc": lambda x: 1 / cmath.sin(x),
+                "sec": lambda x: 1 / cmath.cos(x),
+                "cot": lambda x: 1 / cmath.tan(x),
+                "acsc": lambda x: cmath.asin(1 / x),
+                "asec": lambda x: cmath.acos(1 / x),
+                "acot": lambda x: cmath.atan(1 / x),
+            }
+        )
+
+        for name, fn in math_fns.items():
+            if any(trig in name for trig in self.convert_outputs):
+                if self.trig_mode == 'deg':
+                    functions[name] = (
+                        lambda orig_fn: lambda *args: (
+                            math.degrees(orig_fn(*args).real)
+                            if orig_fn(*args).imag == 0
+                            else None
+                        )
+                    )(fn)
+                elif self.trig_mode == 'rad':
+                    functions[name] = math_fns[name]
+                elif self.trig_mode == 'grad':
+                    functions[name] = (
+                        lambda orig_fn: lambda *args: (
+                            orig_fn(*args).real * 200 / cmath.pi
+                            if orig_fn(*args).imag == 0
+                            else None
+                        )
+                    )(fn)
+            elif any(trig in name for trig in self.convert_inputs):
+                if self.trig_mode == 'deg':
+                    functions[name] = (
+                        lambda orig_fn, name: lambda *args: orig_fn(
+                            *self._convert_args(name, args, math.radians)
+                        )
+                    )(fn, name)
+                elif self.trig_mode == 'rad':
+                    functions[name] = math_fns[name]
+                elif self.trig_mode == 'grad':
+                    functions[name] = (
+                        lambda orig_fn, name: lambda *args: orig_fn(
+                            *self._convert_args(
+                                name, args, lambda x: x * cmath.pi / 200
+                            )
+                        )
+                    )(fn, name)
+            else:
+                functions[name] = math_fns[name]
+
         self._simple_eval = get_simple_eval(functions)
         self._function_names = list(functions.keys())
+        self._old_trig_mode = self.trig_mode
+        self._old_memory = self.memory.copy()
 
         keywords = [name.lower() for name in self._function_names]
         keywords.extend(['%', '//', '*', '/', '+', '-', '(', ')', '**'])
@@ -82,6 +216,11 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         number.
 
         """
+        if (
+            self.trig_mode != self._old_trig_mode
+            or self.memory != self._old_memory
+        ):
+            self._initialize_fns()
         expression = expression.strip().lower()
         expression = self._keywords_regex.split(expression)
         expr = ''
@@ -247,4 +386,5 @@ class CalculatorQueryHandler(QueryHandler, metaclass=Singleton):
         else:
             result = CalculatorCalculation(results[0], subqueries[0])
 
+        self.ans = result.value
         return [result]

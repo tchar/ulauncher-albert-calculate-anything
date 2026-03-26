@@ -286,9 +286,7 @@ class CurrencyUnitsCalculation(UnitsCalculation):
         if unit_to_name:
             unit_to_name = unit_to_name[0]
         else:
-            unit_to_name = (
-                str(self.unit_to).replace('currency_', '', 1).replace()
-            )
+            unit_to_name = str(self.unit_to).replace('currency_', '', 1)
 
         if unit_to_name in FLAGS:
             icon = FLAGS[unit_to_name]

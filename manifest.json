@@ -51,6 +51,18 @@
       "default_value": "bin"
     },
     {
+      "id": "trig_mode",
+      "type": "select",
+      "name": "Trigonometry Mode",
+      "description": "The unit used for trigonometric calculations",
+      "default_value": "rad",
+      "options": [
+        {"value": "deg", "text": "Degree"},
+        {"value": "rad", "text": "Radian"},
+        {"value": "grad", "text": "Gradian"}
+      ]
+    },
+    {
       "id": "currency_provider",
       "type": "select",
       "name": "Currency Provider",

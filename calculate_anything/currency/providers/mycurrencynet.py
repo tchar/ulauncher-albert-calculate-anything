@@ -78,7 +78,7 @@ class MyCurrencyNetCurrencyProvider(FreeCurrencyProvider):
         try:
             request = self.get_request()
             logger.info('Making request to: {}'.format(request.full_url))
-            with urlopen(request) as response:  # nosec
+            with urlopen(request, timeout=self.REQUEST_TIMEOUT) as response:  # nosec
                 data = response.read().decode()
                 response_code = response.getcode()
         except HTTPError as e:

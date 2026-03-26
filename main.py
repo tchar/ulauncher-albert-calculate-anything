@@ -52,8 +52,7 @@ class CalculateAnythingExtension(Extension):
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         query_nokw = event.get_argument() or ''
-        query = event.get_query() or ''
-        query = query.replace(event.get_keyword() + ' ', '', 1)
+        query = query_nokw
         mode = 'calculator'
         if event.get_keyword() == extension.preferences['time_kw']:
             query = TimeQueryHandler().keyword + query
@@ -158,6 +157,10 @@ class PreferencesEventListener(EventListener):
             default_currencies = event.preferences['default_currencies']
             preferences.currency.set_default_currencies(default_currencies)
 
+        with safe_operation('Set trigonometry mode'):
+            trig_mode = event.preferences['trig_mode']
+            preferences.calculator.set_trig_mode(trig_mode)
+
         preferences.commit()
 
 
@@ -188,6 +191,8 @@ class PreferencesUpdateEventListener(EventListener):
             preferences.time.set_default_cities(event.new_value)
         elif event.id == 'units_conversion_mode':
             preferences.units.set_conversion_mode(event.new_value)
+        elif event.id == 'trig_mode':
+            preferences.calculator.set_trig_mode(event.new_value)
 
         preferences.commit()
 

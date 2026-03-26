@@ -115,6 +115,12 @@ The extension can work in albert without keywords if you comment out the `__trig
 
 If you are using Ulauncher use the extension preferences.
 
+### Trigonometry Mode
+
+The calculator supports calculating trig functions in degrees, radians (default), and gradians. Choose your preferred mode in the extension preferences.
+
+**Note**: Only the radian mode supports complex numbers in trig functions.
+
 ### Set Currency Provider
 
 You can select from different currency providers. Supported providers are:
@@ -333,6 +339,10 @@ The following constants exist: `pi`, `e`, `tau` and others from [cmath](https://
 
 The following functions exist: `phase`, `polar`, `rect`, `exp`, `log`, `log10`, `sqrt`, `acos`, `asin`, `atan`, `cos`, `sin`, `tan`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh` and others from [cmath](https://docs.python.org/3/library/cmath.html)
 
+The functions `csc`, `sec`, `cot`, `acsc`, `asec`, and `acot` exist and are calculated using their reciprocals. `atan2` exists but supports only real numbers.
+
+`deg` and `rad` convert from radians to degrees and vice versa respectively, except in gradian mode where they convert from gradians to degrees and from gradians to radians respectively.
+
 #### **Simple Cases**
 - `10 + sqrt(2)`: Answer is 11.4142
 - `10 + cos(pi) + 30 * e ^ 2`: Answer is 230.672
@@ -342,6 +352,26 @@ Use i as the imaginary unit
 - `10 + sqrt(2) + i`: Answer is 11.4142 + i
 - `cos(1 + i)`: Answer is 0.83373 - 0.988898i
 - `e ^ (pi * i) + 1`: Answer is 0 (Euler's identity)
+
+#### **Memory**
+
+The `ans()` function returns the last calculated result.
+
+The calculator has 10 memory slots from `m0` to `m9` which can store numbers for later use. Their values are initialized to `0`, and they are persistent as long as the launcher is running. Reset the entire memory to `0` with `mc()`.
+
+Use the variables `m0` to `m9` to access memory slot values. Use the following functions to load and change the values (Replace `0` with a number from `0` to `9` to use the other slots):
+- `m0l(number)`: Load `m0` with `number`
+- `m0c()`: Clear `m0` (set to `0`)
+- `m0a(number)`: Add `number` to `m0`
+- `m0s(number)`: Subtract `number` from `m0`
+- `m0m(number)`: Multiply `m0` by `number`
+- `m0d(number)`: Divide `m0` by `number`
+- `m0e(number)`: Raise `m0` to the power of `number`
+- `m0r(number)`: Take the `number`th root of `m0`
+
+The functions return the new memory slot value after the operation to facilitate chaining.
+
+**Note**: the functions run every time a valid expression containing them is evaluated. For example, if `m0` is `1` and the launcher input is `m0a(2)`, `m0` will become `3`. If you type a space, `m0` will become `5` as a new valid expression is evaluated.
 
 ### Base N Calculator
 

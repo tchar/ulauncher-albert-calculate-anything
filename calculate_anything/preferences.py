@@ -8,6 +8,7 @@ from calculate_anything.currency.providers.base import CurrencyProvider
 from calculate_anything.currency import CurrencyService
 from calculate_anything.lang import LanguageService
 from calculate_anything.time import TimezoneService
+from calculate_anything.query.handlers.calculator import CalculatorQueryHandler
 from calculate_anything.utils import (
     Singleton,
     get_or_default,
@@ -319,6 +320,34 @@ class UnitsPreferences(_Preferences):
             UnitsService().start()
 
 
+class CalculatorPreferences(_Preferences):
+    '''The calculator preferences class
+
+    Attributes:
+        None
+    '''
+
+    def set_trig_mode(self, trig_mode: str) -> None:
+        '''The trigonometry mode to be set. The mode is not set immediately,
+        but only after 'commit()' is called
+
+        Args:
+            trig_mode (str): The trigonometry mode to set. It must be one of
+                'deg', 'rad', or 'grad'.
+        '''
+        trig_mode = get_or_default(
+            trig_mode,
+            str,
+            'rad',
+            ['deg', 'rad', 'grad'],
+        ).lower()
+        super()._to_commit('trig_mode', trig_mode)
+
+    def _commit_one(self, key: str, value: Any) -> None:
+        if key == 'trig_mode':
+            CalculatorQueryHandler.trig_mode = value
+
+
 class Preferences(metaclass=Singleton):
     '''The Preferences class is a Singleton class which holds all other
     preferences, like language, timezone, units and currency.
@@ -335,6 +364,7 @@ class Preferences(metaclass=Singleton):
         self.time = TimePreferences()
         self.units = UnitsPreferences()
         self.currency = CurrencyPreferences()
+        self.calculator = CalculatorPreferences()
 
     def commit(self) -> None:
         '''Commits preference changes in proper order'''
@@ -342,3 +372,4 @@ class Preferences(metaclass=Singleton):
         self.time.commit()
         self.units.commit()
         self.currency.commit()
+        self.calculator.commit()
