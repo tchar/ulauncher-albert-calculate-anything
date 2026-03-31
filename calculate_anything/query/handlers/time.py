@@ -41,14 +41,27 @@ logger = logging.getLogger(__name__)
 
 
 class TimeQueryHandler(QueryHandler, metaclass=Singleton):
+
+    LOCALE_ID = 'en_US'
+
     def __init__(self):
         super().__init__('time')
-        if parsedatetime is not None:
+        self._init_calendar()
+
+    def _init_calendar(self, locale_id: str = 'en_US') -> None:
+        if parsedatetime is None:
+            self._cal = None
+            return
+        try:
+            self._cal = parsedatetime.Calendar(
+                parsedatetime.Constants(localeID=TimeQueryHandler.LOCALE_ID),
+                version=parsedatetime.VERSION_CONTEXT_STYLE,
+            )
+        except Exception:
+            # locale not supported by parsedatetime, fall back to en_US
             self._cal = parsedatetime.Calendar(
                 version=parsedatetime.VERSION_CONTEXT_STYLE
             )
-        else:
-            self._cal = None
 
     @staticmethod
     def now() -> datetime:

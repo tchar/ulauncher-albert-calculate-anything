@@ -79,9 +79,9 @@ Open `Ulauncher` go to `Extensions` > `Add extension` and paste https://github.c
 
 ## Install for Albert
 
-Similarly to `Ulauncher` the same dependencies are are required.
+Similarly to `Ulauncher` the same dependencies are required.
 
-To install the extension for Albert run
+To install the extension for Albert check below example code and update your data location accordingly.
 ```bash
 # You probably have some of them already installed
 /usr/bin/python3 -m pip install Pint simpleeval parsedatetime pytz
@@ -89,27 +89,38 @@ To install the extension for Albert run
 # Optionally for translations and formatting to your locale
 /usr/bin/python3 -m pip install babel
 
-# Determine Install location
-[ -z "$XDG_DATA_HOME" ] && INSTALL_DIR=~/.local/share || INSTALL_DIR=$XDG_DATA_HOME
-
-# Create module directory if not exists
-mkdir -p $INSTALL_DIR/albert/org.albert.extension.python/modules/
+# Determine Install location (Open Albert and type "Albert data" to see the Albert data location)
+# Update below lines with your location
+ALBERT_DATA_LOCATION="/home/<user>/.local/share/albert"
+ALBERT_PYTHON_PLUGIN_LOCATION="$ALBERT_DATA_LOCATION/python/plugins"
+INSTALL_DIR="$ALBERT_PYTHON_PLUGIN_LOCATION/calculate-anything"
+mkdir -p $INSTALL_DIR
 
 # Install extension
-git clone https://github.com/tchar/ulauncher-albert-calculate-anything $INSTALL_DIR/albert/org.albert.extension.python/modules/
+git clone https://github.com/tchar/ulauncher-albert-calculate-anything $INSTALL_DIR
 ```
+Open Albert, navigate to **Settings → Plugins** and enable the **Calculate Anything** plugin.
 
-Open albert, enable `Python` extensions and then enable the `Calculate Anything` extension.
-
-You can double click it to open module's location and edit `__init__.py` to add your preferences.
+To configure the plugin, select it in the Plugins list and click the settings icon (or double-click it). All preferences are available through the built-in GUI configuration panel — no manual file editing is required.
 
 ## How to Setup
 
 ### Albert
 
-If you are using Albert open the extension location normally at `~/.local/share/albert/org.albert.extension.python/modules/ulauncher-albert-calculate-anything/__init__.py` and edit the preferences mentioned below in the apropriate variable `API_KEY`, `CACHE`, `DEFAULT_CURRENCIES`, `DEFAULT_CITIES`, `SHOW_EMPTY_PLACEHOLDER` or `__triggers__` for the keyword
+If you are using Albert, open **Settings → Plugins**, select **Calculate Anything** and open its configuration panel. All preferences described below are available as labelled fields in that panel — no manual editing of `__init__.py` is needed.
 
-The extension can work in albert without keywords if you comment out the `__triggers__` option, however if another extension has the keyword you type, `Calculate Anything won't trigger` (see [relevant issue](https://github.com/albertlauncher/albert/issues/978))
+The plugin registers separate trigger-based handlers for each mode with the following default keywords:
+
+| Trigger | Mode |
+|---------|------|
+| `= `    | Calculator, units, currency, percentages |
+| `time ` | Time conversion |
+| `dec `  | Decimal (base 10) |
+| `bin `  | Binary (base 2) |
+| `hex `  | Hexadecimal (base 16) |
+| `oct `  | Octal (base 8) |
+
+Trigger keywords can be remapped from the plugin's entry in the Plugins list if you prefer custom keywords.
 
 ### Ulauncher
 
@@ -123,13 +134,13 @@ You can select from different currency providers. Supported providers are:
 
 Preferences:
 - ULauncher: Select one in currency provider
-- Albert: Modify the `CURRENCY_PROVIDER` in `__init__.py` to one of [`fixerio`, `internal` (European Central Bank)]
+- Albert: Select **Currency provider** in the plugin's configuration panel
 
 ### Set API Key
 
 In order for the currency conversion to work for providers that need an API Key, you need to set it in the preferences.
 - ULauncher: Copy your api key to the `API KEY` box in preferences
-- Albert: Modify the `API_KEY` in `__init__.py`
+- Albert: Enter your key in the **Fixer.io API key** field in the plugin's configuration panel
 
 
 ### Cache
@@ -137,7 +148,7 @@ In order for the currency conversion to work for providers that need an API Key,
 For currency conversion you can enable the cache for a minimum of 1 day up to 1 year. This will store the results fetched by your currency provider to prevent redundant requests. This is especially helpful if you have a free plan on a paid currency provider that limits your requests. It will also display the results faster, since no request is made. If all requested currencies have been cached, no request is made.
 
 - Ulauncher: Edit `Currency Cache` in the extension preferences
-- Albert: Edit `CACHE=86400` in `__init__.py` and set it to your interval in seconds
+- Albert: Set **Currency cache (seconds)** in the plugin's configuration panel (minimum 0, maximum 604800)
 
 ### Default currency
 
@@ -145,14 +156,14 @@ In the preferences you can define a comma separated list of default currencies t
 Defaults to `USD,EUR,CAD,GBP,AUD`
 
 - ULauncher: Edit in `Default Currencies` preferences
-- Albert: Edit `DEFAULT_CURRENCIES` in `__init__.py`
+- Albert: Edit the **Default currencies** field in the plugin's configuration panel (comma-separated, e.g. `USD,EUR,GBP,CAD`)
 
 ### Default cities
 
 In the preferences you can define a comma separated list of default cities when using the time command
 
 - ULauncher: Edit in `Default Currencies` preferences
-- Albert: Edit `DEFAULT_CITIES` in `__init__.py`
+- Albert: Edit the **Default cities** field in the plugin's configuration panel
 
 ### Units Conversion Mode
 
@@ -165,12 +176,12 @@ See [Currency](#crazy-conversion) and [Units](#crazy-conversion-1) for more
 **Crazy mode is experimental and bugs are to be expected**
 
 - ULauncher: Edit in `Units Conversion mode` preferences
-- Albert: Edit `UNITS_CONVERSION_MODE` in `__init__.py`
+- Albert: Select **Units conversion mode** in the plugin's configuration panel
 
 ### Show Empty Placeholder
 
  - ULauncher: Default is `No`. Set to `Yes` to show an empty placeholder when extension doesn't return anything
- - Albert: Change `SHOW_EMPTY_PLACEHOLDER=True` in `__init__.py`
+ - Albert: Toggle **Show placeholder on empty results** in the plugin's configuration panel
 
 ### Commands and Syntax
 
@@ -395,7 +406,7 @@ Here is a demo
 
 ### Adding flags
 
-If your currencie's flag is missing you can place it in the extension's flags directory at `calculate_anything/images/flags/` and restart your launcher or make a pull request to include it.
+If your currency's flag is missing you can place it in the extension's flags directory at `calculate_anything/images/flags/` and restart your launcher or make a pull request to include it.
 
 Make sure to name your flag image in uppercase 2 letter name of your country. To make a currency flag, simply link the country flag you want to the currency `e.g ln -s US.svg USD.svg` or add a completely new flag For example American Dollar's flag is in `calculate_anything/images/flags/USD.svg`. You can use most image formats (i.e `svg`, `png`) 
 

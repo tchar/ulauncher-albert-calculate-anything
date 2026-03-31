@@ -1,0 +1,107 @@
+{
+  "time": {
+    "is": "ist",
+    "was": "war",
+    "on": "am",
+    "now": "jetzt",
+    "year": "Jahr",
+    "years": "Jahre",
+    "months": "Monate",
+    "month": "Monat",
+    "weeks": "Wochen",
+    "day": "Tag",
+    "days": "Tage",
+    "hour": "Stunde",
+    "hours": "Stunden",
+    "minute": "Minute",
+    "minutes": "Minuten",
+    "second": "Sekunde",
+    "seconds": "Sekunden",
+
+    "last-year": "letztes Jahr",
+    "next-year": "nächstes Jahr",
+    "years-from-now": "Jahre ab jetzt",
+    "years-ago": "vor Jahren",
+
+    "last-month": "letzten Monat",
+    "next-month": "nächsten Monat",
+    "months-from-now": "Monate ab jetzt",
+    "months-ago": "vor Monaten",
+
+    "last-week": "letzte Woche",
+    "next-week": "nächste Woche",
+    "weeks-from-now": "Wochen ab jetzt",
+    "weeks-ago": "vor Wochen",
+
+    "yesterday": "gestern",
+    "tomorrow": "morgen",
+    "today": "heute",
+    "days-from-now": "Tage ab jetzt",
+    "days-ago": "vor Tagen"
+  },
+  "calculator": {
+    "query-boolean": "Anfrage hat eine boolesche Darstellung (1 = Wahr, 0 = Falsch)",
+
+    "result-complex": "Ergebnis ist eine komplexe Zahl",
+    "result-imaginary": "Ergebnis ist eine imaginäre Zahl",
+    "result-dimensionless": "Ergebnis hat keine Einheit",
+    "result-boolean": "Ergebnis ist ein Wahrheitswert",
+
+    "infinity": "Unendlichkeit",
+
+    "bytes": "Bytes",
+    "dec": "Dez",
+    "oct": "Okt",
+    "bin": "Bin",
+    "hex": "Hex"
+  },
+  "color": {
+    "rgb": "rgb",
+    "hsv": "hsv",
+    "hsl": "hsl",
+    "cmyk": "cmyk"
+  },
+  "misc": {
+    "no-result": "Bitte weiter tippen ...",
+    "no-result-calculator-description": "Versuche Ausdrücke wie „10 Euro in Dollar", „sqrt(10) + 2 ^ 2.5", „20 cm in Zoll"",
+    "no-result-time-description": "Versuche Ausdrücke wie „Zeit +2 Stunden in Prag", „Zeit bis Dezember"",
+    "no-result-dec-description": "Versuche Ausdrücke wie „159 mod 2 + 1"",
+    "no-result-bin-description": "Versuche Ausdrücke wie „101010 und xor 110111"",
+    "no-result-oct-description": "Versuche Ausdrücke wie „157517 + 123"",
+    "no-result-hex-description": "Versuche Ausdrücke wie „f1a2 + 2 mod 1", „# fd1234""
+  },
+  "errors": {
+    "zero-division-error": "Erschaffst du gerade ein schwarzes Loch?",
+    "zero-division-error-description": "Es sieht aus, als hättest du irgendwo durch null geteilt",
+
+    "boolean-comparison-error": "Komplexe Zahlen können nicht ungleich verglichen werden",
+    "boolean-comparison-error-description": "Du hast versucht, eine komplexe Zahl mit einer anderen Zahl zu vergleichen. Das ist nicht erlaubt",
+
+    "currency-provider-error": "Fehler beim Währungsanbieter. Hast du deinen API-Schlüssel gesetzt?",
+    "currency-provider-error-description": "Trage deinen API-Schlüssel in den Erweiterungseinstellungen ein",
+
+    "date-overflow": "Ich bin keine Zeitmaschine",
+    "date-overflow-description": "Ich kann keine Daten in 1 Million Jahren oder den 32. März berechnen",
+
+    "misparsed-datetime": "Ich habe verstanden",
+    "misparsed-datetime-description": "Du hast eingegeben",
+
+    "boolean-percentage-error": "Wahrheitswert in Prozentberechnung",
+    "boolean-percentage-error-description": "Du kannst keine Prozentsätze von booleschen Variablen berechnen",
+
+    "wrong-base-error": "Ungültige Ziffern für diese Basis",
+    "wrong-base-error-description": "Die Eingabe enthält Ziffern, die für diese Basis nicht gültig sind",
+
+    "base-floating-error": "Ergebnis ist eine Gleitkommazahl",
+    "base-floating-error-description": "Gleitkommazahlen können nicht sicher in andere Zahlensysteme umgewandelt werden",
+
+    "missing-simpleeval-error": "Es scheint, dass simpleeval nicht installiert ist",
+    "missing-simpleeval-error-description": "Installiere es mit \"/usr/bin/python3 -m pip install simpleeval\" und starte den Launcher neu",
+
+    "missing-parsedatetime-error": "Es scheint, dass parsedatetime nicht installiert ist",
+    "missing-parsedatetime-error-description": "Installiere es mit \"/usr/bin/python3 -m pip install parsedatetime\" und starte den Launcher neu",
+
+    "missing-pint-error": "Es scheint, dass pint nicht installiert ist",
+    "missing-pint-error-description": "Installiere es mit \"/usr/bin/python3 -m pip install pint\" und starte den Launcher neu"
+  }
+}

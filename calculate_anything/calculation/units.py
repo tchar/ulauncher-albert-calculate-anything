@@ -172,19 +172,24 @@ class TemperatureUnitsCalculation(UnitsCalculation):
         parse_default = True
         if babel_units:
             try:
-                _locale = locale.getlocale()[0]
-                unit_name = (
-                    str(self.value.units)
-                    .replace('degree_', 'temperature-', 1)
-                    .lower()
-                )
-                name = babel_units.format_unit(
-                    self.value.magnitude,
-                    unit_name,
-                    locale=_locale,
-                    format='#,##0.##;-#',
-                )
-                parse_default = False
+                unit_str = str(self.value.units)
+                if unit_str.startswith('degree_'):
+                    _locale = locale.getlocale()[0]
+                    unit_name = (
+                        str(self.value.units)
+                        .replace('degree_', 'temperature-', 1)
+                        .lower()
+                    )
+                    logger.warning(f"Formatting {self.value.magnitude}, {unit_name}, {_locale}")
+                    name = babel_units.format_unit(
+                        self.value.magnitude,
+                        unit_name,
+                        locale=_locale,
+                        format='#,##0.##;-#',
+                    )
+                    parse_default = False
+                else:
+                    parse_default = True
             except Exception as e:
                 msg = 'Babel: Could not translate temperature units "{}": {}'
                 msg = msg.format(self.value.units, e)
