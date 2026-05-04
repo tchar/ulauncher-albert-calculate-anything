@@ -58,6 +58,7 @@ Optional Dependencies: [babel](https://github.com/python-babel/babel). Installin
 
  - [Install for Ulauncher](#install-for-ulauncher)
  - [Install for Albert](#install-for-albert)
+ - [Install for Alfred 5](#install-for-alfred-5)
  - [How to setup](#how-to-setup)
  - [Examples](#examples)
  - [Known Issues](#known-issues)
@@ -102,6 +103,30 @@ git clone https://github.com/tchar/ulauncher-albert-calculate-anything $INSTALL_
 Open albert, enable `Python` extensions and then enable the `Calculate Anything` extension.
 
 You can double click it to open module's location and edit `__init__.py` to add your preferences.
+
+## Install for Alfred 5
+
+Alfred 5 is macOS-only. See [alfred/README.md](alfred/README.md) for full instructions.
+
+**Quick start:**
+
+```bash
+# 1. Create a dedicated venv
+python3 -m venv ~/.venvs/alfred-calc
+~/.venvs/alfred-calc/bin/pip install 'Pint>=0.17,<=0.23' simpleeval==0.9.13 parsedatetime==2.6 pytz==2021.1
+
+# 2. Clone this repo (if not already)
+git clone https://github.com/tchar/ulauncher-albert-calculate-anything ~/src/calculate-anything
+
+# 3. Install the workflow
+python3 ~/src/calculate-anything/alfred/install.py
+```
+
+Two keyword triggers are created:
+- `calc <expr>` — calculate; result copies to clipboard
+- `= <expr>` — same (disable Alfred's built-in calculator first: Preferences → Features → Calculator)
+
+For currency conversion, add your [fixer.io](https://fixer.io/) API key as `CALCULATE_ANYTHING_FIXER_KEY` in the workflow's environment variables (Alfred Preferences → Workflows → Calculate Anything → `[x]`).
 
 ## How to Setup
 
